@@ -165,11 +165,19 @@ class _DetalleSolicitudCreditoPageState
         abonoInicial: _abono,
         vencimiento: _primerVencimiento,
         formaPago: 'credito',
+        numeroCuotas: _numeroCuotas < 1 ? 1 : _numeroCuotas,
+        tasaInteres: _tasaMensual,
+        // plazo en días ≈ cuotas * 30 (resumen / listados)
+        plazoDias: (_numeroCuotas < 1 ? 1 : _numeroCuotas) * 30,
       );
       await ref
           .read(ventasRepositoryProvider)
           .actualizarVentaBorrador(actualizada);
       if (!mounted) return;
+      // Mantener _venta alineada con lo guardado (cuotas/tasa/abono).
+      setState(() {
+        _venta = actualizada;
+      });
       FiscoGestNotifications.show(
         SnackBar(
           content: Text(
@@ -696,6 +704,13 @@ class _DetalleSolicitudCreditoPageState
                   estadoVenta: _estadoFormularioCredito!,
                   onVolver: _cerrarFormularioCredito,
                   onConfirmado: _onCreditoConfirmado,
+                  abonoInicialInicial: _abono > 0
+                      ? _abono
+                      : (_venta?.abonoInicial ?? 0),
+                  plazoMesesInicial: _numeroCuotas > 0 ? _numeroCuotas : null,
+                  numeroCuotasInicial: _numeroCuotas > 0 ? _numeroCuotas : null,
+                  tasaMensualInicial: _tasaMensual > 0 ? _tasaMensual : null,
+                  primerVencimientoInicial: _primerVencimiento,
                 ),
               )
             : _buildBody(_venta!),

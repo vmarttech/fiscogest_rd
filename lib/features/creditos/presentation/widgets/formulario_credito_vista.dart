@@ -30,10 +30,20 @@ class FormularioCreditoVista extends ConsumerStatefulWidget {
     required this.estadoVenta,
     required this.onVolver,
     required this.onConfirmado,
+    this.abonoInicialInicial,
+    this.plazoMesesInicial,
+    this.numeroCuotasInicial,
+    this.tasaMensualInicial,
+    this.primerVencimientoInicial,
   });
   final RegistrarVentaState estadoVenta;
   final VoidCallback onVolver;
   final void Function(ResultadoFormularioCredito) onConfirmado;
+  final double? abonoInicialInicial;
+  final int? plazoMesesInicial;
+  final int? numeroCuotasInicial;
+  final double? tasaMensualInicial;
+  final DateTime? primerVencimientoInicial;
 
   @override
   ConsumerState<FormularioCreditoVista> createState() =>
@@ -49,14 +59,13 @@ class _FormularioCreditoVistaState
   late final TextEditingController _abonoInicialController;
   late final TextEditingController _tasaInteresController;
   late final TextEditingController _observacionesController;
-  int _plazoMeses = 1;
-  int _numeroCuotas = 1;
+  /// Un solo control: meses = cuotas mensuales (1..24).
+  int _meses = 1;
   late DateTime _fechaPrimerVencimiento;
   bool _mostrarTablaCuotas = false;
   bool _guardando = false;
   bool _paramsAplicados = false;
-  List<int> _opcionesPlazo = const [1, 2, 3, 6];
-  List<int> _opcionesCuotas = const [1, 2, 3, 6];
+  List<int> _opcionesMeses = const [1, 3, 6, 9, 12, 15, 18, 24];
   @override
   void initState() {
     super.initState();
@@ -74,31 +83,73 @@ class _FormularioCreditoVistaState
     try {
       final p = await ref.read(parametrosCreditoProvider.future);
       if (!mounted) return;
-      final plazoMax = p.plazoMaxMeses < 1 ? 24 : p.plazoMaxMeses;
-      const base = [1, 2, 3, 6, 9, 12, 18, 24, 36];
-      final plazos = base.where((m) => m <= plazoMax).toList();
-      if (plazos.isEmpty) {
-        plazos.add(plazoMax);
-      } else if (plazoMax > plazos.last && !plazos.contains(plazoMax)) {
-        plazos.add(plazoMax);
+      final plazoMax =
+          (p.plazoMaxMeses < 1 ? 24 : p.plazoMaxMeses).clamp(1, 24);
+      const baseMeses = [1, 3, 6, 9, 12, 15, 18, 24];
+      final opciones = baseMeses.where((m) => m <= plazoMax).toList();
+      if (opciones.isEmpty) {
+        opciones.add(plazoMax);
       }
-      var cuotasDef = p.cuotasDefault;
-      if (cuotasDef < 1) cuotasDef = 1;
-      if (cuotasDef > plazoMax) cuotasDef = plazoMax;
+
+      final abonoInit = widget.abonoInicialInicial;
+      final mesesInit =
+          widget.numeroCuotasInicial ?? widget.plazoMesesInicial;
+      final tasaInit = widget.tasaMensualInicial;
+      final vencInit = widget.primerVencimientoInicial;
+
+      var meses = mesesInit ?? p.cuotasDefault;
+      if (meses < 1) meses = 1;
+      if (meses > plazoMax) meses = plazoMax;
+      // Ajustar a un valor del set fijo si no coincide (p. ej. 7 → 6)
+      if (!opciones.contains(meses)) {
+        final menores = opciones.where((m) => m <= meses).toList();
+        meses = menores.isNotEmpty ? menores.last : opciones.first;
+      }
+
       final gracia = p.diasGracia < 0 ? 0 : p.diasGracia;
+
       setState(() {
-        _opcionesPlazo = plazos;
-        _opcionesCuotas = List<int>.from(plazos);
-        _plazoMeses = cuotasDef;
-        _numeroCuotas = cuotasDef;
-        _tasaInteresController.text = p.tasaMensualDefault.toString();
-        _fechaPrimerVencimiento = DateTime.now().add(
-          Duration(days: gracia > 0 ? gracia : 30),
-        );
+        _opcionesMeses = opciones;
+        _meses = meses;
+        if (abonoInit != null && abonoInit > 0) {
+          final a = abonoInit;
+          _abonoInicialController.text = a == a.roundToDouble()
+              ? a.toStringAsFixed(0)
+              : a.toStringAsFixed(2);
+        }
+        _tasaInteresController.text =
+            (tasaInit != null && tasaInit > 0
+                    ? tasaInit
+                    : p.tasaMensualDefault)
+                .toString();
+        _fechaPrimerVencimiento = vencInit ??
+            DateTime.now().add(
+              Duration(days: gracia > 0 ? gracia : 30),
+            );
         _paramsAplicados = true;
       });
-    } catch (_) {
-      _paramsAplicados = true;
+    } catch (e, st) {
+      debugPrint('FormularioCreditoVista params: $e');
+      debugPrint('$st');
+      final abonoInit = widget.abonoInicialInicial;
+      final mesesInit =
+          widget.numeroCuotasInicial ?? widget.plazoMesesInicial;
+      final tasaInit = widget.tasaMensualInicial;
+      final vencInit = widget.primerVencimientoInicial;
+      setState(() {
+        _opcionesMeses = const [1, 3, 6, 9, 12, 15, 18, 24];
+        if (abonoInit != null && abonoInit > 0) {
+          _abonoInicialController.text = abonoInit.toStringAsFixed(2);
+        }
+        if (mesesInit != null && mesesInit > 0) {
+          _meses = mesesInit.clamp(1, 24);
+        }
+        if (tasaInit != null && tasaInit > 0) {
+          _tasaInteresController.text = tasaInit.toString();
+        }
+        if (vencInit != null) _fechaPrimerVencimiento = vencInit;
+        _paramsAplicados = true;
+      });
     }
   }
 
@@ -126,7 +177,7 @@ class _FormularioCreditoVistaState
         totalVenta: _totalVenta,
         abonoInicial: _abonoInicial,
         tasaMensual: _tasaMensual,
-        numeroCuotas: _numeroCuotas,
+        numeroCuotas: _meses,
         fechaPrimerVencimiento: _fechaPrimerVencimiento,
       );
 
@@ -159,17 +210,17 @@ class _FormularioCreditoVistaState
     try {
       final resumen = _resumen;
       final ahora = DateTime.now();
-      final fechaVencimientoFinal = _numeroCuotas <= 1
+      final fechaVencimientoFinal = _meses <= 1
           ? _fechaPrimerVencimiento
           : _fechaPrimerVencimiento.add(
-              Duration(days: 30 * (_numeroCuotas - 1)),
+              Duration(days: 30 * (_meses - 1)),
             );
       PlanPago? planPago;
-      if (_numeroCuotas > 1) {
+      if (_meses > 1) {
         planPago = CalculadoraCreditoService.generarPlanPago(
           capital: _saldoFinanciado,
           tasaMensual: _tasaMensual,
-          numeroCuotas: _numeroCuotas,
+          numeroCuotas: _meses,
           fechaPrimerVencimiento: _fechaPrimerVencimiento,
         );
       }
@@ -181,8 +232,8 @@ class _FormularioCreditoVistaState
         abonoInicial: _abonoInicial,
         tasaInteres: _tasaMensual,
         montoInteres: resumen.montoInteres,
-        plazoDias: _plazoMeses * 30,
-        numeroCuotas: _numeroCuotas,
+        plazoDias: _meses * 30,
+        numeroCuotas: _meses,
         planPago: planPago,
         fechaCreacion: ahora,
         fechaVencimiento: fechaVencimientoFinal,
@@ -635,22 +686,12 @@ class _FormularioCreditoVistaState
           hint: '0.00',
           onChanged: (_) => setState(() {}),
         ),
-        _buildSelectorEtiqueta('Plazo'),
+        _buildSelectorEtiqueta('Plazo / cuotas mensuales'),
         _buildSelectorOpciones<int>(
-          _opcionesPlazo,
-          _plazoMeses,
-          (m) => '$m ${m == 1 ? 'mes' : 'meses'}',
-          (m) => setState(() {
-            _plazoMeses = m;
-            if (_numeroCuotas > m) _numeroCuotas = m;
-          }),
-        ),
-        _buildSelectorEtiqueta('Número de cuotas'),
-        _buildSelectorOpciones<int>(
-          _opcionesCuotas.where((c) => c <= _plazoMeses).toList(),
-          _numeroCuotas,
-          (c) => '$c ${c == 1 ? 'cuota' : 'cuotas'}',
-          (c) => setState(() => _numeroCuotas = c),
+          _opcionesMeses,
+          _meses,
+          (m) => m == 1 ? '1 mes' : '$m meses',
+          (m) => setState(() => _meses = m),
         ),
         _buildSelectorEtiqueta('Primer vencimiento'),
         _buildCampoFecha(),

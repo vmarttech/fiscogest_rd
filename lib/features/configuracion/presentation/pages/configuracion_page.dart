@@ -537,29 +537,36 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }
 
   Widget _seccionEmpresa() {
-    InputDecoration fieldDeco({String? hint}) => InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(
-            color: Color(0xFF77828A),
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Color(0xFF21877C), width: 1.5),
-          ),
-        );
+    InputDecoration fieldDeco({String? hint}) {
+      final mob = AppBreakpoints.isMobile(context);
+      return InputDecoration(
+        hintText: hint,
+        isDense: true,
+        hintStyle: TextStyle(
+          color: const Color(0xFF77828A),
+          fontSize: mob ? 13 : 14,
+          fontWeight: FontWeight.w600,
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: mob ? 12 : 15,
+          vertical: mob ? 10 : 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(mob ? 10 : 14),
+          borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(mob ? 10 : 14),
+          borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(mob ? 10 : 14),
+          borderSide: const BorderSide(color: Color(0xFF21877C), width: 1.5),
+        ),
+      );
+    }
 
     // Contorno con sombra negra 1.5% alrededor del campo
     Widget shadowedField(Widget child) {
@@ -619,7 +626,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(minHeight: 420),
-        padding: const EdgeInsets.fromLTRB(19, 19, 19, 28),
+        padding: EdgeInsets.fromLTRB(
+          AppBreakpoints.isMobile(context) ? 12 : 19,
+          AppBreakpoints.isMobile(context) ? 14 : 19,
+          AppBreakpoints.isMobile(context) ? 12 : 19,
+          AppBreakpoints.isMobile(context) ? 20 : 28,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(19),
@@ -705,7 +717,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             // form-layout: logo | fields
             LayoutBuilder(
               builder: (context, c) {
-                final side = c.maxWidth >= 640;
+                final isMobForm = AppBreakpoints.isMobile(context);
+                final side = !isMobForm && c.maxWidth >= 720;
                 final logoCol = Column(
                   children: [
                     const SizedBox(height: 20),
@@ -796,92 +809,111 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
 
                 final fields = Column(
                   children: [
-                    // Fila 1: otras funciones (izq) | datos principales (der)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: field(
-                            'Moneda',
-                            DropdownButtonFormField<String>(
-                              key: ValueKey(_monedaSeleccionada),
-                              initialValue: _monedaSeleccionada,
-                              decoration: fieldDeco(),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'DOP',
-                                  child: Text(
-                                    'DOP (RD\$)',
-                                    style: TextStyle(fontWeight: FontWeight.w700),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'USD',
-                                  child: Text(
-                                    'USD',
-                                    style: TextStyle(fontWeight: FontWeight.w700),
-                                  ),
-                                ),
+                    Builder(
+                      builder: (context) {
+                        final mob = AppBreakpoints.isMobile(context);
+                        final gapH = mob ? 10.0 : 14.0;
+                        final gapW = mob ? 10.0 : 16.0;
+                        final inputStyle = TextStyle(
+                          fontSize: mob ? 14 : 15,
+                          fontWeight: FontWeight.w700,
+                        );
+                        Widget pairOrStack(Widget a, Widget b) {
+                          if (mob) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                a,
+                                SizedBox(height: gapH),
+                                b,
                               ],
-                              onChanged: (v) {
-                                if (v != null) {
-                                  setState(() => _monedaSeleccionada = v);
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 22),
-                        Expanded(
-                          child: field(
-                            'Nombre comercial *',
-                            TextFormField(
-                              controller: _nombreController,
-                              onChanged: (_) => setState(() {}),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                            );
+                          }
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: a),
+                              SizedBox(width: gapW),
+                              Expanded(child: b),
+                            ],
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            pairOrStack(
+                              field(
+                                'Moneda',
+                                DropdownButtonFormField<String>(
+                                  key: ValueKey(_monedaSeleccionada),
+                                  initialValue: _monedaSeleccionada,
+                                  isExpanded: true,
+                                  decoration: fieldDeco(),
+                                  items: const [
+                                    DropdownMenuItem(
+                                      value: 'DOP',
+                                      child: Text(
+                                        'DOP (RD\$)',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'USD',
+                                      child: Text(
+                                        'USD',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  onChanged: (v) {
+                                    if (v != null) {
+                                      setState(() => _monedaSeleccionada = v);
+                                    }
+                                  },
+                                ),
                               ),
-                              decoration: fieldDeco(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: field(
-                            'ITBIS (%) *',
-                            TextFormField(
-                              controller: _itbisController,
-                              onChanged: (_) => setState(() {}),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                              field(
+                                'Nombre comercial *',
+                                TextFormField(
+                                  controller: _nombreController,
+                                  onChanged: (_) => setState(() {}),
+                                  style: inputStyle,
+                                  decoration: fieldDeco(),
+                                ),
                               ),
-                              decoration: fieldDeco(),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 22),
-                        Expanded(
-                          child: field(
-                            'RNC / Cédula *',
-                            TextFormField(
-                              controller: _rncController,
-                              onChanged: (_) => setState(() {}),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                            SizedBox(height: gapH),
+                            pairOrStack(
+                              field(
+                                'ITBIS (%) *',
+                                TextFormField(
+                                  controller: _itbisController,
+                                  onChanged: (_) => setState(() {}),
+                                  style: inputStyle,
+                                  decoration: fieldDeco(),
+                                ),
                               ),
-                              decoration: fieldDeco(),
+                              field(
+                                'RNC / Cédula *',
+                                TextFormField(
+                                  controller: _rncController,
+                                  onChanged: (_) => setState(() {}),
+                                  style: inputStyle,
+                                  decoration: fieldDeco(),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
+                            SizedBox(height: gapH),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 14),
                     field(

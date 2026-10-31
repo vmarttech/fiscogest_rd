@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -91,9 +92,26 @@ class _FormularioCreditoDialogState
   void initState() {
     super.initState();
     _abonoInicialController = TextEditingController(text: '0');
-    _tasaInteresController = TextEditingController(text: '0.05');
+    _tasaInteresController = TextEditingController(text: '0.06');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _aplicarParametrosConfig();
+    });
     _observacionesController = TextEditingController();
     _fechaPrimerVencimiento = DateTime.now().add(const Duration(days: 30));
+  }
+
+
+  Future<void> _aplicarParametrosConfig() async {
+    try {
+      final p = await ref.read(parametrosCreditoProvider.future);
+      if (!mounted) return;
+      setState(() {
+        _tasaInteresController.text = p.tasaMensualDefault.toString();
+      });
+    } catch (e, st) {
+      debugPrint('FormularioCreditoDialog params: $e');
+      debugPrint('$st');
+    }
   }
 
   @override

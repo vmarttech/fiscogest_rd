@@ -36,234 +36,258 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
     return AppScaffold(
       title: 'IMPUESTOS',
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header + CTA
-
-            // Declaraciones DGII (606 / 607) — viven en Impuestos, no en métricas
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 24,
-                16,
-                mobile ? 16 : 24,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Declaraciones DGII',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Base para declaración 606 (compras) y 607 (ventas).',
-                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 12),
-                  LayoutBuilder(
-                    builder: (context, c) {
-                      final wide = c.maxWidth > 520;
-                      final cards = [
-                        _DgiiCard(
-                          codigo: '606',
-                          titulo: 'Compras DGII',
-                          subtitulo: 'Base para declaración 606',
-                          onTap: () => context.push('/reports/detalle/606'),
-                        ),
-                        _DgiiCard(
-                          codigo: '607',
-                          titulo: 'Ventas DGII',
-                          subtitulo: 'Base para declaración 607',
-                          onTap: () => context.push('/reports/detalle/607'),
-                        ),
-                      ];
-                      if (wide) {
-                        return Row(
-                          children: [
-                            Expanded(child: cards[0]),
-                            const SizedBox(width: 12),
-                            Expanded(child: cards[1]),
-                          ],
-                        );
-                      }
-                      return Column(
-                        children: [
-                          cards[0],
-                          const SizedBox(height: 10),
-                          cards[1],
-                        ],
-                      );
-                    },
-                  ),
-                ],
+        child: impuestosAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'Error: $e',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.error,
+                ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 24,
-                mobile ? 12 : 16,
-                mobile ? 16 : 24,
-                0,
-              ),
-              child: mobile
-                  ? Column(
+          ),
+          data: (impuestos) {
+            final filtrados = impuestos.where((i) {
+              if (_filtroBusqueda.isEmpty) return true;
+              return i.nombre.toLowerCase().contains(_filtroBusqueda) ||
+                  i.tipo.toLowerCase().contains(_filtroBusqueda) ||
+                  i.descripcion.toLowerCase().contains(_filtroBusqueda);
+            }).toList();
+
+            final hPad = mobile ? 16.0 : 24.0;
+
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // —— Declaraciones DGII ——
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 0),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Configuración tributaria',
+                          'Declaraciones DGII',
                           style: AppTypography.h4.copyWith(
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Tasas, tipos y exenciones',
+                          'Base para declaración 606 (compras) y 607 (ventas).',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 12),
-                        SizedBox(
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: () => _mostrarSheetRegistro(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                        LayoutBuilder(
+                          builder: (context, c) {
+                            final wide = c.maxWidth > 520;
+                            final cards = [
+                              _DgiiCard(
+                                codigo: '606',
+                                titulo: 'Compras DGII',
+                                subtitulo: 'Base para declaración 606',
+                                onTap: () =>
+                                    context.push('/reports/detalle/606'),
                               ),
-                            ),
-                            icon: const Icon(Icons.add_rounded, size: 20),
-                            label: const Text(
-                              'NUEVO IMPUESTO',
-                              style: TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                          ),
+                              _DgiiCard(
+                                codigo: '607',
+                                titulo: 'Ventas DGII',
+                                subtitulo: 'Base para declaración 607',
+                                onTap: () =>
+                                    context.push('/reports/detalle/607'),
+                              ),
+                            ];
+                            if (wide) {
+                              return Row(
+                                children: [
+                                  Expanded(child: cards[0]),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: cards[1]),
+                                ],
+                              );
+                            }
+                            return Column(
+                              children: [
+                                cards[0],
+                                const SizedBox(height: 10),
+                                cards[1],
+                              ],
+                            );
+                          },
                         ),
                       ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                  ),
+                ),
+
+                // —— Config tributaria + CTA ——
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      hPad,
+                      mobile ? 16 : 20,
+                      hPad,
+                      0,
+                    ),
+                    child: mobile
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                'Configuración tributaria e ITBIS',
+                                'Configuración tributaria',
                                 style: AppTypography.h4.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Administración de tasas, tipos globales y exenciones.',
+                                'Tasas, tipos y exenciones',
                                 style: AppTypography.bodySmall.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
                               ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                height: 48,
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () =>
+                                      _mostrarSheetRegistro(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.add_rounded,
+                                    size: 20,
+                                  ),
+                                  label: const Text(
+                                    'NUEVO IMPUESTO',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Configuración tributaria e ITBIS',
+                                      style: AppTypography.h4.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Administración de tasas, tipos globales y exenciones.',
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                height: 44,
+                                child: ElevatedButton.icon(
+                                  onPressed: () =>
+                                      _mostrarSheetRegistro(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.add_rounded,
+                                    size: 18,
+                                  ),
+                                  label: const Text(
+                                    'Nuevo impuesto',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          height: 44,
-                          child: ElevatedButton.icon(
-                            onPressed: () => _mostrarSheetRegistro(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            icon: const Icon(Icons.add_rounded, size: 18),
-                            label: const Text(
-                              'Nuevo impuesto',
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-
-            // Buscador
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                mobile ? 16 : 24,
-                14,
-                mobile ? 16 : 24,
-                8,
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (v) =>
-                    setState(() => _filtroBusqueda = v.trim().toLowerCase()),
-                style: AppTypography.bodyMedium,
-                decoration: InputDecoration(
-                  hintText: 'Buscar por nombre, tipo o descripción…',
-                  hintStyle: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  isDense: true,
-                  filled: true,
-                  fillColor: AppColors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(
-                      color: AppColors.primary.withValues(alpha: 0.5),
-                    ),
                   ),
                 ),
-              ),
-            ),
 
-            // Lista
-            Expanded(
-              child: impuestosAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(
+                // —— Buscador ——
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      'Error: $e',
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.error,
+                    padding: EdgeInsets.fromLTRB(hPad, 14, hPad, 8),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (v) => setState(
+                        () => _filtroBusqueda = v.trim().toLowerCase(),
+                      ),
+                      style: AppTypography.bodyMedium,
+                      decoration: InputDecoration(
+                        hintText:
+                            'Buscar por nombre, tipo o descripción…',
+                        hintStyle: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        isDense: true,
+                        filled: true,
+                        fillColor: AppColors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide:
+                              const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide:
+                              const BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color:
+                                AppColors.primary.withValues(alpha: 0.5),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                data: (impuestos) {
-                  final filtrados = impuestos.where((i) {
-                    if (_filtroBusqueda.isEmpty) return true;
-                    return i.nombre.toLowerCase().contains(_filtroBusqueda) ||
-                        i.tipo.toLowerCase().contains(_filtroBusqueda) ||
-                        i.descripcion.toLowerCase().contains(_filtroBusqueda);
-                  }).toList();
 
-                  if (filtrados.isEmpty) {
-                    return Center(
+                // —— Lista / vacío ——
+                if (filtrados.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Column(
@@ -294,35 +318,32 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                           ],
                         ),
                       ),
-                    );
-                  }
-
-                  return ListView.separated(
-                    padding: EdgeInsets.fromLTRB(
-                      mobile ? 16 : 24,
-                      4,
-                      mobile ? 16 : 24,
-                      24,
                     ),
-                    itemCount: filtrados.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (_, i) {
-                      final impuesto = filtrados[i];
-                      return _ImpuestoCard(
-                        impuesto: impuesto,
-                        mobile: mobile,
-                        onEdit: () => _mostrarSheetRegistro(
-                          context,
-                          impuestoToEdit: impuesto,
-                        ),
-                        onDelete: () => _confirmarEliminar(impuesto),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(hPad, 4, hPad, 24),
+                    sliver: SliverList.separated(
+                      itemCount: filtrados.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: 10),
+                      itemBuilder: (_, i) {
+                        final impuesto = filtrados[i];
+                        return _ImpuestoCard(
+                          impuesto: impuesto,
+                          mobile: mobile,
+                          onEdit: () => _mostrarSheetRegistro(
+                            context,
+                            impuestoToEdit: impuesto,
+                          ),
+                          onDelete: () => _confirmarEliminar(impuesto),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
