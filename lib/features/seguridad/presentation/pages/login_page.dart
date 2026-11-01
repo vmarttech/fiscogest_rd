@@ -160,7 +160,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       debugPrint('Login: sin red → skip nube');
       return;
     }
-    await EmitirToken.trasLogin(username: username, password: password);
+    try {
+      await EmitirToken.trasLogin(username: username, password: password)
+          .timeout(const Duration(seconds: 12));
+    } catch (e, st) {
+      debugPrint('Login: EmitirToken (nube) falló, app sigue offline: $e');
+      debugPrint('$st');
+      return; // sin token: no forzar pull/push en este arranque
+    }
     // 1) Bajar licencia + datos ANTES de subir (evitar pisar nube con demo local)
     if (!requiereSetup) {
       try {

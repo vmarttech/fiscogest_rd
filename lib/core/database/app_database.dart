@@ -1,10 +1,7 @@
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/core/database/encrypted_connection.dart';
 // ignore_for_file: experimental_member_use
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:fiscogest_rd/core/database/migrations/migracion_002_agregar_campos_productos.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/clientes_table.dart';
@@ -905,11 +902,10 @@ const _crearColaSincronizacion = '''
   ''';
 
 LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final carpetaBase = await getApplicationDocumentsDirectory();
-    final archivoDb = File(p.join(carpetaBase.path, 'fiscogest_rd.sqlite'));
-    return NativeDatabase.createInBackground(archivoDb);
-  });
+  return openEncryptedConnection(
+    plainName: 'fiscogest_rd.sqlite',
+    encryptedName: 'fiscogest_rd.enc.sqlite',
+  );
 }
 
 final appDatabaseProvider = Provider((ref) {
