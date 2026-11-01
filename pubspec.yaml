@@ -43,6 +43,7 @@ dependencies:
   open_filex: ^5.0.0
   permission_handler: ^13.0.2
   webview_flutter: ^4.14.1
+  sqlite3_flutter_libs: 0.5.42
 dev_dependencies:
   flutter_test:
     sdk: flutter

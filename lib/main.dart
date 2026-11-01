@@ -25,6 +25,8 @@ import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
+import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
+import 'dart:io';
 
 class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
   _InventarioRepositoryAdapter(this._db);
@@ -150,6 +152,11 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isAndroid) {
+    await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
+  }
+
   await initializeDateFormatting('es_DO', null);
   final db = AppDatabase();
   await RepositoryInjection.initialize(db);
