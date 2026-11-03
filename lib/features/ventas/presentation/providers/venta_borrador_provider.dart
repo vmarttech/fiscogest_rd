@@ -327,7 +327,33 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     return null;
   }
 
+  /// null = ok; String = mensaje de error (sin stock).
+  String? validarStockParaAgregar(Producto producto, double cantidadExtra) {
+    final stock = producto.stock;
+    // null = no controla inventario (servicio / no rastrea stock)
+    if (stock == null) return null;
+    final indice = state.detalles.indexWhere(
+      (item) => item['productoId'] == producto.id,
+    );
+    final enCarrito = indice >= 0
+        ? (state.detalles[indice]['cantidad'] as num?)?.toDouble() ?? 0
+        : 0.0;
+    final total = enCarrito + cantidadExtra;
+    if (total > stock + 1e-9) {
+      final disp = stock == stock.roundToDouble()
+          ? '${stock.toInt()}'
+          : stock.toStringAsFixed(2);
+      return 'Sin existencia suficiente: ${producto.nombre} '
+          '(disponible: $disp, solicitado: ${total == total.roundToDouble() ? total.toInt() : total})';
+    }
+    return null;
+  }
+
   void agregarProducto(Producto producto, double cantidad) {
+    final errorStock = validarStockParaAgregar(producto, cantidad);
+    if (errorStock != null) {
+      throw StateError(errorStock);
+    }
     final nuevosDetalles = List<Map<String, dynamic>>.from(state.detalles);
     final indice = nuevosDetalles.indexWhere(
       (item) => item['productoId'] == producto.id,

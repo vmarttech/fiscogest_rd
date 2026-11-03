@@ -50,12 +50,13 @@ class VentasDao {
     final int? clienteId,
     final int? usuarioId,
   }) async {
-    // Historial de cotizaciones: solo pendientes / aprobadas (crédito).
-    // No mezclar facturado/enCredito (eso es venta).
+    // Historial de cotizaciones: contado (cotizado), crédito pendiente (enCredito)
+    // y crédito aprobado. Nunca facturado/anulado (eso es venta).
     final query = _db.select(_db.ventasTable)
       ..where(
         (final t) =>
             t.estadoDocumento.equals('cotizado') |
+            t.estadoDocumento.equals('enCredito') |
             t.estadoDocumento.equals('aprobado'),
       )
       ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)]);
@@ -204,6 +205,7 @@ class VentasDao {
         (final t) =>
             t.nombreCliente.like('%$limpio%') &
             (t.estadoDocumento.equals('cotizado') |
+                t.estadoDocumento.equals('enCredito') |
                 t.estadoDocumento.equals('aprobado')),
       )
       ..orderBy([(final t) => OrderingTerm.desc(t.fechaRegistro)])

@@ -272,16 +272,17 @@ class _NuevaVentaBorradorPageState
     Producto producto,
     double cantidad,
   ) async {
-    ref
-        .read(ventaBorradorProvider.notifier)
-        .agregarProducto(producto, cantidad);
-    if (mounted) {
+    try {
+      ref
+          .read(ventaBorradorProvider.notifier)
+          .agregarProducto(producto, cantidad);
+    } on StateError catch (e) {
+      if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
-          content: Text('${producto.nombre} agregado'),
-          backgroundColor: AppColors.success,
+          content: Text(e.message),
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -2593,11 +2594,22 @@ class _NuevaVentaBorradorPageState
 
   Widget _buildEnlaceHistorial() {
     return Center(
-      child: TextButton.icon(
-        icon: const Icon(Icons.history, size: 18),
-        label: const Text('Ver historial de ventas'),
-        onPressed: () => context.push('/ventas/historial'),
-        style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+      child: Wrap(
+        spacing: 8,
+        children: [
+          TextButton.icon(
+            icon: const Icon(Icons.request_quote_outlined, size: 18),
+            label: const Text('Historial cotizaciones'),
+            onPressed: () => context.push('/ventas/cotizaciones/historial'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.receipt_long_outlined, size: 18),
+            label: const Text('Historial ventas'),
+            onPressed: () => context.push('/ventas/historial'),
+            style: TextButton.styleFrom(foregroundColor: AppColors.info),
+          ),
+        ],
       ),
     );
   }
@@ -2611,7 +2623,6 @@ class _NuevaVentaBorradorPageState
     if (!esPantallaPequena) {
       return const SizedBox.shrink();
     }
-
     // Móvil: barra inferior
     final simplificado = ref.watch(modoColmadoProvider);
     final onTap = !puedeGenerar || _guardando
@@ -2625,7 +2636,6 @@ class _NuevaVentaBorradorPageState
     final bg = simplificado
         ? AppColors.primary
         : (_esCredito ? AppColors.warning : AppColors.primary);
-
     return Material(
       elevation: 8,
       color: AppColors.white,

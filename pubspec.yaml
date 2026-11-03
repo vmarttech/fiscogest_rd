@@ -28,7 +28,6 @@ dependencies:
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   image_picker: ^1.2.3
-  mobile_scanner: ^6.0.2
   file_picker: ^10.3.7
   xml: ^6.5.0
   asn1lib: ^1.5.0
@@ -44,6 +43,8 @@ dependencies:
   permission_handler: ^13.0.2
   webview_flutter: ^4.14.1
   sqlite3_flutter_libs: 0.5.42
+  camera: ^0.12.2
+  google_mlkit_barcode_scanning: ^0.16.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
