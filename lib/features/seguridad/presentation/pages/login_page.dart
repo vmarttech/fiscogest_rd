@@ -534,45 +534,50 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           suffixIcon: _ocultar
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
+                          onSuffixTap: () =>
+                              setState(() => _ocultar = !_ocultar),
                           obscureText: _ocultar,
                         ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
+                        const SizedBox(height: 8),
+                        // Organización estilo Rodex: Recordar a la izquierda, huella a la derecha
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CheckboxListTile(
+                                contentPadding: EdgeInsets.zero,
+                                dense: true,
+                                value: _rememberMe,
+                                onChanged: _cargando
+                                    ? null
+                                    : (v) => setState(
+                                          () => _rememberMe = v ?? false,
+                                        ),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                activeColor: const Color(0xFF2DD4BF),
+                                title: Text(
+                                  'Recordar usuario',
+                                  style: TextStyle(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.85),
+                                    fontSize: 14,
+                                  ),
+                                ),
                               ),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
-                            onPressed: () =>
-                                setState(() => _ocultar = !_ocultar),
-                            child: Text(
-                              _ocultar ? 'Mostrar' : 'Ocultar',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 13,
+                            if (_bioEnabled && _bioAvailable)
+                              IconButton(
+                                tooltip: 'Entrar con huella / PIN',
+                                onPressed:
+                                    _cargando ? null : _entrarConBiometria,
+                                icon: Icon(
+                                  Icons.fingerprint,
+                                  size: 28,
+                                  color: const Color(0xFF5EEAD4)
+                                      .withValues(alpha: _cargando ? 0.4 : 1),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          value: _rememberMe,
-                          onChanged: _cargando
-                              ? null
-                              : (v) => setState(() => _rememberMe = v ?? false),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          activeColor: const Color(0xFF2DD4BF),
-                          title: Text(
-                            'Recordar usuario',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontSize: 14,
-                            ),
-                          ),
+                          ],
                         ),
                         if (_error != null) ...[
                           const SizedBox(height: 8),
@@ -590,23 +595,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           text: _cargando ? 'Entrando…' : 'Entrar',
                           onPressed: _cargando ? null : _entrar,
                         ),
-                        if (_bioEnabled && _bioAvailable) ...[
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: _cargando ? null : _entrarConBiometria,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF5EEAD4),
-                              side: BorderSide(
-                                color: const Color(
-                                  0xFF5EEAD4,
-                                ).withValues(alpha: 0.5),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            icon: const Icon(Icons.fingerprint, size: 22),
-                            label: const Text('Entrar con huella / PIN'),
-                          ),
-                        ],
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: () => context.push('/recuperar-clave'),
