@@ -19,6 +19,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_provid
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class DetalleCuentaCobrarPage extends ConsumerStatefulWidget {
   const DetalleCuentaCobrarPage({super.key, required this.cuentaId});
@@ -50,6 +51,26 @@ class _DetalleCuentaCobrarPageState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _cargar());
+  }
+
+
+  Future<void> _enviarRecordatorioWhatsApp(CuentaPorCobrar c) async {
+    try {
+      final empresa = ref.read(configuracionControllerProvider).valueOrNull;
+      await ref.read(recordatorioWhatsAppServiceProvider).enviarDesdeCuenta(
+            cuenta: c,
+            empresa: empresa,
+          );
+    } catch (e) {
+      if (!mounted) return;
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('$e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _imprimirCronograma(CuentaPorCobrar c) async {
@@ -546,15 +567,9 @@ class _DetalleCuentaCobrarPageState
           runSpacing: 8,
           children: [
             OutlinedButton.icon(
-              onPressed: () {
-                FiscoGestNotifications.show(
-                  const SnackBar(
-                    content: Text(
-                      'Recordatorio: conectar WhatsApp en una próxima iteración',
-                    ),
-                  ),
-                );
-              },
+              onPressed: c.estaPagada
+                  ? null
+                  : () => _enviarRecordatorioWhatsApp(c),
               icon: const Icon(Icons.chat, size: 16, color: Color(0xFF059669)),
               label: const Text(
                 'Enviar Recordatorio',

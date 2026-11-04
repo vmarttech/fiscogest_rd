@@ -45,6 +45,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/pages/cobro_venta_page
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
 
 /// Hub de la estación de Caja — responsive PC / tablet / móvil.
 class CajaInicioPage extends ConsumerStatefulWidget {
@@ -1693,7 +1694,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         title: Text(simple ? 'Comprobante' : 'Comprobante fiscal'),
         content: Text(
-          'NCF: $ncf\n\nElija imprimir o enviar (WhatsApp, correo, etc.).',
+          'NCF: $ncf\n\nElija cómo entregar el comprobante al cliente.',
         ),
         actions: [
           TextButton(
@@ -1704,42 +1705,53 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             onPressed: () => Navigator.pop(ctx, 'imprimir'),
             child: const Text('Imprimir'),
           ),
-          FilledButton.icon(
+          TextButton(
             onPressed: () => Navigator.pop(ctx, 'enviar'),
-            icon: const Icon(Icons.share_outlined, size: 18),
-            label: const Text('Enviar'),
+            child: const Text('Enviar PDF'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
+            icon: const Icon(Icons.chat_outlined, size: 18),
+            label: const Text('Recibo digital'),
           ),
         ],
       ),
     );
     if (accion == null || !mounted) return;
     try {
-      final compartir = accion == 'enviar';
-      String? codigoSeg;
-      AmbienteDgii? ambiente;
-      try {
-        if (ventaConDetalle.id != null) {
-          codigoSeg = await ref
-              .read(ecfeRepositoryProvider)
-              .codigoSeguridadPorVenta(ventaConDetalle.id!);
-          ambiente =
-              (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
-        }
-      } catch (_) {}
-      await ComprobantePdf.imprimirFactura(
-        ventaConDetalle,
-        compartir: compartir,
-        empresa: emp,
-        rncCliente: _rncFiscalController.text.trim(),
-        direccionCliente: '',
-        telefonoCliente: '',
-        codigoSeguridad: codigoSeg,
-        ambienteDgii: ambiente,
-      );
+      if (accion == 'recibo_digital') {
+        await const ReciboDigitalService().compartir(
+          venta: ventaConDetalle,
+          empresa: emp,
+        );
+      } else {
+        final compartir = accion == 'enviar';
+        String? codigoSeg;
+        AmbienteDgii? ambiente;
+        try {
+          if (ventaConDetalle.id != null) {
+            codigoSeg = await ref
+                .read(ecfeRepositoryProvider)
+                .codigoSeguridadPorVenta(ventaConDetalle.id!);
+            ambiente =
+                (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
+          }
+        } catch (_) {}
+        await ComprobantePdf.imprimirFactura(
+          ventaConDetalle,
+          compartir: compartir,
+          empresa: emp,
+          rncCliente: _rncFiscalController.text.trim(),
+          direccionCliente: '',
+          telefonoCliente: '',
+          codigoSeguridad: codigoSeg,
+          ambienteDgii: ambiente,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(SnackBar(
-        content: Text('PDF: $e'),
+        content: Text('Comprobante: $e'),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
       ));

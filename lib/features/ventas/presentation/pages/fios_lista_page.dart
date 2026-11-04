@@ -8,6 +8,8 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/fios_provider.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class FiosListaPage extends ConsumerWidget {
   const FiosListaPage({super.key});
@@ -114,6 +116,8 @@ class FiosListaPage extends ConsumerWidget {
                       fio: f,
                       fechaFmt: fechaFmt,
                       onAbonar: () => _abrirAbonar(context, ref, f),
+                      onRecordatorio: () =>
+                          _abrirRecordatorioWhatsApp(context, ref, f),
                     );
                   },
                 ),
@@ -123,6 +127,88 @@ class FiosListaPage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+
+  Future<void> _abrirRecordatorioWhatsApp(
+    BuildContext context,
+    WidgetRef ref,
+    FioData fio,
+  ) async {
+    final telefonoCtrl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Recordatorio WhatsApp'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cliente: ${fio.nombreCliente}',
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Saldo: ${formatRd(fio.saldoPendiente)}',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: telefonoCtrl,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'WhatsApp del cliente',
+                hintText: '8091234567',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.phone),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.chat, size: 18),
+            label: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) {
+      telefonoCtrl.dispose();
+      return;
+    }
+    try {
+      final empresa = ref.read(configuracionControllerProvider).valueOrNull;
+      await ref.read(recordatorioWhatsAppServiceProvider).enviarDesdeFiao(
+            nombreCliente: fio.nombreCliente,
+            saldoPendiente: fio.saldoPendiente,
+            telefonoCliente: telefonoCtrl.text.trim(),
+            empresa: empresa,
+            nota: fio.nota,
+          );
+    } catch (e) {
+      if (context.mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('$e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      telefonoCtrl.dispose();
+    }
   }
 
   Future<void> _abrirAbonar(
@@ -153,11 +239,13 @@ class _FioTile extends StatelessWidget {
     required this.fio,
     required this.fechaFmt,
     required this.onAbonar,
+    required this.onRecordatorio,
   });
 
   final FioData fio;
   final DateFormat fechaFmt;
   final VoidCallback onAbonar;
+  final VoidCallback onRecordatorio;
 
   @override
   Widget build(BuildContext context) {
@@ -219,6 +307,15 @@ class _FioTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                   ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Recordatorio WhatsApp',
+                onPressed: onRecordatorio,
+                icon: const Icon(
+                  Icons.chat,
+                  color: Color(0xFF059669),
+                  size: 22,
                 ),
               ),
               Column(

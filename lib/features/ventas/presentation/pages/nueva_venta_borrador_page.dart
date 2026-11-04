@@ -30,6 +30,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -618,7 +619,7 @@ class _NuevaVentaBorradorPageState
             context: context,
             builder: (ctx) => AlertDialog(
               title: const Text('Comprobante'),
-              content: const Text('Elija imprimir o enviar.'),
+              content: const Text('Elija cómo entregar el comprobante al cliente.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
@@ -628,26 +629,37 @@ class _NuevaVentaBorradorPageState
                   onPressed: () => Navigator.pop(ctx, 'imprimir'),
                   child: const Text('Imprimir'),
                 ),
-                FilledButton.icon(
+                TextButton(
                   onPressed: () => Navigator.pop(ctx, 'enviar'),
-                  icon: const Icon(Icons.share_outlined, size: 18),
-                  label: const Text('Enviar'),
+                  child: const Text('Enviar PDF'),
+                ),
+                FilledButton.icon(
+                  onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
+                  icon: const Icon(Icons.chat_outlined, size: 18),
+                  label: const Text('Recibo digital'),
                 ),
               ],
             ),
           );
           if (accion != null && mounted) {
             try {
-              await ComprobantePdf.imprimirFactura(
-                ventaConDetalle,
-                compartir: accion == 'enviar',
-                empresa: emp,
-              );
+              if (accion == 'recibo_digital') {
+                await const ReciboDigitalService().compartir(
+                  venta: ventaConDetalle,
+                  empresa: emp,
+                );
+              } else {
+                await ComprobantePdf.imprimirFactura(
+                  ventaConDetalle,
+                  compartir: accion == 'enviar',
+                  empresa: emp,
+                );
+              }
             } catch (e) {
               if (mounted) {
                 FiscoGestNotifications.show(
                   SnackBar(
-                    content: Text('PDF: $e'),
+                    content: Text('Comprobante: $e'),
                     backgroundColor: AppColors.error,
                     behavior: SnackBarBehavior.floating,
                   ),

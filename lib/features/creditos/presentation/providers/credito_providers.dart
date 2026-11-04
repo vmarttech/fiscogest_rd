@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/creditos/data/repositories/cuenta_por_cobr
 import 'package:fiscogest_rd/features/creditos/data/services/credito_documento_service_impl.dart';
 import 'package:fiscogest_rd/features/creditos/domain/repositories/i_cuenta_por_cobrar_repository.dart';
 import 'package:fiscogest_rd/features/creditos/domain/services/i_credito_documento_service.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/services/recordatorio_whatsapp_service.dart';
 
 final cuentasCobrarDaoCreditoProvider = Provider<CuentasCobrarDao>((ref) {
   final AppDatabase db = ref.watch(databaseProvider);
@@ -73,3 +74,9 @@ final expedienteCreditoPorVentaProvider = FutureProvider.autoDispose
         clienteId: args.clienteId,
       );
     });
+
+final recordatorioWhatsAppServiceProvider = Provider<RecordatorioWhatsAppService>((ref) {
+  return RecordatorioWhatsAppService(
+    clienteRepository: ref.watch(clienteRepositoryProvider),
+  );
+});

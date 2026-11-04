@@ -22,6 +22,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
 
 class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
@@ -253,6 +254,41 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         FiscoGestNotifications.show(
           SnackBar(
             content: Text('Error al generar archivo: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+
+  Future<void> _compartirReciboDigital(BuildContext context, WidgetRef ref) async {
+    try {
+      Venta v = venta;
+      if (v.detalles.isEmpty && v.id != null) {
+        final repo = ref.read(venta_providers.ventasRepositoryProvider);
+        v = await repo.obtenerVentaPorId(v.id!) ?? v;
+      }
+      if (v.detalles.isEmpty) {
+        if (context.mounted) {
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text('Esta venta no tiene líneas de producto.'),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+      final emp = ref.read(configuracionControllerProvider).valueOrNull;
+      await const ReciboDigitalService().compartir(venta: v, empresa: emp);
+    } catch (e) {
+      if (context.mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Recibo digital: $e'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -847,6 +883,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         icon: Icons.picture_as_pdf_outlined,
                         label: 'PDF',
                         onTap: () => _exportarPDF(context, ref),
+                        esPantallaPequena: esPantallaPequena,
+                      ),
+                    if (esCotizacionActiva)
+                      _chipAccion(
+                        icon: Icons.chat_outlined,
+                        label: 'Recibo digital',
+                        onTap: () => _compartirReciboDigital(context, ref),
                         esPantallaPequena: esPantallaPequena,
                       ),
                     if (esCotizacionActiva)

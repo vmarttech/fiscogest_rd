@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
 
 class MostrarDetalleVenta extends ConsumerWidget {
   const MostrarDetalleVenta({super.key, required this.venta});
@@ -102,7 +103,42 @@ class MostrarDetalleVenta extends ConsumerWidget {
     }
   }
 
-    Future<void> _enviarPorCorreo(BuildContext context, WidgetRef ref) async {
+  
+  Future<void> _compartirReciboDigital(BuildContext context, WidgetRef ref) async {
+    try {
+      Venta v = venta;
+      if (v.id != null) {
+        final full = await ref.read(ventasRepositoryProvider).obtenerVentaPorId(v.id!);
+        if (full != null) v = full;
+      }
+      if (v.detalles.isEmpty) {
+        if (context.mounted) {
+          FiscoGestNotifications.show(
+            const SnackBar(
+              content: Text('Sin líneas de producto.'),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+      final emp = ref.read(configuracionControllerProvider).valueOrNull;
+      await const ReciboDigitalService().compartir(venta: v, empresa: emp);
+    } catch (e) {
+      if (context.mounted) {
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Recibo digital: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _enviarPorCorreo(BuildContext context, WidgetRef ref) async {
     final correoCtrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
@@ -272,6 +308,12 @@ class MostrarDetalleVenta extends ConsumerWidget {
           label: 'PDF',
           color: const Color(0xFF7C3AED),
           onTap: () => _exportarPDF(context, ref),
+        ),
+        _AccionChip(
+          icon: Icons.chat_outlined,
+          label: 'Recibo digital',
+          color: const Color(0xFF059669),
+          onTap: () => _compartirReciboDigital(context, ref),
         ),
         _AccionChip(
           icon: Icons.share_outlined,
