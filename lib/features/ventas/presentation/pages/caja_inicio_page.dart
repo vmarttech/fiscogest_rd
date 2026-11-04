@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 // ignore_for_file: unused_element, unused_field, unused_import, unused_element_parameter
 import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
@@ -262,7 +263,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     return cfg?.cajaExigirSesion ?? false;
   }
 
-  bool get _puedeCobrar => _cajaAbierta || !_exigeSesionCaja;
+  // En Android e iOS se permite cobrar sin sesión de caja,
+  // tanto en teléfonos como en tablets.
+  // En escritorio se conserva la regla configurada.
+  bool get _puedeCobrar =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      _cajaAbierta ||
+      !_exigeSesionCaja;
 
   void _irACobrarCotizacion() {
     if (!_puedeCobrar) {

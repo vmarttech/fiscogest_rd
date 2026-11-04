@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart' show listadoCuentasCobrarProvider;
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
@@ -426,8 +427,14 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   }
 
   Future<bool> _exigirCajaAbierta() async {
-    // Solo exige sesión si el switch está explícitamente ON.
-    // cfg null o false → permitir cobrar.
+    // En Android e iOS nunca se exige abrir caja,
+    // independientemente del tamaño de pantalla o configuración.
+    final esDispositivoMovil =
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+    if (esDispositivoMovil) return true;
+
+    // En escritorio se conserva la configuración existente.
     final cfg =
         ref.read(configuracionControllerProvider).valueOrNull ??
         ref.read(configuracionControllerProvider).asData?.value;

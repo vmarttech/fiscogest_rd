@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -570,15 +571,31 @@ class _NuevaVentaBorradorPageState
           ref.invalidate(productoControllerProvider);
         } catch (_) {}
         if (montoTotal > 0) {
+          final esMovil =
+              defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS;
+          final cfgCaja =
+              ref.read(configuracionControllerProvider).valueOrNull;
           final cajaRepo = ref.read(cajaRepositoryProvider);
-          final nFactura = venta.numeroFactura ?? venta.numeroCotizacion;
-          await cajaRepo.registrarMovimiento(
-            referencia: nFactura,
-            monto: montoTotal,
-            tipo: 'ingreso',
-            descripcion: 'Cobro venta $nFactura (modo simple)',
-            formaPago: formaPago,
-          );
+          final sesionCaja = await cajaRepo.obtenerSesionAbierta();
+
+          if (sesionCaja != null && sesionCaja.estaAbierta) {
+            final nFactura =
+                venta.numeroFactura ?? venta.numeroCotizacion;
+            await cajaRepo.registrarMovimiento(
+              referencia: nFactura,
+              monto: montoTotal,
+              tipo: 'ingreso',
+              descripcion: 'Cobro venta $nFactura (modo simple)',
+              formaPago: formaPago,
+            );
+          } else if (!esMovil &&
+              cfgCaja?.cajaExigirSesion == true &&
+              cfgCaja?.modoSimplificado != true) {
+            throw Exception(
+              'La caja está cerrada. Abra un turno antes de cobrar.',
+            );
+          }
         }
         ref.invalidate(listaCotizacionesProvider);
         ref.invalidate(listaVentasProvider);

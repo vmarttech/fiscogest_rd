@@ -135,64 +135,19 @@ class FiosListaPage extends ConsumerWidget {
     WidgetRef ref,
     FioData fio,
   ) async {
-    final telefonoCtrl = TextEditingController();
-    final ok = await showDialog<bool>(
+    final telefono = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Recordatorio WhatsApp'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Cliente: ${fio.nombreCliente}',
-              style: AppTypography.bodyMedium.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Saldo: ${formatRd(fio.saldoPendiente)}',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: telefonoCtrl,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'WhatsApp del cliente',
-                hintText: '8091234567',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.phone),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton.icon(
-            onPressed: () => Navigator.pop(ctx, true),
-            icon: const Icon(Icons.chat, size: 18),
-            label: const Text('Enviar'),
-          ),
-        ],
-      ),
+      builder: (_) => _RecordatorioWhatsAppDialog(fio: fio),
     );
-    if (ok != true || !context.mounted) {
-      telefonoCtrl.dispose();
-      return;
-    }
+
+    if (telefono == null || !context.mounted) return;
+
     try {
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
       await ref.read(recordatorioWhatsAppServiceProvider).enviarDesdeFiao(
             nombreCliente: fio.nombreCliente,
             saldoPendiente: fio.saldoPendiente,
-            telefonoCliente: telefonoCtrl.text.trim(),
+            telefonoCliente: telefono,
             empresa: empresa,
             nota: fio.nota,
           );
@@ -206,8 +161,6 @@ class FiosListaPage extends ConsumerWidget {
           ),
         );
       }
-    } finally {
-      telefonoCtrl.dispose();
     }
   }
 
@@ -527,6 +480,84 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _RecordatorioWhatsAppDialog extends StatefulWidget {
+  const _RecordatorioWhatsAppDialog({required this.fio});
+
+  final FioData fio;
+
+  @override
+  State<_RecordatorioWhatsAppDialog> createState() =>
+      _RecordatorioWhatsAppDialogState();
+}
+
+class _RecordatorioWhatsAppDialogState
+    extends State<_RecordatorioWhatsAppDialog> {
+  late final TextEditingController _telefonoCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _telefonoCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _telefonoCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fio = widget.fio;
+
+    return AlertDialog(
+      title: const Text('Recordatorio WhatsApp'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Cliente: ${fio.nombreCliente}',
+            style: AppTypography.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Saldo: ${formatRd(fio.saldoPendiente)}',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _telefonoCtrl,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              labelText: 'WhatsApp del cliente',
+              hintText: '8091234567',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.phone),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton.icon(
+          onPressed: () =>
+              Navigator.pop(context, _telefonoCtrl.text.trim()),
+          icon: const Icon(Icons.chat, size: 18),
+          label: const Text('Enviar'),
+        ),
+      ],
     );
   }
 }
