@@ -228,7 +228,6 @@ class VentasRepositoryImpl implements IVentasRepository {
     return _mapearDesdeVentasTableData(registro, esCotizacion: true);
   }
 
-
   @override
   Future<Venta?> buscarPorNumeroFactura(String ncf) async {
     final registro = await _ventasDao.buscarPorNumeroFactura(ncf);
@@ -278,7 +277,6 @@ class VentasRepositoryImpl implements IVentasRepository {
     return '$pref-$digitos';
   }
 
-
   Future<String> _numeroCotizacionLibre({
     required String preferido,
     required bool esCredito,
@@ -307,8 +305,7 @@ class VentasRepositoryImpl implements IVentasRepository {
     // Buscar el siguiente número disponible.
     for (var intento = 0; intento < 1000; intento++) {
       correlativo++;
-      final candidato =
-          '$prefijo-${correlativo.toString().padLeft(6, '0')}';
+      final candidato = '$prefijo-${correlativo.toString().padLeft(6, '0')}';
       if (!await _ventasDao.existeNumeroCotizacion(candidato)) {
         return candidato;
       }
@@ -341,12 +338,12 @@ class VentasRepositoryImpl implements IVentasRepository {
   @override
   Future<Venta> registrarVenta(Venta venta) async {
     await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
-    
+
     final numero = await _numeroCotizacionLibre(
       preferido: venta.numeroCotizacion,
       esCredito: venta.numeroCotizacion.trim().toUpperCase().startsWith('CR'),
     );
-final id = await _ventasDao.insertarVenta(
+    final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
         numeroCotizacion: Value(numero),
         numeroFactura: Value(venta.numeroFactura),
@@ -380,12 +377,13 @@ final id = await _ventasDao.insertarVenta(
 
   @override
   Future<Venta> registrarVentaBorrador(Venta cotizacion) async {
-    
     final numero = await _numeroCotizacionLibre(
       preferido: cotizacion.numeroCotizacion,
-      esCredito: cotizacion.numeroCotizacion.trim().toUpperCase().startsWith('CR'),
+      esCredito: cotizacion.numeroCotizacion.trim().toUpperCase().startsWith(
+        'CR',
+      ),
     );
-final id = await _ventasDao.insertarVenta(
+    final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
         numeroCotizacion: Value(numero),
         numeroFactura: Value(cotizacion.numeroFactura),
