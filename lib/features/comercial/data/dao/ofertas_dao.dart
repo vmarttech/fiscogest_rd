@@ -21,17 +21,47 @@ class OfertasDao extends DatabaseAccessor<AppDatabase> with _$OfertasDaoMixin {
     return consulta.get();
   }
 
-  Future<bool> validarOferta(int ofertaId, double montoCompra) async {
-    final consulta = select(ofertasTable)..where((t) => t.id.equals(ofertaId));
-    final oferta = await consulta.getSingleOrNull();
+  Future<List<OfertaData>> listarTodas() {
+    final consulta = select(ofertasTable)
+      ..orderBy([(t) => OrderingTerm(expression: t.nombre)]);
+    return consulta.get();
+  }
+
+  Future<OfertaData?> obtenerPorId(int id) {
+    return (select(
+      ofertasTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<int> crear(OfertasTableCompanion oferta) {
+    return into(ofertasTable).insert(oferta);
+  }
+
+  Future<bool> actualizar(int id, OfertasTableCompanion cambios) async {
+    final filas = await (update(
+      ofertasTable,
+    )..where((t) => t.id.equals(id))).write(cambios);
+    return filas > 0;
+  }
+
+  Future<int> eliminar(int id) {
+    return (delete(ofertasTable)..where((t) => t.id.equals(id))).go();
+  }
+
+  /// [cantidadCompra] representa unidades del producto, no dinero.
+  Future<bool> validarOferta(int ofertaId, double cantidadCompra) async {
+    final oferta = await obtenerPorId(ofertaId);
     if (oferta == null) return false;
+
     final ahora = DateTime.now();
+
     final vigente =
-        oferta.vigenciaDesde.isBefore(ahora.add(const Duration(seconds: 1))) &&
-        oferta.vigenciaHasta.isAfter(
-          ahora.subtract(const Duration(seconds: 1)),
-        );
+        oferta.estado == RegistroEstado.vigente &&
+        !ahora.isBefore(oferta.vigenciaDesde) &&
+        !ahora.isAfter(oferta.vigenciaHasta);
+
     if (!vigente) return false;
-    return montoCompra >= oferta.cantidadMinima;
+
+    return cantidadCompra >= oferta.cantidadMinima;
   }
 }
