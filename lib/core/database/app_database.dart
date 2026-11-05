@@ -126,15 +126,46 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 69;
+  int get schemaVersion => 70;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
+      await m.database.customStatement('''
+        CREATE TABLE IF NOT EXISTS promociones_comerciales (
+          id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          nombre TEXT NOT NULL,
+          descripcion TEXT NOT NULL,
+          tipo TEXT NOT NULL,
+          valor REAL NOT NULL,
+          fecha_inicio TEXT NULL,
+          fecha_fin TEXT NULL,
+          activa INTEGER NOT NULL DEFAULT 1,
+          minimo_cantidad INTEGER NULL,
+          minimo_monto REAL NULL
+        );
+      ''');
       await m.database.customStatement(_crearTablaBitacora);
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 70) {
+        await m.database.customStatement('''
+        CREATE TABLE IF NOT EXISTS promociones_comerciales (
+          id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          nombre TEXT NOT NULL,
+          descripcion TEXT NOT NULL,
+          tipo TEXT NOT NULL,
+          valor REAL NOT NULL,
+          fecha_inicio TEXT NULL,
+          fecha_fin TEXT NULL,
+          activa INTEGER NOT NULL DEFAULT 1,
+          minimo_cantidad INTEGER NULL,
+          minimo_monto REAL NULL
+        );
+      ''');
+      }
+
       if (from < 69) {
         try {
           await m.database.customStatement(
@@ -171,13 +202,15 @@ class AppDatabase extends _$AppDatabase {
         } catch (_) {}
       }
 
-
       if (from < 67) {
         try {
           await m.addColumn(cuentasCobrarTable, cuentasCobrarTable.tasaInteres);
         } catch (_) {}
         try {
-          await m.addColumn(cuentasCobrarTable, cuentasCobrarTable.numeroCuotas);
+          await m.addColumn(
+            cuentasCobrarTable,
+            cuentasCobrarTable.numeroCuotas,
+          );
         } catch (_) {}
         try {
           await m.addColumn(
@@ -192,7 +225,6 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(cuotasCuentaTable, cuotasCuentaTable.montoInteres);
         } catch (_) {}
       }
-
 
       if (from < 66) {
         try {
@@ -255,7 +287,10 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
       }
       if (from < 64) {
         try {
-          await m.addColumn(cajaMovimientosTable, cajaMovimientosTable.sesionId);
+          await m.addColumn(
+            cajaMovimientosTable,
+            cajaMovimientosTable.sesionId,
+          );
         } catch (_) {
           try {
             await m.database.customStatement(

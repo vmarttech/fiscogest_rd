@@ -33,7 +33,8 @@ import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_re
 import 'package:riverpod/riverpod.dart';
 
 final promocionDatasourceProvider = Provider<PromocionDatasource>((ref) {
-  return PromocionDatasource();
+  final db = ref.watch(databaseProvider);
+  return PromocionDatasource(db);
 });
 
 final promocionRepositoryProvider = Provider<IPromocionRepository>((ref) {
