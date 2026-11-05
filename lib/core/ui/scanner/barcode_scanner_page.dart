@@ -36,10 +36,8 @@ class BarcodeScannerPage extends StatefulWidget {
     return Navigator.of(context).push<String>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (_) => BarcodeScannerPage(
-          titulo: titulo,
-          subtitulo: subtitulo,
-        ),
+        builder: (_) =>
+            BarcodeScannerPage(titulo: titulo, subtitulo: subtitulo),
       ),
     );
   }
@@ -111,9 +109,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           _inicializando = false;
           _error = status.isPermanentlyDenied
               ? 'Permiso de cámara bloqueado.\n'
-                  'Actívalo en Ajustes o ingresa el código manualmente.'
+                    'Actívalo en Ajustes o ingresa el código manualmente.'
               : 'Se necesita permiso de cámara.\n'
-                  'También puedes ingresar el código abajo.';
+                    'También puedes ingresar el código abajo.';
         });
         return;
       }
@@ -269,7 +267,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       if (raw == null || raw.isEmpty) return;
 
       _yaLeido = true;
-      HapticFeedback.lightImpact();
+      await HapticFeedback.lightImpact();
       await _pausarStream();
       if (mounted) {
         Navigator.of(context).pop(raw);
@@ -286,7 +284,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     try {
       final rotation =
           InputImageRotationValue.fromRawValue(description.sensorOrientation) ??
-              InputImageRotation.rotation0deg;
+          InputImageRotation.rotation0deg;
 
       if (Platform.isAndroid) {
         final bytes = _yuv420ToNv21(image);
@@ -445,9 +443,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
               onReintentar: _reintentar,
             )
           else if (_inicializando || !previewListo)
-            const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            )
+            const Center(child: CircularProgressIndicator(color: Colors.white))
           else
             Center(
               child: AspectRatio(
@@ -646,10 +642,7 @@ class _ScanFramePainter extends CustomPainter {
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
     final hole = Path()..addRRect(r);
     final dim = Path.combine(PathOperation.difference, overlay, hole);
-    canvas.drawPath(
-      dim,
-      Paint()..color = Colors.black.withValues(alpha: 0.45),
-    );
+    canvas.drawPath(dim, Paint()..color = Colors.black.withValues(alpha: 0.45));
     canvas.drawRRect(r, paint);
   }
 

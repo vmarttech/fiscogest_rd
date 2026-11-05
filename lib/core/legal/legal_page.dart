@@ -1,83 +1,115 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:fiscogest_rd/core/legal/legal_texts.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
-import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
-enum LegalDocumento { privacidad, terminos }
+enum LegalDocumento { privacidad, terminos, eliminarCuenta }
 
-class LegalPage extends StatelessWidget {
+class LegalPage extends StatefulWidget {
   const LegalPage({super.key, required this.documento});
 
   final LegalDocumento documento;
 
   static const routePrivacidad = 'legal-privacidad';
   static const routeTerminos = 'legal-terminos';
+  static const routeEliminarCuenta = 'legal-eliminar-cuenta';
   static const pathPrivacidad = '/legal/privacidad';
   static const pathTerminos = '/legal/terminos';
+  static const pathEliminarCuenta = '/legal/eliminar-cuenta';
+
+  @override
+  State<LegalPage> createState() => _LegalPageState();
+}
+
+class _LegalPageState extends State<LegalPage> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  String get _url {
+    switch (widget.documento) {
+      case LegalDocumento.privacidad:
+        return kUrlPrivacidad;
+      case LegalDocumento.terminos:
+        return kUrlTerminos;
+      case LegalDocumento.eliminarCuenta:
+        return kUrlEliminarCuenta;
+    }
+  }
+
+  String get _titulo {
+    switch (widget.documento) {
+      case LegalDocumento.privacidad:
+        return 'Privacidad';
+      case LegalDocumento.terminos:
+        return 'Términos de uso';
+      case LegalDocumento.eliminarCuenta:
+        return 'Eliminar cuenta';
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (_) {
+            if (mounted) setState(() => _isLoading = true);
+          },
+          onPageFinished: (_) {
+            if (mounted) setState(() => _isLoading = false);
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(_url));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final esPriv = documento == LegalDocumento.privacidad;
-    final titulo = esPriv ? 'Privacidad' : 'Términos de uso';
-    final cuerpo = esPriv ? kPrivacidadResumen : kTerminosResumen;
-    final url = esPriv ? kUrlPrivacidad : kUrlTerminos;
-
     return AppScaffold(
-      title: titulo,
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            children: [
-              Text(
-                esPriv
-                    ? 'Política de privacidad del software FiscoGest RD'
-                    : 'Términos de la licencia de uso del software',
-                style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                cuerpo,
-                style: AppTypography.bodyMedium.copyWith(height: 1.45),
-              ),
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  final uri = Uri.parse(url);
-                  try {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } catch (_) {}
-                },
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('Abrir versión web'),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Si el sitio aún no está publicado, el texto de esta pantalla '
-                'es el documento vigente.',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+      title: _titulo,
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator()),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              child: Container(
+                color: AppColors.surface.withValues(alpha: 0.95),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/login');
+                          }
+                        },
+                        child: const Text('Volver'),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Recargar',
+                      onPressed: () => _controller.reload(),
+                      icon: const Icon(Icons.refresh),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/login');
-                  }
-                },
-                child: const Text('Volver'),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

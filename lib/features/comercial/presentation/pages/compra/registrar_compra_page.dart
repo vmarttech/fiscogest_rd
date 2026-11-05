@@ -20,6 +20,7 @@ import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/compra_rapida_page.dart';
 
 class RegistrarCompraPage extends ConsumerStatefulWidget {
   const RegistrarCompraPage({super.key});
@@ -50,6 +51,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _redirigirSiSimplificado());
+
     super.initState();
     _fechaController.text = DateTime.now().toLocal().toString().split(' ')[0];
   }
@@ -263,7 +266,16 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     });
   }
 
-  Future<void> _guardarCompra() async {
+  
+  void _redirigirSiSimplificado() {
+    if (!mounted) return;
+    final simple = ref.read(modoSimplificadoProvider);
+    if (simple) {
+      context.goNamed(CompraRapidaPage.routeName);
+    }
+  }
+
+Future<void> _guardarCompra() async {
     for (var i = 0; i < _lineas.length; i++) {
       final ctrl = _controladores[i];
       _lineas[i].productoId = int.tryParse(ctrl.productoId.text.trim());

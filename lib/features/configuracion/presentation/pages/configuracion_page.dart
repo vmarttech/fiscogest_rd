@@ -1680,6 +1680,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             subtitle: 'Licencia de uso del software',
             onTap: () => context.push('/legal/terminos'),
           ),
+          tile(
+            icon: Icons.person_remove_outlined,
+            title: 'Eliminar cuenta',
+            subtitle: 'Solicitar borrado de tu cuenta y datos',
+            onTap: () => context.push('/legal/eliminar-cuenta'),
+          ),
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
             builder: (context, snap) {

@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/compra_usecase_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/compra_rapida_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
@@ -1110,8 +1111,14 @@ class ListaComprasPage extends ConsumerWidget {
                   SizedBox(
                     height: 48,
                     child: FilledButton.icon(
-                      onPressed: () =>
-                          context.goNamed(RegistrarCompraPage.routeName),
+                      onPressed: () {
+                        final simple = ref.read(modoSimplificadoProvider);
+                        context.goNamed(
+                          simple
+                              ? CompraRapidaPage.routeName
+                              : RegistrarCompraPage.routeName,
+                        );
+                      },
                       icon: const Icon(Icons.add),
                       label: const Text('Nueva Compra / Gasto'),
                       style: FilledButton.styleFrom(
@@ -1321,8 +1328,14 @@ class ListaComprasPage extends ConsumerWidget {
       floatingActionButton: isMobile
           ? FloatingActionButton.extended(
               heroTag: 'nueva_compra',
-              onPressed: () =>
-                  context.goNamed(RegistrarCompraPage.routeName),
+              onPressed: () {
+                final simple = ref.read(modoSimplificadoProvider);
+                context.goNamed(
+                  simple
+                      ? CompraRapidaPage.routeName
+                      : RegistrarCompraPage.routeName,
+                );
+              },
               backgroundColor: const Color(0xFF00796B),
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(

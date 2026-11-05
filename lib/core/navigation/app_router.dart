@@ -76,6 +76,7 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/recepcion/reg
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/dashboard_compras_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/lista_compras_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/compra_rapida_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
@@ -106,7 +107,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           path == '/setup-cuenta' ||
           path == '/recuperar-clave' ||
           path == '/legal/privacidad' ||
-          path == '/legal/terminos') {
+          path == '/legal/terminos' ||
+          path == '/legal/eliminar-cuenta') {
         return null;
       }
       var sesion = ref.read(sesionProvider);
@@ -243,6 +245,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/legal/terminos',
         name: LegalPage.routeTerminos,
         builder: (_, __) => const LegalPage(documento: LegalDocumento.terminos),
+      ),
+      GoRoute(
+        path: '/legal/eliminar-cuenta',
+        name: LegalPage.routeEliminarCuenta,
+        builder: (_, __) =>
+            const LegalPage(documento: LegalDocumento.eliminarCuenta),
       ),
       GoRoute(
         path: '/setup-cuenta',
@@ -476,6 +484,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'registrar',
             name: RegistrarCompraPage.routeName,
             builder: (_, __) => const AppShell(child: RegistrarCompraPage()),
+          ),
+          GoRoute(
+            path: 'rapida',
+            name: CompraRapidaPage.routeName,
+            builder: (_, __) => const AppShell(child: CompraRapidaPage()),
           ),
           GoRoute(
             path: 'detalle/:compraId',

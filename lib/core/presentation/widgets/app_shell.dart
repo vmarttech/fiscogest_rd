@@ -694,6 +694,14 @@ class AppShell extends ConsumerWidget {
                       currentPath,
                       isPermanent,
                     ),
+                    _buildNavItem(
+                      context,
+                      '/legal/eliminar-cuenta',
+                      'Eliminar cuenta',
+                      Icons.person_remove_outlined,
+                      currentPath,
+                      isPermanent,
+                    ),
                     _buildNavAction(
                       context,
                       title: 'Acerca de la App',
