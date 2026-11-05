@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
@@ -19,10 +20,13 @@ class VentasRepositoryImpl implements IVentasRepository {
     this._ventasDao, [
     CuentasCobrarDao? _,
     ProductosDao? productosDao,
-  ]) : _productosDao = productosDao;
+    OfertasDao? ofertasDao,
+  ]) : _productosDao = productosDao,
+       _ofertasDao = ofertasDao;
 
   final VentasDao _ventasDao;
   final ProductosDao? _productosDao;
+  final OfertasDao? _ofertasDao;
 
   Future<List<DetalleVenta>> _mapearDetalles(
     List<VentaDetalleData> filas,
@@ -601,16 +605,46 @@ class VentasRepositoryImpl implements IVentasRepository {
       throw UnimplementedError();
 
   @override
-  Future<List<Oferta>> obtenerOfertasActivas() async =>
-      throw UnimplementedError();
+  Future<List<Oferta>> obtenerOfertasActivas() async {
+    final dao = _ofertasDao;
+    if (dao == null) {
+      throw StateError(
+        'OfertasDao no fue configurado en VentasRepositoryImpl.',
+      );
+    }
+
+    final registros = await dao.listarOfertasActivas();
+
+    return registros
+        .map(
+          (r) => Oferta(
+            id: r.id,
+            nombre: r.nombre,
+            productoId: r.productoId,
+            cantidadMinima: r.cantidadMinima,
+            precioOferta: r.precioOferta,
+            vigenciaDesde: r.vigenciaDesde,
+            vigenciaHasta: r.vigenciaHasta,
+            estado: r.estado.name,
+          ),
+        )
+        .toList();
+  }
 
   @override
   Future<bool> aplicarDescuento(int ofertaId, double montoCompra) async =>
       throw UnimplementedError();
 
   @override
-  Future<bool> validarOferta(int ofertaId, double montoCompra) async =>
-      throw UnimplementedError();
+  Future<bool> validarOferta(int ofertaId, double montoCompra) async {
+    final dao = _ofertasDao;
+    if (dao == null) {
+      throw StateError(
+        'OfertasDao no fue configurado en VentasRepositoryImpl.',
+      );
+    }
+    return dao.validarOferta(ofertaId, montoCompra);
+  }
 
   @override
   Future<void> actualizarEnCascada(int ventaId) async =>

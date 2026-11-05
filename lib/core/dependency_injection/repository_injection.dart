@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/comercial/data/dao/devoluciones_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_movimientos_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/caja_sesiones_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/comercial/data/dao/ofertas_dao.dart';
 import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_repository_impl.dart';
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
@@ -67,6 +68,7 @@ class RepositoryInjection {
       ventasDao,
       cuentasCobrarDao,
       productosDao,
+      OfertasDao(db),
     );
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
