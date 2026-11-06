@@ -21,6 +21,8 @@ class PromocionRepositoryImpl implements IPromocionRepository {
       activa: promocion.activa,
       minimoCantidad: promocion.minimoCantidad,
       minimoMonto: promocion.minimoMonto,
+      productoIds: promocion.productoIds,
+      categoriaIds: promocion.categoriaIds,
     );
   }
 
@@ -33,16 +35,14 @@ class PromocionRepositoryImpl implements IPromocionRepository {
   @override
   Future<List<Promocion>> listarTodas() async {
     final registros = await _datasource.listarTodos();
-    return registros.map(_deserializar).toList();
+    return Future.wait(registros.map(_deserializar));
   }
 
   @override
   Future<List<Promocion>> listarActivas(DateTime fechaReferencia) async {
     final registros = await _datasource.listarActivas();
-    return registros
-        .map(_deserializar)
-        .where((promocion) => promocion.estaVigente(fechaReferencia))
-        .toList();
+    final promociones = await Future.wait(registros.map(_deserializar));
+    return promociones.where((p) => p.estaVigente(fechaReferencia)).toList();
   }
 
   @override
@@ -57,9 +57,13 @@ class PromocionRepositoryImpl implements IPromocionRepository {
   @override
   Future<void> eliminar(int id) => _datasource.eliminar(id);
 
-  static Promocion _deserializar(Map<String, dynamic> modelo) {
+  Future<Promocion> _deserializar(Map<String, dynamic> modelo) async {
+    final id = (modelo['id'] as num).toInt();
+    final productoIds = await _datasource.listarProductoIds(id);
+    final categoriaIds = await _datasource.listarCategoriaIds(id);
+
     return Promocion(
-      id: modelo['id'] as int,
+      id: id,
       nombre: modelo['nombre'] as String,
       descripcion: modelo['descripcion'] as String,
       tipo: modelo['tipo'] as String,
@@ -67,8 +71,10 @@ class PromocionRepositoryImpl implements IPromocionRepository {
       fechaInicio: _parsearFecha(modelo['fechaInicio']),
       fechaFin: _parsearFecha(modelo['fechaFin']),
       activa: (modelo['activa'] as num) != 0,
-      minimoCantidad: modelo['minimoCantidad'] as int?,
+      minimoCantidad: (modelo['minimoCantidad'] as num?)?.toInt(),
       minimoMonto: (modelo['minimoMonto'] as num?)?.toDouble(),
+      productoIds: productoIds,
+      categoriaIds: categoriaIds,
     );
   }
 

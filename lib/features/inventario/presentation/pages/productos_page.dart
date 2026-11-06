@@ -10,6 +10,8 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/kardex_provider.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/ofertas_promociones_page.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
@@ -66,7 +68,6 @@ final indicadoresReposicionProvider =
       };
     });
 
-
 Widget _inventoryHeaderCell(
   String label,
   Color color, {
@@ -107,8 +108,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
   bool _filtroRutaAplicado = false;
   String _ordenProductos = 'nombre_asc';
   bool _soloActivos = true;
+
   /// Solo desktop: producto seleccionado en el listado.
   Producto? _productoSeleccionado;
+
   /// 'normal' | 'compacta'
   String _vistaLista = 'normal';
 
@@ -175,7 +178,13 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       _filtroRutaAplicado = true;
       final q = GoRouterState.of(context).uri.queryParameters['filtro'];
       if (q != null &&
-          const {'bajo', 'agotado', 'en_stock', 'inactivo', 'todos'}.contains(q)) {
+          const {
+            'bajo',
+            'agotado',
+            'en_stock',
+            'inactivo',
+            'todos',
+          }.contains(q)) {
         _filtroEstado = q;
       }
     }
@@ -281,7 +290,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 // Fila 2: activos + orden
                 _buildBarraOrdenYFiltros(),
                 const SizedBox(height: 14),
-                ref.watch(productoControllerProvider).when(
+                ref
+                    .watch(productoControllerProvider)
+                    .when(
                       loading: () => const Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
                         child: Center(
@@ -356,18 +367,25 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     // ─── DESKTOP: 3 columnas (filtros | listado | detalle) ───
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      child: ref.watch(productoControllerProvider).when(
+      child: ref
+          .watch(productoControllerProvider)
+          .when(
             loading: () => const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             ),
             error: (e, _) => Center(
               child: Text(
                 'Error: $e',
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.error,
+                ),
               ),
             ),
             data: (productos) {
               final filtrados = _filtrarProductos(productos);
+              final mostrarOfertas =
+                  !ref.watch(modoSimplificadoProvider) &&
+                  AppBreakpoints.isDesktop(context);
               // Si el seleccionado ya no está en la lista, limpiar
               if (_productoSeleccionado != null &&
                   filtrados.every((p) => p.id != _productoSeleccionado!.id)) {
@@ -388,6 +406,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       onFiltro: (v) => setState(() => _filtroEstado = v),
                       onVista: (v) => setState(() => _vistaLista = v),
                       onNuevo: _irANuevoProducto,
+                      mostrarOfertas: mostrarOfertas,
+                      onOfertas: () =>
+                          context.pushNamed(OfertasPromocionesPage.routeName),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -434,7 +455,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     );
   }
 
-
   Widget _buildBarraOrdenYFiltros() {
     const ordenes = <MapEntry<String, String>>[
       MapEntry('nombre_asc', 'Nombre A→Z'),
@@ -480,9 +500,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected
-                      ? AppColors.primary
-                      : AppColors.textSecondary,
+                  color: selected ? AppColors.primary : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -588,8 +606,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                               ),
                             ),
                             trailing: e.key == _ordenProductos
-                                ? const Icon(Icons.check_rounded,
-                                    color: AppColors.primary, size: 20)
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  )
                                 : null,
                             onTap: () => Navigator.pop(ctx, e.key),
                           ),
@@ -611,8 +632,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.sort_rounded,
-                      size: 18, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.sort_rounded,
+                    size: 18,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -624,8 +648,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       ),
                     ),
                   ),
-                  const Icon(Icons.keyboard_arrow_down_rounded,
-                      size: 20, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: AppColors.textSecondary,
+                  ),
                 ],
               ),
             ),
@@ -634,7 +661,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       ],
     );
   }
-
 
   /// Umbral "bajo": stockMinimo del producto; si es null/<=0 usa 5.
   double _umbralBajo(Producto p) {
@@ -722,7 +748,6 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
     if (stock <= min) return ('Bajo', AppColors.warning);
     return ('En Stock', AppColors.success);
   }
-
 
   // ─────────────────────────────────────────────
   // SECCIÓN KÁRDEX
@@ -855,6 +880,8 @@ class _PanelConfigInventario extends StatelessWidget {
     required this.onFiltro,
     required this.onVista,
     required this.onNuevo,
+    required this.mostrarOfertas,
+    required this.onOfertas,
   });
 
   final String filtroEstado;
@@ -863,6 +890,8 @@ class _PanelConfigInventario extends StatelessWidget {
   final ValueChanged<String> onFiltro;
   final ValueChanged<String> onVista;
   final VoidCallback onNuevo;
+  final bool mostrarOfertas;
+  final VoidCallback onOfertas;
 
   @override
   Widget build(BuildContext context) {
@@ -916,26 +945,30 @@ class _PanelConfigInventario extends StatelessWidget {
                 label: 'En Stock',
                 selected: filtroEstado == 'en_stock',
                 color: AppColors.success,
-                onTap: () => onFiltro(filtroEstado == 'en_stock' ? 'todos' : 'en_stock'),
+                onTap: () =>
+                    onFiltro(filtroEstado == 'en_stock' ? 'todos' : 'en_stock'),
               ),
               _FilterChip(
                 label: 'Bajo',
                 selected: filtroEstado == 'bajo',
                 color: AppColors.warning,
-                onTap: () => onFiltro(filtroEstado == 'bajo' ? 'todos' : 'bajo'),
+                onTap: () =>
+                    onFiltro(filtroEstado == 'bajo' ? 'todos' : 'bajo'),
               ),
               _FilterChip(
                 label: 'Agotado',
                 selected: filtroEstado == 'agotado',
                 color: AppColors.error,
-                onTap: () => onFiltro(filtroEstado == 'agotado' ? 'todos' : 'agotado'),
+                onTap: () =>
+                    onFiltro(filtroEstado == 'agotado' ? 'todos' : 'agotado'),
               ),
               const SizedBox(height: 8),
               _FilterChip(
                 label: 'Inactivos',
                 selected: filtroEstado == 'inactivo',
                 color: AppColors.textSecondary,
-                onTap: () => onFiltro(filtroEstado == 'inactivo' ? 'todos' : 'inactivo'),
+                onTap: () =>
+                    onFiltro(filtroEstado == 'inactivo' ? 'todos' : 'inactivo'),
               ),
             ],
           ),
@@ -1015,6 +1048,32 @@ class _PanelConfigInventario extends StatelessWidget {
               ),
             ),
           ),
+          if (mostrarOfertas) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onOfertas,
+                icon: const Icon(Icons.local_offer_outlined, size: 18),
+                label: const Text('OFERTAS Y PROMOCIONES'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: BorderSide(
+                    color: AppColors.primary.withValues(alpha: 0.45),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1249,14 +1308,14 @@ class _PanelListadoProductos extends StatelessWidget {
                       final stock = p.stock ?? 0;
                       final minimo = p.stockMinimo ?? 10;
                       final (st, sc) = getStatus(stock, minimo);
-                      final sel = seleccionado?.id != null &&
-                          seleccionado!.id == p.id;
+                      final sel =
+                          seleccionado?.id != null && seleccionado!.id == p.id;
                       return Material(
                         color: sel
                             ? const Color(0xFFF0FDF4)
                             : (i.isEven
-                                ? Colors.white
-                                : AppColors.grey50.withValues(alpha: 0.5)),
+                                  ? Colors.white
+                                  : AppColors.grey50.withValues(alpha: 0.5)),
                         child: InkWell(
                           onTap: () => onSeleccionar(p),
                           onDoubleTap: () => onEditar(p),
@@ -1315,11 +1374,12 @@ class _PanelListadoProductos extends StatelessWidget {
                                       ),
                                       child: Text(
                                         '${stock.toStringAsFixed(stock.truncateToDouble() == stock ? 0 : 1)}  $st',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: sc,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: compacta ? 10.5 : 11.5,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: sc,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: compacta ? 10.5 : 11.5,
+                                            ),
                                       ),
                                     ),
                                   ),
@@ -1348,7 +1408,6 @@ class _PanelListadoProductos extends StatelessWidget {
       ),
     );
   }
-
 }
 
 // ═══════════════════════════════════════════════
@@ -1648,15 +1707,15 @@ class _ProductoCardMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-        final stock = producto.stock ?? 0;
+    final stock = producto.stock ?? 0;
     final minBajo = (producto.stockMinimo == null || producto.stockMinimo! <= 0)
         ? 5.0
         : producto.stockMinimo!;
     final (statusText, statusColor) = stock <= 0
         ? ('Agotado', AppColors.error)
         : stock <= minBajo
-            ? ('Bajo', AppColors.warning)
-            : ('En Stock', AppColors.success);
+        ? ('Bajo', AppColors.warning)
+        : ('En Stock', AppColors.success);
 
     return Container(
       padding: const EdgeInsets.all(14),

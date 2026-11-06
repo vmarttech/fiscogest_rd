@@ -29,7 +29,7 @@ class FacturaImprimible extends StatelessWidget {
     });
   }
 
-  double get _baseGravable => venta.subtotal - _descuentoTotal;
+  double get _baseGravable => venta.subtotal;
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +286,9 @@ class FacturaImprimible extends StatelessWidget {
       buffer.writeln(
         '   Cant: ${linea.cantidad}  x  ${_formatearMonto(linea.precioUnitario)}',
       );
-      buffer.writeln('   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: false)}');
+      buffer.writeln(
+        '   Subtotal: ${_formatearMonto(subtotalLinea)}${sufijoTasaLinea(linea.tasaImpuesto, ceroEsExento: false)}',
+      );
       if (linea.montoDescuento != 0.0) {
         buffer.writeln(
           '   Descuento: -${_formatearMonto(linea.montoDescuento)}',
@@ -299,7 +301,9 @@ class FacturaImprimible extends StatelessWidget {
       buffer.writeln('Descuento:         -${_formatearMonto(descuentoTotal)}');
       buffer.writeln('Base Gravable:     ${_formatearMonto(baseGravable)}');
     }
-    buffer.writeln('${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_formatearMonto(venta.itbis)}');
+    buffer.writeln(
+      '${etiquetaItbisLineas(venta.detalles.map((d) => d.tasaImpuesto))}:       ${_formatearMonto(venta.itbis)}',
+    );
     buffer.writeln('========================================');
     buffer.writeln('TOTAL A PAGAR:     ${_formatearMonto(venta.total)}');
     buffer.writeln('========================================');

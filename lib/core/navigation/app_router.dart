@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/productos_page.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/ofertas_promociones_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/kardex_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/nuevo_producto_page.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/pages/registrar_entrada_page.dart';
@@ -565,6 +566,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/inventario',
         name: ProductosPage.routeName,
         builder: (_, __) => const AppShell(child: ProductosPage()),
+      ),
+      GoRoute(
+        path: '/inventario/ofertas-promociones',
+        name: OfertasPromocionesPage.routeName,
+        builder: (_, __) => const AppShell(child: OfertasPromocionesPage()),
       ),
       GoRoute(
         path: '/kardex',

@@ -4,6 +4,7 @@
 /// La app los carga en vivo mediante WebView, por lo que
 /// cualquier actualización en la web se refleja automáticamente
 /// sin necesidad de publicar una nueva versión de la app.
+library;
 
 const kUrlPrivacidad = 'https://fiscogest-web.web.app/privacidad.html';
 const kUrlTerminos = 'https://fiscogest-web.web.app/terminos.html';

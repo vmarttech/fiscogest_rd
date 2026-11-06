@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class LegalWebViewScreen extends StatefulWidget {
-  final String title;
-  final String url;
 
   const LegalWebViewScreen({
     super.key,
     required this.title,
     required this.url,
   });
+  final String title;
+  final String url;
 
   @override
   State<LegalWebViewScreen> createState() => _LegalWebViewScreenState();

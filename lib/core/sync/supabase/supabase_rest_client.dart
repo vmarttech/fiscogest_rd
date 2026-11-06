@@ -74,20 +74,33 @@ class SupabaseRestClient {
     required String onConflict,
   }) async {
     if (!SupabaseConfig.isConfigured || rows.isEmpty) return;
+    final t = table.toLowerCase();
+    final requiereJwt = _tablasConNegocio.contains(t);
     for (final row in rows) {
       final n = row['negocio_id']?.toString() ?? '';
-      if (n.isEmpty && _tablasConNegocio.contains(table.toLowerCase())) {
+      if (n.isEmpty && requiereJwt) {
         throw Exception('Sync upsert $table sin negocio_id');
+      }
+    }
+    // Producción: tablas de negocio solo con JWT de sesión.
+    // Sin JWT no se intenta anon (RLS lo bloquea y genera ruido).
+    if (requiereJwt) {
+      await RenovarToken.asegurar();
+      final jwt = await SesionNube.tokenVigente();
+      if (jwt == null || jwt.isEmpty) {
+        throw Exception(
+          'Sync upsert $table: sin JWT de sesión (inicie sesión con red '
+          'para emitir token). No se usa anon en tablas de negocio.',
+        );
       }
     }
     final uri = _uri(table).replace(
       queryParameters: {'on_conflict': onConflict},
     );
     final body = jsonEncode(rows);
-    var res = await _post(uri, body, usarJwt: true);
-    if (res.statusCode == 401 || res.statusCode == 403) {
-      res = await _post(uri, body, usarJwt: false);
-    }
+    // Solo JWT en tablas de negocio. Anon solo en tablas de plataforma
+    // que no estén en _tablasConNegocio.
+    final res = await _post(uri, body, usarJwt: true);
     if (res.statusCode >= 300) {
       throw Exception(
         'Supabase upsert $table: ${res.statusCode} ${res.body}',

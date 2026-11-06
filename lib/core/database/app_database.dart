@@ -122,11 +122,17 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
+
   AppDatabase._internal() : super(_openConnection());
+
+  /// Constructor para pruebas con una conexión SQLite aislada.
+  /// No modifica el singleton utilizado por la aplicación.
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
+
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 70;
+  int get schemaVersion => 71;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -143,6 +149,20 @@ class AppDatabase extends _$AppDatabase {
           activa INTEGER NOT NULL DEFAULT 1,
           minimo_cantidad INTEGER NULL,
           minimo_monto REAL NULL
+        );
+      ''');
+      await m.database.customStatement('''
+        CREATE TABLE IF NOT EXISTS promocion_productos (
+          promocion_id INTEGER NOT NULL,
+          producto_id INTEGER NOT NULL,
+          PRIMARY KEY (promocion_id, producto_id)
+        );
+      ''');
+      await m.database.customStatement('''
+        CREATE TABLE IF NOT EXISTS promocion_categorias (
+          promocion_id INTEGER NOT NULL,
+          categoria_id INTEGER NOT NULL,
+          PRIMARY KEY (promocion_id, categoria_id)
         );
       ''');
       await m.database.customStatement(_crearTablaBitacora);
@@ -164,6 +184,23 @@ class AppDatabase extends _$AppDatabase {
           minimo_monto REAL NULL
         );
       ''');
+      }
+
+      if (from < 71) {
+        await m.database.customStatement('''
+          CREATE TABLE IF NOT EXISTS promocion_productos (
+            promocion_id INTEGER NOT NULL,
+            producto_id INTEGER NOT NULL,
+            PRIMARY KEY (promocion_id, producto_id)
+          );
+        ''');
+        await m.database.customStatement('''
+          CREATE TABLE IF NOT EXISTS promocion_categorias (
+            promocion_id INTEGER NOT NULL,
+            categoria_id INTEGER NOT NULL,
+            PRIMARY KEY (promocion_id, categoria_id)
+          );
+        ''');
       }
 
       if (from < 69) {

@@ -10,6 +10,8 @@ class Promocion {
     this.activa = true,
     this.minimoCantidad,
     this.minimoMonto,
+    this.productoIds = const [],
+    this.categoriaIds = const [],
   });
   final int id;
   final String nombre;
@@ -21,6 +23,8 @@ class Promocion {
   final bool activa;
   final int? minimoCantidad;
   final double? minimoMonto;
+  final List<int> productoIds;
+  final List<int> categoriaIds;
   bool estaVigente(DateTime fechaReferencia) {
     if (fechaInicio != null && fechaReferencia.isBefore(fechaInicio!)) {
       return false;
@@ -29,6 +33,18 @@ class Promocion {
     return activa;
   }
 
-  bool aplicaAProducto(int? idProducto) => true;
+  bool aplicaAProducto(int? idProducto, {int? idCategoria}) {
+    if (productoIds.isEmpty && categoriaIds.isEmpty) {
+      return true;
+    }
+
+    final coincideProducto =
+        idProducto != null && productoIds.contains(idProducto);
+    final coincideCategoria =
+        idCategoria != null && categoriaIds.contains(idCategoria);
+
+    return coincideProducto || coincideCategoria;
+  }
+
   bool aplicaACategoriaCliente(String? idCategoria) => true;
 }

@@ -348,15 +348,40 @@ class SyncPull {
 
       dynamic existing;
       if (idLocalRemote is int) {
-        existing = await (_db.select(_db.ventasTable)
+        final byId = await (_db.select(_db.ventasTable)
               ..where((t) => t.id.equals(idLocalRemote)))
-            .getSingleOrNull();
+            .get();
+        if (byId.length == 1) {
+          existing = byId.first;
+        } else if (byId.length > 1) {
+          // No debería haber ids duplicados; tomar el primero de forma segura
+          existing = byId.first;
+        }
       }
       // Equipo nuevo: el autoincrement no coincide → buscar por documento
+      // Nunca usar getSingleOrNull: puede haber duplicados locales.
       if (existing == null && numFactura.isNotEmpty) {
-        existing = await (_db.select(_db.ventasTable)
+        final candidatos = await (_db.select(_db.ventasTable)
               ..where((t) => t.numeroFactura.equals(numFactura)))
-            .getSingleOrNull();
+            .get();
+        if (candidatos.length == 1) {
+          existing = candidatos.first;
+        } else if (candidatos.isNotEmpty) {
+          final monto = _toDouble(r['monto_total']);
+          final fecha = DateTime.tryParse('${r['fecha'] ?? ''}');
+          for (final c in candidatos) {
+            final sameMonto = (c.montoTotal - monto).abs() < 0.01;
+            final sameFecha = fecha == null ||
+                (c.fecha.year == fecha.year &&
+                    c.fecha.month == fecha.month &&
+                    c.fecha.day == fecha.day);
+            if (sameMonto && sameFecha) {
+              existing = c;
+              break;
+            }
+          }
+          existing ??= candidatos.first;
+        }
       }
       if (existing == null && numCotiz.isNotEmpty) {
         final candidatos = await (_db.select(_db.ventasTable)

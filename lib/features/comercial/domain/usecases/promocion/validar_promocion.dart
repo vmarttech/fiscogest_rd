@@ -5,8 +5,10 @@ class LineaVenta {
     required this.productoId,
     required this.cantidad,
     required this.precioUnitario,
+    this.categoriaId,
   });
   final int productoId;
+  final int? categoriaId;
   final double cantidad;
   final double precioUnitario;
   double get subtotal => cantidad * precioUnitario;
@@ -27,7 +29,12 @@ class ValidarPromocion {
       return false;
     }
     final lineasAplicables = lineas
-        .where((l) => promocion.aplicaAProducto(l.productoId))
+        .where(
+          (l) => promocion.aplicaAProducto(
+            l.productoId,
+            idCategoria: l.categoriaId,
+          ),
+        )
         .toList();
     if (lineasAplicables.isEmpty) {
       return false;

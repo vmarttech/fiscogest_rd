@@ -156,13 +156,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     required bool requiereSetup,
     required String usernameSesion,
   }) async {
-    if (!await SupabaseConfig.hayRed()) {
-      debugPrint('Login: sin red → skip nube');
-      return;
+    // Probe rápido; si falla igual intentamos EmitirToken (hayRed a veces
+    // da falso negativo con timeout corto o DNS lento).
+    final hay = await SupabaseConfig.hayRed();
+    if (!hay) {
+      debugPrint('Login: hayRed=false → igual se intenta EmitirToken');
     }
     try {
       await EmitirToken.trasLogin(username: username, password: password)
-          .timeout(const Duration(seconds: 12));
+          .timeout(const Duration(seconds: 15));
     } catch (e, st) {
       debugPrint('Login: EmitirToken (nube) falló, app sigue offline: $e');
       debugPrint('$st');

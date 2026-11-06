@@ -467,8 +467,19 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
+
+    await _guardarDetalles(cotizacion.id!, cotizacion.detalles);
+
     final registro = await _ventasDao.obtenerVentaPorId(cotizacion.id!);
-    return _mapearDesdeVentasTableData(registro!, esCotizacion: true);
+    final dets = await _mapearDetalles(
+      await _ventasDao.listarDetalles(cotizacion.id!),
+    );
+
+    return _mapearDesdeVentasTableData(
+      registro!,
+      esCotizacion: true,
+      detalles: dets,
+    );
   }
 
   /// Solo Caja: asigna numeroFactura fiscal y estado FACTURADO.

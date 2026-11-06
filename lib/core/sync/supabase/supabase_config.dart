@@ -19,7 +19,8 @@ class SupabaseConfig {
       url.startsWith('https://') &&
       !anonKey.contains('PEGA_AQUI');
 
-  /// true si hay respuesta en 2s (aunque sea 401/404). Sin red = false.
+  /// true si Supabase responde (aunque sea 401/404).
+  /// Timeout 6s: redes lentas / DNS no deben contar como "sin red".
   static Future<bool> hayRed() async {
     if (!isConfigured) return false;
     try {
@@ -32,7 +33,7 @@ class SupabaseConfig {
               'Authorization': 'Bearer $anonKey',
             },
           )
-          .timeout(const Duration(seconds: 2));
+          .timeout(const Duration(seconds: 6));
       return true;
     } catch (_) {
       return false;
