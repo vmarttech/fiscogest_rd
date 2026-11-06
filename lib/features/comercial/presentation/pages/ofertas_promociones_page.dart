@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
+import 'package:fiscogest_rd/features/comercial/presentation/pages/promocion_form_sheet.dart';
 
 class OfertasPromocionesPage extends ConsumerStatefulWidget {
   const OfertasPromocionesPage({super.key});
@@ -42,37 +43,19 @@ class _OfertasPromocionesPageState
     final categoriasAsync = ref.watch(categoriaControllerProvider);
 
     return AppScaffold(
-      showAppBar: false,
+      title: 'Ofertas y promociones',
+      subtitle: 'Descuentos y reglas para Caja',
+      showAppBar: true,
       useAppPage: false,
+      actions: [
+        IconButton(
+          tooltip: 'Actualizar',
+          onPressed: _recargar,
+          icon: const Icon(Icons.refresh),
+        ),
+      ],
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-            child: Row(
-              children: [
-                IconButton(
-                  tooltip: 'Volver a Productos',
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Ofertas y promociones',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Actualizar',
-                  onPressed: _recargar,
-                  icon: const Icon(Icons.refresh),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
           Expanded(
             child: FutureBuilder<List<Promocion>>(
               future: _future,
@@ -144,17 +127,17 @@ class _OfertasPromocionesPageState
         .length;
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       children: [
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               children: [
                 _indicador('Registradas', '${promociones.length}'),
-                _indicador('Vigentes ahora', '$vigentes'),
+                _indicador('Vigentes', '$vigentes'),
                 _indicador(
-                  'Inactivas/vencidas',
+                  'Inactivas',
                   '${promociones.length - vigentes}',
                 ),
               ],
@@ -229,11 +212,17 @@ class _OfertasPromocionesPageState
       children: [
         Text(
           valor,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     ),
   );
@@ -252,406 +241,34 @@ class _OfertasPromocionesPageState
         ref.read(categoriaControllerProvider).valueOrNull ??
         <Categoria>[];
 
-    final nombre = TextEditingController(text: promocion?.nombre ?? '');
-    final descripcion = TextEditingController(
-      text: promocion?.descripcion ?? '',
-    );
-    final valor = TextEditingController(
-      text: promocion?.valor.toString() ?? '10',
-    );
-    final cantidad = TextEditingController(
-      text: promocion?.minimoCantidad?.toString() ?? '',
-    );
-    final minimoMonto = TextEditingController(
-      text: promocion?.minimoMonto?.toString() ?? '',
-    );
-
-    final productosMarcados = <int>{...promocion?.productoIds ?? const <int>[]};
-    final categoriasMarcadas = <int>{
-      ...promocion?.categoriaIds ?? const <int>[],
-    };
-    final formKey = GlobalKey<FormState>();
-
-    var tipo = promocion?.tipo ?? 'porcentaje';
-    var activa = promocion?.activa ?? true;
-    DateTime? inicio = promocion?.fechaInicio;
-    DateTime? fin = promocion?.fechaFin;
-
-    final resultado = await showDialog<Promocion>(
+    final resultado = await showModalBottomSheet<Promocion>(
       context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, refrescarDialogo) => AlertDialog(
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 12,
-          ),
-          titlePadding: const EdgeInsets.fromLTRB(18, 14, 18, 4),
-          contentPadding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
-          actionsPadding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
-          buttonPadding: const EdgeInsets.symmetric(horizontal: 8),
-          title: Text(
-            promocion == null ? 'Nueva promoción' : 'Editar promoción',
-          ),
-          content: SizedBox(
-            width: MediaQuery.sizeOf(dialogContext).width < 600
-                ? MediaQuery.sizeOf(dialogContext).width - 48
-                : 560,
-            height: (MediaQuery.sizeOf(dialogContext).height * 0.65).clamp(
-              160.0,
-              620.0,
-            ),
-            child: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      controller: nombre,
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre de la promoción *',
-                      ),
-                      validator: (v) => v == null || v.trim().isEmpty
-                          ? 'Escribe un nombre.'
-                          : null,
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: descripcion,
-                      maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Descripción',
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(
-                      initialValue: tipo,
-                      decoration: const InputDecoration(
-                        labelText: 'Tipo de promoción',
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'porcentaje',
-                          child: Text('Descuento por porcentaje'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'lleve2Pague1',
-                          child: Text('Lleve 2 y pague 1'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'montoFijo',
-                          child: Text('Descuento de monto fijo'),
-                        ),
-                      ],
-                      onChanged: (v) => refrescarDialogo(() {
-                        tipo = v ?? 'porcentaje';
-                        valor.text = tipo == 'porcentaje'
-                            ? '10'
-                            : tipo == 'montoFijo'
-                            ? '100'
-                            : '1';
-                      }),
-                    ),
-                    if (tipo != 'lleve2Pague1') ...[
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: valor,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: tipo == 'porcentaje'
-                              ? 'Porcentaje de descuento *'
-                              : 'Monto de descuento (RD\$) *',
-                        ),
-                        validator: (v) {
-                          final n = double.tryParse(
-                            (v ?? '').replaceAll(',', '.'),
-                          );
-                          if (n == null || n <= 0) {
-                            return 'Introduce un valor mayor que cero.';
-                          }
-                          if (tipo == 'porcentaje' && n > 100) {
-                            return 'El porcentaje no puede superar 100.';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                    if (tipo == 'lleve2Pague1')
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 6),
-                        child: Text(
-                          'El descuento se calcula por cada línea: dos unidades del mismo producto y una gratis.',
-                        ),
-                      ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Vigencia',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            icon: const Icon(Icons.calendar_today),
-                            label: Text(
-                              inicio == null
-                                  ? 'Fecha inicial'
-                                  : DateFormat('dd/MM/yyyy').format(inicio!),
-                            ),
-                            onPressed: () async {
-                              final fecha = await showDatePicker(
-                                context: context,
-                                initialDate: inicio ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
-                              );
-                              if (fecha != null) {
-                                refrescarDialogo(() {
-                                  inicio = DateTime(
-                                    fecha.year,
-                                    fecha.month,
-                                    fecha.day,
-                                  );
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            icon: const Icon(Icons.event),
-                            label: Text(
-                              fin == null
-                                  ? 'Fecha final'
-                                  : DateFormat('dd/MM/yyyy').format(fin!),
-                            ),
-                            onPressed: () async {
-                              final fecha = await showDatePicker(
-                                context: context,
-                                initialDate: fin ?? inicio ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
-                              );
-                              if (fecha != null) {
-                                refrescarDialogo(() {
-                                  fin = DateTime(
-                                    fecha.year,
-                                    fecha.month,
-                                    fecha.day,
-                                    23,
-                                    59,
-                                    59,
-                                  );
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Condiciones mínimas (opcionales)',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: cantidad,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Cantidad mínima',
-                            ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) return null;
-                              final n = int.tryParse(v);
-                              return n == null || n < 0
-                                  ? 'Cantidad inválida.'
-                                  : null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextFormField(
-                            controller: minimoMonto,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: const InputDecoration(
-                              labelText: 'Compra mínima (RD\$)',
-                            ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) return null;
-                              final n = double.tryParse(v.replaceAll(',', '.'));
-                              return n == null || n < 0
-                                  ? 'Monto inválido.'
-                                  : null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Aplicación de la promoción',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const Text(
-                      'Si no seleccionas productos ni categorías, se aplicará a todos los productos elegibles.',
-                    ),
-                    ExpansionTile(
-                      tilePadding: EdgeInsets.zero,
-                      title: Text(
-                        'Productos (${productosMarcados.length} seleccionados)',
-                      ),
-                      children: [
-                        if (listaProductos.isEmpty)
-                          const ListTile(
-                            title: Text('No hay productos disponibles.'),
-                          )
-                        else
-                          SizedBox(
-                            height: 130,
-                            child: ListView(
-                              children: listaProductos
-                                  .where((p) => p.id != null)
-                                  .map(
-                                    (p) => CheckboxListTile(
-                                      dense: true,
-                                      value: productosMarcados.contains(p.id),
-                                      title: Text(p.nombre),
-                                      subtitle: Text(p.codigo),
-                                      onChanged: (marcado) {
-                                        refrescarDialogo(() {
-                                          if (marcado == true) {
-                                            productosMarcados.add(p.id!);
-                                          } else {
-                                            productosMarcados.remove(p.id);
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                      ],
-                    ),
-                    ExpansionTile(
-                      tilePadding: EdgeInsets.zero,
-                      title: Text(
-                        'Categorías (${categoriasMarcadas.length} seleccionadas)',
-                      ),
-                      children: [
-                        if (listaCategorias.isEmpty)
-                          const ListTile(
-                            title: Text('No hay categorías disponibles.'),
-                          )
-                        else
-                          SizedBox(
-                            height: 130,
-                            child: ListView(
-                              children: listaCategorias
-                                  .where((c) => c.id != null)
-                                  .map(
-                                    (c) => CheckboxListTile(
-                                      dense: true,
-                                      value: categoriasMarcadas.contains(c.id),
-                                      title: Text(c.nombre),
-                                      onChanged: (marcado) {
-                                        refrescarDialogo(() {
-                                          if (marcado == true) {
-                                            categoriasMarcadas.add(c.id!);
-                                          } else {
-                                            categoriasMarcadas.remove(c.id);
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                      ],
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Promoción activa'),
-                      value: activa,
-                      onChanged: (v) => refrescarDialogo(() => activa = v),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (!formKey.currentState!.validate()) return;
-                if (inicio != null && fin != null && fin!.isBefore(inicio!)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'La fecha final no puede ser anterior a la inicial.',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-
-                final importe = tipo == 'lleve2Pague1'
-                    ? 1.0
-                    : double.parse(valor.text.replaceAll(',', '.'));
-
-                Navigator.pop(
-                  dialogContext,
-                  Promocion(
-                    id: promocion?.id ?? 0,
-                    nombre: nombre.text.trim(),
-                    descripcion: descripcion.text.trim(),
-                    tipo: tipo,
-                    valor: importe,
-                    fechaInicio: inicio,
-                    fechaFin: fin,
-                    activa: activa,
-                    minimoCantidad: cantidad.text.trim().isEmpty
-                        ? null
-                        : int.parse(cantidad.text.trim()),
-                    minimoMonto: minimoMonto.text.trim().isEmpty
-                        ? null
-                        : double.parse(minimoMonto.text.replaceAll(',', '.')),
-                    productoIds: productosMarcados.toList(),
-                    categoriaIds: categoriasMarcadas.toList(),
-                  ),
-                );
-              },
-              child: const Text('Guardar promoción'),
-            ),
-          ],
-        ),
+      isScrollControlled: true,
+      useSafeArea: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      builder: (sheetContext) {
+        final h = MediaQuery.sizeOf(sheetContext).height;
+        final inset = MediaQuery.viewInsetsOf(sheetContext).bottom;
+        return Padding(
+          padding: EdgeInsets.only(bottom: inset),
+          child: SizedBox(
+            height: (h * 0.50).clamp(260.0, 420.0),
+            child: PromocionFormSheet(
+              promocion: promocion,
+              productos: listaProductos,
+              categorias: listaCategorias,
+            ),
+          ),
+        );
+      },
     );
-
-    nombre.dispose();
-    descripcion.dispose();
-    valor.dispose();
-    cantidad.dispose();
-    minimoMonto.dispose();
 
     if (resultado == null || !mounted) return;
-
     try {
       final repo = ref.read(promocionRepositoryProvider);
       if (promocion == null) {
@@ -670,9 +287,9 @@ class _OfertasPromocionesPageState
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('No se pudo guardar: $error')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo guardar: $error')),
+      );
     }
   }
 
@@ -820,18 +437,38 @@ class _OfertasPromocionesPageState
   }) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icono, size: 48, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 12),
-            Text(mensaje, textAlign: TextAlign.center),
-            const SizedBox(height: 6),
-            Text(detalle, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: accion, child: Text(textoAccion)),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Icon(icono, size: 40, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(height: 12),
+              Text(
+                mensaje,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                detalle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black.withValues(alpha: 0.55),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: FilledButton(
+                  onPressed: accion,
+                  child: Text(textoAccion),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

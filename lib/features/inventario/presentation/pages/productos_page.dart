@@ -289,6 +289,34 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 const SizedBox(height: 10),
                 // Fila 2: activos + orden
                 _buildBarraOrdenYFiltros(),
+                // Ofertas también en celular (antes solo panel desktop)
+                if (!ref.watch(modoSimplificadoProvider)) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.pushNamed(
+                        OfertasPromocionesPage.routeName,
+                      ),
+                      icon: const Icon(Icons.local_offer_outlined, size: 18),
+                      label: const Text('Ofertas y promociones'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(
+                          color: AppColors.primary.withValues(alpha: 0.45),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 14),
                 ref
                     .watch(productoControllerProvider)
@@ -560,62 +588,69 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               final chosen = await showModalBottomSheet<String>(
                 context: context,
                 backgroundColor: Colors.white,
+                isScrollControlled: true,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 builder: (ctx) {
+                  final maxH = MediaQuery.of(ctx).size.height * 0.72;
                   return SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 8),
-                        Container(
-                          width: 36,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFCBD5E1),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(20, 14, 20, 8),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Ordenar por',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: maxH),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 8),
+                            Container(
+                              width: 36,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFCBD5E1),
+                                borderRadius: BorderRadius.circular(2),
                               ),
                             ),
-                          ),
-                        ),
-                        for (final e in ordenes)
-                          ListTile(
-                            dense: true,
-                            title: Text(
-                              e.value,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: e.key == _ordenProductos
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: e.key == _ordenProductos
-                                    ? AppColors.primary
-                                    : AppColors.textPrimary,
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(20, 14, 20, 8),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Ordenar por',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
-                            trailing: e.key == _ordenProductos
-                                ? const Icon(
-                                    Icons.check_rounded,
-                                    color: AppColors.primary,
-                                    size: 20,
-                                  )
-                                : null,
-                            onTap: () => Navigator.pop(ctx, e.key),
-                          ),
-                        const SizedBox(height: 8),
-                      ],
+                            for (final e in ordenes)
+                              ListTile(
+                                dense: true,
+                                title: Text(
+                                  e.value,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: e.key == _ordenProductos
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: e.key == _ordenProductos
+                                        ? AppColors.primary
+                                        : AppColors.textPrimary,
+                                  ),
+                                ),
+                                trailing: e.key == _ordenProductos
+                                    ? const Icon(
+                                        Icons.check_rounded,
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      )
+                                    : null,
+                                onTap: () => Navigator.pop(ctx, e.key),
+                              ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 },
