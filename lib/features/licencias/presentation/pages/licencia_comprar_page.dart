@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/sync/supabase/pedido_sync.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/features/licencias/domain/medios_cobro.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
 import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
 import 'package:fiscogest_rd/features/licencias/data/paypal_service.dart';
@@ -112,6 +116,279 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
 
   void _snack(String m) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+  }
+
+  /// Flujo depósito / transferencia: elige plan → genera FG- → muestra cuentas.
+  Future<void> _iniciarPagoTransferencia() async {
+    final plan = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final planesPago = _planes.where((p) => p != 'gratis').toList();
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Pago por depósito o transferencia',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Elige el plan. Se generará tu referencia FG- y verás las cuentas para depositar.',
+                  style: TextStyle(fontSize: 13, height: 1.35, color: Colors.black54),
+                ),
+                const SizedBox(height: 16),
+                for (final p in planesPago) ...[
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    title: Text(
+                      nombrePlanUi(p),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(
+                      'US\$ ${(precioMensualUsd(p) ?? 0).toStringAsFixed(2)} / mes',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.pop(ctx, p),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (plan == null || !mounted) return;
+
+    setState(() {
+      _cargando = true;
+      _planEnProceso = plan;
+    });
+    try {
+      final svc = ref.read(licenciaServiceProvider);
+      final refCode = await svc.crearPedido(
+        plan: plan,
+        vigenciaTipo: 'mensual',
+        medioPreferido: 'transferencia',
+      );
+      // Subir pedido a la nube para que el admin lo vea
+      try {
+        final db = ref.read(databaseProvider);
+        await PedidoSync(db).pushTodos();
+      } catch (_) {}
+
+      if (!mounted) return;
+      await _mostrarInstruccionesTransferencia(
+        referencia: refCode,
+        plan: plan,
+        montoUsd: precioMensualUsd(plan) ?? 0,
+      );
+    } catch (e) {
+      if (mounted) _snack('No se pudo generar la referencia: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _cargando = false;
+          _planEnProceso = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _mostrarInstruccionesTransferencia({
+    required String referencia,
+    required String plan,
+    required double montoUsd,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (_, scrollCtrl) {
+            return ListView(
+              controller: scrollCtrl,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Tu referencia de pago',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${nombrePlanUi(plan)} · US\$ ${montoUsd.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F766E),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          referencia,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Copiar',
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: referencia));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Referencia copiada')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.copy_rounded, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Incluye esta referencia en el concepto del depósito o transferencia. '
+                  'Cuando confirmemos el pago, activa la licencia con el mismo código FG-.',
+                  style: TextStyle(fontSize: 13, height: 1.35, color: Colors.black54),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Cuentas para depositar',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                for (final m in kMediosCobroMartTech) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: const Color(0xFFF8FAFC),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          m.nombre,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${m.etiquetaDato}: ${m.dato}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Titular: ${m.titular}',
+                          style: const TextStyle(fontSize: 13, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          m.instruccionCorta.replaceAll('FG-XXXXX', referencia),
+                          style: const TextStyle(fontSize: 12.5, height: 1.35),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: () async {
+                              await Clipboard.setData(ClipboardData(text: m.dato));
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${m.etiquetaDato} copiado')),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.copy, size: 16),
+                            label: const Text('Copiar dato'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    context.push('/licencia/activar');
+                  },
+                  child: const Text('Ya pagué · Activar con mi FG-'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   String _planActualId() {
@@ -245,8 +522,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                           Align(
                             alignment: Alignment.center,
                             child: TextButton(
-                              onPressed: () =>
-                                  context.push('/licencia/activar'),
+                              onPressed: _cargando ? null : _iniciarPagoTransferencia,
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.textSecondary,
                                 textStyle: const TextStyle(
@@ -261,7 +537,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: const Text(
-                                '¿Prefieres depósito o transferencia? Activa tu código FG-',
+                                '¿Prefieres depósito o transferencia? Generar código FG-',
                               ),
                             ),
                           ),

@@ -181,7 +181,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   ),
                   const SizedBox(height: 10),
                   _ActividadReciente(
-                    onCompra: simple ? () {} : () => go('/compras/lista'),
+                    onCompra: () => go(simple ? '/compras/rapida' : '/compras/lista'),
                     onCxc: () => go('/creditos/cuentas'),
                   ),
                 ],

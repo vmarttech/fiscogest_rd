@@ -540,9 +540,15 @@ class AppShell extends ConsumerWidget {
                         puede(Permiso.creditosGestionar))
                       _buildNavItem(context, '/creditos', 'Crédito',
                           Icons.credit_score_outlined, currentPath, isPermanent),
-                    if (!modoSimplificado && puede(Permiso.comprasGestionar))
-                      _buildNavItem(context, '/compras', 'Compras',
-                          Icons.shopping_cart_outlined, currentPath, isPermanent),
+                    if (puede(Permiso.comprasGestionar))
+                      _buildNavItem(
+                        context,
+                        modoSimplificado ? '/compras/rapida' : '/compras',
+                        'Compras',
+                        Icons.shopping_cart_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (!modoSimplificado && permiteReportesLicencia && (puede(Permiso.reportesVer) || esAdmin))
                       _buildNavItem(context, '/gastos', 'Gastos',
                           Icons.money_off_csred_outlined, currentPath, isPermanent),
