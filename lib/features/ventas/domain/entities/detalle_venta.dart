@@ -17,7 +17,7 @@ class DetalleVenta {
 
   final int? id;
   final int productoId;
-  final int cantidad;
+  final double cantidad;
   final double precioUnitario;
   final double subtotal;
   final String? nombreProducto;
@@ -32,7 +32,7 @@ class DetalleVenta {
   DetalleVenta copyWith({
     int? id,
     int? productoId,
-    int? cantidad,
+    double? cantidad,
     double? precioUnitario,
     double? subtotal,
     String? nombreProducto,

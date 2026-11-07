@@ -1444,19 +1444,22 @@ class _SecuenciasEncfSection extends ConsumerWidget {
     WidgetRef ref,
     EcfeSecuenciaInfo? existing,
   ) async {
-    final tipoCtrl = TextEditingController(text: '${existing?.tipoEcf ?? 31}');
+    // H-22: no proponer rangos de ejemplo que parezcan autorización DGII.
+    // Alta nueva → campos vacíos / inactiva; el usuario debe digitar el rango real.
+    final tipoCtrl = TextEditingController(
+      text: existing != null ? '${existing.tipoEcf}' : '',
+    );
     final actualCtrl = TextEditingController(
-      text: '${existing?.secuenciaActual ?? 0}',
+      text: existing != null ? '${existing.secuenciaActual}' : '0',
     );
     final desdeCtrl = TextEditingController(
-      text: '${existing?.secuenciaDesde ?? 1}',
+      text: existing != null ? '${existing.secuenciaDesde}' : '',
     );
     final hastaCtrl = TextEditingController(
-      text: '${existing?.secuenciaHasta ?? 100}',
+      text: existing != null ? '${existing.secuenciaHasta}' : '',
     );
-    var activo = existing?.activo ?? true;
-    DateTime? venc =
-        existing?.fechaVencimiento ?? DateTime(DateTime.now().year + 1, 12, 31);
+    var activo = existing?.activo ?? false;
+    DateTime? venc = existing?.fechaVencimiento;
 
     final ok = await showDialog<bool>(
       context: context,
@@ -1493,8 +1496,9 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                     TextField(
                       controller: desdeCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Desde',
+                        labelText: 'Desde (autorizado DGII)',
                         border: OutlineInputBorder(),
+                        helperText: 'Inicio del rango asignado por la DGII',
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -1502,13 +1506,17 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                     TextField(
                       controller: hastaCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Hasta',
+                        labelText: 'Hasta (autorizado DGII)',
                         border: OutlineInputBorder(),
+                        helperText: 'Fin del rango asignado por la DGII',
                       ),
                       keyboardType: TextInputType.number,
                     ),
                     SwitchListTile(
-                      title: const Text('Activa'),
+                      title: const Text('Activa para emisión'),
+                      subtitle: const Text(
+                        'Solo active cuando el rango coincida con la autorización DGII',
+                      ),
                       value: activo,
                       onChanged: (v) => setSt(() => activo = v),
                     ),

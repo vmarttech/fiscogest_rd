@@ -357,7 +357,7 @@ class _FilaProducto extends ConsumerWidget {
                   icon: Icons.remove,
                   onTap: () => ref
                       .read(registrarVentaProvider.notifier)
-                      .cambiarCantidad(indice, linea.cantidad - 1),
+                      .cambiarCantidad(indice, linea.cantidad - 1.0),
                 ),
                 SizedBox(
                   width: 32,
@@ -373,7 +373,7 @@ class _FilaProducto extends ConsumerWidget {
                   icon: Icons.add,
                   onTap: () => ref
                       .read(registrarVentaProvider.notifier)
-                      .cambiarCantidad(indice, linea.cantidad + 1),
+                      .cambiarCantidad(indice, linea.cantidad + 1.0),
                 ),
               ],
             ),

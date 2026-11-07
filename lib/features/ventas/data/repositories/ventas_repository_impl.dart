@@ -46,7 +46,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         DetalleVenta(
           id: d.id,
           productoId: d.productoId,
-          cantidad: d.cantidad.round().clamp(1, 999999),
+          cantidad: d.cantidad <= 0 ? 0.0 : d.cantidad,
           precioUnitario: d.precioUnitario,
           subtotal: d.subtotal,
           nombreProducto: nombre,

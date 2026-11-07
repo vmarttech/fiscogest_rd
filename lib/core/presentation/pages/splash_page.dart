@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 /// Presentación de arranque (cold start). Sin menú lateral.
 class SplashPage extends ConsumerStatefulWidget {
@@ -38,6 +39,12 @@ class _SplashPageState extends ConsumerState<SplashPage>
     Future<void>.delayed(const Duration(milliseconds: 700), () async {
       if (!mounted) return;
       try {
+        // Cargar config (modo simplificado) antes de navegar = sin flash
+        try {
+          await ref
+              .read(configuracionControllerProvider.future)
+              .timeout(const Duration(seconds: 3));
+        } catch (_) {}
         final db = ref.read(databaseProvider);
         final usuarios = await db.select(db.usuariosTable).get();
         // ignore: avoid_print

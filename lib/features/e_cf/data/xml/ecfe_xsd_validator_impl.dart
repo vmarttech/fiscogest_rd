@@ -13,7 +13,9 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
   /// Ruta a archivo .xsd o carpeta que lo contiene.
   final String? rutaXsd;
 
-  /// Si true, falla cuando no hay XSD usable o xmllint no está disponible.
+  /// Si true, exige XSD usable y (en escritorio) xmllint disponible.
+  /// Si false, la ausencia de XSD o de xmllint no es error bloqueante:
+  /// se aplica solo la validación estructural interna.
   final bool exigirXsd;
 
   static final _encfRe = RegExp(r'^E(31|32|33|34|41|43|44|45|46|47)\d{10}$');
@@ -35,20 +37,29 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
     }
 
     _validarEstructura(doc, errores);
-
-    final xsdFile = await _resolverArchivoXsd();
+    final rootName = doc.rootElement.name.local;
+    final tipo = doc.rootElement
+            .findAllElements('TipoeCF')
+            .map((e) => e.innerText.trim())
+            .where((t) => t.isNotEmpty)
+            .firstOrNull ??
+        '';
+    final xsdFile = await _resolverArchivoXsd(
+      raiz: rootName,
+      tipoEcf: tipo,
+    );
     if (xsdFile == null) {
       if (exigirXsd) {
         errores.add(
-          'XSD oficial no configurado o no encontrado. '
-          'Indica la ruta del .xsd DGII en e-CF → Configuración.',
+          'XSD oficial no configurado o no encontrado'
+          '${tipo.isNotEmpty ? ' para tipo $tipo' : ''}. '
+          'Indica la ruta del .xsd DGII (archivo o carpeta) en e-CF → Configuración.',
         );
       }
     } else {
       final xsdErr = await _validarConXmllint(xml, xsdFile);
       errores.addAll(xsdErr);
     }
-
     return errores.isEmpty
         ? const EcfeXsdResultado(ok: true)
         : EcfeXsdResultado(ok: false, errores: errores);
@@ -56,10 +67,16 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
 
   void _validarEstructura(XmlDocument doc, List<String> errores) {
     final root = doc.rootElement;
-    if (root.name.local != 'ECF') {
-      errores.add('Raíz debe ser <ECF>, encontrado <${root.name.local}>');
+    final raiz = root.name.local;
+
+    if (raiz != 'ECF' && raiz != 'RFCE') {
+      errores.add(
+        'Raíz debe ser <ECF> o <RFCE>, encontrado <$raiz>',
+      );
       return;
     }
+
+    final esRfce = raiz == 'RFCE';
 
     final encabezado = root.findElements('Encabezado').firstOrNull;
     if (encabezado == null) {
@@ -83,9 +100,14 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
         if (tipo.isNotEmpty && encf.isNotEmpty && !encf.startsWith('E$tipo')) {
           errores.add('eNCF $encf no coincide con TipoeCF $tipo');
         }
-        _req(idDoc, 'FechaVencimientoSecuencia', errores);
-        final fvs =
-            idDoc
+
+        // FechaVencimientoSecuencia:
+        // - No aplica a RFCE (resumen de consumo).
+        // - Tipo 34 (Nota de Crédito): el generador no la emite.
+        if (!esRfce && tipo != '34') {
+          _req(idDoc, 'FechaVencimientoSecuencia', errores);
+        }
+        final fvs = idDoc
                 .findElements('FechaVencimientoSecuencia')
                 .firstOrNull
                 ?.innerText
@@ -93,6 +115,10 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
             '';
         if (fvs.isNotEmpty && !_fechaRe.hasMatch(fvs)) {
           errores.add('FechaVencimientoSecuencia debe ser dd-MM-yyyy: $fvs');
+        }
+
+        if (esRfce) {
+          _req(idDoc, 'TipoPago', errores);
         }
       }
 
@@ -128,31 +154,114 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
       }
     }
 
-    final detalles = root.findElements('DetallesItems').firstOrNull;
-    if (detalles == null) {
-      errores.add('Falta <DetallesItems>');
-    } else {
-      final items = detalles.findElements('Item').toList();
-      if (items.isEmpty) errores.add('Debe haber al menos un <Item>');
-      for (var i = 0; i < items.length; i++) {
-        final it = items[i];
-        if (it.findElements('NumeroLinea').isEmpty) {
-          errores.add('Item[$i]: falta NumeroLinea');
-        }
-        if (it.findElements('NombreItem').isEmpty) {
-          errores.add('Item[$i]: falta NombreItem');
-        }
-        if (it.findElements('MontoItem').isEmpty) {
-          errores.add('Item[$i]: falta MontoItem');
+    // DetallesItems solo aplica a ECF completo, no al resumen RFCE.
+    if (!esRfce) {
+      final detalles = root.findElements('DetallesItems').firstOrNull;
+      if (detalles == null) {
+        errores.add('Falta <DetallesItems>');
+      } else {
+        final items = detalles.findElements('Item').toList();
+        if (items.isEmpty) errores.add('Debe haber al menos un <Item>');
+        for (var i = 0; i < items.length; i++) {
+          final it = items[i];
+          if (it.findElements('NumeroLinea').isEmpty) {
+            errores.add('Item[$i]: falta NumeroLinea');
+          }
+          if (it.findElements('NombreItem').isEmpty) {
+            errores.add('Item[$i]: falta NombreItem');
+          }
+          if (it.findElements('MontoItem').isEmpty) {
+            errores.add('Item[$i]: falta MontoItem');
+          }
         }
       }
     }
   }
 
-  Future<File?> _resolverArchivoXsd() async {
+  /// Resuelve el archivo XSD aplicable al documento.
+  ///
+  /// Prioridad:
+  /// 1. Si [rutaXsd] es un archivo .xsd concreto → se usa tal cual.
+  /// 2. Si es carpeta (o vacío → assets/ecf_xsd): se elige por tipo de e-CF
+  ///    o RFCE según patrones de nombre habituales del paquete DGII.
+  /// 3. Solo como último recurso se usa un esquema genérico ECF*.xsd.
+  ///
+  /// No se devuelve un .xsd arbitrario “el primero del directorio” cuando
+  /// se conoce el tipo: eso produciría validaciones incorrectas.
+  Future<File?> _resolverArchivoXsd({
+    String raiz = 'ECF',
+    String tipoEcf = '',
+  }) async {
     final raw = rutaXsd?.trim() ?? '';
+
+    Future<File?> buscarEnDirectorio(Directory dir) async {
+      if (!await dir.exists()) return null;
+      final xsds = dir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.toLowerCase().endsWith('.xsd'))
+          .toList();
+      if (xsds.isEmpty) return null;
+
+      String nombre(File f) => f.uri.pathSegments.last.toLowerCase();
+
+      // RFCE tiene esquema propio.
+      if (raiz.toUpperCase() == 'RFCE') {
+        for (final f in xsds) {
+          final n = nombre(f);
+          if (n.contains('rfce')) return f;
+        }
+      }
+
+      // Preferir coincidencia por tipo (31, 32, 33, 34, 41, 43, …).
+      if (tipoEcf.isNotEmpty) {
+        final t = tipoEcf;
+        final patrones = <String>[
+          'ecf_$t',
+          'ecf$t',
+          'e-cf_$t',
+          'e-cf$t',
+          'e_cf_$t',
+          '_$t.',
+          '_${t}_',
+          'tipo$t',
+          'tipoe$t',
+        ];
+        for (final f in xsds) {
+          final n = nombre(f);
+          if (patrones.any(n.contains)) return f;
+        }
+      }
+
+      // Genéricos conocidos del proyecto / paquete DGII.
+      const genericos = [
+        'ecf_v1.0.xsd',
+        'ecf.xsd',
+        'ecf_v1.xsd',
+      ];
+      for (final g in genericos) {
+        for (final f in xsds) {
+          if (nombre(f) == g) return f;
+        }
+      }
+
+      // Último recurso solo si no hay tipo conocido.
+      if (tipoEcf.isEmpty && raiz.toUpperCase() != 'RFCE') {
+        xsds.sort((a, b) {
+          final an = nombre(a);
+          final bn = nombre(b);
+          final scoreA = an.contains('ecf') && !an.contains('rfce') ? 0 : 1;
+          final scoreB = bn.contains('ecf') && !bn.contains('rfce') ? 0 : 1;
+          return scoreA.compareTo(scoreB);
+        });
+        return xsds.first;
+      }
+
+      // Tipo conocido pero sin XSD específico: no adivinar.
+      return null;
+    }
+
     if (raw.isEmpty) {
-      // Convención del proyecto
       for (final c in [
         'assets/ecf_xsd/ECF_v1.0.xsd',
         'assets/ecf_xsd/ECF.xsd',
@@ -161,37 +270,17 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
         final f = File(c);
         if (await f.exists()) return f;
       }
-      final dir = Directory('assets/ecf_xsd');
-      if (await dir.exists()) {
-        final xsds = dir
-            .listSync()
-            .whereType<File>()
-            .where((f) => f.path.toLowerCase().endsWith('.xsd'))
-            .toList();
-        if (xsds.isNotEmpty) return xsds.first;
-      }
-      return null;
+      return buscarEnDirectorio(Directory('assets/ecf_xsd'));
     }
 
     final f = File(raw);
     if (await f.exists() && raw.toLowerCase().endsWith('.xsd')) {
       return f;
     }
+
     final d = Directory(raw);
     if (await d.exists()) {
-      final xsds = d
-          .listSync()
-          .whereType<File>()
-          .where((x) => x.path.toLowerCase().endsWith('.xsd'))
-          .toList();
-      if (xsds.isEmpty) return null;
-      // Prefer names containing ECF
-      xsds.sort((a, b) {
-        final as = a.path.toUpperCase().contains('ECF') ? 0 : 1;
-        final bs = b.path.toUpperCase().contains('ECF') ? 0 : 1;
-        return as.compareTo(bs);
-      });
-      return xsds.first;
+      return buscarEnDirectorio(d);
     }
     return null;
   }
@@ -200,27 +289,22 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
     final errores = <String>[];
     final xmllint = await _whichXmllint();
     if (xmllint == null) {
+      final esMovil = Platform.isAndroid || Platform.isIOS;
+      if (esMovil) {
+        // En Android/iOS no existe xmllint de forma estándar.
+        // Se mantiene la validación estructural interna (ya ejecutada).
+        // No se bloquea el flujo de certificación/producción en móviles.
+        return const <String>[];
+      }
       if (exigirXsd) {
         errores.add(
           'xmllint no está instalado o no está en el PATH. '
           'Linux: apt install libxml2-utils. '
           'Windows: instale xmllint (libxml2) y agréguelo al PATH. '
-          'Requerido para validar XSD oficial.',
-        );
-      } else {
-        errores.add(
-          'Aviso: XSD encontrado (${xsd.path}) pero xmllint no está '
-          'en el PATH; solo validación estructural interna. '
-          'Instale xmllint (Linux: libxml2-utils · Windows: libxml2/xmllint).',
-        );
-        // Aviso no bloquea si no exigir — quitar de errores y usar info?
-        // Para operación seria: si hay XSD configurado, exigir xmllint
-        errores.clear();
-        errores.add(
-          'XSD configurado (${xsd.path}) pero falta xmllint. '
-          'Instala: xmllint en el PATH (Linux: apt install libxml2-utils; Windows: instalar xmllint)',
+          'Requerido para validar XSD oficial en escritorio.',
         );
       }
+      // En escritorio sin exigirXsd: no se añade error bloqueante.
       return errores;
     }
 

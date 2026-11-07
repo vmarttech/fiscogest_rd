@@ -45,6 +45,7 @@ class HomeMobilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
+    final simple = ref.watch(modoSimplificadoProvider);
     final n1 = cfg?.nombreComercial.trim() ?? '';
     final n2 = cfg?.razonSocial.trim() ?? '';
     final negocio =
@@ -120,7 +121,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                     stockBajo: stockLabel,
                     onVentas: null,
                     onPorCobrar: () => go('/creditos/cuentas'),
-                    onPorPagar: () => go('/compras/cuentas-pagar'),
+                    onPorPagar: simple ? null : () => go('/compras/cuentas-pagar'),
                     onStock: () => go('/inventario?filtro=bajo'),
                   ),
                   const SizedBox(height: 20),
@@ -128,7 +129,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   const SizedBox(height: 10),
                   _AccionesRapidas(
                     onNuevaVenta: () => go('/ventas/cotizaciones/nueva'),
-                    onCompra: () => go('/compras/registrar'),
+                    onCompra: () => go(simple ? '/compras/rapida' : '/compras/registrar'),
                     onGasto: () => go('/gastos'),
                     onCliente: () => go('/clientes/nuevo'),
                     onProducto: () => go('/productos/nuevo'),
@@ -144,7 +145,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                         case 'credito':
                           go('/creditos');
                         case 'compras':
-                          go('/compras');
+                          go(simple ? '/compras/rapida' : '/compras');
                         case 'gastos':
                           go('/gastos');
                         case 'inventario':
@@ -156,7 +157,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                         case 'fiados':
                           go('/ventas/fios');
                         case 'reportes':
-                          go('/reports');
+                          if (!simple) go('/reports');
                       }
                     },
                   ),
@@ -166,7 +167,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                       const Expanded(
                           child: _SectionTitle('Actividad reciente')),
                       GestureDetector(
-                        onTap: () => go('/reports'),
+                        onTap: () { if (!simple) go('/reports'); },
                         child: const Text(
                           'Ver todo',
                           style: TextStyle(
@@ -180,7 +181,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   ),
                   const SizedBox(height: 10),
                   _ActividadReciente(
-                    onCompra: () => go('/compras/lista'),
+                    onCompra: simple ? () {} : () => go('/compras/lista'),
                     onCxc: () => go('/creditos/cuentas'),
                   ),
                 ],
@@ -270,7 +271,8 @@ final dash = ref.watch(dashboardSnapshotProvider);
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  context.push('/compras/registrar');
+                  final modoSimple = ProviderScope.containerOf(context).read(modoSimplificadoProvider);
+                  context.push(modoSimple ? '/compras/rapida' : '/compras/registrar');
                 },
               ),
             ],

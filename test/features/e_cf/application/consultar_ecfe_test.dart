@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fiscogest_rd/features/e_cf/application/consultar_ecfe.dart';
+import 'package:fiscogest_rd/features/e_cf/application/consultar_estado_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
 
 void main() {
@@ -45,6 +46,39 @@ void main() {
         ConsultarEcfe.mapearEstadoDgii('Estado no documentado', null),
         isNull,
       );
+    });
+  });
+  group('ConsultarEstadoEcfe.mapearEstadoDgii', () {
+    test('mantiene el mismo mapeo para estados reconocidos', () {
+      final casos = <String, EstadoEcfInterno>{
+        'Aceptado': EstadoEcfInterno.aceptado,
+        'Aceptado Condicional': EstadoEcfInterno.aceptadoObservacion,
+        'Rechazado': EstadoEcfInterno.rechazado,
+        'En Proceso': EstadoEcfInterno.enProceso,
+      };
+
+      for (final caso in casos.entries) {
+        expect(
+          ConsultarEstadoEcfe.mapearEstadoDgii(caso.key),
+          caso.value,
+          reason: 'Estado DGII: ${caso.key}',
+        );
+        expect(
+          ConsultarEstadoEcfe.mapearEstadoDgii(caso.key),
+          ConsultarEcfe.mapearEstadoDgii(caso.key, null),
+          reason: 'Los mappers deben coincidir para ${caso.key}',
+        );
+      }
+    });
+
+    test('devuelve null para estados vacíos o desconocidos', () {
+      for (final estado in <String?>[null, '', 'Estado no documentado']) {
+        expect(ConsultarEstadoEcfe.mapearEstadoDgii(estado), isNull);
+        expect(
+          ConsultarEstadoEcfe.mapearEstadoDgii(estado),
+          ConsultarEcfe.mapearEstadoDgii(estado, null),
+        );
+      }
     });
   });
 }

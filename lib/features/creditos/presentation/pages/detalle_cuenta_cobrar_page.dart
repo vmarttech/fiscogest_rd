@@ -38,7 +38,7 @@ class _DetalleCuentaCobrarPageState
     extends ConsumerState<DetalleCuentaCobrarPage> {
   CuentaPorCobrar? _cuenta;
   ProntoPagoAcuerdoData? _acuerdoActivo;
-  final List<({String nombre, int cantidad, double total})> _lineas = [];
+  final List<({String nombre, double cantidad, double total})> _lineas = [];
   bool _cargando = true;
   String? _error;
   bool _pagando = false;
@@ -53,14 +53,12 @@ class _DetalleCuentaCobrarPageState
     WidgetsBinding.instance.addPostFrameCallback((_) => _cargar());
   }
 
-
   Future<void> _enviarRecordatorioWhatsApp(CuentaPorCobrar c) async {
     try {
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
-      await ref.read(recordatorioWhatsAppServiceProvider).enviarDesdeCuenta(
-            cuenta: c,
-            empresa: empresa,
-          );
+      await ref
+          .read(recordatorioWhatsAppServiceProvider)
+          .enviarDesdeCuenta(cuenta: c, empresa: empresa);
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(

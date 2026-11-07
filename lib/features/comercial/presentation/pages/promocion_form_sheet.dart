@@ -192,7 +192,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Nombre de la promoción *',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   validator: (v) => v == null || v.trim().isEmpty
                       ? 'Escribe un nombre.'
@@ -206,7 +206,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Descripción',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -216,7 +216,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Tipo de promoción',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   items: const [
                     DropdownMenuItem(
@@ -325,7 +325,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Cantidad mínima',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null;
@@ -343,7 +343,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Compra mínima (RD\$)',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null;

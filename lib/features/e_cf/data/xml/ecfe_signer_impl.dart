@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/ports/ecfe_signer.dart';
 import 'package:xml/xml.dart';
+import 'package:xml_crypto/xml_crypto.dart';
 import 'package:fiscogest_rd/features/e_cf/data/xml/pkcs12_movil.dart';
 
 /// Firma XML e-CF con certificado PKCS#12 (.p12/.pfx).
@@ -280,128 +281,134 @@ class EcfeSignerImpl implements EcfeSigner {
   }
 
   static String _extractCertBase64(String pem) {
-    final lines = pem
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty && !l.startsWith('-----'))
-        .toList();
-    return lines.join();
-  }
+    final match = RegExp(
+      r'-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----',
+    ).firstMatch(pem);
 
-  static String _stripSignature(String xml) {
-    try {
-      final doc = XmlDocument.parse(xml);
-      for (final s in doc.findAllElements('Signature').toList()) {
-        // Solo xmldsig
-        final ns = s.namespaceUri ?? '';
-        if (ns.contains('xmldsig') || s.name.local == 'Signature') {
-          s.remove();
-        }
-      }
-      return doc.toXmlString(pretty: false);
-    } catch (_) {
-      // fallback regex
-      return xml.replaceAll(
-        RegExp(r'<Signature\b[^>]*>[\s\S]*?</Signature>', multiLine: true),
-        '',
+    if (match == null) {
+      throw const FormatException(
+        'No se encontró el certificado X509 en formato PEM',
       );
     }
+
+    final base64Cert = match.group(1)!.replaceAll(RegExp(r'\s+'), '');
+
+    if (base64Cert.isEmpty ||
+        !RegExp(r'^[A-Za-z0-9+/]+={0,2}$').hasMatch(base64Cert)) {
+      throw const FormatException(
+        'El certificado X509 contiene Base64 inválido',
+      );
+    }
+
+    return base64Cert;
+  }
+
+  static const String _xmlDsigNamespace = 'http://www.w3.org/2000/09/xmldsig#';
+
+  static String _stripSignature(String xml) {
+    final doc = XmlDocument.parse(xml);
+
+    void limpiar(XmlElement padre) {
+      for (final nodo in padre.children.toList()) {
+        if (nodo is! XmlElement) continue;
+
+        final esFirmaXmlDsig =
+            nodo.name.local == 'Signature' &&
+            nodo.namespaceUri == _xmlDsigNamespace;
+
+        if (esFirmaXmlDsig) {
+          nodo.remove();
+        } else {
+          limpiar(nodo);
+        }
+      }
+    }
+
+    limpiar(doc.rootElement);
+
+    return doc.toXmlString(pretty: false);
   }
 
   static String _conFechaHoraFirma(String xml, DateTime firma) {
     String dos(int n) => n.toString().padLeft(2, '0');
+
     final texto =
         '${dos(firma.day)}-${dos(firma.month)}-${firma.year} '
         '${dos(firma.hour)}:${dos(firma.minute)}:${dos(firma.second)}';
-    final limpio = xml.replaceAll(
-      RegExp(r'<FechaHoraFirma>[\s\S]*?</FechaHoraFirma>'),
-      '',
-    );
-    final cierre = RegExp(r'</([A-Za-z_][\w.-]*)>\s*$');
-    final m = cierre.firstMatch(limpio.trimRight());
-    if (m == null) return limpio;
-    final raiz = m.group(1)!;
-    final idx = limpio.lastIndexOf('</$raiz>');
-    if (idx < 0) return limpio;
-    return '${limpio.substring(0, idx)}<FechaHoraFirma>$texto</FechaHoraFirma></$raiz>';
-  }
 
-  static String _canon(String xml) {
     final doc = XmlDocument.parse(xml);
-    return _escribir(doc.rootElement);
+
+    void eliminarFecha(XmlElement padre) {
+      for (final nodo in padre.children.toList()) {
+        if (nodo is! XmlElement) continue;
+
+        if (nodo.name.local == 'FechaHoraFirma' && nodo.namespaceUri == null) {
+          nodo.remove();
+        } else {
+          eliminarFecha(nodo);
+        }
+      }
+    }
+
+    eliminarFecha(doc.rootElement);
+
+    doc.rootElement.children.add(
+      XmlElement(XmlName('FechaHoraFirma'), [], [XmlText(texto)]),
+    );
+
+    return doc.toXmlString(pretty: false);
   }
 
-  static String _esc(String s, {required bool attr}) {
-    final b = StringBuffer();
-    for (final unidad in s.runes) {
-      final ch = String.fromCharCode(unidad);
-      if (ch == '&') {
-        b.write('&amp;');
-      } else if (ch == '<') {
-        b.write('&lt;');
-      } else if (ch == '>') {
-        b.write('&gt;');
-      } else if (ch == '\r') {
-        b.write('&#xD;');
-      } else if (attr && ch == '"') {
-        b.write('&quot;');
-      } else if (attr && ch == '\t') {
-        b.write('&#x9;');
-      } else if (attr && ch == '\n') {
-        b.write('&#xA;');
-      } else {
-        b.write(ch);
-      }
-    }
-    return b.toString();
-  }
+  /// Serializa un documento XML de forma determinista para cálculo de digest
+  /// y firma (XMLDSig enveloped).
+  ///
+  /// Se declara el algoritmo oficial de C14N 1.0:
+  ///   http://www.w3.org/TR/2001/REC-xml-c14n-20010315
+  /// porque es el requerido por la especificación de firma de e-CF de la DGII.
+  ///
+  /// Esta implementación cubre el subconjunto de XML que produce FiscoGest
+  /// (documentos e-CF y el SignedInfo). No pretende ser una implementación
+  /// completa de C14N 1.0 (no procesa comentarios, PIs ni todos los casos
+  /// de namespaces heredados complejos).
+  ///
+  /// El mismo algoritmo se aplica tanto al documento como al SignedInfo
+  /// para garantizar consistencia entre DigestValue y SignatureValue.
+  static const String _c14nAlgorithm =
+      'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
 
-  static String _escribir(XmlElement e) {
-    final ns = <XmlAttribute>[];
-    final attrs = <XmlAttribute>[];
-    for (final a in e.attributes) {
-      if (a.name.local == 'xmlns' || a.name.prefix == 'xmlns') {
-        ns.add(a);
-      } else {
-        attrs.add(a);
-      }
+  /// Canonicalización XML C14N 1.0 inclusiva, compartida por
+  /// digest del documento y firma de SignedInfo.
+  static String _canon(String xml) {
+    final document = XmlDocument.parse(xml);
+    final algorithm = SignedXml.canonicalizationAlgorithms[_c14nAlgorithm];
+
+    if (algorithm == null) {
+      throw StateError('No está disponible el algoritmo XML C14N 1.0');
     }
-    ns.sort((a, b) => a.name.qualified.compareTo(b.name.qualified));
-    attrs.sort((a, b) {
-      final c = (a.name.namespaceUri ?? '').compareTo(
-        b.name.namespaceUri ?? '',
-      );
-      return c != 0 ? c : a.name.local.compareTo(b.name.local);
-    });
-    final nombre = e.name.qualified;
-    final buf = StringBuffer('<$nombre');
-    for (final a in <XmlAttribute>[...ns, ...attrs]) {
-      buf.write(' ${a.name.qualified}="${_esc(a.value, attr: true)}"');
+
+    final canonical = algorithm.process(document.rootElement);
+    if (canonical is! String) {
+      throw StateError('El canonicalizador no devolvió texto XML');
     }
-    buf.write('>');
-    for (final c in e.children) {
-      if (c is XmlElement) {
-        buf.write(_escribir(c));
-      } else if (c is XmlText && c.value.trim().isNotEmpty) {
-        buf.write(_esc(c.value, attr: false));
-      }
-    }
-    buf.write('</$nombre>');
-    return buf.toString();
+    return canonical;
   }
 
   static String _insertSignature(String xml, String signatureXml) {
-    // Insertar antes del cierre de la raíz (ECF u otra)
-    final close = RegExp(r'</([A-Za-z_][\w.-]*)>\s*$');
-    final m = close.firstMatch(xml);
-    if (m != null) {
-      final tag = m.group(1)!;
-      final idx = xml.lastIndexOf('</$tag>');
-      if (idx >= 0) {
-        return '${xml.substring(0, idx)}$signatureXml</$tag>';
-      }
+    final documento = XmlDocument.parse(xml);
+    final firma = XmlDocument.parse(signatureXml);
+
+    final raizFirma = firma.rootElement;
+
+    if (raizFirma.name.local != 'Signature' ||
+        raizFirma.namespaceUri != _xmlDsigNamespace) {
+      throw const FormatException(
+        'El nodo proporcionado no es una firma XMLDSig válida.',
+      );
     }
-    return '$xml$signatureXml';
+
+    documento.rootElement.children.add(raizFirma.copy());
+
+    return documento.toXmlString(pretty: false);
   }
 }
 

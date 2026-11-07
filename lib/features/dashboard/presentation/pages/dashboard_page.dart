@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   static const String routeName = 'dashboard';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final simple = ref.watch(modoSimplificadoProvider);
     final isMobile = AppBreakpoints.isMobile(context);
 
     // ─── Solo rediseño visual PC; en móvil se mantiene usable ───
@@ -29,7 +32,7 @@ class DashboardPage extends StatelessWidget {
               const SizedBox(height: 20),
               _buildSmallKpis(isMobile),
               const SizedBox(height: 20),
-              _buildActionCards(context, isMobile),
+              _buildActionCards(context, isMobile, simple),
               const SizedBox(height: 24),
               if (isMobile) ...[
                 _buildExcepcionesCard(),
@@ -232,7 +235,7 @@ class DashboardPage extends StatelessWidget {
   // ─────────────────────────────────────────────
   // 3 TARJETAS GRANDES (la violeta = carrusel)
   // ─────────────────────────────────────────────
-  Widget _buildActionCards(BuildContext context, bool isMobile) {
+  Widget _buildActionCards(BuildContext context, bool isMobile, bool simple) {
     final cards = [
       _ActionCardData(
         title: 'Nueva Venta',
@@ -243,10 +246,10 @@ class DashboardPage extends StatelessWidget {
       ),
       _ActionCardData(
         title: 'Nueva Compra',
-        subtitle: 'Registrar compra a proveedor',
+        subtitle: simple ? 'Compra rapida al contado' : 'Registrar compra a proveedor',
         icon: Icons.shopping_cart_rounded,
         gradient: const [Color(0xFF2563EB), Color(0xFF3B82F6)],
-        onTap: () => context.go('/compras/registrar'),
+        onTap: () => context.go(simple ? '/compras/rapida' : '/compras/registrar'),
       ),
       // ─── TARJETA VIOLETA = CARRUSEL ───
       const _ActionCardData(

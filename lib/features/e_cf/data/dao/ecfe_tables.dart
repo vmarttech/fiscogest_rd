@@ -55,6 +55,12 @@ class EcfeEventosTable extends Table {
   DateTimeColumn get creadoEn => dateTime()();
 }
 
+/// Secuencias e-NCF autorizadas por la DGII.
+///
+/// Regla comercial (H-20): solo puede existir **una secuencia activa** por
+/// `tipoEcf`. La unicidad se impone en BD con el índice parcial
+/// `idx_ecfe_secuencias_tipo_activo` (migración schema v72) y en aplicación
+/// dentro de [EcfeSecuenciaService.guardar].
 class EcfeSecuenciasTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get tipoEcf => integer()();

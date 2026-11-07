@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:xml/xml.dart' as xml;
 import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_secuencia_service.dart';
@@ -51,6 +53,7 @@ class GenerarXmlEcfe {
     bool exigirXsd = false,
   }) async {
     var codigoModificacionNota = '3';
+    String? encfFinal; // H-19.2: debe estar fuera del try para usarlo en catch
     try {
       final cfgPre = await repo.obtenerConfig();
       final preGen = await EcfePreflight.evaluar(cfgPre);
@@ -70,18 +73,25 @@ class GenerarXmlEcfe {
           ? _lineasGuardadas(doc.notaFiscalJson, doc.ventaId)
           : null;
 
-      if (doc.tipoEcf != TipoEcf.facturaCreditoFiscal &&
-          doc.tipoEcf != TipoEcf.facturaConsumo &&
-          doc.tipoEcf != TipoEcf.notaDebito &&
-          doc.tipoEcf != TipoEcf.notaCredito &&
-          doc.tipoEcf != TipoEcf.compras &&
-          doc.tipoEcf != TipoEcf.gastosMenores &&
-          doc.tipoEcf != TipoEcf.regimenesEspeciales) {
+      // Catálogo completo DGII de tipos e-CF admitidos en generación.
+      const tiposSoportados = {
+        TipoEcf.facturaCreditoFiscal, // 31
+        TipoEcf.facturaConsumo, // 32
+        TipoEcf.notaDebito, // 33
+        TipoEcf.notaCredito, // 34
+        TipoEcf.compras, // 41
+        TipoEcf.gastosMenores, // 43
+        TipoEcf.regimenesEspeciales, // 44
+        TipoEcf.gubernamental, // 45
+        TipoEcf.exportacion, // 46
+        TipoEcf.pagosExterior, // 47
+      };
+      if (!tiposSoportados.contains(doc.tipoEcf)) {
         return GenerarXmlResultado(
           ok: false,
           errores: [
-            'Tipo ${doc.tipoEcf.codigo} aún no soportado en generación XML '
-                '(soportados: 31, 32, 33, 34)',
+            'Tipo ${doc.tipoEcf.codigo} no soportado en generación XML '
+                '(soportados: 31, 32, 33, 34, 41, 43, 44, 45, 46, 47)',
           ],
         );
       }
@@ -156,8 +166,9 @@ class GenerarXmlEcfe {
       // e-NCF: reutilizar si ya es formal. Si no, se asignará SOLO después de
       // pasar validación XSD (evita quemar secuencia por error de estructura).
       final yaTieneFormal = EcfeSecuenciaService.esEncfFormal(doc.encf);
-      final String? encfAsignado =
-          yaTieneFormal ? doc.encf!.trim().toUpperCase() : null;
+      final String? encfAsignado = yaTieneFormal
+          ? doc.encf!.trim().toUpperCase()
+          : null;
       final fmt = DateFormat('dd-MM-yyyy');
       final fechaEmision = fmt.format(
         (doc.tipoEcf == TipoEcf.notaCredito ||
@@ -313,7 +324,8 @@ class GenerarXmlEcfe {
       // En certificación/producción el XSD oficial es obligatorio.
       // En pre-certificación se respeta el flag del caller (desarrollo).
       final cfgAmb = await repo.obtenerConfig();
-      final exigirXsdEfectivo = exigirXsd ||
+      final exigirXsdEfectivo =
+          exigirXsd ||
           cfgAmb.ambiente.name == 'certificacion' ||
           cfgAmb.ambiente.name == 'produccion';
       final val = await EcfeXsdValidatorImpl(
@@ -345,7 +357,6 @@ class GenerarXmlEcfe {
       }
 
       // XSD OK → ahora sí consumimos la secuencia (si aún no tenía formal)
-      late final String encfFinal;
       if (encfAsignado == null) {
         final seq = await secuencias.siguiente(doc.tipoEcf);
         encfFinal = seq.encf;
@@ -395,6 +406,36 @@ class GenerarXmlEcfe {
         encfFinal = encfAsignado;
       }
 
+      // El XML definitivo puede diferir del provisional (e-NCF real y
+      // FechaVencimientoSecuencia). Se revalida antes de marcarlo como listo.
+      final valFinal = await EcfeXsdValidatorImpl(
+        rutaXsd: rutaXsd,
+        exigirXsd: exigirXsdEfectivo,
+      ).validar(xml);
+      if (!valFinal.ok) {
+        await repo.guardarXml(
+          id: documentoId,
+          xmlSinFirma: xml,
+          encf: encfFinal,
+          estado: EstadoEcfInterno.validacionFallida,
+          ultimoError: valFinal.errores.join(' · '),
+        );
+        await repo.registrarEvento(
+          documentoId: documentoId,
+          paso: 'validar_estructura',
+          ok: false,
+          detalle:
+              'Validación del XML definitivo falló (secuencia ya consumida): '
+              '${valFinal.errores.join(' · ')}',
+        );
+        return GenerarXmlResultado(
+          ok: false,
+          xml: xml,
+          encf: encfFinal,
+          errores: valFinal.errores,
+        );
+      }
+
       await repo.guardarXml(
         id: documentoId,
         xmlSinFirma: xml,
@@ -406,90 +447,163 @@ class GenerarXmlEcfe {
         documentoId: documentoId,
         paso: 'generar_xml',
         ok: true,
-        detalle: 'XML generado $encfAsignado',
+        detalle: 'XML generado $encfFinal',
       );
       await repo.registrarEvento(
         documentoId: documentoId,
         paso: 'validar_estructura',
         ok: true,
-        detalle: 'Validación estructural OK',
+        detalle: 'Validación estructural OK (XML definitivo)',
       );
-
       return GenerarXmlResultado(ok: true, xml: xml, encf: encfFinal);
     } catch (e) {
+      // Ajuste comercial H-19.2: si ya se consumió un e-NCF, lo asociamos
+      // al documento aunque haya fallado la generación/validación/persistencia.
+      // Evita números fiscales "huérfanos".
       try {
-        await repo.actualizarEstado(
-          id: documentoId,
-          estado: EstadoEcfInterno.errorTecnico,
-          ultimoError: '$e',
-        );
-        await repo.registrarEvento(
-          documentoId: documentoId,
-          paso: 'generar_xml',
-          ok: false,
-          detalle: '$e',
-        );
+        final reservado = encfFinal;
+        if (reservado != null && reservado.isNotEmpty) {
+          await repo.guardarXml(
+            id: documentoId,
+            xmlSinFirma: '',
+            encf: reservado,
+            estado: EstadoEcfInterno.errorTecnico,
+            ultimoError: '$e',
+          );
+          await repo.registrarEvento(
+            documentoId: documentoId,
+            paso: 'generar_xml',
+            ok: false,
+            detalle: 'Error tras reservar $reservado: $e',
+          );
+        } else {
+          await repo.actualizarEstado(
+            id: documentoId,
+            estado: EstadoEcfInterno.errorTecnico,
+            ultimoError: '$e',
+          );
+          await repo.registrarEvento(
+            documentoId: documentoId,
+            paso: 'generar_xml',
+            ok: false,
+            detalle: '$e',
+          );
+        }
       } catch (_) {}
       return GenerarXmlResultado(ok: false, errores: ['$e']);
     }
   }
 
+  /// Recupera líneas de nota fiscal desde JSON persistido.
+  ///
+  /// Conserva cantidades fraccionarias (no se redondea a entero).
+  /// Usa jsonDecode en lugar de regex para tolerar estructuras válidas.
   List<DetalleVenta>? _lineasGuardadas(String? json, int? ventaId) {
-    if (json == null || !json.contains('"lineas"')) return null;
-    final cuerpo = RegExp(r'"lineas"\s*:\s*\[(.*)\]').firstMatch(json);
-    if (cuerpo == null) return null;
-    final out = <DetalleVenta>[];
-    for (final objeto in RegExp(r'\{[^{}]*\}').allMatches(cuerpo.group(1)!)) {
-      final texto = objeto.group(0)!;
-      String textoDe(String campo) {
-        final hallado = RegExp('"$campo"\\s*:\\s*"([^"]*)"').firstMatch(texto);
-        return hallado?.group(1) ?? '';
-      }
+    if (json == null || json.trim().isEmpty) return null;
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is! Map) return null;
+      final rawLineas = decoded['lineas'];
+      if (rawLineas is! List || rawLineas.isEmpty) return null;
 
-      double numeroDe(String campo) {
-        final hallado = RegExp(
-          '"$campo"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)',
-        ).firstMatch(texto);
-        return double.tryParse(hallado?.group(1) ?? '') ?? 0;
-      }
+      final out = <DetalleVenta>[];
+      for (final item in rawLineas) {
+        if (item is! Map) continue;
+        final m = item.cast<String, dynamic>();
 
-      final nombre = textoDe('nombre');
-      final cantNum = numeroDe('cantidad');
-      final precioNum = numeroDe('precio');
-      final montoNum = numeroDe('monto');
-      final tasaNum = numeroDe('tasa');
-      out.add(
-        DetalleVenta(
-          productoId: 0,
-          cantidad: cantNum.round(),
-          precioUnitario: precioNum,
-          subtotal: montoNum,
-          nombreProducto: nombre,
-          subtotalLinea: montoNum,
-          tasaImpuesto: tasaNum,
-        ),
-      );
+        double numOf(String k) {
+          final v = m[k];
+          if (v is num) return v.toDouble();
+          if (v is String) return double.tryParse(v.trim()) ?? 0;
+          return 0;
+        }
+
+        final nombre = (m['nombre'] ?? '').toString();
+        final cantNum = numOf('cantidad');
+        final precioNum = numOf('precio');
+        final montoNum = numOf('monto');
+        final tasaNum = numOf('tasa');
+
+        if (cantNum <= 0 && montoNum == 0) continue;
+
+        out.add(
+          DetalleVenta(
+            productoId: 0,
+            cantidad: cantNum,
+            precioUnitario: precioNum,
+            subtotal: montoNum,
+            nombreProducto: nombre,
+            subtotalLinea: montoNum,
+            tasaImpuesto: tasaNum,
+          ),
+        );
+      }
+      return out.isEmpty ? null : out;
+    } catch (_) {
+      return null;
     }
-    return out.isEmpty ? null : out;
   }
 
   double? _montoNotaFiscal(String? json) {
     if (json == null || json.trim().isEmpty) return null;
-    final coincidencia = RegExp(
-      r'"montoTotal"\s*:\s*(-?\d+(?:\.\d+)?)',
-    ).firstMatch(json);
-    if (coincidencia == null) return null;
-    return double.tryParse(coincidencia.group(1)!);
+
+    try {
+      final decoded = jsonDecode(json);
+
+      dynamic buscar(dynamic valor) {
+        if (valor is Map) {
+          if (valor.containsKey('montoTotal')) {
+            return valor['montoTotal'];
+          }
+
+          for (final hijo in valor.values) {
+            final resultado = buscar(hijo);
+            if (resultado != null) return resultado;
+          }
+        }
+
+        if (valor is List) {
+          for (final hijo in valor) {
+            final resultado = buscar(hijo);
+            if (resultado != null) return resultado;
+          }
+        }
+
+        return null;
+      }
+
+      final valor = buscar(decoded);
+
+      if (valor is num) return valor.toDouble();
+
+      if (valor is String) {
+        return double.tryParse(valor.trim());
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
-  double? _montoTotalXml(String? xml) {
-    if (xml == null || xml.trim().isEmpty) return null;
-    final coincidencias = RegExp(
-      r'<MontoTotal>([^<]+)</MontoTotal>',
-    ).allMatches(xml);
-    if (coincidencias.isEmpty) return null;
-    return double.tryParse(coincidencias.last.group(1)!.trim());
+  double? _montoTotalXml(String? xmlContenido) {
+    if (xmlContenido == null || xmlContenido.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      final documento = xml.XmlDocument.parse(xmlContenido);
+
+      final importes = documento.findAllElements('MontoTotal').toList();
+
+      if (importes.isEmpty) return null;
+
+      return double.tryParse(importes.last.innerText.trim());
+    } catch (_) {
+      return null;
+    }
   }
+
   String _razonModificacion(String codigo) {
     switch (codigo) {
       case '1':
@@ -506,5 +620,4 @@ class GenerarXmlEcfe {
         return 'Ajuste del comprobante';
     }
   }
-
 }

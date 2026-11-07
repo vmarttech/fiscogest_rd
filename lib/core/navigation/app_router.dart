@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:fiscogest_rd/core/legal/legal_page.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_admin_pedidos_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_activar_page.dart';
@@ -144,6 +145,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       if (sesion == null) return '/login';
       // Solo dueño FiscoGest puede administrar pedidos de pago
+      // Modo simplificado: bloquear modulos full; permitir SOLO /compras/rapida.
+      try {
+        final cfg = await ref
+            .read(configuracionControllerProvider.future)
+            .timeout(const Duration(seconds: 2));
+        if (cfg?.modoSimplificado == true) {
+          final p = path;
+          final bloqueado = (p.startsWith('/compras') &&
+                  !p.startsWith('/compras/rapida')) ||
+              p.startsWith('/reports') ||
+              p.startsWith('/reportes') ||
+              p.startsWith('/usuarios');
+          if (bloqueado) return '/';
+        }
+      } catch (_) {}
+
       if ((path == '/licencia/admin' || path.startsWith('/licencia/admin/')) &&
           !esDuenoPlataforma(sesion.username)) {
         return '/licencia';

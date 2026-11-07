@@ -1,4 +1,5 @@
 import 'package:fiscogest_rd/features/e_cf/data/gateways/dgii_consulta_gateway_impl.dart';
+import 'package:fiscogest_rd/features/e_cf/application/consultar_ecfe.dart';
 import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/estado_ecf_interno.dart';
 
@@ -21,23 +22,8 @@ class ConsultarEstadoEcfe {
   ConsultarEstadoEcfe({required this.repo});
   final EcfeRepository repo;
 
-  static EstadoEcfInterno mapearEstadoDgii(String? estado) {
-    final e = (estado ?? '').trim().toLowerCase();
-    if (e.contains('aceptado') && e.contains('obs')) {
-      return EstadoEcfInterno.aceptadoObservacion;
-    }
-    if (e.contains('aceptado') || e.contains('aprobado')) {
-      return EstadoEcfInterno.aceptado;
-    }
-    if (e.contains('rechaz')) {
-      return EstadoEcfInterno.rechazado;
-    }
-    if (e.contains('proceso') ||
-        e.contains('pendiente') ||
-        e.contains('recibido')) {
-      return EstadoEcfInterno.enProceso;
-    }
-    return EstadoEcfInterno.enProceso;
+  static EstadoEcfInterno? mapearEstadoDgii(String? estado, [String? codigo]) {
+    return ConsultarEcfe.mapearEstadoDgii(estado, codigo);
   }
 
   Future<ConsultarEstadoEcfeResultado> call({required int documentoId}) async {
@@ -83,7 +69,41 @@ class ConsultarEstadoEcfe {
         );
       }
 
-      final interno = mapearEstadoDgii(res.estadoDgii);
+      final interno = mapearEstadoDgii(res.estadoDgii, res.codigo);
+      // Una respuesta desconocida no debe modificar el estado persistido.
+      if (interno == null) {
+        final detalle =
+            (res.estadoDgii == null || res.estadoDgii!.trim().isEmpty)
+            ? 'DGII no devolvió un estado fiscal reconocible'
+            : 'Estado DGII no reconocido: ${res.estadoDgii}';
+
+        await repo.registrarEvento(
+          documentoId: documentoId,
+          paso: 'consultar_resultado',
+          ok: false,
+          detalle: detalle,
+        );
+
+        return ConsultarEstadoEcfeResultado(
+          ok: false,
+          estadoInterno: doc.estado,
+          estadoDgii: res.estadoDgii,
+          mensaje: res.mensaje,
+          errores: [detalle],
+        );
+      }
+
+      // Una respuesta transitoria no puede degradar un estado definitivo.
+      final estadoDefinitivo =
+          doc.estado == EstadoEcfInterno.aceptado ||
+          doc.estado == EstadoEcfInterno.aceptadoObservacion ||
+          doc.estado == EstadoEcfInterno.rechazado;
+
+      final estadoAguardar =
+          estadoDefinitivo && interno == EstadoEcfInterno.enProceso
+          ? doc.estado
+          : interno;
+
       final errorAnterior = doc.ultimoError ?? '';
       final esEstadoTerminalConfirmado =
           interno == EstadoEcfInterno.aceptado ||
@@ -95,14 +115,16 @@ class ConsultarEstadoEcfe {
 
       await repo.actualizarEstado(
         id: documentoId,
-        estado: interno,
+        estado: estadoAguardar,
         trackId: track,
         codigoRespuesta: res.codigo,
         mensajeDgii: res.mensaje ?? res.estadoDgii,
         ultimoError: conservaIncertidumbre
             ? errorAnterior
-            : interno == EstadoEcfInterno.rechazado
-            ? (res.mensaje ?? res.estadoDgii)
+            : estadoAguardar == EstadoEcfInterno.rechazado
+            ? (interno == EstadoEcfInterno.rechazado
+                  ? (res.mensaje ?? res.estadoDgii)
+                  : errorAnterior)
             : null,
       );
       await repo.registrarEvento(
@@ -114,7 +136,7 @@ class ConsultarEstadoEcfe {
 
       return ConsultarEstadoEcfeResultado(
         ok: true,
-        estadoInterno: interno,
+        estadoInterno: estadoAguardar,
         estadoDgii: res.estadoDgii,
         mensaje: res.mensaje,
       );

@@ -1476,7 +1476,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final subLinea = double.parse((precio * cantidad).toStringAsFixed(2));
     final nuevoDet = DetalleVenta(
       productoId: producto.id!,
-      cantidad: cantidad,
+      cantidad: cantidad.toDouble(),
       precioUnitario: precio,
       subtotal: subLinea,
       subtotalLinea: subLinea,

@@ -54,15 +54,14 @@ class EcfePreflight {
           rncEmisor: cfg.rncEmisor,
         );
         if (subjectOk == false) {
-          // false = se pudo leer y NO coincide; null = no se pudo verificar
           errores.add(
-            'El certificado .p12 no parece corresponder al RNC emisor configurado. '
-            'DGII exige que el titular del certificado coincida con el emisor.',
+            'El certificado no coincide con el RNC emisor. '
+            'El atributo serialNumber debe coincidir exactamente.',
           );
         } else if (subjectOk == null) {
-          avisos.add(
-            'No se pudo verificar el titular del certificado (OpenSSL). '
-            'Revise manualmente que el .p12 sea del RNC emisor.',
+          errores.add(
+            'No se pudo verificar el titular del certificado con OpenSSL. '
+            'Operación bloqueada por seguridad.',
           );
         }
       }
@@ -113,11 +112,16 @@ class EcfePreflight {
           errores.add('Ruta XSD inválida: $xsd');
         }
       }
-      final xmllint = await _which('xmllint');
-      if (xmllint == null) {
-        errores.add(
-          'xmllint no está en el PATH (libxml2). Obligatorio para validar XSD en cert/prod.',
-        );
+      // xmllint solo es exigible en escritorio. En Android/iOS no está
+      // disponible de forma estándar y el validador usa la validación
+      // estructural interna + XSD embebido cuando es posible.
+      if (!Platform.isAndroid && !Platform.isIOS) {
+        final xmllint = await _which('xmllint');
+        if (xmllint == null) {
+          errores.add(
+            'xmllint no está en el PATH (libxml2). Obligatorio para validar XSD en cert/prod en escritorio.',
+          );
+        }
       }
     } else if (xsd.isEmpty) {
       avisos.add('XSD no configurado: solo validación estructural interna.');
@@ -159,7 +163,8 @@ class EcfePreflight {
     required String rncEmisor,
   }) async {
     final rnc = rncEmisor.replaceAll(RegExp(r'\D'), '');
-    if (rnc.isEmpty) return null;
+    if (rnc.length != 9 && rnc.length != 11) return false;
+
     final openssl = await _which('openssl');
     if (openssl == null) return null;
     try {
@@ -185,16 +190,36 @@ class EcfePreflight {
         if (r.exitCode != 0) return null;
         final sub = await Process.run(
           openssl,
-          ['x509', '-in', '${tmp.path}/c.pem', '-noout', '-subject'],
+          [
+            'x509',
+            '-in',
+            '${tmp.path}/c.pem',
+            '-noout',
+            '-subject',
+            '-nameopt',
+            'multiline',
+          ],
           runInShell: false,
         );
         if (sub.exitCode != 0) return null;
-        final subject = '${sub.stdout}'.replaceAll(RegExp(r'\s+'), ' ');
-        final digits = subject.replaceAll(RegExp(r'\D'), '');
-        // Coincidencia si el RNC aparece en el subject (serial/CN/serialNumber).
-        if (digits.contains(rnc)) return true;
-        if (subject.contains(rnc)) return true;
-        return false;
+
+        final subject = '${sub.stdout}';
+
+        // Solo se acepta el atributo serialNumber.
+        // Nunca buscar el RNC en el subject completo ni en el CN.
+        final serialMatch = RegExp(
+          r'^\s*serialNumber\s*=\s*(.*?)\s*$',
+          multiLine: true,
+          caseSensitive: false,
+        ).firstMatch(subject);
+
+        if (serialMatch == null) return false;
+
+        final serial = serialMatch
+            .group(1)!
+            .replaceAll(RegExp(r'\D'), '');
+
+        return serial.isNotEmpty && serial == rnc;
       } finally {
         try {
           await tmp.delete(recursive: true);

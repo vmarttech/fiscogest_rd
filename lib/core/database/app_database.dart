@@ -127,16 +127,23 @@ class AppDatabase extends _$AppDatabase {
 
   /// Constructor para pruebas con una conexión SQLite aislada.
   /// No modifica el singleton utilizado por la aplicación.
-  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
+  AppDatabase.forTesting(super.executor);
 
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 71;
+  int get schemaVersion => 73;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
+
+      await m.database.customStatement('''
+        CREATE UNIQUE INDEX IF NOT EXISTS
+        idx_ecfe_secuencias_tipo_activo
+        ON ecfe_secuencias_table (tipo_ecf)
+        WHERE activo = 1;
+      ''');
       await m.database.customStatement('''
         CREATE TABLE IF NOT EXISTS promociones_comerciales (
           id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -201,6 +208,34 @@ class AppDatabase extends _$AppDatabase {
             PRIMARY KEY (promocion_id, categoria_id)
           );
         ''');
+      }
+
+      // H-20: Una sola secuencia ACTIVA por tipo e-CF (índice único parcial).
+      // Escalable: la BD impide el duplicado aunque falle la lógica de aplicación.
+      // H-23: puede ejecutarse antes de createTable(ecfe*) en BD muy antiguas.
+      if (from < 72) {
+        try {
+          // 1) Limpiar posibles duplicados activos (conserva el de menor id).
+          await m.database.customStatement('''
+            UPDATE ecfe_secuencias_table
+            SET activo = 0
+            WHERE id NOT IN (
+              SELECT MIN(id)
+              FROM ecfe_secuencias_table
+              WHERE activo = 1
+              GROUP BY tipo_ecf
+            )
+            AND activo = 1;
+          ''');
+          // 2) Índice único parcial: solo una fila con activo=1 por tipo_ecf.
+          await m.database.customStatement('''
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_ecfe_secuencias_tipo_activo
+            ON ecfe_secuencias_table (tipo_ecf)
+            WHERE activo = 1;
+          ''');
+        } catch (_) {
+          // Tabla aún no creada en este salto de versión; se creará en bloques < 50/48.
+        }
       }
 
       if (from < 69) {
@@ -337,16 +372,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         }
       }
 
-      if (from < 62) {
-        await customStatement(
-          'ALTER TABLE ecfe_documentos_table ADD COLUMN rnc_receptor TEXT NULL;',
-        );
-      }
-      if (from < 63) {
-        await customStatement(
-          'ALTER TABLE ecfe_documentos_table ADD COLUMN nota_fiscal_json TEXT NULL;',
-        );
-      }
+      // H-23: ALTER solo si la tabla ya existe (instalaciones previas a e-CF).
       if (from < 60) {
         await m.createTable(impuestosTable);
       }
@@ -403,20 +429,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         await m.createTable(licenciasTable);
         await m.createTable(pedidosLicenciaTable);
       }
-      if (from < 54) {
-        await customStatement(
-          'ALTER TABLE ecfe_documentos_table ADD COLUMN encf_referencia TEXT NULL;',
-        );
-        await customStatement(
-          'ALTER TABLE ecfe_documentos_table ADD COLUMN motivo_anulacion TEXT NULL;',
-        );
-      }
 
-      if (from < 53) {
-        await customStatement(
-          'ALTER TABLE ecfe_documentos_table ADD COLUMN codigo_seguridad TEXT NULL;',
-        );
-      }
 
       if (from < 52) {
         await customStatement(
@@ -492,17 +505,76 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         );
       }
 
-      if (from < 48) {
-        await m.createTable(ecfeSecuenciasTable);
+      // V73: garantizar unicidad de secuencias e-CF.
+      if (from < 73) {
+        await m.database.customStatement('''
+          UPDATE ecfe_secuencias_table
+          SET activo = 0
+          WHERE activo = 1
+          AND id NOT IN (
+            SELECT MIN(id)
+            FROM ecfe_secuencias_table
+            WHERE activo = 1
+            GROUP BY tipo_ecf
+          );
+        ''');
+
+        await m.database.customStatement('''
+          CREATE UNIQUE INDEX IF NOT EXISTS
+          idx_ecfe_secuencias_tipo_activo
+          ON ecfe_secuencias_table (tipo_ecf)
+          WHERE activo = 1;
+        ''');
       }
-      if (from < 47) {
-        await m.createTable(ecfeConfigTable);
-        await m.createTable(ecfeDocumentosTable);
-        await m.createTable(ecfeEventosTable);
-      }
+
       if (from < 46) {
         await m.createTable(gastosTable);
       }
+
+      // H-23: asegurar columnas e-CF después de crear las tablas.
+      final columnasEcfe = await customSelect(
+        'PRAGMA table_info(ecfe_documentos_table)',
+      ).get();
+
+      if (columnasEcfe.isEmpty) {
+        throw StateError(
+          'H-23: ecfe_documentos_table no existe después de su creación.',
+        );
+      }
+
+      final nombresColumnasEcfe = columnasEcfe
+          .map((fila) => fila.read<String>('name'))
+          .toSet();
+
+      Future<void> asegurarColumnaEcfe(
+        String nombre,
+        String tipo,
+      ) async {
+        if (!nombresColumnasEcfe.contains(nombre)) {
+          await customStatement(
+            'ALTER TABLE ecfe_documentos_table ADD COLUMN $nombre $tipo;',
+          );
+          nombresColumnasEcfe.add(nombre);
+        }
+      }
+
+      if (from < 62) {
+        await asegurarColumnaEcfe('rnc_receptor', 'TEXT NULL');
+      }
+
+      if (from < 63) {
+        await asegurarColumnaEcfe('nota_fiscal_json', 'TEXT NULL');
+      }
+
+      if (from < 54) {
+        await asegurarColumnaEcfe('encf_referencia', 'TEXT NULL');
+        await asegurarColumnaEcfe('motivo_anulacion', 'TEXT NULL');
+      }
+
+      if (from < 53) {
+        await asegurarColumnaEcfe('codigo_seguridad', 'TEXT NULL');
+      }
+
       if (from < 45) {
         await m.database.customStatement(_crearTablaBitacora);
         await m.database.customStatement(_crearColaSincronizacion);

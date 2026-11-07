@@ -141,7 +141,7 @@ bool _cubreTodaLaFactura(Venta venta, Map<int, double> cantidades) {
 DetalleVenta _detalleDevuelto(DetalleVenta d, double q) {
   final factor = d.cantidad.toDouble() == 0 ? 0.0 : q / d.cantidad.toDouble();
   final sub = (d.subtotalLinea ?? d.subtotal) * factor;
-  return d.copyWith(cantidad: q.round(), subtotal: sub, subtotalLinea: sub);
+  return d.copyWith(cantidad: q, subtotal: sub, subtotalLinea: sub);
 }
 
 Venta _ventaDevolucion(Venta venta, Map<int, double> cantidades) {

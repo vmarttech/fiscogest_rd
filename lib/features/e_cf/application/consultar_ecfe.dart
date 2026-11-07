@@ -117,6 +117,17 @@ class ConsultarEcfe {
         );
       }
 
+      // Una respuesta transitoria no puede degradar un estado definitivo.
+      final estadoDefinitivo =
+          doc.estado == EstadoEcfInterno.aceptado ||
+          doc.estado == EstadoEcfInterno.aceptadoObservacion ||
+          doc.estado == EstadoEcfInterno.rechazado;
+
+      final estadoAguardar =
+          estadoDefinitivo && interno == EstadoEcfInterno.enProceso
+          ? doc.estado
+          : interno;
+
       final errorAnterior = doc.ultimoError ?? '';
       final esEstadoTerminalConfirmado =
           interno == EstadoEcfInterno.aceptado ||
@@ -128,13 +139,15 @@ class ConsultarEcfe {
 
       await repo.actualizarEstado(
         id: documentoId,
-        estado: interno,
+        estado: estadoAguardar,
         codigoRespuesta: res.codigo,
         mensajeDgii: res.mensaje ?? res.estadoDgii,
         ultimoError: conservaIncertidumbre
             ? errorAnterior
-            : interno == EstadoEcfInterno.rechazado
-            ? (res.mensaje ?? res.estadoDgii)
+            : estadoAguardar == EstadoEcfInterno.rechazado
+            ? (interno == EstadoEcfInterno.rechazado
+                  ? (res.mensaje ?? res.estadoDgii)
+                  : errorAnterior)
             : null,
       );
       // Si la DGII envía código de seguridad en el JSON, persistirlo

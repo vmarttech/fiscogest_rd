@@ -224,7 +224,7 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     quitarProducto(indice);
   }
 
-  void cambiarCantidad(int indice, int nuevaCantidad) {
+  void cambiarCantidad(int indice, double nuevaCantidad) {
     final lista = List<DetalleVenta>.from(state.detalles);
     if (indice >= 0 && indice < lista.length && nuevaCantidad > 0) {
       final linea = lista[indice];

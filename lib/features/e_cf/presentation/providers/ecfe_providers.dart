@@ -119,10 +119,11 @@ final ecfeSpecPorIdProvider =
   return ref.watch(ecfeRepositoryProvider).obtenerSpecPorId(id);
 });
 
+/// Lista secuencias e-NCF configuradas.
+/// H-21: no invoca asegurarTiposBase(); no se crean rangos ficticios al abrir la vista.
 final ecfeSecuenciasProvider =
     FutureProvider.autoDispose<List<EcfeSecuenciaInfo>>((ref) async {
   final svc = ref.watch(ecfeSecuenciaServiceProvider);
-  await svc.asegurarTiposBase();
   return svc.listar();
 });
 

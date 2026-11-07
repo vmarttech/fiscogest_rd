@@ -272,7 +272,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
       if (context.canPop()) {
         context.pop();
       } else {
-        context.goNamed('lista-compras');
+        context.go('/');
       }
     } catch (e) {
       if (mounted) {

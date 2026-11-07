@@ -329,6 +329,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  expressions:
+    dependency: transitive
+    description:
+      name: expressions
+      sha256: f3b0e99563a9a1bde1138e728eb722f292cc7d2aec55d28136c49b1a370306c5
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.5+3"
   fake_async:
     dependency: transitive
     description:
@@ -861,6 +869,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  ninja:
+    dependency: transitive
+    description:
+      name: ninja
+      sha256: "5c99d34740edab78cc58032fea81f2bb017efcd8211a8f82a08c6d4604f30b11"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.8"
+  ninja_asn1:
+    dependency: transitive
+    description:
+      name: ninja_asn1
+      sha256: b0f04877243fda51c475ec2bcaadb55a92759baee9f02888124c60775760ccf7
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  ninja_hex:
+    dependency: transitive
+    description:
+      name: ninja_hex
+      sha256: a84dba8810aacb8dbecfe4791db5aecc472e29c7a1894d12bccbb981b2be2969
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
+  ninja_pem:
+    dependency: transitive
+    description:
+      name: ninja_pem
+      sha256: "1db06bc389109efec00c2ad4e19d3e5151ae3cb4a5ac03d19b6e1e5ff2fa8db7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
+  ninja_prime:
+    dependency: transitive
+    description:
+      name: ninja_prime
+      sha256: "47074594d59518c665c50ecca3e0b5baa411bea1d238a3c93c83fbde90c0c3ad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   objective_c:
     dependency: transitive
     description:
@@ -1109,6 +1157,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.2"
   recase:
     dependency: transitive
     description:
@@ -1157,6 +1213,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.4"
+  rsa_pkcs:
+    dependency: transitive
+    description:
+      name: rsa_pkcs
+      sha256: "6e1e03563d2cbd9758d8a562f738b759763d464fd65d32da132153230a0c0395"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      sha256: "5c3004a4a8dbb94bd4bf5412a4def4acdaa12e12f269737a5751369e12d1a962"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.28.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -1546,6 +1618,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.6.1"
+  xml_crypto:
+    dependency: "direct main"
+    description:
+      name: xml_crypto
+      sha256: b44d7eb5f55cad9e83059ae135d362ae14967fa7e97a717853d5c2349f429a9c
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
+  xpath_selector:
+    dependency: transitive
+    description:
+      name: xpath_selector
+      sha256: "6d8295565a34a6e2821a0721592e584c70421e52a0f54955e0c8e41963db7c90"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
+  xpath_selector_xml_parser:
+    dependency: transitive
+    description:
+      name: xpath_selector_xml_parser
+      sha256: "51ae8df88c31d033745de301f327276e1f75a0ae11c95e7b8f725c08f7dff8bb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   yaml:
     dependency: transitive
     description:

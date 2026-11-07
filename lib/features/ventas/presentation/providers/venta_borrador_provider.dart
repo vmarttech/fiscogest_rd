@@ -655,7 +655,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
         final productoId = pid is int ? pid : int.tryParse('$pid') ?? 0;
         return DetalleVenta(
           productoId: productoId,
-          cantidad: cant.round().clamp(1, 999999),
+          cantidad: cant <= 0 ? 1.0 : cant,
           precioUnitario: precio,
           subtotal: sub,
           nombreProducto: m['productoNombre'] as String?,

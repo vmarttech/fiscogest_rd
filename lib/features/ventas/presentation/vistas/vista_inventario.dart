@@ -67,13 +67,13 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
   }
 
   void _seleccionarProducto(Producto producto) {
-    const int cantidad = 1;
+    const double cantidad = 1;
     final double precioUnitario = producto.precioVenta;
     final double subtotal = cantidad * precioUnitario;
     final DetalleVenta linea = DetalleVenta(
       productoId: producto.id ?? 0,
       nombreProducto: producto.nombre,
-      cantidad: cantidad,
+      cantidad: cantidad.toDouble(),
       precioUnitario: precioUnitario,
       subtotal: subtotal,
       subtotalLinea: subtotal,

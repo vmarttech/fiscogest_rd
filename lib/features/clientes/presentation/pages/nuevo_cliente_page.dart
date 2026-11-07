@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class NuevoClientePage extends ConsumerStatefulWidget {
   const NuevoClientePage({super.key, this.cliente});
@@ -81,11 +82,11 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
   void _guardar() {
     if (!_formKey.currentState!.validate()) return;
 
-    final ingreso = double.tryParse(
-          _ingresoController.text.trim().replaceAll(',', '.'),
-        ) ??
+    final ingreso =
+        double.tryParse(_ingresoController.text.trim().replaceAll(',', '.')) ??
         0.0;
-    var limite = double.tryParse(
+    var limite =
+        double.tryParse(
           _limiteCuotaController.text.trim().replaceAll(',', '.'),
         ) ??
         0.0;
@@ -157,6 +158,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
   @override
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
+    final simple = ref.watch(modoSimplificadoProvider);
     final accionGuardar = SizedBox(
       width: mobile ? double.infinity : 240,
       height: 48,
@@ -278,14 +280,16 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                 ),
                                 const SizedBox(height: 12),
                                 if (mobile) ...[
-                                  TextFormField(
-                                    controller: _rncCedulaController,
-                                    decoration: _deco(
-                                      'RNC o cédula',
-                                      hint: '00112345678',
+                                  if (!simple) ...[
+                                    TextFormField(
+                                      controller: _rncCedulaController,
+                                      decoration: _deco(
+                                        'RNC o cédula',
+                                        hint: '00112345678',
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 12),
+                                    const SizedBox(height: 12),
+                                  ],
                                   TextFormField(
                                     controller: _telefonoController,
                                     keyboardType: TextInputType.phone,
@@ -310,16 +314,18 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                 ] else ...[
                                   Row(
                                     children: [
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: _rncCedulaController,
-                                          decoration: _deco(
-                                            'RNC o cédula',
-                                            hint: '00112345678',
+                                      if (!simple) ...[
+                                        Expanded(
+                                          child: TextFormField(
+                                            controller: _rncCedulaController,
+                                            decoration: _deco(
+                                              'RNC o cédula',
+                                              hint: '00112345678',
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
+                                        const SizedBox(width: 12),
+                                      ],
                                       Expanded(
                                         child: TextFormField(
                                           controller: _telefonoController,
@@ -361,71 +367,80 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          _SeccionCard(
-                            titulo: 'Crédito y capacidad de pago',
-                            icon: Icons.account_balance_wallet_outlined,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                TextFormField(
-                                  controller: _ingresoController,
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                    decimal: true,
+                          if (!simple) ...[
+                            const SizedBox(height: 12),
+                            _SeccionCard(
+                              titulo: 'Crédito y capacidad de pago',
+                              icon: Icons.account_balance_wallet_outlined,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TextFormField(
+                                    controller: _ingresoController,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    decoration: _deco(
+                                      'Ingreso mensual demostrado',
+                                      hint: '10000.00',
+                                    ),
+                                    onChanged: (v) {
+                                      final ing =
+                                          double.tryParse(
+                                            v.trim().replaceAll(',', '.'),
+                                          ) ??
+                                          0;
+                                      // Autocompleta límite solo si el campo límite está vacío
+                                      if (_limiteCuotaController.text
+                                              .trim()
+                                              .isEmpty &&
+                                          ing > 0) {
+                                        _limiteCuotaController.text =
+                                            (ing * 0.30).toStringAsFixed(2);
+                                      }
+                                    },
                                   ),
-                                  decoration: _deco(
-                                    'Ingreso mensual demostrado',
-                                    hint: '10000.00',
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _limiteCuotaController,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    decoration: _deco(
+                                      'Límite de cuota mensual',
+                                      hint: '3000.00',
+                                    ),
                                   ),
-                                  onChanged: (v) {
-                                    final ing = double.tryParse(
-                                          v.trim().replaceAll(',', '.'),
-                                        ) ??
-                                        0;
-                                    // Autocompleta límite solo si el campo límite está vacío
-                                    if (_limiteCuotaController.text.trim().isEmpty &&
-                                        ing > 0) {
-                                      _limiteCuotaController.text =
-                                          (ing * 0.30).toStringAsFixed(2);
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 12),
-                                TextFormField(
-                                  controller: _limiteCuotaController,
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                    decimal: true,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Sugerido: 30% del ingreso. El depto. de crédito puede subir o bajar este tope. '
+                                    'No se aprueban planes cuya cuota mensuales lo exceda.',
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 11,
+                                    ),
                                   ),
-                                  decoration: _deco(
-                                    'Límite de cuota mensual',
-                                    hint: '3000.00',
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Sugerido: 30% del ingreso. El depto. de crédito puede subir o bajar este tope. '
-                                  'No se aprueban planes cuya cuota mensuales lo exceda.',
-                                  style: AppTypography.bodySmall.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _SeccionCard(
-                            titulo: 'Observaciones',
-                            icon: Icons.notes_outlined,
-                            child: TextFormField(
-                              controller: _observacionesController,
-                              maxLines: 3,
-                              decoration: _deco(
-                                'Comentarios',
-                                hint: 'Referencias, condiciones…',
+                                ],
                               ),
                             ),
-                          ),
+                          ],
+                          if (!simple) ...[
+                            const SizedBox(height: 12),
+                            _SeccionCard(
+                              titulo: 'Observaciones',
+                              icon: Icons.notes_outlined,
+                              child: TextFormField(
+                                controller: _observacionesController,
+                                maxLines: 3,
+                                decoration: _deco(
+                                  'Comentarios',
+                                  hint: 'Referencias, condiciones…',
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 8),
                         ],
                       ),
@@ -439,7 +454,9 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  border: const Border(top: BorderSide(color: AppColors.border)),
+                  border: const Border(
+                    top: BorderSide(color: AppColors.border),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.04),

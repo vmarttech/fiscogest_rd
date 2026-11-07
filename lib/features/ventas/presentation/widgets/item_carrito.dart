@@ -82,7 +82,7 @@ class ItemCarrito extends ConsumerWidget {
     if (nueva != null && nueva > 0) {
       ref
           .read(registrarVentaProvider.notifier)
-          .cambiarCantidad(indice, nueva.toInt());
+          .cambiarCantidad(indice, nueva.toDouble());
     }
   }
 

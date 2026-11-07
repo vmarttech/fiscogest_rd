@@ -46,7 +46,10 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                 }
                 builder.element('IndicadorMontoGravado', nest: '0');
                 if (p.tipoEcfCodigo != 41 && p.tipoEcfCodigo != 43) {
-                  builder.element('TipoIngresos', nest: p.tipoIngresos);
+                  builder.element(
+                    'TipoIngresos',
+                    nest: p.tipoIngresos.padLeft(2, '0'),
+                  );
                 }
                 builder.element('TipoPago', nest: p.tipoPago);
                 if (p.tipoPago == '2' && p.fechaLimitePago.trim().isNotEmpty) {
@@ -73,14 +76,8 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               'Emisor',
               nest: () {
                 builder.element('RNCEmisor', nest: p.rncEmisor);
-                builder.element(
-                  'RazonSocialEmisor',
-                  nest: _safe(p.razonSocialEmisor),
-                );
-                builder.element(
-                  'DireccionEmisor',
-                  nest: _safe(p.direccionEmisor),
-                );
+                builder.element('RazonSocialEmisor', nest: p.razonSocialEmisor);
+                builder.element('DireccionEmisor', nest: p.direccionEmisor);
                 if ((p.telefonoEmisor ?? '').isNotEmpty) {
                   builder.element(
                     'TablaTelefonoEmisor',
@@ -108,16 +105,14 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                   }
                   builder.element(
                     'RazonSocialComprador',
-                    nest: _safe(
-                      (p.razonSocialComprador ?? '').isEmpty
-                          ? 'CONSUMIDOR FINAL'
-                          : p.razonSocialComprador!,
-                    ),
+                    nest: (p.razonSocialComprador ?? '').isEmpty
+                        ? 'CONSUMIDOR FINAL'
+                        : p.razonSocialComprador!,
                   );
                   if ((p.direccionComprador ?? '').isNotEmpty) {
                     builder.element(
                       'DireccionComprador',
-                      nest: _safe(p.direccionComprador!),
+                      nest: p.direccionComprador!,
                     );
                   }
                 },
@@ -192,7 +187,7 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                     'IndicadorFacturacion',
                     nest: it.indicadorFacturacion,
                   );
-                  builder.element('NombreItem', nest: _safe(it.nombreItem));
+                  builder.element('NombreItem', nest: it.nombreItem);
                   builder.element(
                     'IndicadorBienoServicio',
                     nest: it.indicadorBienoServicio,
@@ -225,7 +220,7 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               if (p.razonModificacion.trim().isNotEmpty) {
                 builder.element(
                   'RazonModificacion',
-                  nest: _safe(p.razonModificacion.trim()),
+                  nest: p.razonModificacion.trim(),
                 );
               }
             },
@@ -247,15 +242,6 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
       v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
   static String _rate(double v) => v.toStringAsFixed(2);
 
-  static String _safe(String s) {
-    return s
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
-  }
-
   String _buildRfce(EcfePayload p) {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="utf-8"');
@@ -272,7 +258,10 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
                 builder.element('TipoeCF', nest: p.tipoEcfCodigo.toString());
                 builder.element('eNCF', nest: p.encf);
                 if (p.tipoEcfCodigo != 41 && p.tipoEcfCodigo != 43) {
-                  builder.element('TipoIngresos', nest: p.tipoIngresos);
+                  builder.element(
+                    'TipoIngresos',
+                    nest: p.tipoIngresos.padLeft(2, '0'),
+                  );
                 }
                 builder.element('TipoPago', nest: p.tipoPago);
                 if (p.tipoPago == '2' && p.fechaLimitePago.trim().isNotEmpty) {
@@ -284,10 +273,7 @@ class EcfeXmlBuilderImpl implements EcfeXmlBuilder {
               'Emisor',
               nest: () {
                 builder.element('RNCEmisor', nest: p.rncEmisor);
-                builder.element(
-                  'RazonSocialEmisor',
-                  nest: _safe(p.razonSocialEmisor),
-                );
+                builder.element('RazonSocialEmisor', nest: p.razonSocialEmisor);
                 builder.element('FechaEmision', nest: p.fechaEmision);
               },
             );

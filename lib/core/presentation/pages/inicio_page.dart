@@ -130,7 +130,7 @@ class InicioPage extends ConsumerWidget {
                   onProveedores: () => _go(context, '/proveedores'),
                   onFiao: () => _go(context, '/ventas/fios'),
                   onProductos: () => _go(context, '/inventario'),
-                  onCompras: () => _go(context, '/compras'),
+                  onCompras: () => _go(context, '/compras/rapida'),
                   onClientes: () => _go(context, '/clientes'),
                 ),
               ),

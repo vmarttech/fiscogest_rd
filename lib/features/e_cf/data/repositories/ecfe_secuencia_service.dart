@@ -71,31 +71,16 @@ class EcfeSecuenciaService {
         .toList();
   }
 
+  /// H-21: No crear secuencias predeterminadas.
+  ///
+  /// Los rangos e-NCF deben provenir de una autorización real de la DGII
+  /// y cargarse explícitamente en Configuración → Secuencias e-NCF.
+  /// Inventar rangos (p. ej. 1–100 activos) confunde configuración fiscal
+  /// y puede permitir emisión con números no asignados.
+  ///
+  /// Conservado como no-op por compatibilidad con llamadas existentes.
   Future<void> asegurarTiposBase() async {
-    for (final tipo in [
-      TipoEcf.facturaCreditoFiscal,
-      TipoEcf.facturaConsumo,
-      TipoEcf.notaDebito,
-      TipoEcf.notaCredito,
-    ]) {
-      final rows = await (_db.select(_db.ecfeSecuenciasTable)
-            ..where((t) => t.tipoEcf.equals(tipo.codigo))
-            ..limit(1))
-          .get();
-      if (rows.isEmpty) {
-        await _db.into(_db.ecfeSecuenciasTable).insert(
-              EcfeSecuenciasTableCompanion.insert(
-                tipoEcf: tipo.codigo,
-                secuenciaActual: const Value(0),
-                secuenciaDesde: const Value(1),
-                secuenciaHasta: const Value(100),
-                fechaVencimiento:
-                    Value(DateTime(DateTime.now().year + 1, 12, 31)),
-                activo: const Value(true),
-              ),
-            );
-      }
-    }
+    // Intencionalmente vacío (H-21).
   }
 
   Future<void> guardar({
@@ -116,71 +101,130 @@ class EcfeSecuenciaService {
         'secuenciaActual debe estar entre ${secuenciaDesde - 1} y $secuenciaHasta',
       );
     }
-    if (id != null) {
-      await (_db.update(_db.ecfeSecuenciasTable)..where((t) => t.id.equals(id)))
-          .write(
-        EcfeSecuenciasTableCompanion(
-          tipoEcf: Value(tipoEcf),
-          secuenciaActual: Value(secuenciaActual),
-          secuenciaDesde: Value(secuenciaDesde),
-          secuenciaHasta: Value(secuenciaHasta),
-          fechaVencimiento: Value(fechaVencimiento),
-          activo: Value(activo),
-        ),
-      );
-    } else {
-      await _db.into(_db.ecfeSecuenciasTable).insert(
-            EcfeSecuenciasTableCompanion.insert(
-              tipoEcf: tipoEcf,
-              secuenciaActual: Value(secuenciaActual),
-              secuenciaDesde: Value(secuenciaDesde),
-              secuenciaHasta: Value(secuenciaHasta),
-              fechaVencimiento: Value(fechaVencimiento),
-              activo: Value(activo),
-            ),
-          );
-    }
+    // Ajuste comercial: solo puede existir UNA secuencia activa por tipo e-CF.
+    // Si se activa esta, se desactivan las demás del mismo tipo.
+    await _db.transaction(() async {
+      if (activo) {
+        await (_db.update(_db.ecfeSecuenciasTable)
+              ..where((t) =>
+                  t.tipoEcf.equals(tipoEcf) &
+                  t.activo.equals(true) &
+                  (id != null ? t.id.isNotValue(id) : const Constant(true))))
+            .write(const EcfeSecuenciasTableCompanion(activo: Value(false)));
+      }
+
+      if (id != null) {
+        await (_db.update(_db.ecfeSecuenciasTable)..where((t) => t.id.equals(id)))
+            .write(
+          EcfeSecuenciasTableCompanion(
+            tipoEcf: Value(tipoEcf),
+            secuenciaActual: Value(secuenciaActual),
+            secuenciaDesde: Value(secuenciaDesde),
+            secuenciaHasta: Value(secuenciaHasta),
+            fechaVencimiento: Value(fechaVencimiento),
+            activo: Value(activo),
+          ),
+        );
+      } else {
+        await _db.into(_db.ecfeSecuenciasTable).insert(
+              EcfeSecuenciasTableCompanion.insert(
+                tipoEcf: tipoEcf,
+                secuenciaActual: Value(secuenciaActual),
+                secuenciaDesde: Value(secuenciaDesde),
+                secuenciaHasta: Value(secuenciaHasta),
+                fechaVencimiento: Value(fechaVencimiento),
+                activo: Value(activo),
+              ),
+            );
+      }
+    });
   }
 
+  /// Reserva el siguiente e-NCF de forma **atómica**.
+  /// Usa transacción + actualización condicional para evitar duplicados
+  /// bajo concurrencia (dos llamadas simultáneas no pueden obtener el mismo número).
   Future<({String encf, DateTime? vencimiento})> siguiente(TipoEcf tipo) async {
-    final rows = await (_db.select(_db.ecfeSecuenciasTable)
-          ..where((t) => t.tipoEcf.equals(tipo.codigo) & t.activo.equals(true))
-          ..limit(1))
-        .get();
-    if (rows.isEmpty) {
-      throw StateError(
-        'No hay secuencia activa para e-CF tipo ${tipo.codigo} (E${tipo.codigo}). '
-        'Configúrala en e-CF → Configuración → Secuencias e-NCF.',
-      );
-    }
-    final r = rows.first;
-    if (r.fechaVencimiento != null) {
-      final f = r.fechaVencimiento!;
-      final hoy = DateTime.now();
-      final d = DateTime(hoy.year, hoy.month, hoy.day);
-      final v = DateTime(f.year, f.month, f.day);
-      if (d.isAfter(v)) {
-        throw StateError(
-          'Secuencia e-NCF tipo ${tipo.codigo} vencida ($f). '
-          'Actualiza el rango autorizado por la DGII.',
-        );
+    const maxIntentos = 5;
+
+    for (var intento = 1; intento <= maxIntentos; intento++) {
+      try {
+        return await _db.transaction(() async {
+          final rows = await (_db.select(_db.ecfeSecuenciasTable)
+                ..where((t) =>
+                    t.tipoEcf.equals(tipo.codigo) & t.activo.equals(true))
+                ..orderBy([(t) => OrderingTerm.asc(t.id)])
+                ..limit(1))
+              .get();
+
+          if (rows.isEmpty) {
+            throw StateError(
+              'No hay secuencia activa para e-CF tipo ${tipo.codigo} (E${tipo.codigo}). '
+              'Configúrala en e-CF → Configuración → Secuencias e-NCF.',
+            );
+          }
+
+          final r = rows.first;
+
+          // Validación de vencimiento
+          if (r.fechaVencimiento != null) {
+            final f = r.fechaVencimiento!;
+            final hoy = DateTime.now();
+            final d = DateTime(hoy.year, hoy.month, hoy.day);
+            final v = DateTime(f.year, f.month, f.day);
+            if (d.isAfter(v)) {
+              throw StateError(
+                'Secuencia e-NCF tipo ${tipo.codigo} vencida ($f). '
+                'Actualiza el rango autorizado por la DGII.',
+              );
+            }
+          }
+
+          var next = r.secuenciaActual + 1;
+          if (next < r.secuenciaDesde) {
+            next = r.secuenciaDesde;
+          }
+          if (next > r.secuenciaHasta) {
+            throw StateError(
+              'Secuencia e-NCF agotada para tipo ${tipo.codigo} '
+              '(actual ${r.secuenciaActual}, hasta ${r.secuenciaHasta}).',
+            );
+          }
+
+          // Actualización CONDICIONAL: solo si el valor leído sigue siendo el mismo.
+          // Si otra transacción ya lo cambió → 0 filas afectadas → reintento.
+          final actualizadas = await (_db.update(_db.ecfeSecuenciasTable)
+                ..where((t) =>
+                    t.id.equals(r.id) &
+                    t.secuenciaActual.equals(r.secuenciaActual)))
+              .write(
+            EcfeSecuenciasTableCompanion(
+              secuenciaActual: Value(next),
+            ),
+          );
+
+          if (actualizadas == 0) {
+            // Condición de carrera detectada → forzar reintento
+            throw StateError('conflicto_secuencia');
+          }
+
+          return (
+            encf: 'E${tipo.codigo}${next.toString().padLeft(10, '0')}',
+            vencimiento: r.fechaVencimiento,
+          );
+        });
+      } on StateError catch (e) {
+        if (e.message == 'conflicto_secuencia' && intento < maxIntentos) {
+          // Pequeña espera aleatoria para reducir contención
+          await Future<void>.delayed(Duration(milliseconds: 15 * intento));
+          continue;
+        }
+        rethrow;
       }
     }
-    var next = r.secuenciaActual + 1;
-    if (next < r.secuenciaDesde) {
-      next = r.secuenciaDesde;
-    }
-    if (next > r.secuenciaHasta) {
-      throw StateError(
-        'Secuencia e-NCF agotada para tipo ${tipo.codigo} '
-        '(actual ${r.secuenciaActual}, hasta ${r.secuenciaHasta}).',
-      );
-    }
-    await (_db.update(_db.ecfeSecuenciasTable)..where((t) => t.id.equals(r.id)))
-        .write(EcfeSecuenciasTableCompanion(secuenciaActual: Value(next)));
-    return (
-      encf: 'E${tipo.codigo}${next.toString().padLeft(10, '0')}',
-      vencimiento: r.fechaVencimiento,
+
+    throw StateError(
+      'No se pudo reservar e-NCF tipo ${tipo.codigo} después de $maxIntentos intentos '
+      '(alta contención). Reintente la emisión.',
     );
   }
 }

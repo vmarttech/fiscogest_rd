@@ -57,8 +57,32 @@ class DgiiAuthClient {
 
     final tmp = await Directory.systemTemp.createTemp('dgii_auth_');
     try {
+      if (!Platform.isWindows) {
+        final permisosDir = await Process.run('chmod', [
+          '700',
+          tmp.path,
+        ]).timeout(_requestTimeout);
+
+        if (permisosDir.exitCode != 0) {
+          throw StateError('No se pudo proteger el directorio temporal DGII.');
+        }
+      }
+
       final f = File('${tmp.path}/semilla.xml');
       await f.writeAsString(semillaFirmada, flush: true);
+
+      if (!Platform.isWindows) {
+        final permisosXml = await Process.run('chmod', [
+          '600',
+          f.path,
+        ]).timeout(_requestTimeout);
+
+        if (permisosXml.exitCode != 0) {
+          throw StateError(
+            'No se pudo proteger el XML firmado de autenticación.',
+          );
+        }
+      }
 
       final req = http.MultipartRequest(
         'POST',

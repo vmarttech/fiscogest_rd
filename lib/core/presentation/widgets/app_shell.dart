@@ -82,6 +82,8 @@ class AppShell extends ConsumerWidget {
     final permiteFiaoLicencia = gatesLic.permiteFiao;
     final permiteCreditoFormalLicencia = gatesLic.permiteCreditoFormal;
     final permiteAlmacenesLicencia = gatesLic.permiteAlmacenes;
+    final permiteReportesLicencia = gatesLic.permiteReportes;
+    final permiteUsuariosExtraLicencia = gatesLic.permiteUsuariosExtra;
 
     final currentPath = GoRouterState.of(context).uri.path;
     // Tablet horizontal y ≥900: mismo chrome que escritorio (evita desbordes del layout móvil).
@@ -120,6 +122,8 @@ class AppShell extends ConsumerWidget {
               permiteFiaoLicencia: permiteFiaoLicencia,
               permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
               permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+              permiteReportesLicencia: permiteReportesLicencia,
+              permiteUsuariosExtraLicencia: permiteUsuariosExtraLicencia,
               pedidosPendientes: pedidosPendientes,
               isPermanent: true,
               hideBrandHeader: false,
@@ -187,6 +191,8 @@ class AppShell extends ConsumerWidget {
               permiteFiaoLicencia: permiteFiaoLicencia,
               permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
               permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+              permiteReportesLicencia: permiteReportesLicencia,
+              permiteUsuariosExtraLicencia: permiteUsuariosExtraLicencia,
               pedidosPendientes: pedidosPendientes,
               isPermanent: false,
             ),
@@ -360,7 +366,7 @@ class AppShell extends ConsumerWidget {
           const SizedBox(width: 4),
           // Exportar Resumen
           FilledButton.icon(
-            onPressed: () => context.push('/reports'),
+            onPressed: () { if (!ProviderScope.containerOf(context).read(modoSimplificadoProvider)) context.push('/reports'); },
             icon: const Icon(Icons.download_outlined, size: 16),
             label: const Text(
               'Exportar Resumen',
@@ -400,6 +406,8 @@ class AppShell extends ConsumerWidget {
     required bool permiteFiaoLicencia,
     required bool permiteCreditoFormalLicencia,
     required bool permiteAlmacenesLicencia,
+    required bool permiteReportesLicencia,
+    required bool permiteUsuariosExtraLicencia,
     required int pedidosPendientes,
     required bool isPermanent,
   }) {
@@ -524,18 +532,18 @@ class AppShell extends ConsumerWidget {
                       if (!modoSimplificado)
                         _buildNavItem(context, '/ventas/cobro', 'Caja',
                           Icons.payments_outlined, currentPath, isPermanent),
-                    if (modoSimplificado &&
+                    if (modoSimplificado && permiteFiaoLicencia &&
                         puede(Permiso.fiaoUsar))
                       _buildNavItem(context, '/ventas/fios', 'Fiao',
                           Icons.edit_note_rounded, currentPath, isPermanent),
-                    if (!modoSimplificado &&
+                    if (!modoSimplificado && permiteCreditoFormalLicencia &&
                         puede(Permiso.creditosGestionar))
                       _buildNavItem(context, '/creditos', 'Crédito',
                           Icons.credit_score_outlined, currentPath, isPermanent),
-                    if (puede(Permiso.comprasGestionar))
+                    if (!modoSimplificado && puede(Permiso.comprasGestionar))
                       _buildNavItem(context, '/compras', 'Compras',
                           Icons.shopping_cart_outlined, currentPath, isPermanent),
-                    if (puede(Permiso.reportesVer) || esAdmin)
+                    if (!modoSimplificado && permiteReportesLicencia && (puede(Permiso.reportesVer) || esAdmin))
                       _buildNavItem(context, '/gastos', 'Gastos',
                           Icons.money_off_csred_outlined, currentPath, isPermanent),
 
@@ -582,7 +590,7 @@ class AppShell extends ConsumerWidget {
                     if (puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/unidades', 'Unidades',
                           Icons.straighten_outlined, currentPath, isPermanent),
-                    if (puede(Permiso.catalogoGestionar))
+                    if (!modoSimplificado && permiteAlmacenesLicencia && puede(Permiso.catalogoGestionar))
                       _buildNavItem(context, '/almacenes', 'Almacenes',
                           Icons.warehouse_outlined, currentPath, isPermanent),
                     if (puede(Permiso.catalogoGestionar))
@@ -591,12 +599,11 @@ class AppShell extends ConsumerWidget {
 
                     const SizedBox(height: 16),
                     _buildSectionTitle('SISTEMA'),
-                    if (puede(Permiso.reportesVer) ||
-                        modoSimplificado ||
-                        esAdmin)
+                    if (!modoSimplificado &&
+                        (puede(Permiso.reportesVer) || esAdmin))
                       _buildNavItem(context, '/reports', 'Reportes',
                           Icons.assessment_outlined, currentPath, isPermanent),
-                    if (!modoColmadoFlag && esAdmin) ...[
+                    if (!modoColmadoFlag && esAdmin && permiteFiscalLicencia) ...[
                       _buildNavItem(context, '/ecfe', 'e-CF · DGII',
                           Icons.cloud_sync_outlined, currentPath, isPermanent),
                       _buildNavItem(context, '/impuestos', 'Impuestos',
@@ -604,7 +611,7 @@ class AppShell extends ConsumerWidget {
                       _buildNavItem(context, '/import-export', 'Importar / Exportar',
                           Icons.import_export, currentPath, isPermanent),
                     ],
-                    if (puede(Permiso.usuariosGestionar))
+                    if (!modoSimplificado && permiteUsuariosExtraLicencia && puede(Permiso.usuariosGestionar))
                       _buildNavItem(context, '/usuarios', 'Usuarios',
                           Icons.manage_accounts_outlined, currentPath, isPermanent),
                     if (esDuenoPlataforma(usernameSesion))

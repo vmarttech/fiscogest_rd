@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
@@ -162,8 +162,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   ],
                 ),
               ),
-            if (!mobile)
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+            if (!mobile) const Divider(height: 1, color: Color(0xFFE2E8F0)),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -195,8 +194,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color:
-                                      Colors.black.withValues(alpha: 0.06),
+                                  color: Colors.black.withValues(alpha: 0.06),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
@@ -241,6 +239,30 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                               color: AppColors.textSecondary,
                               fontSize: 12,
                               height: 1.35,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.center,
+                            child: TextButton(
+                              onPressed: () =>
+                                  context.push('/licencia/activar'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.textSecondary,
+                                textStyle: const TextStyle(
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                '¿Prefieres depósito o transferencia? Activa tu código FG-',
+                              ),
                             ),
                           ),
                         ],
@@ -474,8 +496,7 @@ class _PriceCard extends StatelessWidget {
                 : FilledButton(
                     onPressed: disabled ? null : onAction,
                     style: FilledButton.styleFrom(
-                      backgroundColor:
-                          plan == 'gratis' ? Colors.white : _teal,
+                      backgroundColor: plan == 'gratis' ? Colors.white : _teal,
                       foregroundColor: plan == 'gratis'
                           ? const Color(0xFF475569)
                           : Colors.white,
@@ -493,9 +514,7 @@ class _PriceCard extends StatelessWidget {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: plan == 'gratis'
-                                  ? _teal
-                                  : Colors.white,
+                              color: plan == 'gratis' ? _teal : Colors.white,
                             ),
                           )
                         : Text(
@@ -518,35 +537,40 @@ class _PriceCard extends StatelessWidget {
     switch (plan.toLowerCase()) {
       case 'gratis':
         return const [
-          _Feat(true, 'Ventas y caja'),
-          _Feat(true, 'Catálogo limitado (productos / clientes)'),
-          _Feat(true, 'Fiao básico'),
-          _Feat(true, '1 equipo'),
-          _Feat(false, 'Sin reportes ni módulo fiscal'),
+          _Feat(true, 'Ventas al contado'),
+          _Feat(true, '40 productos / 20 clientes'),
+          _Feat(true, '30 facturas al mes'),
+          _Feat(true, '1 equipo · solo local'),
+          _Feat(false, 'Sin reportes ni sync en la nube'),
         ];
       case 'basico':
         return const [
-          _Feat(true, 'Hasta 50 facturas al mes'),
+          _Feat(true, 'Hasta 300 facturas al mes'),
           _Feat(true, 'Ventas, compras, inventario y caja'),
-          _Feat(true, 'Productos y clientes sin tope práctico'),
-          _Feat(true, 'Reportes para decidir con datos'),
+          _Feat(true, 'Catálogo sin tope'),
+          _Feat(true, 'Reportes básicos'),
+          _Feat(true, 'Sync en la nube + backup'),
           _Feat(true, 'Fiao · 1 equipo'),
         ];
       case 'simplificado':
         return const [
-          _Feat(true, 'Todo lo de Básico'),
-          _Feat(true, 'Hasta 150 facturas al mes'),
-          _Feat(true, 'Más holgura de fiao'),
-          _Feat(true, 'Mismos reportes e inventario'),
-          _Feat(false, 'Sin almacenes ni e-CF'),
+          _Feat(true, 'Todo lo de Esencial'),
+          _Feat(true, 'Ventas sin tope'),
+          _Feat(true, 'Hasta 3 equipos · 3 usuarios'),
+          _Feat(true, 'Fiao sin tope'),
+          _Feat(true, 'Reportes avanzados + dashboard'),
+          _Feat(true, 'Importar / Exportar'),
+          _Feat(false, 'Sin módulo fiscal ni e-CF'),
         ];
       case 'pro':
         return const [
-          _Feat(true, 'Ventas sin tope práctico + ITBIS'),
-          _Feat(true, 'RNC de la empresa y secuencias NCF'),
-          _Feat(true, 'Facturación electrónica e-CF (DGII)'),
-          _Feat(true, 'Almacenes, transferencias y multiequipo'),
-          _Feat(true, 'Crédito formal y usuarios por equipo'),
+          _Feat(true, 'Todo lo de Avanzado'),
+          _Feat(true, 'Crédito formal (CxC, solicitudes, cuotas)'),
+          _Feat(true, 'RNC + NCF + ITBIS'),
+          _Feat(true, 'e-CF factura electrónica DGII'),
+          _Feat(true, '606 / 607'),
+          _Feat(true, 'Almacenes + transferencias'),
+          _Feat(true, 'Usuarios ilimitados + onboarding'),
         ];
       default:
         return const [];

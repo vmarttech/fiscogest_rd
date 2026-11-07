@@ -66,12 +66,12 @@ class FirmarXmlEcfe {
       if (pre.bloqueante) {
         return FirmarXmlResultado(ok: false, errores: pre.errores);
       }
-      final EcfeSigner signer = (cfg.rutaCertificado.trim().isEmpty)
-          ? NoOpEcfeSigner()
-          : EcfeSignerImpl(
-              rutaCertificado: cfg.rutaCertificado,
-              claveCertificado: cfg.claveCertificado,
-            );
+      // El preflight ya garantiza que el certificado existe y es válido.
+      // Nunca continuar por una ruta de firma NoOp.
+      final EcfeSigner signer = EcfeSignerImpl(
+        rutaCertificado: cfg.rutaCertificado,
+        claveCertificado: cfg.claveCertificado,
+      );
 
       final firmadoCompleto = await signer.firmar(xml);
       final codigoSeg = CodigoSeguridadEcf.empaquetar(
