@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 /// URL del manifiesto de versión (público en GitHub).
@@ -132,6 +133,8 @@ class UpdateChecker {
     );
   }
 
+  /// Descarga el APK por streaming (sin cargar todo en RAM) y abre el instalador.
+  /// Si falla la descarga in-app, ofrece abrir la misma URL en el navegador (plan B).
   static Future<void> _downloadAndInstall(
     BuildContext context,
     UpdateInfo update,
@@ -155,28 +158,45 @@ class UpdateChecker {
     }
     if (!context.mounted) return;
 
-    // NO usar await showDialog: bloquearía la descarga hasta cerrar el diálogo.
     // ignore: avoid_print
-    print('[UpdateChecker] inicio descarga APK...');
+    print('[UpdateChecker] inicio descarga APK (streaming): ${update.apkUrl}');
+
+    final progress = ValueNotifier<double?>(null);
+    var dialogOpen = true;
+
     unawaited(showDialog<void>(
       context: context,
       barrierDismissible: false,
       useRootNavigator: true,
-      builder: (_) => const PopScope(
+      builder: (_) => PopScope(
         canPop: false,
         child: AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Expanded(child: Text('Descargando actualización...')),
-            ],
+          content: ValueListenableBuilder<double?>(
+            valueListenable: progress,
+            builder: (_, value, __) {
+              final pct = value;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (pct == null)
+                    const CircularProgressIndicator()
+                  else
+                    LinearProgressIndicator(value: pct.clamp(0.0, 1.0)),
+                  const SizedBox(height: 16),
+                  Text(
+                    pct == null
+                        ? 'Descargando actualización...'
+                        : 'Descargando... ${(pct * 100).toStringAsFixed(0)}%',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     ));
 
-    var dialogOpen = true;
     void closeProgress() {
       if (dialogOpen && context.mounted) {
         final nav = Navigator.of(context, rootNavigator: true);
@@ -185,17 +205,76 @@ class UpdateChecker {
       }
     }
 
-    try {
-      final res = await http
-          .get(Uri.parse(update.apkUrl))
-          .timeout(const Duration(minutes: 3));
-      if (res.statusCode != 200) {
-        throw Exception('Error al descargar (${res.statusCode})');
+    Future<void> openInBrowser() async {
+      final uri = Uri.tryParse(update.apkUrl);
+      if (uri == null) return;
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo abrir: ${update.apkUrl}')),
+        );
       }
+    }
+
+    final client = http.Client();
+    try {
+      final uri = Uri.parse(update.apkUrl);
+      if (uri.scheme != 'https') {
+        throw Exception('La URL del APK debe ser HTTPS');
+      }
+
+      final request = http.Request('GET', uri);
+      request.headers.addAll({
+        'User-Agent': 'FiscoGestRD-Updater/1.0',
+        'Accept': '*/*',
+      });
+      request.followRedirects = true;
+      request.maxRedirects = 8;
+
+      final streamed = await client
+          .send(request)
+          .timeout(const Duration(seconds: 45));
+
+      if (streamed.statusCode < 200 || streamed.statusCode >= 300) {
+        throw Exception('Error al descargar (HTTP ${streamed.statusCode})');
+      }
+
+      final total = streamed.contentLength ?? -1;
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/fiscogest_update.apk');
-      await file.writeAsBytes(res.bodyBytes);
+      if (await file.exists()) {
+        await file.delete();
+      }
 
+      final sink = file.openWrite();
+      var received = 0;
+      try {
+        await for (final chunk in streamed.stream.timeout(
+          const Duration(seconds: 90),
+        )) {
+          sink.add(chunk);
+          received += chunk.length;
+          if (total > 0) {
+            progress.value = received / total;
+          }
+        }
+      } finally {
+        await sink.flush();
+        await sink.close();
+      }
+
+      // APK real de release suele superar varios MB; HTML de error es mucho menor.
+      if (received < 5 * 1024 * 1024) {
+        try {
+          await file.delete();
+        } catch (_) {}
+        throw Exception(
+          'Descarga incompleta o inválida (${(received / 1024).toStringAsFixed(0)} KB).',
+        );
+      }
+
+      // ignore: avoid_print
+      print('[UpdateChecker] APK guardado: ${file.path} ($received bytes)');
       closeProgress();
 
       final result = await OpenFilex.open(file.path);
@@ -203,16 +282,72 @@ class UpdateChecker {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('No se pudo abrir el instalador: ${result.message}'),
+            action: SnackBarAction(
+              label: 'Navegador',
+              onPressed: openInBrowser,
+            ),
+          ),
+        );
+      }
+    } on TimeoutException {
+      closeProgress();
+      if (context.mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Descarga lenta o interrumpida'),
+            content: const Text(
+              'No se completó la descarga dentro de la app.\n\n'
+              'Puedes abrir el enlace en el navegador e instalar el APK desde Descargas.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cerrar'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await openInBrowser();
+                },
+                child: const Text('Abrir en navegador'),
+              ),
+            ],
           ),
         );
       }
     } catch (e) {
       closeProgress();
+      // ignore: avoid_print
+      print('[UpdateChecker] ERROR descarga: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al actualizar: $e')),
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('No se pudo actualizar'),
+            content: Text(
+              '$e\n\n'
+              'Usa el navegador para descargar e instalar manualmente.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cerrar'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await openInBrowser();
+                },
+                child: const Text('Abrir en navegador'),
+              ),
+            ],
+          ),
         );
       }
+    } finally {
+      client.close();
+      progress.dispose();
     }
   }
 
