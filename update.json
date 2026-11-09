@@ -1,7 +1,7 @@
 {
-  "versionName": "3.2.2",
-  "versionCode": 24,
-  "apkUrl": "https://github.com/vmarttech/fiscogest_rd/releases/download/v3.2.2/app-release.apk",
-  "changelog": "Actualización 3.2.2 (build 24).",
+  "versionName": "3.2.3",
+  "versionCode": 25,
+  "apkUrl": "https://github.com/vmarttech/fiscogest_rd/releases/download/v3.2.3/app-release.apk",
+  "changelog": "Actualización 3.2.3 (build 25).",
   "forceUpdate": false
 }
