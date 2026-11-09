@@ -137,7 +137,9 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
       }
     }
 
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final pendientes =
           c.planPago?.cuotas.where((q) => !q.pagada).toList() ?? <Cuota>[];
@@ -199,7 +201,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -393,7 +395,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                                   label: Text(f),
                                   selected: _formaPago == f,
                                   onSelected: (_) =>
-                                      setState(() => _formaPago = f),
+                                      setState(() { _formaPago = f; }),
                                   selectedColor: const Color(0xFFD1FAE5),
                                   labelStyle: TextStyle(
                                     fontWeight: FontWeight.w600,

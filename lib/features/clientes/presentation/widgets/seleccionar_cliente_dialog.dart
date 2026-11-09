@@ -76,7 +76,7 @@ class _SeleccionarClienteDialogState
               label: 'Buscar cliente',
               hint: 'Nombre, RNC o Teléfono',
               controller: _busqueda,
-              onChanged: (valor) => setState(() => _termino = valor),
+              onChanged: (valor) => setState(() { _termino = valor; }),
             ),
             AppLayout.vM,
             SizedBox(
@@ -196,7 +196,9 @@ class _NuevoClienteFormDialogState
 
   Future<void> _guardar() async {
     if (_formKey.currentState?.validate() != true) return;
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final cli = ClienteCompleto(
         nombre: _nombre.text.trim(),
@@ -229,7 +231,7 @@ class _NuevoClienteFormDialogState
         );
       }
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 

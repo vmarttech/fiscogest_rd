@@ -67,6 +67,7 @@ class LimitesPlan {
     required this.permiteAlmacenes,
     required this.permiteUsuariosExtra,
     required this.permiteEcf,
+    this.notificaPagosFiaoWhatsapp = false,
   });
 
   final int? maxProductos;
@@ -81,6 +82,7 @@ class LimitesPlan {
   final bool permiteAlmacenes;
   final bool permiteUsuariosExtra;
   final bool permiteEcf;
+  final bool notificaPagosFiaoWhatsapp;
 }
 
 /// Matriz móvil acordada.
@@ -104,8 +106,8 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     maxProductos: 40,
     maxClientes: 20,
     maxVentasMes: 30,
-    maxCuentasFiaoAbiertas: 0,
-    permiteFiao: false,
+    maxCuentasFiaoAbiertas: 25,
+    permiteFiao: true,
     permiteCreditoFormal: false,
     permiteFiscal: false,
     permiteReportes: false,
@@ -118,7 +120,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     maxProductos: null,
     maxClientes: null,
     maxVentasMes: 300,
-    maxCuentasFiaoAbiertas: 25,
+    maxCuentasFiaoAbiertas: 300,
     permiteFiao: true,
     permiteCreditoFormal: false,
     permiteFiscal: false,
@@ -126,6 +128,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: false,
     permiteUsuariosExtra: false,
     permiteEcf: false,
+    notificaPagosFiaoWhatsapp: true,
   ),
   // Avanzado US$9.99 — multi-equipo (3), fiao sin tope, reportes avanzados, sin fiscal.
   'simplificado': LimitesPlan(
@@ -140,6 +143,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: false,
     permiteUsuariosExtra: false,
     permiteEcf: false,
+    notificaPagosFiaoWhatsapp: true,
   ),
   // Fiscal Pro US$19.99 — credito formal + fiscal DGII + almacenes + equipos.
   'pro': LimitesPlan(
@@ -270,6 +274,8 @@ String planMinimoPara(String funcion) {
   switch (funcion) {
     case 'reportes':
       return 'basico';
+    case 'kardex':
+    case 'ajustes_inventario':
     case 'almacenes':
     case 'transferencias':
     case 'fiscal':
@@ -283,7 +289,7 @@ String planMinimoPara(String funcion) {
     case 'reportes_avanzados':
     case 'import_export':
     case 'fiao':
-      return 'simplificado';
+      return 'gratis';
     default:
       return 'pro';
   }

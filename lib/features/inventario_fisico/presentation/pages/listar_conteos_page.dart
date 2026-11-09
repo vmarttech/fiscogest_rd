@@ -308,7 +308,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               '$total',
                               Icons.list_alt_rounded,
                               const Color(0xFF64748B),
-                              () => setState(() => _estadoFiltro = null),
+                              () => setState(() { _estadoFiltro = null; }),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -362,7 +362,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                     // Buscar + chips
                     TextField(
                       onChanged: (v) =>
-                          setState(() => _filtro = v.trim().toLowerCase()),
+                          setState(() { _filtro = v.trim().toLowerCase(); }),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: 'Buscar conteo…',
@@ -399,7 +399,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                       child: Row(
                         children: [
                           _chip('Todos', _estadoFiltro == null, () {
-                            setState(() => _estadoFiltro = null);
+                            setState(() {
+                              _estadoFiltro = null;
+                            });
                           }),
                           const SizedBox(width: 6),
                           for (final e in [

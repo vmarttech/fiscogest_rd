@@ -229,7 +229,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                                 label: Text(n == 1 ? '1 cuota' : '$n cuotas'),
                                 selected: _numeroCuotas == n,
                                 onSelected: (_) =>
-                                    setState(() => _numeroCuotas = n),
+                                    setState(() { _numeroCuotas = n; }),
                               ),
                           ],
                         ),

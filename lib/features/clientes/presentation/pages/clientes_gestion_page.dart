@@ -109,13 +109,15 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 if (_seleccionado != null &&
                     filtrados.every((c) => c.id != _seleccionado!.id)) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) setState(() => _seleccionado = null);
+                    if (mounted) setState(() { _seleccionado = null; });
                   });
                 }
                 if (!mobile && filtrados.isNotEmpty && _seleccionado == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted && _seleccionado == null) {
-                      setState(() => _seleccionado = filtrados.first);
+                      setState(() {
+                        _seleccionado = filtrados.first;
+                      });
                     }
                   });
                 }
@@ -236,7 +238,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                   mobile: false,
                                   selected: _seleccionado?.id == c.id,
                                   onOpen: () =>
-                                      setState(() => _seleccionado = c),
+                                      setState(() { _seleccionado = c; }),
                                   onEdit: () => _irAEditarCliente(context, c),
                                   onDelete: () =>
                                       _confirmarEliminar(context, c),
@@ -451,7 +453,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
           TextField(
             controller: _searchController,
             onChanged: (v) =>
-                setState(() => _filtroBusqueda = v.trim().toLowerCase()),
+                setState(() { _filtroBusqueda = v.trim().toLowerCase(); }),
             style: AppTypography.bodyMedium,
             decoration: InputDecoration(
               hintText: 'Buscar por nombre, RNC, teléfono o correo…',

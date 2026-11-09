@@ -179,7 +179,9 @@ class _FormularioCreditoDialogState
       }
       return;
     }
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final resumen = _resumen;
       final ahora = DateTime.now();
@@ -340,7 +342,7 @@ class _FormularioCreditoDialogState
                               ),
                               selected: activo,
                               onSelected: (_) =>
-                                  setState(() => _numeroCuotas = cuotas),
+                                  setState(() { _numeroCuotas = cuotas; }),
                             );
                           })
                           .toList(),

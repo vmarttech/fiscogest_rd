@@ -201,6 +201,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             (path == '/creditos' || path.startsWith('/creditos/'))) {
           return '/licencia';
         }
+
+    // Reportes: desde Esencial (gratis no incluye reportes)
+    if (!gates.permiteReportes &&
+        (path == '/reports' || path.startsWith('/reports/'))) {
+      return '/licencia';
+    }
+    // Kardex y ajustes de inventario: solo Pro
+    // (almacenes y transferencias ya tienen gate a nivel de página)
+    if (!gates.permiteAlmacenes &&
+        (path == '/kardex' || path.startsWith('/kardex/') ||
+         path == '/ajustes' || path.startsWith('/ajustes/'))) {
+      return '/licencia';
+    }
       } catch (_) {}
 
       // Setup obligatorio SOLO para cuentas reales de fábrica (no invitado).

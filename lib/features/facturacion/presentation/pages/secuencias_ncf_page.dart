@@ -215,7 +215,9 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
   }
 
   Future<void> _guardar() async {
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       await widget.onGuardar(
         _Params(
@@ -229,7 +231,7 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -252,7 +254,7 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
               ),
               Switch.adaptive(
                 value: _activo,
-                onChanged: (v) => setState(() => _activo = v),
+                onChanged: (v) => setState(() { _activo = v; }),
               ),
               Text(
                 _activo ? 'Activo' : 'Inactivo',

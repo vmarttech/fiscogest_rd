@@ -439,7 +439,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Promoción activa'),
                   value: _activa,
-                  onChanged: (v) => setState(() => _activa = v),
+                  onChanged: (v) => setState(() { _activa = v; }),
                 ),
                 const SizedBox(height: 8),
               ],

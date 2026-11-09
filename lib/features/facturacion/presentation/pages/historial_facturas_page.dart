@@ -89,7 +89,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                               ? AppColors.primary.withValues(alpha: 0.08)
                               : Colors.transparent,
                           child: InkWell(
-                            onTap: () => setState(() => _sel = d),
+                            onTap: () => setState(() { _sel = d; }),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,

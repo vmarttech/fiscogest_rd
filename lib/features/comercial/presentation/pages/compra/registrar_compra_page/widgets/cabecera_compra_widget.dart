@@ -366,7 +366,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                           ),
                       ],
                       onChanged: (v) {
-                        if (v != null) setState(() => _sucursal = v);
+                        if (v != null) setState(() { _sucursal = v; });
                       },
                     ),
                   ),

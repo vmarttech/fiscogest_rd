@@ -103,7 +103,9 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
             hint: 'Buscar producto, código o escanear',
             prefixIcon: Icons.search,
             onChanged: (String valor) {
-              setState(() => _terminoBusqueda = valor);
+              setState(() {
+                _terminoBusqueda = valor;
+              });
             },
           ),
         ),

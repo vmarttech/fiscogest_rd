@@ -1371,7 +1371,7 @@ class _RegistrarTransferenciaPageState
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => setState(() => _filtroEstado = key),
+        onTap: () => setState(() { _filtroEstado = key; }),
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),

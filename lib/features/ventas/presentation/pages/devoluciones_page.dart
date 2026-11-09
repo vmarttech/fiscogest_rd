@@ -42,13 +42,17 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
         _cants.add(TextEditingController(text: d.cantidad.toString()));
       }
     }
-    setState(() => _venta = venta);
+    setState(() {
+      _venta = venta;
+    });
   }
 
   Future<void> _buscar() async {
     final q = _ncf.text.trim().toUpperCase();
     if (q.isEmpty) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     try {
       final repo = ref.read(ventasRepositoryProvider);
       Venta? encontrada;
@@ -69,7 +73,7 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() { _busy = false; });
     }
   }
 
@@ -95,7 +99,9 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
       );
       return;
     }
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     try {
       final r = await ref
           .read(emitirNcServiceProvider)
@@ -115,7 +121,7 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() { _busy = false; });
     }
   }
 

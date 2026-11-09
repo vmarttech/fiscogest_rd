@@ -158,7 +158,9 @@ class _SelectorDeliveryDialogState
               ),
               style: AppTypography.labelMedium,
               onChanged: (_) {
-                setState(() => _opcionSeleccionada = null);
+                setState(() {
+                  _opcionSeleccionada = null;
+                });
               },
             ),
           ],

@@ -47,20 +47,25 @@ class SheetAnotarFiao extends ConsumerStatefulWidget {
 }
 
 class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
+  int _diasCompromiso = 15;
   late final TextEditingController _nombre;
+  late final TextEditingController _telefono;
   late final TextEditingController _nota;
   bool _guardando = false;
+  int? _clienteId;
 
   @override
   void initState() {
     super.initState();
     _nombre = TextEditingController(text: widget.nombreInicial ?? '');
+    _telefono = TextEditingController();
     _nota = TextEditingController();
   }
 
   @override
   void dispose() {
     _nombre.dispose();
+    _telefono.dispose();
     _nota.dispose();
     super.dispose();
   }
@@ -70,6 +75,11 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
     if (cliente != null && mounted) {
       setState(() {
         _nombre.text = cliente.nombre;
+        _clienteId = cliente.id;
+        final tel = (cliente.telefono).trim();
+        if (tel.isNotEmpty) {
+          _telefono.text = tel;
+        }
       });
     }
   }
@@ -96,7 +106,6 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
       );
       return;
     }
-
 
     final lic = ref.read(licenciaActualProvider).valueOrNull;
     final gates = LicenciaGates(lic);
@@ -130,18 +139,22 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
       }
     }
 
+    final tel = _telefono.text.trim();
     setState(() => _guardando = true);
     try {
       final db = ref.read(databaseProvider);
-      await db
-          .into(db.fiosTable)
-          .insert(
+      await db.into(db.fiosTable).insert(
             FiosTableCompanion.insert(
               nombreCliente: nombre,
               montoOriginal: widget.total,
               saldoPendiente: widget.total,
               nota: Value(_nota.text.trim().isEmpty ? null : _nota.text.trim()),
               ventaId: Value(widget.ventaId),
+              fechaCompromiso: Value(
+                DateTime.now().add(Duration(days: _diasCompromiso)),
+              ),
+              clienteId: Value(_clienteId),
+              telefono: Value(tel.isEmpty ? null : tel),
             ),
           );
       if (!mounted) return;
@@ -209,7 +222,6 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
               ),
             ),
             const SizedBox(height: 14),
-            // Nombre: lista O a mano
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -218,6 +230,12 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
                     controller: _nombre,
                     autofocus: true,
                     textCapitalization: TextCapitalization.words,
+                    onChanged: (_) {
+                      // Si editan el nombre a mano, soltar vínculo de cliente
+                      if (_clienteId != null) {
+                        setState(() => _clienteId = null);
+                      }
+                    },
                     decoration: InputDecoration(
                       labelText: 'Nombre de quien debe',
                       hintText: 'Escribir o elegir de la lista',
@@ -254,6 +272,28 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
             ),
             const SizedBox(height: 10),
             TextField(
+              controller: _telefono,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                labelText: 'WhatsApp / Teléfono (recomendado)',
+                hintText: 'Ej: 8091234567',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                isDense: true,
+                prefixIcon: const Icon(Icons.phone, size: 20),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Si elige un cliente de la lista se rellena solo. Permite avisar por WhatsApp sin buscar después.',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
               controller: _nota,
               maxLines: 2,
               decoration: InputDecoration(
@@ -264,6 +304,20 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
                 ),
                 isDense: true,
               ),
+            ),
+            const SizedBox(height: 10),
+            const Text('Compromete pago en:'),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              children: [7, 15, 21].map((d) {
+                final sel = _diasCompromiso == d;
+                return ChoiceChip(
+                  label: Text('$d dias'),
+                  selected: sel,
+                  onSelected: (_) => setState(() => _diasCompromiso = d),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 16),
             SizedBox(

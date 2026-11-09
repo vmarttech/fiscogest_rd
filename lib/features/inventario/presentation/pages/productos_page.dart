@@ -239,9 +239,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       subtitulo: 'Centre el código de barras',
                     );
                     if (!mounted || codigo == null) return;
-                    setState(() => _filtroProductos = codigo.trim());
+                    setState(() {
+                      _filtroProductos = codigo.trim();
+                    });
                   },
-                  onChanged: (v) => setState(() => _filtroProductos = v),
+                  onChanged: (v) => setState(() { _filtroProductos = v; }),
                 ),
                 const SizedBox(height: 12),
                 // Fila 1: estado de stock (scroll horizontal, sin amontonar)
@@ -418,7 +420,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               if (_productoSeleccionado != null &&
                   filtrados.every((p) => p.id != _productoSeleccionado!.id)) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) setState(() => _productoSeleccionado = null);
+                  if (mounted) setState(() { _productoSeleccionado = null; });
                 });
               }
               return Row(
@@ -431,8 +433,8 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       filtroEstado: _filtroEstado,
                       vistaLista: _vistaLista,
                       productos: productos,
-                      onFiltro: (v) => setState(() => _filtroEstado = v),
-                      onVista: (v) => setState(() => _vistaLista = v),
+                      onFiltro: (v) => setState(() { _filtroEstado = v; }),
+                      onVista: (v) => setState(() { _vistaLista = v; }),
                       onNuevo: _irANuevoProducto,
                       mostrarOfertas: mostrarOfertas,
                       onOfertas: () =>
@@ -449,9 +451,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       vistaLista: _vistaLista,
                       puedeVerCostos: puedeVerCostos,
                       filtroTexto: _filtroProductos,
-                      onBuscar: (v) => setState(() => _filtroProductos = v),
+                      onBuscar: (v) => setState(() { _filtroProductos = v; }),
                       onSeleccionar: (p) =>
-                          setState(() => _productoSeleccionado = p),
+                          setState(() { _productoSeleccionado = p; }),
                       onEditar: _editarProducto,
                       onEliminar: _confirmarEliminar,
                       getStatus: _getStatus,
@@ -656,7 +658,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 },
               );
               if (chosen != null) {
-                setState(() => _ordenProductos = chosen);
+                setState(() {
+                  _ordenProductos = chosen;
+                });
               }
             },
             child: Container(
@@ -803,7 +807,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => setState(() => _vistaActual = 0),
+                onPressed: () => setState(() { _vistaActual = 0; }),
               ),
               const SizedBox(width: 8),
               Text(
@@ -818,7 +822,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           const SizedBox(height: 16),
           AppTextField(
             hint: 'Buscar por ID de producto...',
-            onChanged: (v) => setState(() => _filtroKardex = v),
+            onChanged: (v) => setState(() { _filtroKardex = v; }),
           ),
           const SizedBox(height: 16),
           Expanded(

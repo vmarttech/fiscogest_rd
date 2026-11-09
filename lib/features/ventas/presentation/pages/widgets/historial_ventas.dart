@@ -329,7 +329,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                       label: Text(e.$2),
                                       selected: sel,
                                       onSelected: (_) =>
-                                          setState(() => _filtro = e.$1),
+                                          setState(() { _filtro = e.$1; }),
                                       selectedColor:
                                           AppColors.primary.withValues(alpha: 0.15),
                                       checkmarkColor: AppColors.primary,

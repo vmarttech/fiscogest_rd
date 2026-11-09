@@ -42,7 +42,9 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
 
   Future<void> _emitir() async {
     if (_sel?.id == null) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     try {
       final r = await ref
           .read(emitirNcServiceProvider)
@@ -82,7 +84,9 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _busy = false);
+        setState(() {
+          _busy = false;
+        });
         FiscoGestNotifications.show(
           SnackBar(
             content: Text('$e'),
@@ -122,7 +126,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
               docs: docs,
               fmt: _fmt,
               seleccionadoId: _sel?.id,
-              onTap: (d) => setState(() => _sel = d),
+              onTap: (d) => setState(() { _sel = d; }),
             );
             final panel = _sel == null
                 ? _NcPanelVacio(

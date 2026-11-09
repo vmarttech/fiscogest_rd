@@ -204,7 +204,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   Future<void> _buscar() async {
     final texto = _busquedaController.text.trim();
     if (texto.isEmpty) {
-      setState(() => _resultados = []);
+      setState(() {
+        _resultados = [];
+      });
       await _cargarPendientes();
       return;
     }
@@ -498,7 +500,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _rncNombreEncontrado = null);
+      setState(() {
+        _rncNombreEncontrado = null;
+      });
       FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'.replaceAll('Exception: ', '')),
@@ -507,7 +511,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       );
     } finally {
       svc.dispose();
-      if (mounted) setState(() => _buscandoRnc = false);
+      if (mounted) setState(() { _buscandoRnc = false; });
     }
   }
 
@@ -711,7 +715,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     }
 
     // NCF fiscal se asigna en Caja (B01/B02) justo antes de cobrar
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       await _asegurarNcfFiscal(ventaId);
       final repositorio = ref.read(venta_providers.ventasRepositoryProvider);
@@ -848,7 +854,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -862,7 +868,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     } else if (def.contains('transfer')) {
       forma = FormaPago.transferencia;
     }
-    setState(() => _formaPago = forma);
+    setState(() {
+      _formaPago = forma;
+    });
   }
 
   List<FormaPago> _formasDisponibles({required bool esCredito}) {
@@ -901,9 +909,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           .where((c) => c.id != null && !c.estaPagada && c.saldoPendiente > 0.009)
           .toList();
       if (!mounted) return;
-      setState(() => _cxcPendientes = abiertas);
+      setState(() {
+        _cxcPendientes = abiertas;
+      });
     } catch (_) {
-      if (mounted) setState(() => _cxcPendientes = []);
+      if (mounted) setState(() { _cxcPendientes = []; });
     }
   }
 
@@ -992,7 +1002,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       return;
     }
     if (!await _exigirCajaAbierta()) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final metodo = _formaPago.nombre;
       await ref.read(databaseProvider).transaction(() async {
@@ -1043,7 +1055,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         ));
       }
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -2170,7 +2182,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                           label: Text(f.nombre),
                                           selected: _formaPago == f,
                                           onSelected: (_) {
-                                            setState(() => _formaPago = f);
+                                            setState(() {
+                                              _formaPago = f;
+                                            });
                                             if (f == FormaPago.efectivo) {
                                               _efectivoRecibidoController
                                                       .text =
@@ -3173,21 +3187,21 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 label: const Text('B02 · Consumidor final'),
                                 selected: _tipoNcf == 'B02',
                                 onSelected: (sel) {
-                                  if (sel) setState(() => _tipoNcf = 'B02');
+                                  if (sel) setState(() { _tipoNcf = 'B02'; });
                                 },
                               ),
                               ChoiceChip(
                                 label: const Text('B01 · Crédito fiscal'),
                                 selected: _tipoNcf == 'B01',
                                 onSelected: (sel) {
-                                  if (sel) setState(() => _tipoNcf = 'B01');
+                                  if (sel) setState(() { _tipoNcf = 'B01'; });
                                 },
                               ),
                               ChoiceChip(
                                 label: const Text('B14 · Regímenes especiales'),
                                 selected: _tipoNcf == 'B14',
                                 onSelected: (sel) {
-                                  if (sel) setState(() => _tipoNcf = 'B14');
+                                  if (sel) setState(() { _tipoNcf = 'B14'; });
                                 },
                               ),
                             ],
@@ -3281,7 +3295,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     alpha: 0.15,
                                   ),
                                   onSelected: (_) {
-                                    setState(() => _formaPago = forma);
+                                    setState(() {
+                                      _formaPago = forma;
+                                    });
                                   },
                                   side: sel
                                       ? const BorderSide(

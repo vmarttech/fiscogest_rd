@@ -807,7 +807,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       },
     );
     if (fondo == null || !mounted) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final sesionId = await ref
           .read(cajaRepositoryProvider)
@@ -844,7 +846,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -1075,7 +1077,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       },
     );
     if (result == null || !mounted) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final ok = await ref
           .read(cajaRepositoryProvider)
@@ -1138,7 +1142,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -1176,7 +1180,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _rncNombreEncontrado = null);
+      setState(() {
+        _rncNombreEncontrado = null;
+      });
       FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'.replaceAll('Exception: ', '')),
@@ -1185,7 +1191,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       );
     } finally {
       svc.dispose();
-      if (mounted) setState(() => _buscandoRnc = false);
+      if (mounted) setState(() { _buscandoRnc = false; });
     }
   }
 
@@ -1229,7 +1235,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       });
       return;
     }
-    setState(() => _buscandoProducto = true);
+    setState(() {
+      _buscandoProducto = true;
+    });
     try {
       // Asegurar catálogo cargado (si aún loading → esperar / recargar)
       var estado = ref.read(productoControllerProvider);
@@ -1295,7 +1303,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _buscandoProducto = false);
+      setState(() {
+        _buscandoProducto = false;
+      });
       FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'),
@@ -1638,7 +1648,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _buscandoTicket = false);
+      setState(() {
+        _buscandoTicket = false;
+      });
       FiscoGestNotifications.show(
         SnackBar(
           content: Text('$e'),
@@ -1739,7 +1751,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         return;
       }
 
-      setState(() => _procesando = true);
+      setState(() {
+        _procesando = true;
+      });
       try {
         final metodo = _formaPagoNombre();
         final cuota = _cuotaActualCxc(c);
@@ -1850,7 +1864,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           );
         }
       } finally {
-        if (mounted) setState(() => _procesando = false);
+        if (mounted) setState(() { _procesando = false; });
       }
       return;
     }
@@ -2129,7 +2143,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       return;
     }
 
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       if (_ticketEsDirectoCaja) {
         final detallesActuales = List<DetalleVenta>.from(_lineasDirectoCaja);
@@ -2264,7 +2280,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -2298,10 +2314,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       } else if (key == LogicalKeyboardKey.f4) {
         _dialogoArqueoCaja();
       } else if (key == LogicalKeyboardKey.f6) {
-        setState(() => _modoUi = 'cxc');
+        setState(() {
+          _modoUi = 'cxc';
+        });
         _dialogoBuscarCxc();
       } else if (key == LogicalKeyboardKey.f3) {
-        setState(() => _modoUi = 'cotizacion');
+        setState(() {
+          _modoUi = 'cotizacion';
+        });
         _dialogoBuscarCotizacion();
       } else if (key == LogicalKeyboardKey.f12) {
         _irCobrarTicketSeleccionado();
@@ -2681,7 +2701,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     try {
       final repo = ref.read(ventasRepositoryProvider);
       final lista = await repo.listarPendientesCobro();
-      if (mounted) setState(() => _pendientes = lista);
+      if (mounted) setState(() { _pendientes = lista; });
     } catch (_) {}
     if (!mounted) return;
     final qCtrl = TextEditingController();
@@ -2774,7 +2794,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _seleccionarTicket(seleccionada);
-      setState(() => _modoUi = 'cotizacion');
+      setState(() {
+        _modoUi = 'cotizacion';
+      });
     });
   }
 
@@ -3226,7 +3248,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           borderRadius: BorderRadius.circular(8),
           child: InkWell(
             onTap: () {
-              setState(() => _modoUi = id);
+              setState(() {
+                _modoUi = id;
+              });
               if (id == 'cotizacion') {
                 _dialogoBuscarCotizacion();
               } else if (id == 'cxc') {
@@ -3494,7 +3518,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
   }
 
   Future<void> _onTipoNcfSeleccionado(String code) async {
-    setState(() => _tipoNcf = code);
+    setState(() {
+      _tipoNcf = code;
+    });
     if (code == 'B01' || code == 'B14') {
       final rnc = _rncFiscalController.text.replaceAll(RegExp(r'\\D'), '');
       if (rnc.length < 9) {
@@ -5118,7 +5144,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         color: bg,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () => setState(() => _formaPagoUi = id),
+          onTap: () => setState(() { _formaPagoUi = id; }),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             width: double.infinity,

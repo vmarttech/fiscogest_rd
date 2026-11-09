@@ -39,7 +39,9 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
       );
       return;
     }
-    setState(() => _cargando = true);
+    setState(() {
+      _cargando = true;
+    });
     try {
       // Traer estado real del pedido desde la nube (negocio actual)
       try {
@@ -58,7 +60,7 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
         SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 

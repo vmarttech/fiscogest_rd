@@ -774,7 +774,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                 isDense: true,
                               ),
                               onChanged: (v) =>
-                                  setState(() => _filtro = v.toLowerCase()),
+                                  setState(() { _filtro = v.toLowerCase(); }),
                             );
                             final chips = Wrap(
                               spacing: 8,
@@ -806,7 +806,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                 ),
                                 PopupMenuButton<String?>(
                                   onSelected: (v) =>
-                                      setState(() => _categoriaFiltro = v),
+                                      setState(() { _categoriaFiltro = v; }),
                                   itemBuilder: (_) => [
                                     const PopupMenuItem(
                                       value: null,
@@ -1172,7 +1172,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
         ),
         const SizedBox(height: 16),
         TextField(
-          onChanged: (v) => setState(() => _filtro = v.toLowerCase()),
+          onChanged: (v) => setState(() { _filtro = v.toLowerCase(); }),
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             hintText: 'Buscar gasto…',
@@ -1210,24 +1210,24 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 label: 'Este mes',
                 selected: _periodo == _PeriodoFiltro.esteMes,
                 onTap: () =>
-                    setState(() => _periodo = _PeriodoFiltro.esteMes),
+                    setState(() { _periodo = _PeriodoFiltro.esteMes; }),
               ),
               const SizedBox(width: 6),
               _FilterChipBtn(
                 label: '7 días',
                 selected: _periodo == _PeriodoFiltro.ultimos7,
                 onTap: () =>
-                    setState(() => _periodo = _PeriodoFiltro.ultimos7),
+                    setState(() { _periodo = _PeriodoFiltro.ultimos7; }),
               ),
               const SizedBox(width: 6),
               _FilterChipBtn(
                 label: 'Todos',
                 selected: _periodo == _PeriodoFiltro.todos,
-                onTap: () => setState(() => _periodo = _PeriodoFiltro.todos),
+                onTap: () => setState(() { _periodo = _PeriodoFiltro.todos; }),
               ),
               const SizedBox(width: 6),
               PopupMenuButton<String?>(
-                onSelected: (v) => setState(() => _categoriaFiltro = v),
+                onSelected: (v) => setState(() { _categoriaFiltro = v; }),
                 itemBuilder: (_) => [
                   const PopupMenuItem(
                     value: null,

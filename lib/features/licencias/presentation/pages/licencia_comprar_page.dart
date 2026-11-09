@@ -9,6 +9,8 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/licencias/domain/medios_cobro.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/widgets/equivalente_dop_texto.dart';
+
 import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
 import 'package:fiscogest_rd/features/licencias/data/paypal_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/paypal_checkout_page.dart';
@@ -171,8 +173,20 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                       nombrePlanUi(p),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    subtitle: Text(
-                      'US\$ ${(precioMensualUsd(p) ?? 0).toStringAsFixed(2)} / mes',
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'US\$ ${(precioMensualUsd(p) ?? 0).toStringAsFixed(2)} / mes',
+                        ),
+                        const SizedBox(height: 2),
+                        EquivalenteDopTexto(
+                          montoUsd: (precioMensualUsd(p) ?? 0).toDouble(),
+                          compacto: true,
+                          color: Colors.black54,
+                        ),
+                      ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.pop(ctx, p),
@@ -230,20 +244,22 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final bottomInset = MediaQuery.viewPaddingOf(ctx).bottom;
         return DraggableScrollableSheet(
           expand: false,
-          initialChildSize: 0.85,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
+          initialChildSize: 0.80,
+          minChildSize: 0.45,
+          maxChildSize: 0.92,
           builder: (_, scrollCtrl) {
             return ListView(
               controller: scrollCtrl,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + bottomInset),
               children: [
                 Center(
                   child: Container(
@@ -268,6 +284,13 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 Text(
                   '${nombrePlanUi(plan)} · US\$ ${montoUsd.toStringAsFixed(2)}',
                   style: const TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(height: 4),
+                EquivalenteDopTexto(
+                  montoUsd: montoUsd,
+                  compacto: false,
+                  permitirCopiar: true,
+                  color: Colors.black87,
                 ),
                 const SizedBox(height: 14),
                 Container(
@@ -719,6 +742,13 @@ class _PriceCard extends StatelessWidget {
               ],
             ),
           ),
+          if (precio > 0) ...[
+            const SizedBox(height: 4),
+            EquivalenteDopTexto(
+              montoUsd: precio,
+              compacto: true,
+            ),
+          ],
           const SizedBox(height: 20),
           for (final f in features)
             Padding(

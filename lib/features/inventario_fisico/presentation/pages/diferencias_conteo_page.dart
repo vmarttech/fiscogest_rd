@@ -65,7 +65,9 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
       ),
     );
     if (ok != true) return;
-    setState(() => _aprobando = true);
+    setState(() {
+      _aprobando = true;
+    });
     try {
       final uid = ref.read(usuarioAutenticadoProvider);
       if (uid == null) {
@@ -107,14 +109,19 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _aprobando = false);
+      if (mounted) {
+        setState(() {
+          _aprobando = false;
+        });
+      }
     }
   }
 
   Future<void> _exportarReporte() async {
     try {
-      final bytes =
-          await ref.read(generarReporteProvider).call(widget.conteoId);
+      final bytes = await ref
+          .read(generarReporteProvider)
+          .call(widget.conteoId);
       await Printing.layoutPdf(
         onLayout: (_) async => bytes,
         name: 'conteo_${widget.conteoId}.pdf',
@@ -154,7 +161,9 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
       });
       return const AppScaffold(
         title: 'Diferencias',
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF0D9488))),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF0D9488)),
+        ),
       );
     }
 
@@ -175,9 +184,8 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
             ]
           : const [],
       body: async.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: _teal),
-        ),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: _teal)),
         error: (e, _) => Center(
           child: Text(
             'Error: $e',
@@ -271,12 +279,14 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                 OutlinedButton.icon(
                                   onPressed: _exportarReporte,
                                   icon: const Icon(
-                                      Icons.picture_as_pdf_outlined,
-                                      size: 18),
+                                    Icons.picture_as_pdf_outlined,
+                                    size: 18,
+                                  ),
                                   label: const Text(
                                     'Exportar PDF',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w800),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: _teal,
@@ -295,14 +305,17 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : const Icon(Icons.check_rounded,
-                                          size: 18),
+                                      : const Icon(
+                                          Icons.check_rounded,
+                                          size: 18,
+                                        ),
                                   label: Text(
                                     _aprobando
                                         ? 'Aplicando…'
                                         : 'Aprobar ajustes',
                                     style: const TextStyle(
-                                        fontWeight: FontWeight.w900),
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
                                   style: FilledButton.styleFrom(
                                     backgroundColor: _teal,
@@ -324,8 +337,12 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: _kpi('Total', '$total',
-                                          Icons.list_alt, const Color(0xFF64748B)),
+                                      child: _kpi(
+                                        'Total',
+                                        '$total',
+                                        Icons.list_alt,
+                                        const Color(0xFF64748B),
+                                      ),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -344,9 +361,12 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: _kpi('OK', '$ok',
-                                          Icons.check_circle_outline,
-                                          const Color(0xFF16A34A)),
+                                      child: _kpi(
+                                        'OK',
+                                        '$ok',
+                                        Icons.check_circle_outline,
+                                        const Color(0xFF16A34A),
+                                      ),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -365,8 +385,12 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: _kpi('Total líneas', '$total',
-                                      Icons.list_alt, const Color(0xFF64748B)),
+                                  child: _kpi(
+                                    'Total líneas',
+                                    '$total',
+                                    Icons.list_alt,
+                                    const Color(0xFF64748B),
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -381,9 +405,12 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _kpi('OK', '$ok',
-                                      Icons.check_circle_outline,
-                                      const Color(0xFF16A34A)),
+                                  child: _kpi(
+                                    'OK',
+                                    '$ok',
+                                    Icons.check_circle_outline,
+                                    const Color(0xFF16A34A),
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -401,35 +428,44 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                _chip('Todas', _filtro == _FiltroDif.todas,
-                                    () => setState(
-                                        () => _filtro = _FiltroDif.todas)),
+                                _chip(
+                                  'Todas',
+                                  _filtro == _FiltroDif.todas,
+                                  () => setState(() {
+                                    _filtro = _FiltroDif.todas;
+                                  }),
+                                ),
                                 const SizedBox(width: 6),
                                 _chip(
-                                    'Solo diferencias',
-                                    _filtro == _FiltroDif.soloDif,
-                                    () => setState(
-                                        () => _filtro = _FiltroDif.soloDif)),
+                                  'Solo diferencias',
+                                  _filtro == _FiltroDif.soloDif,
+                                  () => setState(() {
+                                    _filtro = _FiltroDif.soloDif;
+                                  }),
+                                ),
                                 const SizedBox(width: 6),
                                 _chip(
-                                    'Faltantes',
-                                    _filtro == _FiltroDif.faltantes,
-                                    () => setState(() =>
-                                        _filtro = _FiltroDif.faltantes)),
+                                  'Faltantes',
+                                  _filtro == _FiltroDif.faltantes,
+                                  () => setState(() {
+                                    _filtro = _FiltroDif.faltantes;
+                                  }),
+                                ),
                                 const SizedBox(width: 6),
                                 _chip(
-                                    'Sobrantes',
-                                    _filtro == _FiltroDif.sobrantes,
-                                    () => setState(() =>
-                                        _filtro = _FiltroDif.sobrantes)),
+                                  'Sobrantes',
+                                  _filtro == _FiltroDif.sobrantes,
+                                  () => setState(() {
+                                    _filtro = _FiltroDif.sobrantes;
+                                  }),
+                                ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 14),
                           if (filtrados.isEmpty)
                             Container(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 48),
+                              padding: const EdgeInsets.symmetric(vertical: 48),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
@@ -437,8 +473,11 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                               ),
                               child: const Column(
                                 children: [
-                                  Icon(Icons.inbox_outlined,
-                                      size: 40, color: Color(0xFFCBD5E1)),
+                                  Icon(
+                                    Icons.inbox_outlined,
+                                    size: 40,
+                                    color: Color(0xFFCBD5E1),
+                                  ),
                                   SizedBox(height: 10),
                                   Text(
                                     'Sin resultados con este filtro',
@@ -585,8 +624,8 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
     final color = d.diferencia == 0
         ? const Color(0xFF64748B)
         : (d.diferencia > 0
-            ? const Color(0xFF16A34A)
-            : const Color(0xFFDC2626));
+              ? const Color(0xFF16A34A)
+              : const Color(0xFFDC2626));
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -607,8 +646,8 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
               d.diferencia == 0
                   ? Icons.check_rounded
                   : (d.diferencia > 0
-                      ? Icons.trending_up_rounded
-                      : Icons.trending_down_rounded),
+                        ? Icons.trending_up_rounded
+                        : Icons.trending_down_rounded),
               color: color,
               size: 20,
             ),

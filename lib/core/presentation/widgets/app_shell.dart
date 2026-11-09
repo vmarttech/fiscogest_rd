@@ -630,7 +630,8 @@ class AppShell extends ConsumerWidget {
                         isPermanent,
                         badgeCount: pedidosPendientes,
                       ),
-                    _buildNavItem(
+                    if (esAdmin || esDuenoPlataforma(usernameSesion))
+                      _buildNavItem(
                       context,
                       '/licencia/comprar',
                       'Planes y pago',
@@ -638,7 +639,8 @@ class AppShell extends ConsumerWidget {
                       currentPath,
                       isPermanent,
                     ),
-                    _buildNavItem(
+                    if (esAdmin || esDuenoPlataforma(usernameSesion))
+                      _buildNavItem(
                       context,
                       '/licencia',
                       'Mi licencia',

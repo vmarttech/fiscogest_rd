@@ -26,4 +26,15 @@ class FiosTable extends Table {
 
   /// Opcional: vínculo a cotización/venta si existió
   IntColumn get ventaId => integer().named('venta_id').nullable()();
+
+  /// Fecha compromiso de pago. Null = regla por defecto (15 dias).
+  DateTimeColumn get fechaCompromiso =>
+      dateTime().named('fecha_compromiso').nullable()();
+
+  /// Vínculo opcional al cliente del catálogo (cuando se eligió de la lista).
+  IntColumn get clienteId => integer().named('cliente_id').nullable()();
+
+  /// Teléfono/WhatsApp capturado al anotar (o rellenado después).
+  /// Permite avisar sin depender solo del match por nombre.
+  TextColumn get telefono => text().named('telefono').nullable()();
 }

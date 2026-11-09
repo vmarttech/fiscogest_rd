@@ -162,7 +162,7 @@ class _ConsultaStockLecturaSheetState
                             ),
                           ),
                           onChanged: (v) =>
-                              setState(() => _filtro = v.trim().toLowerCase()),
+                              setState(() { _filtro = v.trim().toLowerCase(); }),
                         ),
                       ),
                       // Lista

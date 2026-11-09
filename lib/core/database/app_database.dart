@@ -58,10 +58,12 @@ import 'package:fiscogest_rd/features/e_cf/data/dao/ecfe_tables.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_table.dart';
+import 'package:fiscogest_rd/features/ventas/data/dao/abonos_fiao_table.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
+    AbonosFiaoTable,
     LicenciasTable,
     PedidosLicenciaTable,
     DispositivosLicenciaTable,
@@ -132,7 +134,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 73;
+  int get schemaVersion => 74;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -176,6 +178,21 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+    // Fase A fiao: tabla abonos + columna fecha compromiso (idempotente)
+    try { await m.createTable(abonosFiaoTable); } catch (_) {}
+    
+      // V74: teléfono y clienteId en fios (avisos WhatsApp robustos)
+      if (from < 74) {
+        try {
+          await m.addColumn(fiosTable, fiosTable.clienteId);
+        } catch (_) {}
+        try {
+          await m.addColumn(fiosTable, fiosTable.telefono);
+        } catch (_) {}
+      }
+
+      try { await m.addColumn(fiosTable, fiosTable.fechaCompromiso); } catch (_) {}
+
       if (from < 70) {
         await m.database.customStatement('''
         CREATE TABLE IF NOT EXISTS promociones_comerciales (

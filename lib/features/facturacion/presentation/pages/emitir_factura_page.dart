@@ -60,7 +60,9 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
   Future<void> _emitir() async {
     final v = _seleccion;
     if (v == null || v.id == null) return;
-    setState(() => _emitiendo = true);
+    setState(() {
+      _emitiendo = true;
+    });
     try {
       final ncf = await ref
           .read(emitirFacturaServiceProvider)
@@ -150,7 +152,9 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _emitiendo = false);
+        setState(() {
+          _emitiendo = false;
+        });
         FiscoGestNotifications.show(
           SnackBar(
             content: Text('$e'),
@@ -203,7 +207,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
                     venta: _seleccion!,
                     tipoNcf: _tipoNcf,
                     emitiendo: _emitiendo,
-                    onTipo: (t) => setState(() => _tipoNcf = t),
+                    onTipo: (t) => setState(() { _tipoNcf = t; }),
                     onEmitir: _emitir,
                   );
 

@@ -233,11 +233,13 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
 
   Future<void> _guardar() async {
     if (!widget.editable || _guardando) return;
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       await widget.onGuardar(_leer());
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -497,7 +499,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   groupValue: _sexo,
                                   // ignore: deprecated_member_use
                                   onChanged: widget.editable
-                                      ? (v) => setState(() => _sexo = v!)
+                                      ? (v) => setState(() { _sexo = v!; })
                                       : null,
                                   visualDensity: VisualDensity.compact,
                                 ),
@@ -509,7 +511,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   groupValue: _sexo,
                                   // ignore: deprecated_member_use
                                   onChanged: widget.editable
-                                      ? (v) => setState(() => _sexo = v!)
+                                      ? (v) => setState(() { _sexo = v!; })
                                       : null,
                                   visualDensity: VisualDensity.compact,
                                 ),
@@ -600,7 +602,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                               ],
                               onChanged: widget.editable
                                   ? (v) =>
-                                      setState(() => _tipoVivienda = v ?? 'Alquilada')
+                                      setState(() { _tipoVivienda = v ?? 'Alquilada'; })
                                   : null,
                             ),
                           ),

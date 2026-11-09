@@ -38,7 +38,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   String? _xmlPreview;
 
   Future<void> _imprimirRi() async {
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     try {
       final repo = ref.read(ecfeRepositoryProvider);
       final doc = await repo.obtenerPorId(widget.documentoId);
@@ -77,7 +79,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         SnackBar(content: Text('RI: $e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 
@@ -86,7 +88,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
   }
 
   Future<void> _generarXmlCore() async {
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     try {
       final repoEcfe = ref.read(ecfeRepositoryProvider);
       final doc = await repoEcfe.obtenerPorId(widget.documentoId);
@@ -137,7 +141,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       ref.invalidate(ecfeColaProvider);
 
       if (!mounted) return;
-      setState(() => _xmlPreview = result.xml);
+      setState(() {
+        _xmlPreview = result.xml;
+      });
 
       FiscoGestNotifications.show(
         SnackBar(
@@ -158,13 +164,15 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 
   /// Generar XML → Firmar → Enviar a DGII (un solo flujo).
   Future<void> _procesarEcfe() async {
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     final pasos = <String>[];
     try {
       final repo = ref.read(ecfeRepositoryProvider);
@@ -196,7 +204,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           );
         }
         pasos.add('XML generado');
-        setState(() => _generando = was);
+        setState(() {
+          _generando = was;
+        });
       } else if (doc.estado == EstadoEcfInterno.xmlListo) {
         pasos.add('XML ya listo');
       }
@@ -213,7 +223,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           throw StateError(fr.errores.join(' · '));
         }
         if (fr.xmlFirmado != null) {
-          setState(() => _xmlPreview = fr.xmlFirmado);
+          setState(() {
+            _xmlPreview = fr.xmlFirmado;
+          });
         }
         pasos.add('Firmado');
       } else if (doc?.estado == EstadoEcfInterno.firmado) {
@@ -256,12 +268,14 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 
   Future<void> _firmarXml() async {
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     try {
       final repo = ref.read(ecfeRepositoryProvider);
       final doc = await repo.obtenerPorId(widget.documentoId);
@@ -288,7 +302,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       ref.invalidate(ecfeColaProvider);
       if (!mounted) return;
       if (result.ok) {
-        setState(() => _xmlPreview = result.xmlFirmado);
+        setState(() {
+          _xmlPreview = result.xmlFirmado;
+        });
         FiscoGestNotifications.show(
           const SnackBar(
             content: Text('XML firmado (listo para enviar a DGII)'),
@@ -313,12 +329,14 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 
   Future<void> _enviarDgii() async {
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     try {
       final result = await EnviarEcfe(
         repo: ref.read(ecfeRepositoryProvider),
@@ -347,12 +365,14 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 
   Future<void> _consultarEstado() async {
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     try {
       final result = await ConsultarEcfe(
         repo: ref.read(ecfeRepositoryProvider),
@@ -382,7 +402,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 
@@ -459,7 +479,9 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
       ),
     );
     if (ok != true || !mounted) return;
-    setState(() => _generando = true);
+    setState(() {
+      _generando = true;
+    });
     try {
       final r = await AnularEcfe(
         repo: ref.read(ecfeRepositoryProvider),
@@ -481,7 +503,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _generando = false);
+      if (mounted) setState(() { _generando = false; });
     }
   }
 

@@ -88,7 +88,9 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       ),
     );
     if (d != null) {
-      setState(() => _desde = DateTime(d.year, d.month, d.day));
+      setState(() {
+        _desde = DateTime(d.year, d.month, d.day);
+      });
     }
   }
 
@@ -482,7 +484,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                               ? null
                               : TextField(
                                   controller: _busquedaCtrl,
-                                  onChanged: (v) => setState(() => _busqueda = v),
+                                  onChanged: (v) => setState(() { _busqueda = v; }),
                                   style: const TextStyle(fontWeight: FontWeight.w700),
                                   decoration: InputDecoration(
                                     hintText: 'Buscar en resultados…',
@@ -493,7 +495,9 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                                             icon: const Icon(Icons.clear),
                                             onPressed: () {
                                               _busquedaCtrl.clear();
-                                              setState(() => _busqueda = '');
+                                              setState(() {
+                                                _busqueda = '';
+                                              });
                                             },
                                           ),
                                     border: OutlineInputBorder(

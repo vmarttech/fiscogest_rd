@@ -112,7 +112,9 @@ class _NuevaVentaBorradorPageState
       }
       if (key == LogicalKeyboardKey.f5 || key == LogicalKeyboardKey.f10) {
         if (puede) {
-          setState(() => _esCredito = false);
+          setState(() {
+            _esCredito = false;
+          });
           _guardarCotizacion(esCredito: false);
         }
         _atajoPosAbierto = false;
@@ -130,7 +132,9 @@ class _NuevaVentaBorradorPageState
       }
       if (key == LogicalKeyboardKey.f9) {
         if (puede) {
-          setState(() => _esCredito = true);
+          setState(() {
+            _esCredito = true;
+          });
           _guardarCotizacion(esCredito: true);
         }
         _atajoPosAbierto = false;
@@ -315,7 +319,9 @@ class _NuevaVentaBorradorPageState
       lastDate: hoy.add(const Duration(days: 365)),
     );
     if (fecha != null) {
-      setState(() => _fechaVencimientoSeleccionada = fecha);
+      setState(() {
+        _fechaVencimientoSeleccionada = fecha;
+      });
       ref.read(ventaBorradorProvider.notifier).establecerVencimiento(fecha);
     }
   }
@@ -347,7 +353,9 @@ class _NuevaVentaBorradorPageState
   }
 
   void _cambiarEsCredito(bool valor) {
-    setState(() => _esCredito = valor);
+    setState(() {
+      _esCredito = valor;
+    });
     ref
         .read(ventaBorradorProvider.notifier)
         .establecerFormaPago(esCredito: valor);
@@ -449,12 +457,16 @@ class _NuevaVentaBorradorPageState
     bool abrirCobro = false,
     String formaPago = 'efectivo',
   }) async {
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final notificador = ref.read(ventaBorradorProvider.notifier);
       final repositorio = ref.read(ventasRepositoryProvider);
       notificador.establecerFormaPago(esCredito: esCredito);
-      setState(() => _esCredito = esCredito);
+      setState(() {
+        _esCredito = esCredito;
+      });
 
       const double abonoDesdeFormulario = 0.0;
 
@@ -717,7 +729,9 @@ class _NuevaVentaBorradorPageState
       );
     } finally {
       if (mounted) {
-        setState(() => _guardando = false);
+        setState(() {
+          _guardando = false;
+        });
       }
     }
   }
@@ -813,7 +827,7 @@ class _NuevaVentaBorradorPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -974,7 +988,9 @@ class _NuevaVentaBorradorPageState
           }),
           chip('Cotizar', 'F5', Icons.request_quote_outlined, () {
             if (!puedeGenerar || _guardando) return;
-            setState(() => _esCredito = false);
+            setState(() {
+              _esCredito = false;
+            });
             _guardarCotizacion(esCredito: false);
           }),
           chip('Simulador', '', Icons.calculate_outlined, () {
@@ -1483,7 +1499,9 @@ class _NuevaVentaBorradorPageState
                           label: 'Tipo de venta',
                           value: tipoVenta,
                           onTap: () {
-                            setState(() => _esCredito = !_esCredito);
+                            setState(() {
+                              _esCredito = !_esCredito;
+                            });
                           },
                         ),
                         const SizedBox(height: 8),
@@ -1615,7 +1633,9 @@ class _NuevaVentaBorradorPageState
                               onPressed: disabled
                                   ? null
                                   : () {
-                                      setState(() => _esCredito = false);
+                                      setState(() {
+                                        _esCredito = false;
+                                      });
                                       if (simp) {
                                         _onGenerarVentaSimplificada();
                                       } else {
@@ -1653,7 +1673,9 @@ class _NuevaVentaBorradorPageState
                               onPressed: disabled
                                   ? null
                                   : () {
-                                      setState(() => _esCredito = true);
+                                      setState(() {
+                                        _esCredito = true;
+                                      });
                                       _guardarCotizacion(esCredito: true);
                                     },
                             ),
@@ -1665,7 +1687,9 @@ class _NuevaVentaBorradorPageState
                               onPressed: disabled
                                   ? null
                                   : () {
-                                      setState(() => _esCredito = false);
+                                      setState(() {
+                                        _esCredito = false;
+                                      });
                                       _guardarCotizacion(esCredito: false);
                                     },
                             ),

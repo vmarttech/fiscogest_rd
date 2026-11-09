@@ -321,7 +321,7 @@ class _RegistrarRecepcionPageState
   Widget _buildBotonEstado(String valor, String etiqueta) {
     final seleccionado = _estadoRecepcion == valor;
     return InkWell(
-      onTap: () => setState(() => _estadoRecepcion = valor),
+      onTap: () => setState(() { _estadoRecepcion = valor; }),
       borderRadius: BorderRadius.circular(20),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

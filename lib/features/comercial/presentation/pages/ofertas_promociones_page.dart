@@ -34,7 +34,9 @@ class _OfertasPromocionesPageState
       ref.read(promocionRepositoryProvider).listarTodas();
 
   void _recargar() {
-    setState(() => _future = _listar());
+    setState(() {
+      _future = _listar();
+    });
   }
 
   @override

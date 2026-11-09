@@ -44,7 +44,9 @@ class _LicenciaAdminPedidosPageState
     if (!esDuenoPlataforma(sesion?.username)) return;
     if (!SupabaseConfig.isConfigured) return;
     if (_sincronizandoNube) return;
-    setState(() => _sincronizandoNube = true);
+    setState(() {
+      _sincronizandoNube = true;
+    });
     try {
       final remotos = await SupabaseRestClient().select(
         table: 'pedidos_licencia',
@@ -96,12 +98,12 @@ class _LicenciaAdminPedidosPageState
           );
         }
       }
-      if (mounted) setState(() => _tick++);
+      if (mounted) setState(() { _tick++; });
     } catch (e, st) {
       debugPrint('Admin pedidos pull nube: $e');
       debugPrint('$st');
     } finally {
-      if (mounted) setState(() => _sincronizandoNube = false);
+      if (mounted) setState(() { _sincronizandoNube = false; });
     }
   }
 
@@ -233,7 +235,9 @@ class _LicenciaAdminPedidosPageState
                             FiscoGestNotifications.show(
                               SnackBar(content: Text('Licencia emitida: ${p.referencia}')),
                             );
-                            setState(() => _tick++);
+                            setState(() {
+                              _tick++;
+                            });
                           } catch (e) {
                             FiscoGestNotifications.show(
                               SnackBar(

@@ -143,7 +143,7 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                           color: const Color(0xFF666666),
                         ),
                         onPressed: () =>
-                            setState(() => _expandido = !_expandido),
+                            setState(() { _expandido = !_expandido; }),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(
                           minWidth: 32,

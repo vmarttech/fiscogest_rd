@@ -79,7 +79,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
   void _confirmarCredito(ResultadoFormularioCredito resultadoCredito) async {
     _cerrarFormularioCredito();
     if (!mounted) return;
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final abonoRecibido = resultadoCredito.abonoInicial?.monto ?? 0.0;
       final fechaVence = resultadoCredito.cuenta.fechaVencimiento;
@@ -131,7 +133,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         );
       }
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 

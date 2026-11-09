@@ -186,7 +186,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       final dest = File(p.join(logosDir.path, 'logo_negocio$ext'));
       await File(sourcePath).copy(dest.path);
       if (!mounted) return;
-      setState(() => _logoPath = dest.path);
+      setState(() {
+        _logoPath = dest.path;
+      });
       FiscoGestNotifications.show(
         const SnackBar(
           content: Text('Logo listo. Pulsa Guardar para persistirlo.'),
@@ -205,7 +207,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
     final form = _formKey.currentState;
     if (form != null && !form.validate()) return;
     if (_seccion == _SeccionConfig.empresa && !_validarEmpresa()) return;
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     final entity = ConfiguracionEntity(
       id: '1',
       nombreComercial: _nombreController.text.trim(),
@@ -272,7 +276,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -289,7 +293,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       final cfg = asyncCfg.value!;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _datosCargados) return;
-        setState(() => _aplicarConfig(cfg));
+        setState(() {
+          _aplicarConfig(cfg);
+        });
       });
     }
 
@@ -357,7 +363,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                                 icon: _iconoSeccion(s),
                                 label: _tituloSeccion(s),
                                 selected: s == _seccion,
-                                onTap: () => setState(() => _seccion = s),
+                                onTap: () => setState(() { _seccion = s; }),
                               ),
                           ],
                         );
@@ -378,7 +384,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           child: _HistorialModificacionesCard(
             collapsed: _historialColapsado,
             onToggle: () =>
-                setState(() => _historialColapsado = !_historialColapsado),
+                setState(() { _historialColapsado = !_historialColapsado; }),
             entradas: _historialEntradas,
           ),
         ),
@@ -431,7 +437,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  onSelected: (_) => setState(() => _seccion = s),
+                  onSelected: (_) => setState(() { _seccion = s; }),
                 );
               },
             ),
@@ -874,7 +880,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                                   ],
                                   onChanged: (v) {
                                     if (v != null) {
-                                      setState(() => _monedaSeleccionada = v);
+                                      setState(() {
+                                        _monedaSeleccionada = v;
+                                      });
                                     }
                                   },
                                 ),
@@ -1237,42 +1245,42 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                   switchCampo(
                     'Logo',
                     _docLogo,
-                    (v) => setState(() => _docLogo = v),
+                    (v) => setState(() { _docLogo = v; }),
                   ),
                   switchCampo(
                     'RNC del emisor',
                     _docRnc,
-                    (v) => setState(() => _docRnc = v),
+                    (v) => setState(() { _docRnc = v; }),
                   ),
                   switchCampo(
                     'Dirección',
                     _docDireccion,
-                    (v) => setState(() => _docDireccion = v),
+                    (v) => setState(() { _docDireccion = v; }),
                   ),
                   switchCampo(
                     'Teléfono',
                     _docTelefono,
-                    (v) => setState(() => _docTelefono = v),
+                    (v) => setState(() { _docTelefono = v; }),
                   ),
                   switchCampo(
                     'Correo',
                     _docCorreo,
-                    (v) => setState(() => _docCorreo = v),
+                    (v) => setState(() { _docCorreo = v; }),
                   ),
                   switchCampo(
                     'NCF',
                     _docNcf,
-                    (v) => setState(() => _docNcf = v),
+                    (v) => setState(() { _docNcf = v; }),
                   ),
                   switchCampo(
                     'Datos del cliente',
                     _docCliente,
-                    (v) => setState(() => _docCliente = v),
+                    (v) => setState(() { _docCliente = v; }),
                   ),
                   switchCampo(
                     'Desglose ITBIS',
                     _docItbisDesglose,
-                    (v) => setState(() => _docItbisDesglose = v),
+                    (v) => setState(() { _docItbisDesglose = v; }),
                   ),
                   AppLayout.vM,
                   AppTextField(
@@ -1330,7 +1338,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           ),
           value: _transfImprimirManifiesto,
           activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
-          onChanged: (v) => setState(() => _transfImprimirManifiesto = v),
+          onChanged: (v) => setState(() { _transfImprimirManifiesto = v; }),
         ),
         if (_transfImprimirManifiesto) ...[
           const SizedBox(height: 8),
@@ -1388,7 +1396,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             ),
             value: _transfMostrarFirmas,
             activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
-            onChanged: (v) => setState(() => _transfMostrarFirmas = v),
+            onChanged: (v) => setState(() { _transfMostrarFirmas = v; }),
           ),
           const Text(
             'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
@@ -1456,7 +1464,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                       label: Text(e.$2),
                       selected: _cajaFormaPagoDefault == e.$1,
                       onSelected: (_) =>
-                          setState(() => _cajaFormaPagoDefault = e.$1),
+                          setState(() { _cajaFormaPagoDefault = e.$1; }),
                     ),
                 ],
               ),
@@ -1471,13 +1479,19 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               const Text('Métodos habilitados', style: AppTypography.h4),
               AppLayout.vS,
               filaSwitch('Tarjeta', _cajaPermitirTarjeta, (v) {
-                setState(() => _cajaPermitirTarjeta = v);
+                setState(() {
+                  _cajaPermitirTarjeta = v;
+                });
               }),
               filaSwitch('Transferencia', _cajaPermitirTransferencia, (v) {
-                setState(() => _cajaPermitirTransferencia = v);
+                setState(() {
+                  _cajaPermitirTransferencia = v;
+                });
               }),
               filaSwitch('Cheque', _cajaPermitirCheque, (v) {
-                setState(() => _cajaPermitirCheque = v);
+                setState(() {
+                  _cajaPermitirCheque = v;
+                });
               }),
             ],
           ),
@@ -1492,7 +1506,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               filaSwitch(
                 'Exigir sesión abierta para cobrar',
                 _cajaExigirSesion,
-                (v) => setState(() => _cajaExigirSesion = v),
+                (v) => setState(() { _cajaExigirSesion = v; }),
               ),
             ],
           ),
@@ -1578,7 +1592,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 value: _modoSimplificado,
                 activeThumbColor: AppColors.primary,
                 onChanged: (v) {
-                  setState(() => _modoSimplificado = v);
+                  setState(() {
+                    _modoSimplificado = v;
+                  });
                   // UI inmediata; Guardar confirma en BD
                   ref.read(modoSimplificadoCacheProvider.notifier).state = v;
                 },

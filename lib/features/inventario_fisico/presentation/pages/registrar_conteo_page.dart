@@ -101,7 +101,9 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
       }
       return;
     }
-    setState(() => _cargando = true);
+    setState(() {
+      _cargando = true;
+    });
     try {
       final ahora = DateTime.now();
       final conteo = ConteoFisico(
@@ -138,7 +140,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 
@@ -331,12 +333,16 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         children: [
           Expanded(
             child: _tabBtn('Conteo Simple', !_porLotes, () {
-              setState(() => _porLotes = false);
+              setState(() {
+                _porLotes = false;
+              });
             }),
           ),
           Expanded(
             child: _tabBtn('Conteo por Lotes', _porLotes, () {
-              setState(() => _porLotes = true);
+              setState(() {
+                _porLotes = true;
+              });
             }),
           ),
         ],

@@ -5,12 +5,18 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/fios_provider.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
+import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
+import 'package:fiscogest_rd/features/creditos/presentation/widgets/avisar_atrasados_button.dart';
 class FiosListaPage extends ConsumerWidget {
   const FiosListaPage({super.key});
 
@@ -23,6 +29,19 @@ class FiosListaPage extends ConsumerWidget {
     final fechaFmt = DateFormat('dd/MM/yyyy');
 
     return AppScaffold(
+  floatingActionButton: Consumer(builder: (context, ref, _) {
+    final fios = ref.watch(fiosPendientesProvider).asData?.value ?? const [];
+    final ahora = DateTime.now();
+    final atrasados = fios.where((f) =>
+        f.estado != 'pagado' &&
+        (f.fechaCompromiso == null || f.fechaCompromiso!.isBefore(ahora))).toList();
+    return FloatingActionButton.extended(
+      onPressed: () => AvisarAtrasadosButton.avisar(context, ref, atrasados),
+      icon: const Icon(Icons.chat_bubble_outline),
+      label: const Text('Avisar atrasados'),
+    );
+  }),
+
       title: 'FIAO',
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -116,8 +135,21 @@ class FiosListaPage extends ConsumerWidget {
                       fio: f,
                       fechaFmt: fechaFmt,
                       onAbonar: () => _abrirAbonar(context, ref, f),
-                      onRecordatorio: () =>
-                          _abrirRecordatorioWhatsApp(context, ref, f),
+                      onRecordatorio: () {
+                        final gatesWA = LicenciaGates(ref.read(licenciaActualProvider).valueOrNull);
+                        if (!gatesWA.permiteNotifWhatsappFiao) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Los recordatorios por WhatsApp están disponibles desde el plan Esencial.',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
+                        _abrirRecordatorioWhatsApp(context, ref, f);
+                      },
                     );
                   },
                 ),
@@ -141,6 +173,16 @@ class FiosListaPage extends ConsumerWidget {
     );
 
     if (telefono == null || !context.mounted) return;
+
+    // Persistir teléfono en el fiao si aún no tenía
+    if ((fio.telefono == null || fio.telefono!.trim().isEmpty) &&
+        telefono.trim().isNotEmpty) {
+      try {
+        final db = ref.read(databaseProvider);
+        await (db.update(db.fiosTable)..where((t) => t.id.equals(fio.id)))
+            .write(FiosTableCompanion(telefono: Value(telefono.trim())));
+      } catch (_) {}
+    }
 
     try {
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
@@ -348,7 +390,9 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
       return;
     }
 
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       await ref.read(fiosRepositoryProvider).abonar(widget.fio.id, valor);
       if (!mounted) return;
@@ -363,11 +407,36 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
-  @override
+  
+  Widget _botonMonto(String label, double valor) {
+    final saldo = widget.fio.saldoPendiente;
+    final activo = valor <= saldo + 0.01;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3),
+        child: OutlinedButton(
+          onPressed: (_guardando || !activo)
+              ? null
+              : () => setState(() {
+                    _monto.text = valor.toStringAsFixed(2);
+                  }),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Text(label,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+        ),
+      ),
+    );
+  }
+@override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final saldo = widget.fio.saldoPendiente;
@@ -381,7 +450,8 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
+        child: SingleChildScrollView(
+              child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -409,12 +479,42 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
             ),
             Text(
               'Saldo: ${formatRd(saldo)}',
+
               style: AppTypography.bodyMedium.copyWith(
                 color: AppColors.warning,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 14),
+            const SizedBox(height: 8),
+            Row(children: [
+              _botonMonto('50', 50),
+              _botonMonto('100', 100),
+              _botonMonto('200', 200),
+              _botonMonto('500', 500),
+            ]),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _guardando
+                    ? null
+                    : () => setState(() {
+                          _monto.text = saldo.toStringAsFixed(2);
+                        }),
+                icon: const Icon(Icons.check_circle_outline, size: 20),
+                label: const Text('SALDAR TODO',
+                    style: TextStyle(fontWeight: FontWeight.w800)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             TextField(
               controller: _monto,
               keyboardType: const TextInputType.numberWithOptions(
@@ -479,6 +579,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
             ),
           ],
         ),
+            ),
       ),
     );
   }
@@ -501,7 +602,9 @@ class _RecordatorioWhatsAppDialogState
   @override
   void initState() {
     super.initState();
-    _telefonoCtrl = TextEditingController();
+    // Preferir teléfono ya guardado en el fiao
+    final prefill = (widget.fio.telefono ?? '').trim();
+    _telefonoCtrl = TextEditingController(text: prefill);
   }
 
   @override

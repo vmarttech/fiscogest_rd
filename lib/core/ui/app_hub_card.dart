@@ -30,8 +30,8 @@ class _AppHubCardState extends State<AppHubCard> {
   Widget build(BuildContext context) {
     final c = widget.color;
     return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
+      onEnter: (_) => setState(() { _hover = true; }),
+      onExit: (_) => setState(() { _hover = false; }),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,

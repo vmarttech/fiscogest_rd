@@ -52,10 +52,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
 
   Future<void> _cargarDetalles() async {
     if (_compraId == 0) {
-      if (mounted) setState(() => _cargandoDetalles = false);
+      if (mounted) setState(() { _cargandoDetalles = false; });
       return;
     }
-    if (mounted) setState(() => _cargandoDetalles = true);
+    if (mounted) setState(() { _cargandoDetalles = true; });
     try {
       final repoCompra = ref.read(repo.compraRepositoryProvider);
       final lista = await repoCompra.listarDetallesDeCompra(_compraId);

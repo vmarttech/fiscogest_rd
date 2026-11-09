@@ -45,7 +45,9 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
       final db = ref.read(databaseProvider);
       final row = await AuthService(db).buscarPorUsername(_userCtrl.text);
       if (row == null) {
-        setState(() => _error = 'Usuario no encontrado');
+        setState(() {
+          _error = 'Usuario no encontrado';
+        });
         return;
       }
       if ((row.preguntaRecuperacion ?? '').isEmpty) {
@@ -59,15 +61,19 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         _paso2 = true;
       });
     } catch (e) {
-      setState(() => _error = '$e');
+      setState(() {
+        _error = '$e';
+      });
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 
   Future<void> _recuperar() async {
     if (_passCtrl.text != _pass2Ctrl.text) {
-      setState(() => _error = 'Las contraseñas no coinciden');
+      setState(() {
+        _error = 'Las contraseñas no coinciden';
+      });
       return;
     }
     setState(() {
@@ -82,7 +88,9 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         nuevaPassword: _passCtrl.text,
       );
       if (err != null) {
-        setState(() => _error = err);
+        setState(() {
+          _error = err;
+        });
         return;
       }
       if (!mounted) return;
@@ -94,9 +102,11 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
       );
       context.go('/login');
     } catch (e) {
-      setState(() => _error = '$e');
+      setState(() {
+        _error = '$e';
+      });
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 

@@ -51,7 +51,9 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
   Future<void> _guardar() async {
     final sesion = ref.read(sesionProvider);
     if (_passCtrl.text != _pass2Ctrl.text) {
-      setState(() => _error = 'Las contraseñas no coinciden');
+      setState(() {
+        _error = 'Las contraseñas no coinciden';
+      });
       return;
     }
 
@@ -97,7 +99,9 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
           respuesta: _respuestaCtrl.text,
         );
         if (err != null) {
-          setState(() => _error = err);
+          setState(() {
+            _error = err;
+          });
           return;
         }
         ref.read(sesionProvider.notifier).state = UsuarioSesion(
@@ -118,7 +122,7 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
             : 'No se pudo guardar la cuenta',
       );
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 
@@ -189,7 +193,7 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                                 color: Colors.white54,
                               ),
                               onPressed: () =>
-                                  setState(() => _ocultar = !_ocultar),
+                                  setState(() { _ocultar = !_ocultar; }),
                             ),
                           ),
                         ),

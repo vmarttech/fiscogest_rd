@@ -53,7 +53,9 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
   }
 
   Future<void> _cargarDatos() async {
-    setState(() => _cargando = true);
+    setState(() {
+      _cargando = true;
+    });
     final db = ref.read(appDatabaseProvider);
     final filas = await db.select(db.proveedoresTable).get();
     final fila = filas.where((p) => p.id == widget.proveedorId).firstOrNull;

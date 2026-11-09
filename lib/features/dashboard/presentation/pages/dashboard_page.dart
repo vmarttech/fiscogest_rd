@@ -649,7 +649,7 @@ class _CarouselCardState extends State<_CarouselCard> {
           PageView.builder(
             controller: _controller,
             itemCount: _slides.length,
-            onPageChanged: (i) => setState(() => _page = i),
+            onPageChanged: (i) => setState(() { _page = i; }),
             itemBuilder: (_, i) {
               final s = _slides[i];
               return Padding(

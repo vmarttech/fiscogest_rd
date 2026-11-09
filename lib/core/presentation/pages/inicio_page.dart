@@ -1235,14 +1235,18 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
         ..forward();
       return;
     }
-    setState(() => _index = (_index + 1) % _slides.length);
+    setState(() {
+      _index = (_index + 1) % _slides.length;
+    });
     _progress
       ..reset()
       ..forward();
   }
 
   void _goTo(int i) {
-    setState(() => _index = i);
+    setState(() {
+      _index = i;
+    });
     _progress
       ..reset()
       ..forward();
@@ -1250,7 +1254,9 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
 
   void _setPaused(bool v) {
     if (_paused == v) return;
-    setState(() => _paused = v);
+    setState(() {
+      _paused = v;
+    });
     if (v) {
       _progress.stop();
     } else {

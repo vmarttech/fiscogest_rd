@@ -69,7 +69,9 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
 
   Future<void> _onReturn() async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     try {
       final capture = await _paypal.captureOrder(widget.orderId);
       // Solo COMPLETED = dinero capturado. APPROVED NO basta (no hay cobro).

@@ -312,7 +312,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
   Widget _searchField()
  {
     return TextField(
-      onChanged: (v) => setState(() => _filtro = v.trim()),
+      onChanged: (v) => setState(() { _filtro = v.trim(); }),
       style: const TextStyle(fontSize: 14, color: _ink),
       decoration: InputDecoration(
         hintText: 'Buscar código, nombre, responsable, o ubicación...',
@@ -349,7 +349,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
         Padding(
           padding: const EdgeInsets.only(right: 8),
           child: InkWell(
-            onTap: () => setState(() => _chip = it.$1),
+            onTap: () => setState(() { _chip = it.$1; }),
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

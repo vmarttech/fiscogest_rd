@@ -299,7 +299,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
           if (ok) {
             await LoginPrefs.enableBiometric(username: user, password: pass);
-            if (mounted) setState(() => _bioEnabled = true);
+            if (mounted) setState(() { _bioEnabled = true; });
           }
         }
       } else if (await LoginPrefs.isBiometricEnabled()) {
@@ -347,9 +347,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         }
       }
     } catch (e) {
-      setState(() => _error = 'Error: $e');
+      setState(() {
+        _error = 'Error: $e';
+      });
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 
@@ -361,7 +363,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     try {
       final ok = await BiometricAuth.authenticate();
       if (!ok) {
-        setState(() => _error = 'No se pudo verificar la identidad');
+        setState(() {
+          _error = 'No se pudo verificar la identidad';
+        });
         return;
       }
       final cred = await LoginPrefs.readBiometricCredentials();
@@ -416,9 +420,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         }
       }
     } catch (e) {
-      setState(() => _error = 'Error: $e');
+      setState(() {
+        _error = 'Error: $e';
+      });
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() { _cargando = false; });
     }
   }
 
@@ -537,7 +543,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
                           onSuffixTap: () =>
-                              setState(() => _ocultar = !_ocultar),
+                              setState(() { _ocultar = !_ocultar; }),
                           obscureText: _ocultar,
                         ),
                         const SizedBox(height: 8),

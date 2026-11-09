@@ -190,7 +190,9 @@ class _FormularioCreditoVistaState
       locale: const Locale('es', 'DO'),
     );
     if (fecha != null) {
-      setState(() => _fechaPrimerVencimiento = fecha);
+      setState(() {
+        _fechaPrimerVencimiento = fecha;
+      });
     }
   }
 
@@ -206,7 +208,9 @@ class _FormularioCreditoVistaState
       }
       return;
     }
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final resumen = _resumen;
       final ahora = DateTime.now();
@@ -271,7 +275,7 @@ class _FormularioCreditoVistaState
         );
       }
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -691,7 +695,7 @@ class _FormularioCreditoVistaState
           _opcionesMeses,
           _meses,
           (m) => m == 1 ? '1 mes' : '$m meses',
-          (m) => setState(() => _meses = m),
+          (m) => setState(() { _meses = m; }),
         ),
         _buildSelectorEtiqueta('Primer vencimiento'),
         _buildCampoFecha(),

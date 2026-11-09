@@ -19,6 +19,7 @@ class DashboardComprasPage extends ConsumerStatefulWidget {
 
 class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
   String _filtroTexto = '';
+
   /// todos | pagada | credito | pendiente | vencida
   String _filtroEstado = 'todos';
   ActividadRecienteItem? _seleccionada;
@@ -61,7 +62,9 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
             onRefresh: () async {
               ref.invalidate(dashboardComprasKpisProvider);
               ref.invalidate(actividadRecienteComprasProvider);
-              setState(() => _seleccionada = null);
+              setState(() {
+                _seleccionada = null;
+              });
             },
             child: isMobile
                 ? _buildMobile(kpisAsync, actividadAsync, alertas)
@@ -181,7 +184,9 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               child: _quickAction(
                 icon: Icons.account_balance_wallet_rounded,
                 label: 'Por pagar',
-                sub: alertas > 0 ? '$alertas alerta${alertas > 1 ? 's' : ''}' : 'Cuentas',
+                sub: alertas > 0
+                    ? '$alertas alerta${alertas > 1 ? 's' : ''}'
+                    : 'Cuentas',
                 color: alertas > 0
                     ? const Color(0xFFDC2626)
                     : const Color(0xFF0D9488),
@@ -235,10 +240,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                 ('Crédito', 'credito'),
                 ('Pendientes', 'pendiente'),
                 ('Vencidas', 'vencida'),
-              ]) ...[
-                _chipFiltro(e.$1, e.$2),
-                const SizedBox(width: 6),
-              ],
+              ]) ...[_chipFiltro(e.$1, e.$2), const SizedBox(width: 6)],
             ],
           ),
         ),
@@ -257,8 +259,11 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                 ),
                 child: const Column(
                   children: [
-                    Icon(Icons.inbox_outlined,
-                        size: 36, color: Color(0xFFCBD5E1)),
+                    Icon(
+                      Icons.inbox_outlined,
+                      size: 36,
+                      color: Color(0xFFCBD5E1),
+                    ),
                     SizedBox(height: 8),
                     Text(
                       'Sin compras en este filtro',
@@ -470,7 +475,9 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: badge.$2,
                             borderRadius: BorderRadius.circular(6),
@@ -588,8 +595,9 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                 const SizedBox(height: 6),
                                 TextField(
                                   controller: _searchCtrl,
-                                  onChanged: (v) =>
-                                      setState(() => _filtroTexto = v),
+                                  onChanged: (v) => setState(() {
+                                    _filtroTexto = v;
+                                  }),
                                   style: const TextStyle(fontSize: 12),
                                   decoration: InputDecoration(
                                     hintText:
@@ -606,8 +614,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     isDense: true,
                                     filled: true,
                                     fillColor: const Color(0xFFF8FAFC),
-                                    contentPadding:
-                                        const EdgeInsets.symmetric(
+                                    contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                       vertical: 8,
                                     ),
@@ -640,9 +647,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                               ],
                             ),
                             loading: () => const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                             error: (e, _) => Text('$e'),
                           ),
@@ -682,8 +687,8 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     title: 'Registrar compra',
                                     subtitle:
                                         'Nueva orden de compra o gasto [F12]',
-                                    onTap: () => context
-                                        .push('/compras/registrar'),
+                                    onTap: () =>
+                                        context.push('/compras/registrar'),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -694,8 +699,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     title: 'Lista de compras',
                                     subtitle:
                                         'Historial y auditoría tributaria',
-                                    onTap: () =>
-                                        context.push('/compras/lista'),
+                                    onTap: () => context.push('/compras/lista'),
                                   ),
                                 ),
                               ],
@@ -707,12 +711,10 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                       Expanded(
                         child: Container(
                           width: double.infinity,
-                          padding:
-                              const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
                           decoration: _deco(),
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const Text(
                                 'ACTIVIDAD RECIENTE  (↑ ↓ para navegar)',
@@ -738,8 +740,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     ),
                                     Expanded(
                                       flex: 8,
-                                      child: Text('PROVEEDOR',
-                                          style: _hStyle),
+                                      child: Text('PROVEEDOR', style: _hStyle),
                                     ),
                                     SizedBox(
                                       width: 88,
@@ -783,12 +784,13 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                         filtrados.isNotEmpty) {
                                       WidgetsBinding.instance
                                           .addPostFrameCallback((_) {
-                                        if (mounted &&
-                                            _seleccionada == null) {
-                                          setState(() => _seleccionada =
-                                              filtrados.first);
-                                        }
-                                      });
+                                            if (mounted &&
+                                                _seleccionada == null) {
+                                              setState(() {
+                                                _seleccionada = filtrados.first;
+                                              });
+                                            }
+                                          });
                                     }
                                     return Focus(
                                       focusNode: _focusNode,
@@ -803,22 +805,25 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                               _seleccionada?.compraId,
                                         );
                                         if (event.logicalKey ==
-                                            LogicalKeyboardKey
-                                                .arrowDown) {
-                                          final next = (idx + 1)
-                                              .clamp(
-                                                  0, filtrados.length - 1);
-                                          setState(() => _seleccionada =
-                                              filtrados[next]);
+                                            LogicalKeyboardKey.arrowDown) {
+                                          final next = (idx + 1).clamp(
+                                            0,
+                                            filtrados.length - 1,
+                                          );
+                                          setState(() {
+                                            _seleccionada = filtrados[next];
+                                          });
                                           return KeyEventResult.handled;
                                         }
                                         if (event.logicalKey ==
                                             LogicalKeyboardKey.arrowUp) {
-                                          final prev = (idx - 1)
-                                              .clamp(
-                                                  0, filtrados.length - 1);
-                                          setState(() => _seleccionada =
-                                              filtrados[prev]);
+                                          final prev = (idx - 1).clamp(
+                                            0,
+                                            filtrados.length - 1,
+                                          );
+                                          setState(() {
+                                            _seleccionada = filtrados[prev];
+                                          });
                                           return KeyEventResult.handled;
                                         }
                                         return KeyEventResult.ignored;
@@ -827,20 +832,21 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                         itemCount: filtrados.length,
                                         itemBuilder: (_, i) {
                                           final item = filtrados[i];
-                                          final sel = _seleccionada
-                                                  ?.compraId ==
+                                          final sel =
+                                              _seleccionada?.compraId ==
                                               item.compraId;
-                                          final badge =
-                                              _estadoBadge(item.estado);
+                                          final badge = _estadoBadge(
+                                            item.estado,
+                                          );
                                           return Material(
                                             color: sel
                                                 ? const Color(0xFFF0FDF4)
                                                 : Colors.white,
                                             child: InkWell(
-                                              onTap: () => setState(() =>
-                                                  _seleccionada = item),
-                                              onDoubleTap: () =>
-                                                  context.push(
+                                              onTap: () => setState(() {
+                                                _seleccionada = item;
+                                              }),
+                                              onDoubleTap: () => context.push(
                                                 '/compras/detalle/${item.compraId}',
                                               ),
                                               child: Container(
@@ -850,58 +856,50 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                                       width: 4,
                                                       color: sel
                                                           ? const Color(
-                                                              0xFF10B981)
-                                                          : Colors
-                                                              .transparent,
+                                                              0xFF10B981,
+                                                            )
+                                                          : Colors.transparent,
                                                     ),
-                                                    bottom:
-                                                        const BorderSide(
-                                                      color: Color(
-                                                          0xFFF1F5F9),
+                                                    bottom: const BorderSide(
+                                                      color: Color(0xFFF1F5F9),
                                                     ),
                                                   ),
                                                 ),
                                                 padding:
-                                                    const EdgeInsets
-                                                        .symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 11,
-                                                ),
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 11,
+                                                    ),
                                                 child: Row(
                                                   children: [
                                                     SizedBox(
                                                       width: 54,
                                                       child: Text(
-                                                        _fecha(
-                                                            item.fecha),
-                                                        style:
-                                                            const TextStyle(
+                                                        _fecha(item.fecha),
+                                                        style: const TextStyle(
                                                           fontSize: 12,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w700,
+                                                              FontWeight.w700,
                                                           color: Color(
-                                                              0xFF334155),
+                                                            0xFF334155,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
                                                     Expanded(
                                                       flex: 8,
                                                       child: Text(
-                                                        item
-                                                            .proveedorNombre,
+                                                        item.proveedorNombre,
                                                         maxLines: 1,
-                                                        overflow:
-                                                            TextOverflow
-                                                                .ellipsis,
-                                                        style:
-                                                            const TextStyle(
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: const TextStyle(
                                                           fontSize: 13,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w800,
+                                                              FontWeight.w800,
                                                           color: Color(
-                                                              0xFF0F172A),
+                                                            0xFF0F172A,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
@@ -912,34 +910,30 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                                         style: TextStyle(
                                                           fontSize: 12,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w700,
+                                                              FontWeight.w700,
                                                           color: Color(
-                                                              0xFF475569),
+                                                            0xFF475569,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
                                                     SizedBox(
                                                       width: 120,
                                                       child: Text(
-                                                        formatRd(
-                                                            item.total),
+                                                        formatRd(item.total),
                                                         textAlign:
-                                                            TextAlign
-                                                                .right,
+                                                            TextAlign.right,
                                                         maxLines: 1,
                                                         softWrap: false,
                                                         overflow:
-                                                            TextOverflow
-                                                                .fade,
-                                                        style:
-                                                            const TextStyle(
+                                                            TextOverflow.fade,
+                                                        style: const TextStyle(
                                                           fontSize: 13,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w900,
+                                                              FontWeight.w900,
                                                           color: Color(
-                                                              0xFF0F172A),
+                                                            0xFF0F172A,
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
@@ -948,31 +942,25 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                                       child: Center(
                                                         child: Container(
                                                           padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                            horizontal: 8,
-                                                            vertical: 3,
-                                                          ),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color:
-                                                                badge.$2,
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 3,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: badge.$2,
                                                             borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10),
+                                                                BorderRadius.circular(
+                                                                  10,
+                                                                ),
                                                           ),
                                                           child: Text(
                                                             badge.$1,
-                                                            style:
-                                                                TextStyle(
-                                                              fontSize:
-                                                                  11,
+                                                            style: TextStyle(
+                                                              fontSize: 11,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w800,
-                                                              color: badge
-                                                                  .$3,
+                                                              color: badge.$3,
                                                             ),
                                                           ),
                                                         ),
@@ -990,8 +978,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                   loading: () => const Center(
                                     child: CircularProgressIndicator(),
                                   ),
-                                  error: (e, _) =>
-                                      Center(child: Text('$e')),
+                                  error: (e, _) => Center(child: Text('$e')),
                                 ),
                               ),
                               const Divider(height: 10),
@@ -1053,204 +1040,197 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                   final pendientes = k.porPagar + k.vencido;
                   return SingleChildScrollView(
                     child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'TOTALES Y RESUMEN DE SALDOS',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF64748B),
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _resumenFila('Gasto', formatRd(0)),
-                      _resumenFila(
-                          'Compra', formatRd(k.comprasEsteMes)),
-                      _resumenFila('Itbis', formatRd(0)),
-                      _resumenFila('Otros', formatRd(0)),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'TOTAL COMPRAS MES',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              formatRd(k.comprasEsteMes),
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Total Pendientes',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                      Text(
-                        formatRd(pendientes),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'RESUMEN POR ESTADO',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      _resumenFila(
-                          'Crédito', formatRd(k.aCreditoEsteMes)),
-                      _resumenFila('Vencido', formatRd(k.vencido)),
-                      const Divider(height: 20),
-                      // Detalle fila seleccionada
-                      if (_seleccionada == null)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Text(
-                            'Ninguna orden seleccionada',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF94A3B8),
-                            ),
-                          ),
-                        )
-                      else ...[
-                        Text(
-                          _seleccionada!.proveedorNombre,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        Text(
-                          '${_seleccionada!.esCredito ? 'Compra a crédito' : 'Compra de contado'} — ${_fecha(_seleccionada!.fecha)}',
-                          style: const TextStyle(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'TOTALES Y RESUMEN DE SALDOS',
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF94A3B8),
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF64748B),
+                            letterSpacing: 0.3,
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        _resumenFila('Gasto', formatRd(0)),
+                        _resumenFila('Compra', formatRd(k.comprasEsteMes)),
+                        _resumenFila('Itbis', formatRd(0)),
+                        _resumenFila('Otros', formatRd(0)),
                         const SizedBox(height: 10),
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFFE2E8F0),
-                            ),
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Comprobante Fiscal NCF',
+                                'TOTAL COMPRAS MES',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: Color(0xFF94A3B8),
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF64748B),
                                 ),
                               ),
+                              const SizedBox(height: 4),
                               Text(
-                                _seleccionada!.ncf.isEmpty
-                                    ? '—'
-                                    : _seleccionada!.ncf,
+                                formatRd(k.comprasEsteMes),
                                 style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  fontFamily: 'monospace',
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0F172A),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFFE2E8F0),
-                            ),
+                        const Text(
+                          'Total Pendientes',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
                           ),
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Balance Liquidado',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFF94A3B8),
-                                ),
-                              ),
-                              Text(
-                                formatRd(_seleccionada!.total),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ],
+                        ),
+                        Text(
+                          formatRd(pendientes),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         const SizedBox(height: 12),
-                      ],
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () =>
-                              context.push('/compras/registrar'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF10B981),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 14,
+                        const Text(
+                          'RESUMEN POR ESTADO',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _resumenFila('Crédito', formatRd(k.aCreditoEsteMes)),
+                        _resumenFila('Vencido', formatRd(k.vencido)),
+                        const Divider(height: 20),
+                        // Detalle fila seleccionada
+                        if (_seleccionada == null)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'Ninguna orden seleccionada',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w900,
+                          )
+                        else ...[
+                          Text(
+                            _seleccionada!.proveedorNombre,
+                            style: const TextStyle(
                               fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F172A),
                             ),
                           ),
-                          child: const Text('[F12] NUEVA COMPRA'),
+                          Text(
+                            '${_seleccionada!.esCredito ? 'Compra a crédito' : 'Compra de contado'} — ${_fecha(_seleccionada!.fecha)}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Comprobante Fiscal NCF',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                Text(
+                                  _seleccionada!.ncf.isEmpty
+                                      ? '—'
+                                      : _seleccionada!.ncf,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Balance Liquidado',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                Text(
+                                  formatRd(_seleccionada!.total),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => context.push('/compras/registrar'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF10B981),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                              ),
+                            ),
+                            child: const Text('[F12] NUEVA COMPRA'),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   );
                 },
                 loading: () => const Center(
@@ -1274,17 +1254,17 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
   );
 
   BoxDecoration _deco() => BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      );
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: const Color(0xFFE2E8F0)),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.03),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
 
   Widget _cardCentroCompras() {
     return Container(
@@ -1299,26 +1279,33 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.shopping_cart_outlined,
-                size: 20, color: Color(0xFF334155)),
+            child: const Icon(
+              Icons.shopping_cart_outlined,
+              size: 20,
+              color: Color(0xFF334155),
+            ),
           ),
           const SizedBox(width: 10),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Centro de compras',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A))),
+                Text(
+                  'Centro de compras',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 SizedBox(height: 2),
                 Text(
                   'Registra compras, revisa actividad y controla tus cuentas por pagar',
                   style: TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF94A3B8),
-                      height: 1.3),
+                    fontSize: 10,
+                    color: Color(0xFF94A3B8),
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
@@ -1350,11 +1337,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Colors.white.withValues(alpha: 0.85),
-            size: 16,
-          ),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 16),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -1396,7 +1379,9 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
       color: sel ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
       borderRadius: BorderRadius.circular(6),
       child: InkWell(
-        onTap: () => setState(() => _filtroEstado = value),
+        onTap: () => setState(() {
+          _filtroEstado = value;
+        }),
         borderRadius: BorderRadius.circular(6),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
@@ -1453,16 +1438,22 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF334155))),
-                    Text(subtitle,
-                        style: const TextStyle(
-                            fontSize: 9,
-                            color: Color(0xFF94A3B8),
-                            height: 1.25)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF334155),
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        color: Color(0xFF94A3B8),
+                        height: 1.25,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1479,15 +1470,19 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
       child: Row(
         children: [
           Expanded(
-            child: Text(label,
-                style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF64748B))),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            ),
           ),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A))),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF0F172A),
+            ),
+          ),
         ],
       ),
     );
@@ -1497,7 +1492,8 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
     final q = _filtroTexto.trim().toLowerCase();
     return items.where((i) {
       if (q.isNotEmpty) {
-        final ok = i.proveedorNombre.toLowerCase().contains(q) ||
+        final ok =
+            i.proveedorNombre.toLowerCase().contains(q) ||
             i.ncf.toLowerCase().contains(q);
         if (!ok) return false;
       }
@@ -1517,37 +1513,33 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
   String _fecha(DateTime f) => DateFormat('d MMM', 'es').format(f);
 
   String _estadoLabel(EstadoCompra e) => switch (e) {
-        EstadoCompra.pagada => 'Pagada',
-        EstadoCompra.confirmada => 'Confirmada',
-        EstadoCompra.registrada => 'Registrada',
-        EstadoCompra.recibida => 'Recibida',
-        EstadoCompra.vencida => 'Vencida',
-        EstadoCompra.borrador => 'Borrador',
-        EstadoCompra.anulada => 'Anulada',
-      };
+    EstadoCompra.pagada => 'Pagada',
+    EstadoCompra.confirmada => 'Confirmada',
+    EstadoCompra.registrada => 'Registrada',
+    EstadoCompra.recibida => 'Recibida',
+    EstadoCompra.vencida => 'Vencida',
+    EstadoCompra.borrador => 'Borrador',
+    EstadoCompra.anulada => 'Anulada',
+  };
 
   (String, Color, Color) _estadoBadge(EstadoCompra e) => switch (e) {
-        EstadoCompra.pagada => (
-            'Pagada',
-            const Color(0xFFD1FAE5),
-            const Color(0xFF065F46)
-          ),
-        EstadoCompra.confirmada ||
-        EstadoCompra.registrada ||
-        EstadoCompra.recibida => (
-            e == EstadoCompra.confirmada ? 'A Crédito' : _estadoLabel(e),
-            const Color(0xFFDBEAFE),
-            const Color(0xFF1E40AF)
-          ),
-        EstadoCompra.vencida => (
-            'Vencida',
-            const Color(0xFFFEE2E2),
-            const Color(0xFF991B1B)
-          ),
-        _ => (
-            _estadoLabel(e),
-            const Color(0xFFF1F5F9),
-            const Color(0xFF64748B)
-          ),
-      };
+    EstadoCompra.pagada => (
+      'Pagada',
+      const Color(0xFFD1FAE5),
+      const Color(0xFF065F46),
+    ),
+    EstadoCompra.confirmada ||
+    EstadoCompra.registrada ||
+    EstadoCompra.recibida => (
+      e == EstadoCompra.confirmada ? 'A Crédito' : _estadoLabel(e),
+      const Color(0xFFDBEAFE),
+      const Color(0xFF1E40AF),
+    ),
+    EstadoCompra.vencida => (
+      'Vencida',
+      const Color(0xFFFEE2E2),
+      const Color(0xFF991B1B),
+    ),
+    _ => (_estadoLabel(e), const Color(0xFFF1F5F9), const Color(0xFF64748B)),
+  };
 }

@@ -598,7 +598,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             onSelected: (_) =>
-                                setState(() => _filtro = entry.$1),
+                                setState(() { _filtro = entry.$1; }),
                           ),
                         ),
                     ],
@@ -1109,7 +1109,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                         'Controla la habilitación del módulo fiscal electrónico.',
                       ),
                       value: _habilitado,
-                      onChanged: (v) => setState(() => _habilitado = v),
+                      onChanged: (v) => setState(() { _habilitado = v; }),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<AmbienteDgii>(
@@ -1124,7 +1124,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                           DropdownMenuItem(value: a, child: Text(a.etiqueta)),
                       ],
                       onChanged: (v) {
-                        if (v != null) setState(() => _ambiente = v);
+                        if (v != null) setState(() { _ambiente = v; });
                       },
                     ),
                     const SizedBox(height: 14),

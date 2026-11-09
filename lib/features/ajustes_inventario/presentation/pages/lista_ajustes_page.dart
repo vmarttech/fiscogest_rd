@@ -228,7 +228,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                   '$total',
                                   Icons.list_alt_rounded,
                                   const Color(0xFF64748B),
-                                  () => setState(() => _tipoFiltro = null),
+                                  () => setState(() { _tipoFiltro = null; }),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -288,7 +288,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                               '$total',
                               Icons.list_alt_rounded,
                               const Color(0xFF64748B),
-                              () => setState(() => _tipoFiltro = null),
+                              () => setState(() { _tipoFiltro = null; }),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -335,7 +335,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                     // —— Buscar ——
                     TextField(
                       onChanged: (v) =>
-                          setState(() => _filtro = v.trim().toLowerCase()),
+                          setState(() { _filtro = v.trim().toLowerCase(); }),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: 'Buscar producto, tipo o motivo…',
@@ -376,7 +376,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                       child: Row(
                         children: [
                           _chip('Todos', _tipoFiltro == null, () {
-                            setState(() => _tipoFiltro = null);
+                            setState(() {
+                              _tipoFiltro = null;
+                            });
                           }),
                           const SizedBox(width: 6),
                           _chip(

@@ -66,7 +66,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
     }
     final sistema = p.stock ?? 0.0;
     final dif = fisico - sistema;
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       await ref.read(guardarDiferenciaProvider).call(
             DiferenciaConteo(
@@ -111,7 +113,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -363,7 +365,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
           TextField(
             controller: _busquedaCtrl,
             onChanged: (v) =>
-                setState(() => _filtro = v.trim().toLowerCase()),
+                setState(() { _filtro = v.trim().toLowerCase(); }),
             style: const TextStyle(fontWeight: FontWeight.w700),
             decoration: InputDecoration(
               hintText: 'Buscar por código o nombre…',

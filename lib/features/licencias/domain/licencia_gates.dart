@@ -52,6 +52,11 @@ class LicenciaGates {
     if (esDesarrollador || esDemo) return true;
     return limites.permiteEcf;
   }
+  
+  bool get permiteNotifWhatsappFiao {
+    if (esDesarrollador || esDemo) return true;
+    return limites.notificaPagosFiaoWhatsapp;
+  }
 
   bool get esSimplificado => esPlanSimplificado(plan);
 
@@ -60,6 +65,20 @@ class LicenciaGates {
   bool get esPro => esPlanPro(plan);
 
   int? get maxCuentasFiao => limites.maxCuentasFiaoAbiertas;
+
+  /// true si [abiertas] ya alcanzó el tope de cuentas fiao del plan (null = sin tope).
+  bool fiaoEnTope(int abiertas) {
+    final max = maxCuentasFiao;
+    if (max == null) return false;
+    return abiertas >= max;
+  }
+
+  String mensajeTopeFiao(int abiertas) {
+    final max = maxCuentasFiao ?? 0;
+    return 'Llevas $abiertas cuentas de fiao abiertas (tope de tu plan: $max). '
+        'Actualiza tu plan en Licencia y pagos para liberar más.';
+  }
+
 
   int? get maxProductos => limites.maxProductos;
 
@@ -76,13 +95,13 @@ class LicenciaGates {
       return 'Prueba 30 días · acceso completo · 1 equipo.';
     }
     if (esGratis) {
-      return 'Gratis · 15 ventas/mes · 1 equipo · sin reportes.';
+      return 'Gratis · 30 ventas/mes · 40 productos · 1 equipo · sin reportes.';
     }
     if (plan == 'basico') {
-      return 'Básico · 50 facturas/mes · reportes · 1 equipo.';
+      return 'Esencial · 300 facturas/mes · reportes · fiao c/WhatsApp · 1 equipo.';
     }
     if (esSimplificado) {
-      return 'Simplificado · 150 facturas/mes · 1 equipo.';
+      return 'Simplificado · ventas ilimitadas · hasta 3 equipos · fiao ilimitado.';
     }
     if (esPro) {
       return 'Pro · todo incluido · usuarios por departamento.';

@@ -56,7 +56,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
     final double? monto = double.tryParse(_montoCtrl.text.replaceAll(',', '.'));
     if (monto == null || monto <= 0) return;
 
-    setState(() => _cargando = true);
+    setState(() {
+      _cargando = true;
+    });
 
     try {
       final registrar = ref.read(registrarAbonoProvider);
@@ -70,7 +72,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
       );
 
       if (!mounted) return;
-      setState(() => _cargando = false);
+      setState(() {
+        _cargando = false;
+      });
 
       if (ok) {
         if (!mounted) return;
@@ -92,7 +96,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _cargando = false);
+      setState(() {
+        _cargando = false;
+      });
       FiscoGestNotifications.show(
         SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
@@ -207,7 +213,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                             const Duration(days: 365),
                           ),
                         );
-                        if (picked != null) setState(() => _fecha = picked);
+                        if (picked != null) setState(() { _fecha = picked; });
                       },
                     ),
                     const SizedBox(height: 16),
@@ -258,7 +264,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                         ),
                       ],
                       onChanged: (String? v) =>
-                          setState(() => _formaPago = v ?? 'efectivo'),
+                          setState(() { _formaPago = v ?? 'efectivo'; }),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(

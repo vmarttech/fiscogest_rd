@@ -32,7 +32,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
             return const Center(child: Text('Sin licencia'));
           }
           final gates = LicenciaGates(lic);
-          final esDev = lic.esDesarrollador;
+          final sesion = ref.watch(sesionProvider);
+          final esDev = lic.esDesarrollador &&
+              esDuenoPlataforma(sesion?.username);
           final colorEstado = switch (lic.estado) {
             'activa' => const Color(0xFF0F766E),
             'gracia' => Colors.orange.shade800,

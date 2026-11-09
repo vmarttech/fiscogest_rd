@@ -79,7 +79,9 @@ class _DetalleCuentaCobrarPageState
       );
       return;
     }
-    setState(() => _imprimiendoCronograma = true);
+    setState(() {
+      _imprimiendoCronograma = true;
+    });
     try {
       final svc = await ref.read(creditoDocumentoServiceProvider.future);
       await svc.imprimirCronograma(cuenta: c);
@@ -90,12 +92,14 @@ class _DetalleCuentaCobrarPageState
         );
       }
     } finally {
-      if (mounted) setState(() => _imprimiendoCronograma = false);
+      if (mounted) setState(() { _imprimiendoCronograma = false; });
     }
   }
 
   Future<void> _imprimirEstadoCuenta(CuentaPorCobrar c) async {
-    setState(() => _imprimiendoEstadoCuenta = true);
+    setState(() {
+      _imprimiendoEstadoCuenta = true;
+    });
     try {
       final svc = await ref.read(creditoDocumentoServiceProvider.future);
       await svc.imprimirEstadoCuenta(cuenta: c);
@@ -106,7 +110,7 @@ class _DetalleCuentaCobrarPageState
         );
       }
     } finally {
-      if (mounted) setState(() => _imprimiendoEstadoCuenta = false);
+      if (mounted) setState(() { _imprimiendoEstadoCuenta = false; });
     }
   }
 
@@ -216,7 +220,9 @@ class _DetalleCuentaCobrarPageState
 
     // Solo registra el ACUERDO (no cobra). El plan de cuotas sigue vigente
     // hasta que Caja cobre la liquidación o el cliente pague cuotas normales.
-    setState(() => _pagando = true);
+    setState(() {
+      _pagando = true;
+    });
     try {
       final calc = acuerdo.calculo;
       final dao = ProntoPagoAcuerdosDao(ref.read(databaseProvider));
@@ -234,7 +240,9 @@ class _DetalleCuentaCobrarPageState
       );
       final activo = await dao.activoPorCuenta(c.id!);
       if (mounted) {
-        setState(() => _acuerdoActivo = activo);
+        setState(() {
+          _acuerdoActivo = activo;
+        });
       }
       try {
         await ref
@@ -270,7 +278,7 @@ class _DetalleCuentaCobrarPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _pagando = false);
+      if (mounted) setState(() { _pagando = false; });
     }
   }
 

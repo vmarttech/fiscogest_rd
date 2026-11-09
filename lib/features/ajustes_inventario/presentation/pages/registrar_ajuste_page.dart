@@ -147,7 +147,9 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       return;
     }
 
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final ajuste = AjusteInventario(
         productoId: producto.id!,
@@ -182,7 +184,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       );
       context.pop();
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -504,7 +506,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => setState(() => _tipoSeleccionado = value),
+        onTap: () => setState(() { _tipoSeleccionado = value; }),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),

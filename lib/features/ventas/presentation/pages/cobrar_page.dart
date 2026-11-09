@@ -274,7 +274,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                       child: TextField(
                         controller: _busquedaController,
                         onChanged: (valor) =>
-                            setState(() => _textoBusqueda = valor),
+                            setState(() { _textoBusqueda = valor; }),
                         decoration: InputDecoration(
                           hintText: 'Buscar nombre, RNC o cédula',
                           isDense: true,
@@ -285,7 +285,9 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                   tooltip: 'Limpiar búsqueda',
                                   onPressed: () {
                                     _busquedaController.clear();
-                                    setState(() => _textoBusqueda = '');
+                                    setState(() {
+                                      _textoBusqueda = '';
+                                    });
                                   },
                                   icon: const Icon(Icons.clear, size: 18),
                                 ),

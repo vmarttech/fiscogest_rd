@@ -159,7 +159,9 @@ class _DetalleSolicitudCreditoPageState
     final v = _venta;
     if (v == null || v.id == null) return;
 
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final actualizada = v.copyWith(
         abonoInicial: _abono,
@@ -201,7 +203,7 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -209,7 +211,9 @@ class _DetalleSolicitudCreditoPageState
     final v = _venta;
     if (v == null || v.id == null) return;
 
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       if (nuevo == EstadoDocumento.aprobado) {
         // Condiciones de crédito
@@ -440,7 +444,7 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -468,7 +472,9 @@ class _DetalleSolicitudCreditoPageState
   Future<void> _imprimirSolicitud() async {
     final v = _venta;
     if (v == null) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       SolicitudCreditoExpediente? exp;
       if (v.id != null) {
@@ -499,7 +505,7 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -579,7 +585,9 @@ class _DetalleSolicitudCreditoPageState
       return;
     }
     if (!await _exigirListoParaDocumento(exigeCondiciones: true)) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       SolicitudCreditoExpediente? expC;
       try {
@@ -608,14 +616,16 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
   Future<void> _enviarSolicitud() async {
     final v = _venta;
     if (v == null) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final svc = await ref.read(creditoDocumentoServiceProvider.future);
       await svc.enviarSolicitudPorCorreo(
@@ -632,7 +642,7 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 
@@ -651,7 +661,9 @@ class _DetalleSolicitudCreditoPageState
       return;
     }
     if (!await _exigirListoParaDocumento(exigeCondiciones: true)) return;
-    setState(() => _procesando = true);
+    setState(() {
+      _procesando = true;
+    });
     try {
       final svc = await ref.read(creditoDocumentoServiceProvider.future);
       await svc.enviarContratoPorCorreo(venta: v, condiciones: cond);
@@ -665,7 +677,7 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _procesando = false);
+      if (mounted) setState(() { _procesando = false; });
     }
   }
 

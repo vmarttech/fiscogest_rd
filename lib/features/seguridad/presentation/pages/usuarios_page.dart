@@ -239,7 +239,9 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
   String? _error;
   bool _ocultar = true;
 
-  static const roles = rolesDisponibles;
+  // Admin de negocio: acceso total al menú del negocio, NO es desarrollador de plataforma.
+  // Confirmación obligatoria al guardar si se elige Admin (ver _guardar).
+  List<String> get rolesPermitidos => List<String>.from(rolesDisponibles);
 
   @override
   void initState() {
@@ -268,23 +270,33 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
     final esNuevo = widget.existente == null;
 
     if (user.length < 3) {
-      setState(() => _error = 'Usuario: mínimo 3 caracteres');
+      setState(() {
+        _error = 'Usuario: mínimo 3 caracteres';
+      });
       return;
     }
     if (nombre.isEmpty) {
-      setState(() => _error = 'Indique el nombre');
+      setState(() {
+        _error = 'Indique el nombre';
+      });
       return;
     }
     if (nombre.length > 80) {
-      setState(() => _error = 'El nombre no puede superar 80 caracteres');
+      setState(() {
+        _error = 'El nombre no puede superar 80 caracteres';
+      });
       return;
     }
     if (esNuevo && pass.length < 6) {
-      setState(() => _error = 'Contraseña: mínimo 6 caracteres');
+      setState(() {
+        _error = 'Contraseña: mínimo 6 caracteres';
+      });
       return;
     }
     if (!esNuevo && pass.isNotEmpty && pass.length < 6) {
-      setState(() => _error = 'Contraseña: mínimo 6 caracteres');
+      setState(() {
+        _error = 'Contraseña: mínimo 6 caracteres';
+      });
       return;
     }
 
@@ -295,12 +307,43 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
 
     try {
       final db = ref.read(databaseProvider);
+      // Freno comercial: Admin = acceso total al negocio. Confirmar siempre.
+      if (_rol == 'Admin') {
+        final ok = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('¿Asignar rol Admin?'),
+                content: const Text(
+                  'Un usuario Admin puede ver casi todo el menú, gestionar '
+                  'configuración y crear otros usuarios.\n\n'
+                  'No tendrá licencia de desarrollador de plataforma; solo '
+                  'permisos de administrador del negocio.\n\n'
+                  'Para un empleado de mostrador use Vendedor, Cajero u otro rol.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancelar'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Sí, crear Admin'),
+                  ),
+                ],
+              ),
+            ) ??
+            false;
+        if (!ok) return;
+      }
+
       final dao = UsuariosDao(db);
 
       if (esNuevo) {
         final existe = await dao.obtenerPorUsuario(user);
         if (existe != null) {
-          setState(() => _error = 'Ese usuario ya existe');
+          setState(() {
+            _error = 'Ese usuario ya existe';
+          });
           return;
         }
         await dao.insertar(
@@ -326,7 +369,9 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                 u.estado.toLowerCase() == 'activo',
           );
           if (otrosAdmin.isEmpty) {
-            setState(() => _error = 'Debe quedar al menos un Admin activo');
+            setState(() {
+              _error = 'Debe quedar al menos un Admin activo';
+            });
             return;
           }
         }
@@ -348,9 +393,11 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
-      setState(() => _error = 'Error: $e');
+      setState(() {
+        _error = 'Error: $e';
+      });
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -409,22 +456,22 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
-                    onPressed: () => setState(() => _ocultar = !_ocultar),
+                    onPressed: () => setState(() { _ocultar = !_ocultar; }),
                   ),
                 ),
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                initialValue: roles.contains(_rol) ? _rol : 'Vendedor',
+                initialValue: rolesPermitidos.contains(_rol) ? _rol : 'Vendedor',
                 decoration: const InputDecoration(
                   labelText: 'Rol *',
                   border: OutlineInputBorder(),
                 ),
-                items: roles
+                items: rolesPermitidos
                     .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                     .toList(),
                 onChanged: (v) {
-                  if (v != null) setState(() => _rol = v);
+                  if (v != null) setState(() { _rol = v; });
                 },
               ),
               const SizedBox(height: 10),
@@ -439,7 +486,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                   DropdownMenuItem(value: 'Inactivo', child: Text('Inactivo')),
                 ],
                 onChanged: (v) {
-                  if (v != null) setState(() => _estado = v);
+                  if (v != null) setState(() { _estado = v; });
                 },
               ),
               if (_error != null) ...[

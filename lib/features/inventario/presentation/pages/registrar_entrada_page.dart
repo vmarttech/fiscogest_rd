@@ -47,7 +47,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (fecha != null) setState(() => _fechaSeleccionada = fecha);
+    if (fecha != null) setState(() { _fechaSeleccionada = fecha; });
   }
 
   Future<void> _guardarEntrada() async {

@@ -12,6 +12,9 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/widgets/plan_requerido.dart';
 
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
@@ -529,6 +532,16 @@ class _KardexPageState extends ConsumerState<KardexPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!ref.watch(almacenesHabilitadosProvider)) {
+      final plan =
+          ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
+      return PlanRequeridoAlmacenes(
+        titulo: 'Kardex',
+        planActual: plan,
+        funcion: 'kardex',
+      );
+    }
+
     final pid = _productoIdFijo;
     final movimientosAsync = pid != null
         ? ref.watch(kardexPorProductoProvider(pid))
@@ -869,7 +882,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
             children: [
               IconButton(
                 onPressed: paginaActual > 1
-                    ? () => setState(() => _pagina = paginaActual - 1)
+                    ? () => setState(() { _pagina = paginaActual - 1; })
                     : null,
                 icon: const Icon(Icons.chevron_left),
               ),
@@ -882,7 +895,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               ),
               IconButton(
                 onPressed: paginaActual < totalPaginas
-                    ? () => setState(() => _pagina = paginaActual + 1)
+                    ? () => setState(() { _pagina = paginaActual + 1; })
                     : null,
                 icon: const Icon(Icons.chevron_right),
               ),
@@ -1818,13 +1831,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         const Spacer(),
         IconButton(
           onPressed:
-              paginaActual > 1 ? () => setState(() => _pagina = 1) : null,
+              paginaActual > 1 ? () => setState(() { _pagina = 1; }) : null,
           icon: const Icon(Icons.keyboard_double_arrow_left),
           iconSize: 20,
         ),
         IconButton(
           onPressed: paginaActual > 1
-              ? () => setState(() => _pagina = paginaActual - 1)
+              ? () => setState(() { _pagina = paginaActual - 1; })
               : null,
           icon: const Icon(Icons.chevron_left),
           iconSize: 20,
@@ -1836,7 +1849,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               color: n == paginaActual ? _teal : Colors.white,
               borderRadius: BorderRadius.circular(6),
               child: InkWell(
-                onTap: () => setState(() => _pagina = n),
+                onTap: () => setState(() { _pagina = n; }),
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
                   padding:
@@ -1862,7 +1875,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           ),
         if (totalPaginas > 5)
           TextButton(
-            onPressed: () => setState(() => _pagina = totalPaginas),
+            onPressed: () => setState(() { _pagina = totalPaginas; }),
             child: Text(
               '$totalPaginas',
               style: const TextStyle(fontWeight: FontWeight.w800),
@@ -1870,14 +1883,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           ),
         IconButton(
           onPressed: paginaActual < totalPaginas
-              ? () => setState(() => _pagina = paginaActual + 1)
+              ? () => setState(() { _pagina = paginaActual + 1; })
               : null,
           icon: const Icon(Icons.chevron_right),
           iconSize: 20,
         ),
         IconButton(
           onPressed: paginaActual < totalPaginas
-              ? () => setState(() => _pagina = totalPaginas)
+              ? () => setState(() { _pagina = totalPaginas; })
               : null,
           icon: const Icon(Icons.keyboard_double_arrow_right),
           iconSize: 20,

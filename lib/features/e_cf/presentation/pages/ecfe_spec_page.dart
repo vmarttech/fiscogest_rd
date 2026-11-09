@@ -134,7 +134,9 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
       _repo.parseChecklist(widget.spec.checklistJson);
 
   Future<void> _toggle(String itemId, bool done) async {
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     try {
       await _repo.actualizarChecklistItem(
         specId: widget.spec.id!,
@@ -151,7 +153,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() { _busy = false; });
     }
   }
 
@@ -160,7 +162,9 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
     bool cert = false,
     bool prod = false,
   }) async {
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+    });
     try {
       await _repo.activarSpec(
         id: widget.spec.id!,
@@ -179,7 +183,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
         SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() { _busy = false; });
     }
   }
 

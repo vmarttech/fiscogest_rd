@@ -91,7 +91,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
 
   double get _total => _lineas.fold(0.0, (a, l) => a + l.subtotal);
 
-  void _agregarLinea() => setState(() => _lineas.add(_LineaRapida()));
+  void _agregarLinea() => setState(() { _lineas.add(_LineaRapida()); });
 
   void _quitarLinea(int i) {
     if (_lineas.length <= 1) return;
@@ -165,7 +165,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
       }
     }
 
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
 
     try {
       final proveedorRepo = ref.read(repo.proveedorRepositoryProvider);
@@ -279,7 +281,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
         FiscoGestNotifications.show(SnackBar(content: Text('Error: $e')));
       }
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 
@@ -599,7 +601,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
             onChanged: (_) {
               if (l.producto != null &&
                   l.nombre.text.trim() != l.producto!.nombre) {
-                setState(() => l.limpiarProducto());
+                setState(() {
+                  l.limpiarProducto();
+                });
               } else {
                 setState(() {}); // refresca total si aplica
               }
@@ -788,7 +792,7 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                   vertical: 12,
                 ),
               ),
-              onChanged: (v) => setState(() => _filtrados = _filtrar(v)),
+              onChanged: (v) => setState(() { _filtrados = _filtrar(v); }),
             ),
           ),
           // Opción fija: crear producto con el texto buscado

@@ -118,15 +118,21 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
   }
 
   void _limpiarSolicitud() {
-    setState(() => _plantillaSolCtrl.clear());
+    setState(() {
+      _plantillaSolCtrl.clear();
+    });
   }
 
   void _limpiarContrato() {
-    setState(() => _plantillaConCtrl.clear());
+    setState(() {
+      _plantillaConCtrl.clear();
+    });
   }
 
   Future<void> _guardar() async {
-    setState(() => _guardando = true);
+    setState(() {
+      _guardando = true;
+    });
     try {
       final tasa =
           (double.tryParse(_tasaCtrl.text.replaceAll(',', '.')) ?? 0) / 100;
@@ -164,7 +170,7 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _guardando = false);
+      if (mounted) setState(() { _guardando = false; });
     }
   }
 

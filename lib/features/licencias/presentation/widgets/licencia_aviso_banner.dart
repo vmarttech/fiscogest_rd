@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/store/store_channel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
@@ -16,7 +18,7 @@ class LicenciaAvisoBanner extends ConsumerWidget {
     return async.maybeWhen(
       data: (lic) {
         if (lic == null) return const SizedBox.shrink();
-        if (lic.esDesarrollador || lic.vitalicia) {
+        if ((lic.esDesarrollador || lic.vitalicia) && esDuenoPlataforma(ref.watch(sesionProvider)?.username)) {
           return const SizedBox.shrink();
         }
 

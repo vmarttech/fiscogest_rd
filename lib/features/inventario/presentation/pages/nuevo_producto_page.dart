@@ -245,7 +245,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
     );
     if (existente.isNotEmpty) {
-      setState(() => _catSel = existente.first.id);
+      setState(() {
+        _catSel = existente.first.id;
+      });
       FiscoGestNotifications.show(
         const SnackBar(
           content: Text('La categoría ya existía y fue seleccionada'),
@@ -272,7 +274,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-    setState(() => _catSel = creada.first.id);
+    setState(() {
+      _catSel = creada.first.id;
+    });
     FiscoGestNotifications.show(
       const SnackBar(content: Text('Categoría creada y seleccionada')),
     );
@@ -289,7 +293,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
     );
     if (existente.isNotEmpty) {
-      setState(() => _marcaSel = existente.first.id);
+      setState(() {
+        _marcaSel = existente.first.id;
+      });
       FiscoGestNotifications.show(
         const SnackBar(content: Text('La marca ya existía y fue seleccionada')),
       );
@@ -314,7 +320,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-    setState(() => _marcaSel = creada.first.id);
+    setState(() {
+      _marcaSel = creada.first.id;
+    });
     FiscoGestNotifications.show(
       const SnackBar(content: Text('Marca creada y seleccionada')),
     );
@@ -332,7 +340,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       (item) => item.nombre.trim().toLowerCase() == datos.nombre.toLowerCase(),
     );
     if (existente.isNotEmpty) {
-      setState(() => _unidadSel = existente.first.id);
+      setState(() {
+        _unidadSel = existente.first.id;
+      });
       FiscoGestNotifications.show(
         const SnackBar(
           content: Text('La unidad ya existía y fue seleccionada'),
@@ -365,7 +375,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       return;
     }
-    setState(() => _unidadSel = creada.first.id);
+    setState(() {
+      _unidadSel = creada.first.id;
+    });
     FiscoGestNotifications.show(
       const SnackBar(content: Text('Unidad creada y seleccionada')),
     );
@@ -759,7 +771,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                         : null,
                                     items: items,
                                     onChanged: (v) =>
-                                        setState(() => _marcaSel = v),
+                                        setState(() { _marcaSel = v; }),
                                   ),
                                 );
                               },
@@ -803,7 +815,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                         : null,
                                     items: items,
                                     onChanged: (v) =>
-                                        setState(() => _unidadSel = v),
+                                        setState(() { _unidadSel = v; }),
                                   ),
                                 );
                               },
@@ -860,7 +872,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                       ),
                                     ),
                                   ],
-                                  onChanged: (v) => setState(() => _impSel = v),
+                                  onChanged: (v) => setState(() { _impSel = v; }),
                                 );
                               },
                               loading: () => const Center(
@@ -890,7 +902,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                 ),
                               ],
                               onChanged: (_) =>
-                                  setState(() => _recalcularPrecioVenta()),
+                                  setState(() { _recalcularPrecioVenta(); }),
                             ),
                             child2: AppTextField(
                               label: 'Gastos Asociados',
@@ -907,7 +919,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                 ),
                               ],
                               onChanged: (_) =>
-                                  setState(() => _recalcularPrecioVenta()),
+                                  setState(() { _recalcularPrecioVenta(); }),
                             ),
                           ),
                           AppLayout.vM,
@@ -965,7 +977,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                 ),
                               ],
                               onChanged: (_) =>
-                                  setState(() => _recalcularPrecioVenta()),
+                                  setState(() { _recalcularPrecioVenta(); }),
                             ),
                             child2: AppTextField(
                               label: 'Precio de Venta',
@@ -1106,7 +1118,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                             child: Switch(
                               value: _activo,
                               activeThumbColor: AppColors.primary,
-                              onChanged: (v) => setState(() => _activo = v),
+                              onChanged: (v) => setState(() { _activo = v; }),
                             ),
                           ),
                         ],
