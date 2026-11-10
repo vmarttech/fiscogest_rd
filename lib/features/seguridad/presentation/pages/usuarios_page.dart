@@ -5,6 +5,8 @@ import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/sync/supabase/usuario_sync.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -178,6 +180,25 @@ class UsuariosPage extends ConsumerWidget {
                                     u.id,
                                     activo ? 'Inactivo' : 'Activo',
                                   );
+                                  // AUTHZ comercial: Supabase es la fuente de verdad
+                                  try {
+                                    final actualizado = await dao.obtenerPorId(u.id);
+                                    if (actualizado != null) {
+                                      await UsuarioSync(ref.read(databaseProvider))
+                                          .pushUsuario(actualizado);
+                                    }
+                                  } catch (_) {}
+                                  // Si desactivamos al usuario de ESTA sesión → expulsar
+                                  final ses = ref.read(sesionProvider);
+                                  if (activo &&
+                                      ses != null &&
+                                      ses.id == u.id) {
+                                    ref.read(sesionProvider.notifier).state = null;
+                                    if (context.mounted) {
+                                      context.go('/login');
+                                    }
+                                    return;
+                                  }
                                   ref.invalidate(_usuariosListaProvider);
                                 },
                                 icon: Icon(

@@ -15,7 +15,6 @@ import 'package:fiscogest_rd/features/configuracion/presentation/providers/confi
 
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
-import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/avisar_atrasados_button.dart';
 class FiosListaPage extends ConsumerWidget {
   const FiosListaPage({super.key});

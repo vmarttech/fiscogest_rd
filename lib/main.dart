@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/sync/supabase/roles_acceso_sync.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:drift/drift.dart';
@@ -152,6 +153,8 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Catálogo de roles: caché local inmediata; pull nube tras login.
+  await RolesAccesoSync.cargarDesdePrefsOFallback();
 
   if (Platform.isAndroid) {
     await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();

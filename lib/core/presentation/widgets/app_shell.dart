@@ -771,7 +771,7 @@ class AppShell extends ConsumerWidget {
                         style: AppTypography.bodyMedium.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                          fontSize: 15,
                         ),
                       ),
                       onTap: onLogout,
@@ -797,7 +797,7 @@ class AppShell extends ConsumerWidget {
           color: Colors.white,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.8,
-          fontSize: 10,
+          fontSize: 11.5,
         ),
       ),
     );
@@ -844,7 +844,7 @@ class AppShell extends ConsumerWidget {
                     style: AppTypography.labelMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
+                      fontSize: 14.5,
                       height: 1.2,
                     ),
                   ),
@@ -911,7 +911,7 @@ class AppShell extends ConsumerWidget {
                     style: AppTypography.labelMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
+                      fontSize: 14.5,
                       height: 1.2,
                     ),
                   ),

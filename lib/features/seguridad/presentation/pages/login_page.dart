@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/sync/supabase/emitir_token.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/sync/supabase/roles_acceso_sync.dart';
 import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/auth/login_prefs.dart';
@@ -315,6 +316,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           debugPrint('Login: vitalicio $e\n$st');
         }
       }
+      await RolesAccesoSync.pullYCachear();
       ref.read(sesionProvider.notifier).state = UsuarioSesion(
         id: res.usuarioId,
         username: res.username,
@@ -388,6 +390,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
       _userCtrl.text = cred.user;
       await LoginPrefs.setRememberMe(true, cred.user);
+      await RolesAccesoSync.pullYCachear();
       ref.read(sesionProvider.notifier).state = UsuarioSesion(
         id: res.usuarioId,
         username: res.username,

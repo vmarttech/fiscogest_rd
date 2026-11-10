@@ -69,4 +69,53 @@ class UsuarioSync {
       'UsuarioSync: OK → ${conHash.length} con hash, ${sinHash.length} sin hash',
     );
   }
+
+
+  /// Sube un solo usuario (p. ej. tras activar/desactivar).
+  Future<void> pushUsuario(UsuarioData u) async {
+    if (!SupabaseConfig.isConfigured) return;
+    final negocioId = await NegocioLocal.getId();
+    if (negocioId == null || negocioId.isEmpty) return;
+
+    final body = <String, dynamic>{
+      'negocio_id': negocioId,
+      'username': u.username,
+      'nombre': u.nombre,
+      if (u.apellido != null && u.apellido!.isNotEmpty) 'apellido': u.apellido,
+      'rol': u.rol,
+      'activo': u.estado.toLowerCase() == 'activo',
+      if (u.passwordHash.isNotEmpty) 'password_hash': u.passwordHash,
+    };
+    final client = SupabaseRestClient();
+    await client.upsert(
+      table: 'usuarios',
+      rows: [body],
+      onConflict: 'negocio_id,username',
+    );
+    debugPrint('UsuarioSync: pushUsuario ${u.username} activo=${body['activo']}');
+  }
+
+  /// Autoridad en nube: ¿este username está activo en el negocio actual?
+  /// null = no se pudo consultar (sin red / sin config) → el caller decide política.
+  static Future<bool?> verificarActivoEnNube(String username) async {
+    if (!SupabaseConfig.isConfigured) return null;
+    final negocioId = await NegocioLocal.getId();
+    if (negocioId == null || negocioId.isEmpty) return null;
+    try {
+      final client = SupabaseRestClient();
+      final rows = await client.select(
+        table: 'usuarios',
+        filters: {
+          'negocio_id': 'eq.$negocioId',
+          'username': 'eq.${username.trim()}',
+        },
+      );
+      if (rows.isEmpty) return null;
+      return rows.first['activo'] == true;
+    } catch (e) {
+      debugPrint('UsuarioSync: verificarActivoEnNube $e');
+      return null;
+    }
+  }
 }
+

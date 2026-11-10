@@ -8,12 +8,12 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.da
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 
 class AvisarAtrasadosButton extends ConsumerWidget {
-  final List<dynamic> fiosAtrasados;
 
   const AvisarAtrasadosButton({
     super.key,
     required this.fiosAtrasados,
   });
+  final List<dynamic> fiosAtrasados;
 
   static String _normalizar(String texto) {
     return texto

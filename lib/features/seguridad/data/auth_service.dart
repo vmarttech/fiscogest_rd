@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/sync/supabase/usuario_sync.dart';
 
 class AuthResult {
   const AuthResult({
@@ -73,6 +74,17 @@ class AuthService {
     )..where((t) => t.username.equals(u))).getSingleOrNull();
     if (row == null) return null;
     if (row.estado.toLowerCase() != 'activo') return null;
+
+    // AUTHZ comercial: si hay nube, ella manda sobre activo.
+    // Si la nube dice inactivo → rechazar aunque el SQLite local diga Activo.
+    final activoNube =
+        await UsuarioSync.verificarActivoEnNube(row.username);
+    if (activoNube == false) {
+      // Alinear BD local para el próximo pull/UI
+      await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
+          .write(const UsuariosTableCompanion(estado: Value('Inactivo')));
+      return null;
+    }
     if (!verifyPassword(password, row.passwordHash)) return null;
     final updates = UsuariosTableCompanion(
       fechaUltimoAcceso: Value(DateTime.now()),
