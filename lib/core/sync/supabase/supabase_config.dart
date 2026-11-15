@@ -33,7 +33,7 @@ class SupabaseConfig {
               'Authorization': 'Bearer $anonKey',
             },
           )
-          .timeout(const Duration(seconds: 6));
+          .timeout(const Duration(seconds: 3));
       return true;
     } catch (_) {
       return false;

@@ -1,4 +1,6 @@
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
@@ -35,36 +37,43 @@ class PaypalCheckoutPage extends StatefulWidget {
 }
 
 class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
-  late final WebViewController _ctrl;
+  /// webview_flutter solo tiene implementación en Android / iOS / macOS.
+  static bool get isWebViewSupported =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS);
+
+  WebViewController? _ctrl;
   bool _busy = false;
   final _paypal = PaypalService();
 
   @override
   void initState() {
     super.initState();
-    _ctrl = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onNavigationRequest: (req) {
-            final url = req.url;
-            if (url.startsWith(PaypalConfig.returnUrl) ||
-                url.contains('/paypal/return')) {
-              _onReturn();
-              return NavigationDecision.prevent;
-            }
-            if (url.startsWith(PaypalConfig.cancelUrl) ||
-                url.contains('/paypal/cancel')) {
-              Navigator.of(context).pop(
-                const PaypalCheckoutResult(success: false, cancelled: true),
-              );
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.approveUrl));
+
+    if (isWebViewSupported) {
+      _ctrl = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onNavigationRequest: (req) {
+              final url = req.url;
+              if (url.startsWith(PaypalConfig.returnUrl) ||
+                  url.contains('/paypal/return')) {
+                _onReturn();
+                return NavigationDecision.prevent;
+              }
+              if (url.startsWith(PaypalConfig.cancelUrl) ||
+                  url.contains('/paypal/cancel')) {
+                Navigator.of(context).pop(
+                  const PaypalCheckoutResult(success: false, cancelled: true),
+                );
+                return NavigationDecision.prevent;
+              }
+              return NavigationDecision.navigate;
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse(widget.approveUrl));
+    }
   }
 
   Future<void> _onReturn() async {
@@ -128,6 +137,19 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
     return '${capture['status'] ?? ''}'.toUpperCase() == 'COMPLETED';
   }
 
+  Widget _buildUnsupportedFallback() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'WebView no disponible en esta plataforma.\n'
+          'Usa un dispositivo Android o iOS para pagar con PayPal.',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,7 +164,9 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _ctrl),
+          _ctrl != null
+              ? WebViewWidget(controller: _ctrl!)
+              : _buildUnsupportedFallback(),
           if (_busy)
             const ColoredBox(
               color: Color(0x66000000),

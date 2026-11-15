@@ -50,7 +50,7 @@ class RenovarToken {
             },
             body: jsonEncode({'refresh_token': refresh}),
           )
-          .timeout(const Duration(seconds: 20));
+          .timeout(const Duration(seconds: 4));
       if (res.statusCode == 400 ||
           res.statusCode == 401 ||
           res.statusCode == 403) {

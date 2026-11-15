@@ -43,7 +43,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
         try {
           await ref
               .read(configuracionControllerProvider.future)
-              .timeout(const Duration(seconds: 3));
+              .timeout(const Duration(milliseconds: 1500));
         } catch (_) {}
         final db = ref.read(databaseProvider);
         final usuarios = await db.select(db.usuariosTable).get();

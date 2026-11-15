@@ -132,9 +132,11 @@ if [[ "$CURRENT" != "$NEW_VERSION" ]]; then
 fi
 
 echo
-echo "Compilando APK de producción..."
+echo
+echo "Compilando APK de producción (solo arm64)..."
 
 flutter build apk --release \
+  --target-platform android-arm64 \
   --dart-define=STORE=direct \
   --dart-define="PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:?Define PAYPAL_CLIENT_ID antes de publicar}" \
   --dart-define="PAYPAL_SECRET=${PAYPAL_SECRET:?Define PAYPAL_SECRET antes de publicar}" \

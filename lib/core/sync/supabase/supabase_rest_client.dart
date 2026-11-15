@@ -10,7 +10,7 @@ class SupabaseRestClient {
       : _http = httpClient ?? http.Client();
 
   final http.Client _http;
-  static const _timeout = Duration(seconds: 4);
+  static const _timeout = Duration(seconds: 3);
 
   static const _tablasConNegocio = {
     'productos',

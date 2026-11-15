@@ -174,6 +174,16 @@ void main() async {
       'urlLen=${SupabaseConfig.url.length} keyLen=${SupabaseConfig.anonKey.length}',
     );
     if (SupabaseConfig.isConfigured) {
+      // Despertar Supabase en segundo plano (no bloquea el arranque)
+      unawaited(() async {
+        try {
+          final ok = await SupabaseConfig.hayRed();
+          debugPrint('Wake Supabase: ${ok ? "OK / despierto" : "sin respuesta"}');
+        } catch (e) {
+          debugPrint('Wake Supabase: $e');
+        }
+      }());
+
       try {
         unawaited(() async {
           await RenovarToken.asegurar();
