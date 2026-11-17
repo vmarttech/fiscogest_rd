@@ -554,6 +554,17 @@ class AppShell extends ConsumerWidget {
                           Icons.money_off_csred_outlined, currentPath, isPermanent),
 
                     const SizedBox(height: 16),
+                    _buildSectionTitle('GASTRONOMIA'),
+                      _buildNavItem(context, '/gastronomia', 'Venta rapida',
+                          Icons.point_of_sale_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/gastronomia/delivery', 'Delivery',
+                          Icons.motorcycle_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/gastronomia/historial', 'Historial',
+                          Icons.receipt_long_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/gastronomia/reporte', 'Reporte',
+                          Icons.bar_chart_outlined, currentPath, isPermanent),
+                      _buildNavItem(context, '/gastronomia/catalogo', 'Menu',
+                          Icons.restaurant_menu_outlined, currentPath, isPermanent),
                     _buildSectionTitle('INVENTARIO'),
                     if (puede(Permiso.inventarioVer))
                       _buildNavItem(context, '/inventario', 'Productos',

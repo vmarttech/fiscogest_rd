@@ -1,1 +1,0 @@
-// Archivo limpio — referencias eliminadas

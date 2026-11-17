@@ -66,3 +66,19 @@ lib/core/sync/supabase/supabase_secrets.dart
 # Archivos de respaldo Dart
 *.dart.bak*
 .backup_notificaciones_*/
+backups/
+*.bak
+*.backup
+*.tmp
+.backup_*/
+backup_*/
+_bak_*/
+inspeccion_*.txt
+/os
+/pathlib
+/shutil
+/time
+backups_*/
+backups_pre*/
+*.original
+*.save
