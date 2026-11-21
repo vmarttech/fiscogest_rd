@@ -94,3 +94,4 @@ backups_pre*/
 *_antes_restore/
 _antes_restore/
 sys
+*.prod_protect
