@@ -84,3 +84,13 @@ backups_pre*/
 *.save
 *.bak_*
 *.bak*
+
+# Copias / restos locales
+*.bak
+*.bak*
+*.roto
+*.pre_*
+*.backup_*
+*_antes_restore/
+_antes_restore/
+sys
