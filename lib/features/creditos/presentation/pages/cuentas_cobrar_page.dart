@@ -105,6 +105,7 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
     final async = ref.watch(cuentasCobrarListaProvider);
     final totales = ref.watch(creditoTotalesProvider);
     final mobile = AppBreakpoints.isMobile(context);
+    final params = ref.watch(parametrosCreditoProvider).valueOrNull;
 
     final desktop = AppBreakpoints.isDesktop(context);
     return AppScaffold(
@@ -216,8 +217,9 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                               width: double.infinity,
                               child: TextField(
                                 controller: _busquedaController,
-                                onChanged: (valor) =>
-                                    setState(() { _textoBusqueda = valor; }),
+                                onChanged: (valor) => setState(() {
+                                  _textoBusqueda = valor;
+                                }),
                                 decoration: InputDecoration(
                                   hintText: 'Buscar nombre, RNC o cédula',
                                   isDense: true,
@@ -325,6 +327,13 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                   itemBuilder: (_, i) {
                                     final c = filtradas[i].cuenta;
                                     final id = c.id;
+                                    final diasAtraso = c.diasVencido(
+                                      DateTime.now(),
+                                    );
+                                    final moraLista = c.moraEstimada(
+                                      moraMensual:
+                                          params?.moraPorcentaje ?? 0.0,
+                                    );
                                     return Card(
                                       margin: EdgeInsets.zero,
                                       color: AppColors.white,
@@ -412,13 +421,25 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                                 children: [
                                                   Expanded(
                                                     child: Text(
-                                                      _fmtFecha.format(
-                                                        c.fechaVencimiento,
-                                                      ),
+                                                      diasAtraso > 0
+                                                          ? 'Vencida hace $diasAtraso d · Mora ${formatRd(moraLista)}'
+                                                          : _fmtFecha.format(
+                                                              c.fechaVencimiento,
+                                                            ),
                                                       style: AppTypography
                                                           .bodySmall
                                                           .copyWith(
                                                             fontSize: 11,
+                                                            color:
+                                                                diasAtraso > 0
+                                                                ? AppColors
+                                                                      .error
+                                                                : null,
+                                                            fontWeight:
+                                                                diasAtraso > 0
+                                                                ? FontWeight
+                                                                      .w700
+                                                                : null,
                                                           ),
                                                       maxLines: 1,
                                                       overflow:
@@ -427,9 +448,13 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                                   ),
                                                   const SizedBox(width: 4),
                                                   StatusChip(
-                                                    label: c.estado.nombre
-                                                        .toUpperCase(),
-                                                    type: _chipType(c.estado),
+                                                    label: diasAtraso > 0
+                                                        ? 'VENCIDA $diasAtraso d'
+                                                        : c.estado.nombre
+                                                              .toUpperCase(),
+                                                    type: diasAtraso > 0
+                                                        ? StatusChipType.error
+                                                        : _chipType(c.estado),
                                                     dense: true,
                                                   ),
                                                 ],

@@ -316,11 +316,10 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                         tooltip: 'Copiar',
                         onPressed: () async {
                           await Clipboard.setData(ClipboardData(text: referencia));
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Referencia copiada')),
-                            );
-                          }
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Referencia copiada')),
+                          );
                         },
                         icon: const Icon(Icons.copy_rounded, color: Colors.white),
                       ),
@@ -384,11 +383,10 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                           child: TextButton.icon(
                             onPressed: () async {
                               await Clipboard.setData(ClipboardData(text: m.dato));
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${m.etiquetaDato} copiado')),
-                                );
-                              }
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('${m.etiquetaDato} copiado')),
+                              );
                             },
                             icon: const Icon(Icons.copy, size: 16),
                             label: const Text('Copiar dato'),

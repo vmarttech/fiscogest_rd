@@ -79,11 +79,6 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/dashbo
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/lista_compras_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/compra_rapida_page.dart';
-import 'package:fiscogest_rd/features/gastronomia/presentation/pages/venta_rapida_page.dart';
-import 'package:fiscogest_rd/features/gastronomia/presentation/pages/catalogo_gastronomia_page.dart';
-import 'package:fiscogest_rd/features/gastronomia/presentation/pages/delivery_hub_page.dart';
-import 'package:fiscogest_rd/features/gastronomia/presentation/pages/historial_pedidos_gastro_page.dart';
-import 'package:fiscogest_rd/features/gastronomia/presentation/pages/reporte_gastronomia_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detalle_compra_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
@@ -458,28 +453,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      GoRoute(
-        path: '/gastronomia',
-        builder: (_, __) => const VentaRapidaPage(),
-        routes: [
-          GoRoute(
-            path: 'catalogo',
-            builder: (_, __) => const AppShell(child: CatalogoGastronomiaPage()),
-          ),
-          GoRoute(
-            path: 'delivery',
-            builder: (_, __) => const AppShell(child: DeliveryHubPage()),
-          ),
-          GoRoute(
-            path: 'historial',
-            builder: (_, __) => const AppShell(child: HistorialPedidosGastroPage()),
-          ),
-          GoRoute(
-            path: 'reporte',
-            builder: (_, __) => const AppShell(child: ReporteGastronomiaPage()),
-          ),
-        ],
-      ),
       GoRoute(
         path: '/creditos',
         name: CreditoInicioPage.routeName,

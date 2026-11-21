@@ -57,10 +57,16 @@ dev_dependencies:
   riverpod_generator: ^2.5.1
   flutter_launcher_icons: ^0.14.3
 flutter:
+  default-flavor: fiscogest
   uses-material-design: true
   assets:
     - assets/ecf_xsd/
     - assets/branding/app_icon.png
+    - assets/images/logo_foodgest.png
+    - assets/images/foodgest_banner.jpg
+    - assets/images/cards/
+    - assets/images/fondo_platos.png
+    - assets/images/fondo_negocio.png
 
 # Iconos adaptativos (Android) + iOS/desktop/web
 flutter_launcher_icons:

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
@@ -72,7 +73,8 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       }
 
       final producto = await productosDao.obtenerPorId(detalle.productoId);
-      final costoUnitario = producto?.precioCompra ?? 0.0;
+      final promedio = producto?.costoPromedio ?? 0.0;
+      final costoUnitario = promedio > 0 ? promedio : (producto?.precioCompra ?? 0.0);
       final saldoNuevo = saldoAnterior - detalle.cantidad;
 
       final movimientoKardex = Kardex(
@@ -97,7 +99,11 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     }
 
     if (ventaRegistrada.id != null) {
-      await ventasRepository.actualizarEnCascada(ventaRegistrada.id!);
+      try {
+        await ventasRepository.actualizarEnCascada(ventaRegistrada.id!);
+      } catch (e) {
+        debugPrint('[Venta] actualizarEnCascada sin implementar: $e');
+      }
     }
 
     return ventaRegistrada;
@@ -119,6 +125,15 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         ? 'Factura ${venta.numeroFactura}'
         : 'Venta #${venta.numeroCotizacion}';
     for (final detalle in venta.detalles) {
+      final historial = await kardexRepository
+          .obtenerHistorialPorProducto(detalle.productoId);
+      final yaRegistrada = historial.any(
+        (m) =>
+            m.tipoMovimiento == TipoMovimiento.salida &&
+            m.documentoReferencia == refDoc,
+      );
+      if (yaRegistrada) continue;
+
       final producto = await productosDao.obtenerPorId(detalle.productoId);
       final nombre =
           (detalle.nombreProducto != null &&
@@ -132,7 +147,8 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
           'Stock insuficiente: $nombre, disponible=$saldoAnterior, vendiendo=$cant',
         );
       }
-      final costoUnitario = producto?.precioCompra ?? 0.0;
+      final promedio = producto?.costoPromedio ?? 0.0;
+      final costoUnitario = promedio > 0 ? promedio : (producto?.precioCompra ?? 0.0);
       final saldoNuevo = saldoAnterior - cant;
       final movimientoKardex = Kardex(
         productoId: detalle.productoId,
@@ -176,7 +192,8 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
       final saldoAnterior = await _stockActual(detalle.productoId);
       final cant = detalle.cantidad.toDouble();
-      final costoUnitario = producto?.precioCompra ?? 0.0;
+      final promedio = producto?.costoPromedio ?? 0.0;
+      final costoUnitario = promedio > 0 ? promedio : (producto?.precioCompra ?? 0.0);
       final saldoNuevo = saldoAnterior + cant;
       final movimientoKardex = Kardex(
         productoId: detalle.productoId,

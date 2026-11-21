@@ -31,12 +31,14 @@ class _LineaRapida {
   final nombre = TextEditingController();
   final cantidad = TextEditingController(text: '1');
   final costo = TextEditingController();
+  final precioVenta = TextEditingController();
   Producto? producto;
 
   void dispose() {
     nombre.dispose();
     cantidad.dispose();
     costo.dispose();
+    precioVenta.dispose();
   }
 
   void aplicarProducto(Producto p) {
@@ -48,6 +50,13 @@ class _LineaRapida {
           ? v.toStringAsFixed(0)
           : v.toStringAsFixed(2);
     }
+    // Precargar precio de venta actual del inventario (editable)
+    if (p.precioVenta > 0 && precioVenta.text.trim().isEmpty) {
+      final v = p.precioVenta;
+      precioVenta.text = v == v.roundToDouble()
+          ? v.toStringAsFixed(0)
+          : v.toStringAsFixed(2);
+    }
   }
 
   void limpiarProducto() => producto = null;
@@ -56,6 +65,20 @@ class _LineaRapida {
     final c = double.tryParse(cantidad.text.replaceAll(',', '.')) ?? 0;
     final k = double.tryParse(costo.text.replaceAll(',', '.')) ?? 0;
     return c * k;
+  }
+
+  double? get costoNum =>
+      double.tryParse(costo.text.replaceAll(',', '.'));
+
+  double? get precioVentaNum =>
+      double.tryParse(precioVenta.text.replaceAll(',', '.'));
+
+  /// Margen % = ((venta − costo) / costo) × 100. Null si no se puede calcular.
+  double? get margenCalculado {
+    final c = costoNum;
+    final v = precioVentaNum;
+    if (c == null || v == null || c <= 0 || v <= 0) return null;
+    return ((v - c) / c) * 100;
   }
 }
 
@@ -190,10 +213,15 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
       final cantidades = <double>[];
       final costos = <double>[];
 
+      final preciosVenta = <double?>[];
+      final margenes = <double?>[];
+
       for (final l in _lineas) {
         final nom = l.nombre.text.trim();
         final cant = double.parse(l.cantidad.text.replaceAll(',', '.'));
         final cost = double.parse(l.costo.text.replaceAll(',', '.'));
+        final pv = l.precioVentaNum;
+        final mg = l.margenCalculado;
 
         final Producto prod = (l.producto?.id != null)
             ? l.producto!
@@ -202,11 +230,15 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                 costo: cost,
                 usuarioId: usuarioId,
                 catalogoActual: [...catalogo, ...productosLinea],
+                precioVenta: pv,
+                margenGanancia: mg,
               );
 
         productosLinea.add(prod);
         cantidades.add(cant);
         costos.add(cost);
+        preciosVenta.add(pv);
+        margenes.add(mg);
       }
 
       final ahora = DateTime.now();
@@ -265,6 +297,27 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
           );
 
       await ref.read(confirmarCompraUseCaseProvider).call(registrada.id);
+
+      // Fijar precio de venta + margen en inventario (si el usuario los indicó)
+      for (var i = 0; i < productosLinea.length; i++) {
+        final pv = preciosVenta[i];
+        final mg = margenes[i];
+        if (pv == null || pv <= 0) continue;
+        final prod = productosLinea[i];
+        if (prod.id == null) continue;
+        // Releer por si confirmar actualizó stock/costo
+        final actual =
+            await productoRepo.obtenerProductoPorId(prod.id!) ?? prod;
+        await productoRepo.actualizarProducto(
+          actual.copyWith(
+            precioVenta: pv,
+            margenGanancia: mg ?? actual.margenGanancia,
+            // También alinear precioCompra al costo de esta compra si es la referencia
+            precioCompra: costos[i],
+          ),
+        );
+      }
+
       ref.invalidate(productoControllerProvider);
 
       if (!mounted) return;
@@ -653,6 +706,53 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: l.precioVenta,
+            enabled: !_guardando,
+            style: const TextStyle(fontSize: 14, color: _C.ink),
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+            ],
+            onChanged: (_) => setState(() {}),
+            decoration: _fieldDeco(
+              label: 'Precio de venta (opcional)',
+              suffix: l.margenCalculado != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Center(
+                        child: Text(
+                          '${l.margenCalculado!.toStringAsFixed(1)}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: l.margenCalculado! >= 0
+                                ? _C.tealDark
+                                : const Color(0xFFB91C1C),
+                          ),
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+          if (l.margenCalculado != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              l.margenCalculado! >= 0
+                  ? 'Margen de ganancia: ${l.margenCalculado!.toStringAsFixed(1)}% → se guardará en inventario'
+                  : 'Precio por debajo del costo (margen negativo)',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: l.margenCalculado! >= 0
+                    ? _C.tealDark
+                    : const Color(0xFFB91C1C),
+              ),
+            ),
+          ],
           if (l.subtotal > 0) ...[
             const SizedBox(height: 8),
             Align(

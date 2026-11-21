@@ -1,0 +1,167 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/gastronomia/presentation/providers/gastronomia_providers.dart';
+
+final mesasOcupadasProvider =
+    FutureProvider<Map<String, List<PedidoGastronomiaData>>>((ref) async {
+  final pendientes = await ref.read(gastronomiaServiceProvider).pedidosPendientes();
+  final Map<String, List<PedidoGastronomiaData>> map = {};
+  for (final p in pendientes) {
+    final m = p.mesa;
+    if (m != null && m.isNotEmpty) {
+      map.putIfAbsent(m, () => []).add(p);
+    }
+  }
+  return map;
+});
+
+class MesaHubPage extends ConsumerWidget {
+  const MesaHubPage({super.key});
+  static const route = '/gastronomia/mesas';
+
+  static const List<String> mesas = [
+    'M1', 'M2', 'M3', 'M4', 'M5', 'M6',
+    'M7', 'M8', 'T1', 'T2', 'T3', 'Barra',
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ocupadasAsync = ref.watch(mesasOcupadasProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mapa de Mesas'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Actualizar',
+            onPressed: () => ref.invalidate(mesasOcupadasProvider),
+          ),
+        ],
+      ),
+      body: ocupadasAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+        data: (ocupadas) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              childAspectRatio: 1.1,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: mesas.length,
+            itemBuilder: (ctx, i) {
+              final nombre = mesas[i];
+              final pedidos = ocupadas[nombre] ?? const <PedidoGastronomiaData>[];
+              final ocupado = pedidos.isNotEmpty;
+              final primer = pedidos.isEmpty ? null : pedidos.first;
+              final color = !ocupado
+                  ? Colors.green.shade100
+                  : _colorEstado(primer!.estado);
+              final textoEstado = !ocupado
+                  ? 'Libre'
+                  : '${primer!.comensales} pers\n#${primer.id}';
+
+              return InkWell(
+                onTap: () => _abrirMesa(context, nombre, pedidos),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(nombre,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(textoEstado,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 11, height: 1.2)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _colorEstado(String estado) {
+    switch (estado) {
+      case 'pendiente':
+        return Colors.orange.shade100;
+      case 'confirmado':
+        return Colors.yellow.shade200;
+      case 'enPreparacion':
+      case 'en_preparacion':
+        return Colors.blue.shade100;
+      case 'listo':
+        return Colors.green.shade200;
+      case 'enCamino':
+      case 'en_camino':
+        return Colors.purple.shade100;
+      default:
+        return Colors.grey.shade200;
+    }
+  }
+
+  void _abrirMesa(
+      BuildContext context, String mesa, List<PedidoGastronomiaData> pedidos) {
+    if (pedidos.isEmpty) {
+      context.push('/gastronomia/venta-rapida?mesa=$mesa');
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text('Mesa $mesa — Pedidos activos'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: pedidos
+              .map((p) => ListTile(
+                    dense: true,
+                    title:
+                        Text('Pedido #${p.id} · ${p.comensales} comensales'),
+                    subtitle: Text('${p.nombreCliente} · ${p.estado}'),
+                    trailing: p.cuentaDividida
+                        ? const Chip(
+                            label: Text('Cta. div.',
+                                style: TextStyle(fontSize: 10)),
+                            padding: EdgeInsets.zero)
+                        : null,
+                    onTap: () {
+                      Navigator.pop(dctx);
+                      context.push('/gastronomia/cocina');
+                    },
+                  ))
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx),
+              child: const Text('Cerrar')),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(dctx);
+              context.push('/gastronomia/venta-rapida?mesa=$mesa');
+            },
+            child: const Text('Nuevo pedido'),
+          ),
+        ],
+      ),
+    );
+  }
+}

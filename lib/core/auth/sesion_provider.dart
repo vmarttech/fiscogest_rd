@@ -100,4 +100,3 @@ Future<bool> revalidarSesionActiva(WidgetRef ref) async {
   }
   return true;
 }
-

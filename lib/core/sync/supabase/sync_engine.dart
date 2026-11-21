@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_pull.dart';
 import 'package:fiscogest_rd/core/sync/supabase/usuario_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/venta_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/compra_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/caja_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/fio_sync.dart';
 
@@ -45,6 +46,7 @@ class SyncEngine {
     await step('productos', () => ProductoSync(_db).pushTodos());
     await step('clientes', () => ClienteSync(_db).pushTodos());
     await step('ventas', () => VentaSync(_db).pushTodos());
+    await step('compras', () => CompraSync(_db).pushTodos());
     await step('caja', () => CajaSync(_db).pushTodos());
     await step('fios', () => FioSync(_db).pushTodos());
     debugPrint('SyncEngine.pushAll: fin');

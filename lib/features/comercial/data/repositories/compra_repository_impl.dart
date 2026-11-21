@@ -5,6 +5,9 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:fiscogest_rd/features/comercial/domain/entities/compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/detalle_compra.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_repository.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/compra_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
 
 int _extraerId(dynamic valor) {
   if (valor == null) return 0;
@@ -177,25 +180,54 @@ class CompraRepositoryImpl implements ICompraRepository {
     return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
 
+
+  /// Sube compras (+ productos) a Supabase si hay red. No rompe el flujo local.
+  Future<void> _pushCompraAhora({bool incluirProductos = true}) async {
+    if (!SupabaseConfig.isConfigured) return;
+    try {
+      if (!await SupabaseConfig.hayRed()) {
+        debugPrint('CompraSync: sin red — queda para el scheduler');
+        return;
+      }
+      await CompraSync(db).pushTodos();
+      if (incluirProductos) {
+        await ProductoSync(db).pushTodos();
+      }
+    } catch (e, st) {
+      debugPrint('CompraSync inmediato: $e');
+      debugPrint('$st');
+    }
+  }
+
   @override
   Future<Compra> registrarCompra({
     required Compra compra,
     required List<DetalleCompra> detalles,
   }) async {
+    int idCabecera = compra.id;
     await db.transaction(() async {
-      await db.into(db.comprasTable).insert(_compraToCompanion(compra));
+      idCabecera = await db
+          .into(db.comprasTable)
+          .insert(_compraToCompanion(compra));
       await db.batch((batch) {
         for (final detalle in detalles) {
-          batch.insert(db.detalleCompraTable, _detalleToCompanion(detalle));
+          batch.insert(
+            db.detalleCompraTable,
+            _detalleToCompanion(
+              detalle.copyWith(compraId: idCabecera),
+            ),
+          );
         }
       });
     });
-    return compra;
+    final registrada = compra.copyWith(id: idCabecera);
+    await _pushCompraAhora(incluirProductos: false);
+    return registrada;
   }
 
   @override
   Future<Compra> confirmarCompra(int compraId) async {
-    return await db.transaction(() async {
+    final compraConfirmada = await db.transaction(() async {
       final compra = await obtenerCompraPorId(compraId);
       if (compra == null) throw StateError('Compra no encontrada: $compraId');
       if (compra.estado != EstadoCompra.borrador &&
@@ -204,15 +236,17 @@ class CompraRepositoryImpl implements ICompraRepository {
           'Solo se puede confirmar compras en estado Borrador o Registrada',
         );
       }
-      final compraConfirmada = compra.copyWith(
+      final confirmada = compra.copyWith(
         estado: EstadoCompra.confirmada,
         fechaConfirmacion: DateTime.now(),
         actualizadoEn: DateTime.now(),
       );
       await (db.update(db.comprasTable)..where((t) => t.id.equals(compraId)))
-          .write(_compraToCompanion(compraConfirmada));
-      return compraConfirmada;
+          .write(_compraToCompanion(confirmada));
+      return confirmada;
     });
+    await _pushCompraAhora(incluirProductos: true);
+    return compraConfirmada;
   }
 
   @override

@@ -155,8 +155,8 @@ class AvisarAtrasadosButton extends ConsumerWidget {
           'fioIds': <int>[],
         };
       }
-      porTel[telefono]!['nombres'].add(fio.nombreCliente);
-      porTel[telefono]!['saldos'].add(fio.saldoPendiente);
+      (porTel[telefono]!['nombres'] as List<String>).add(fio.nombreCliente);
+      (porTel[telefono]!['saldos'] as List<double>).add(fio.saldoPendiente);
       (porTel[telefono]!['fioIds'] as List<int>).add(fio.id);
     }
 
@@ -173,8 +173,8 @@ class AvisarAtrasadosButton extends ConsumerWidget {
             'fioIds': <int>[],
           };
         }
-        porTel[tel]!['nombres'].add(fio.nombreCliente);
-        porTel[tel]!['saldos'].add(fio.saldoPendiente);
+        (porTel[tel]!['nombres'] as List<String>).add(fio.nombreCliente);
+        (porTel[tel]!['saldos'] as List<double>).add(fio.saldoPendiente);
         (porTel[tel]!['fioIds'] as List<int>).add(fio.id);
       }
     }
@@ -220,7 +220,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
       }
 
       if (porTel.length > 1) {
-        await Future.delayed(const Duration(milliseconds: 450));
+        await Future<void>.delayed(const Duration(milliseconds: 450));
       }
     }
 
@@ -229,6 +229,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
     final resumen = <String>['$enviados enviado(s)'];
     if (fallidos > 0) resumen.add('$fallidos fallido(s)');
     final quedanSin = sinTelefono.length;
+    if (quedanSin > 0) resumen.add('$quedanSin sin teléfono');
     // sinTelefono se redujo solo visualmente; contamos los que no entraron a porTel por id sería más exacto
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

@@ -82,3 +82,5 @@ backups_*/
 backups_pre*/
 *.original
 *.save
+*.bak_*
+*.bak*

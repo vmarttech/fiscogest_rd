@@ -40,8 +40,7 @@ final parametrosCreditoProvider = FutureProvider.autoDispose((ref) async {
 final creditoDocumentoServiceProvider =
     FutureProvider.autoDispose<ICreditoDocumentoService>((ref) async {
       final params = await ref.watch(parametrosCreditoProvider.future);
-      final empresa =
-          ref.watch(configuracionControllerProvider).valueOrNull;
+      final empresa = ref.watch(configuracionControllerProvider).valueOrNull;
       return CreditoDocumentoServiceImpl(
         empresa: empresa,
         plantillaSolicitudExtra: params.plantillaSolicitud,
@@ -75,8 +74,9 @@ final expedienteCreditoPorVentaProvider = FutureProvider.autoDispose
       );
     });
 
-final recordatorioWhatsAppServiceProvider = Provider<RecordatorioWhatsAppService>((ref) {
-  return RecordatorioWhatsAppService(
-    clienteRepository: ref.watch(clienteRepositoryProvider),
-  );
-});
+final recordatorioWhatsAppServiceProvider =
+    Provider<RecordatorioWhatsAppService>((ref) {
+      return RecordatorioWhatsAppService(
+        clienteRepository: ref.watch(clienteRepositoryProvider),
+      );
+    });

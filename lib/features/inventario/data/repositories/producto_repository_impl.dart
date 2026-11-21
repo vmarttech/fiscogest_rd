@@ -1,4 +1,5 @@
 import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
@@ -76,7 +77,9 @@ class ProductoRepositoryImpl implements IProductoRepository {
       }
     });
     try {
-      await ProductoSync(_db).pushTodos();
+      if (SupabaseConfig.isConfigured && await SupabaseConfig.hayRed()) {
+        await ProductoSync(_db).pushTodos();
+      }
     } catch (e) {
       debugPrint('ProductoSync tras guardar: $e');
     }
@@ -92,7 +95,9 @@ class ProductoRepositoryImpl implements IProductoRepository {
             .write(ProductoDataMapper.toCompanion(producto));
     if (rowsAffected > 0) {
       try {
-        await ProductoSync(_db).pushTodos();
+        if (SupabaseConfig.isConfigured && await SupabaseConfig.hayRed()) {
+          await ProductoSync(_db).pushTodos();
+        }
       } catch (e) {
         debugPrint('ProductoSync tras actualizar: $e');
       }
@@ -107,7 +112,9 @@ class ProductoRepositoryImpl implements IProductoRepository {
         .write(const ProductosTableCompanion(activo: Value(0)));
     if (rowsAffected > 0) {
       try {
-        await ProductoSync(_db).pushTodos();
+        if (SupabaseConfig.isConfigured && await SupabaseConfig.hayRed()) {
+          await ProductoSync(_db).pushTodos();
+        }
       } catch (e) {
         debugPrint('ProductoSync tras eliminar: $e');
       }

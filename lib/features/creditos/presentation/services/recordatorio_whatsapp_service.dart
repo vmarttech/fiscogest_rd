@@ -12,8 +12,8 @@ class RecordatorioWhatsAppService {
   RecordatorioWhatsAppService({
     required IClienteRepository clienteRepository,
     EnviarRecordatorioWhatsApp? useCase,
-  })  : _clientes = clienteRepository,
-        _useCase = useCase ?? const EnviarRecordatorioWhatsApp();
+  }) : _clientes = clienteRepository,
+       _useCase = useCase ?? const EnviarRecordatorioWhatsApp();
 
   final IClienteRepository _clientes;
   final EnviarRecordatorioWhatsApp _useCase;
@@ -34,6 +34,8 @@ class RecordatorioWhatsAppService {
     required CuentaPorCobrar cuenta,
     required ConfiguracionEntity? empresa,
     String? telefonoOverride,
+    int? diasAtraso,
+    double? montoMoraEstimada,
   }) async {
     var telefono = telefonoOverride?.trim() ?? '';
     if (telefono.isEmpty) {
@@ -52,7 +54,10 @@ class RecordatorioWhatsAppService {
       nombreCliente: cuenta.clienteNombre ?? 'Cliente',
       nombreNegocio: _nombreNegocio(empresa),
       saldoPendiente: cuenta.saldoPendiente,
-      numeroCuenta: cuenta.numero ?? (cuenta.id != null ? 'CXC-${cuenta.id}' : null),
+      numeroCuenta:
+          cuenta.numero ?? (cuenta.id != null ? 'CXC-${cuenta.id}' : null),
+      diasAtraso: diasAtraso,
+      montoMoraEstimada: montoMoraEstimada,
     );
 
     await _lanzar(resultado.uri);

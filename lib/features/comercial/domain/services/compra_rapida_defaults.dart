@@ -37,6 +37,8 @@ class CompraRapidaDefaults {
     required double costo,
     required int usuarioId,
     required List<Producto> catalogoActual,
+    double? precioVenta,
+    double? margenGanancia,
   }) async {
     final q = nombre.trim().toLowerCase();
     if (q.isEmpty) {
@@ -63,11 +65,16 @@ class CompraRapidaDefaults {
     final codigo =
         'CR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
+    final pv = (precioVenta != null && precioVenta > 0) ? precioVenta : costo;
+    final mg = margenGanancia ??
+        (costo > 0 && pv > 0 ? ((pv - costo) / costo) * 100 : null);
+
     final nuevo = Producto(
       codigo: codigo,
       nombre: nombre.trim(),
       precioCompra: costo,
-      precioVenta: costo,
+      precioVenta: pv,
+      margenGanancia: mg,
       costoPromedio: costo,
       stock: 0,
       categoriaId: categoriaId,

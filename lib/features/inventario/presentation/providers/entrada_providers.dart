@@ -18,6 +18,7 @@ final operacionesEntradaServiceProvider = Provider<OperacionesEntradaService>((
   return OperacionesEntradaService(
     entradaRepository: ref.watch(entradaRepositoryProvider),
     productoRepository: ref.watch(repo.inventarioProductoRepositoryProvider),
+    kardexRepository: ref.watch(repo.kardexRepositoryProvider),
     db: ref.watch(databaseProvider),
   );
 });

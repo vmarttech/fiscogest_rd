@@ -25,12 +25,18 @@ class MostrarDetalleVenta extends ConsumerWidget {
 
   String _formatearMonto(double valor) => formatRd(valor);
 
+  String _fmtCantidad(double valor) {
+    if (valor == valor.roundToDouble()) return valor.toStringAsFixed(0);
+    return valor.toStringAsFixed(2);
+  }
+
   Future<void> _imprimir(BuildContext context, WidgetRef ref) async {
     try {
       Venta v = venta;
       if (v.id != null) {
-        final full =
-            await ref.read(ventasRepositoryProvider).obtenerVentaPorId(v.id!);
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(v.id!);
         if (full != null) v = full;
       }
       if (v.detalles.isEmpty) {
@@ -49,7 +55,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
       final emp = ref.read(configuracionControllerProvider).valueOrNull;
       final codigo = v.id == null
           ? null
-          : await ref.read(ecfeRepositoryProvider).codigoSeguridadPorVenta(v.id!);
+          : await ref
+                .read(ecfeRepositoryProvider)
+                .codigoSeguridadPorVenta(v.id!);
       final ambiente =
           (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
       await ComprobantePdf.imprimirFactura(
@@ -74,14 +82,17 @@ class MostrarDetalleVenta extends ConsumerWidget {
     try {
       Venta v = venta;
       if (v.id != null) {
-        final full =
-            await ref.read(ventasRepositoryProvider).obtenerVentaPorId(v.id!);
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(v.id!);
         if (full != null) v = full;
       }
       final emp = ref.read(configuracionControllerProvider).valueOrNull;
       final codigo = v.id == null
           ? null
-          : await ref.read(ecfeRepositoryProvider).codigoSeguridadPorVenta(v.id!);
+          : await ref
+                .read(ecfeRepositoryProvider)
+                .codigoSeguridadPorVenta(v.id!);
       final ambiente =
           (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
       await ComprobantePdf.imprimirFactura(
@@ -103,12 +114,16 @@ class MostrarDetalleVenta extends ConsumerWidget {
     }
   }
 
-  
-  Future<void> _compartirReciboDigital(BuildContext context, WidgetRef ref) async {
+  Future<void> _compartirReciboDigital(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     try {
       Venta v = venta;
       if (v.id != null) {
-        final full = await ref.read(ventasRepositoryProvider).obtenerVentaPorId(v.id!);
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(v.id!);
         if (full != null) v = full;
       }
       if (v.detalles.isEmpty) {
@@ -155,8 +170,14 @@ class MostrarDetalleVenta extends ConsumerWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enviar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Enviar'),
+          ),
         ],
       ),
     );
@@ -175,7 +196,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
     try {
       Venta v = venta;
       if (v.id != null) {
-        final full = await ref.read(ventasRepositoryProvider).obtenerVentaPorId(v.id!);
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(v.id!);
         if (full != null) v = full;
       }
       // 1) Intentar servicio de negocio
@@ -187,7 +210,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
         final emp = ref.read(configuracionControllerProvider).valueOrNull;
         final codigo = v.id == null
             ? null
-            : await ref.read(ecfeRepositoryProvider).codigoSeguridadPorVenta(v.id!);
+            : await ref
+                  .read(ecfeRepositoryProvider)
+                  .codigoSeguridadPorVenta(v.id!);
         final ambiente =
             (await ref.read(ecfeRepositoryProvider).obtenerConfig()).ambiente;
         await ComprobantePdf.imprimirFactura(
@@ -220,11 +245,11 @@ class MostrarDetalleVenta extends ConsumerWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final desktop = AppBreakpoints.isDesktop(context);
-    final simple = ref
+    final simple =
+        ref
             .watch(configuracionControllerProvider)
             .valueOrNull
             ?.modoSimplificado ==
@@ -252,14 +277,14 @@ class MostrarDetalleVenta extends ConsumerWidget {
     }
 
     Widget sectionTitle(String s) => Text(
-          s,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-            letterSpacing: 0.1,
-          ),
-        );
+      s,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF0F172A),
+        letterSpacing: 0.1,
+      ),
+    );
 
     Widget kv(String k, String v, {bool bold = false}) {
       return Padding(
@@ -390,48 +415,61 @@ class MostrarDetalleVenta extends ConsumerWidget {
         children: [
           sectionTitle('DETALLE DE ARTÍCULOS'),
           const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(8),
+          if (desktop)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: Text(
+                      'Descripción',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Cant',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Precio',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Subtotal',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: const Row(
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: Text(
-                    'Descripción',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Cant',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Precio',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Subtotal',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
+          if (desktop) const SizedBox(height: 4),
           ...venta.detalles.map((linea) {
             final nombre = (linea.nombreProducto ?? 'Ítem').toString();
             double sub = 0;
@@ -442,6 +480,55 @@ class MostrarDetalleVenta extends ConsumerWidget {
                 sub = (linea.subtotal as num).toDouble();
               } catch (_) {}
             }
+            final cantidadTexto = _fmtCantidad(linea.cantidad);
+
+            if (!desktop) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            nombre,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          _formatearMonto(sub),
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Cant. $cantidadTexto × '
+                      '${_formatearMonto(linea.precioUnitario)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
               child: Row(
@@ -459,7 +546,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                   ),
                   Expanded(
                     child: Text(
-                      '${linea.cantidad}',
+                      cantidadTexto,
                       textAlign: TextAlign.right,
                       style: const TextStyle(fontSize: 13),
                     ),
@@ -502,7 +589,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
               style: TextStyle(
                 fontSize: total ? 14 : 13,
                 fontWeight: total ? FontWeight.w900 : FontWeight.w600,
-                color: total ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                color: total
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFF64748B),
               ),
             ),
             Text(
@@ -510,7 +599,9 @@ class MostrarDetalleVenta extends ConsumerWidget {
               style: TextStyle(
                 fontSize: total ? 20 : 14,
                 fontWeight: FontWeight.w900,
-                color: total ? const Color(0xFF0F766E) : const Color(0xFF0F172A),
+                color: total
+                    ? const Color(0xFF0F766E)
+                    : const Color(0xFF0F172A),
               ),
             ),
           ],
@@ -686,10 +777,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                       ),
                       const SizedBox(width: 16),
                       // Columna lateral: solo resumen (ancho fijo visual)
-                      Expanded(
-                        flex: 3,
-                        child: totales,
-                      ),
+                      Expanded(flex: 3, child: totales),
                     ],
                   )
                 else ...[
@@ -707,7 +795,6 @@ class MostrarDetalleVenta extends ConsumerWidget {
     );
   }
 }
-
 
 class FilaDetalle extends StatelessWidget {
   const FilaDetalle(
@@ -778,7 +865,11 @@ class _AccionChip extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
               ),
             ],
           ),

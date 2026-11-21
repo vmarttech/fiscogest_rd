@@ -12,6 +12,7 @@ class ProductoDataMapper {
       descripcion: fila.descripcion,
       precioCompra: fila.precioCompra ?? 0.0,
       gastosAsociados: fila.gastosAsociados ?? 0.0,
+      costoPromedio: fila.costoPromedio ?? 0.0,
       precioVenta: fila.precioVenta ?? 0.0,
       margenGanancia: fila.margenGanancia,
       precioMinimo: fila.precioMinimo,
@@ -39,6 +40,7 @@ class ProductoDataMapper {
       descripcion: drift.Value(entidad.descripcion),
       precioCompra: drift.Value(entidad.precioCompra),
       gastosAsociados: drift.Value(entidad.gastosAsociados),
+      costoPromedio: drift.Value(entidad.costoPromedio),
       precioVenta: drift.Value(entidad.precioVenta),
       margenGanancia: entidad.margenGanancia != null
           ? drift.Value(entidad.margenGanancia!)

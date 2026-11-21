@@ -1636,7 +1636,7 @@ class _NuevaVentaBorradorPageState
                                       setState(() {
                                         _esCredito = false;
                                       });
-                                      if (simp) {
+                                      if (simp || (!_esCredito && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS))) {
                                         _onGenerarVentaSimplificada();
                                       } else {
                                         _guardarCotizacion(esCredito: false);
@@ -1702,11 +1702,11 @@ class _NuevaVentaBorradorPageState
                             onPressed: disabled
                                 ? null
                                 : () {
-                                    if (simp) {
-                                      _onGenerarVentaSimplificada();
-                                    } else {
-                                      _guardarCotizacion(esCredito: _esCredito);
-                                    }
+                                    if (simp || (!_esCredito && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS))) {
+                                        _onGenerarVentaSimplificada();
+                                      } else {
+                                        _guardarCotizacion(esCredito: _esCredito);
+                                      }
                                   },
                           ),
                         ],
@@ -2678,15 +2678,19 @@ class _NuevaVentaBorradorPageState
     }
     // Móvil: barra inferior
     final simplificado = ref.watch(modoColmadoProvider);
+    final esPlataformaMovil = defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+    final flujoDirecto = simplificado ||
+        (!_esCredito && (esPantallaPequena || esPlataformaMovil));
     final onTap = !puedeGenerar || _guardando
         ? null
-        : simplificado
+        : flujoDirecto
         ? _onGenerarVentaSimplificada
         : () => _guardarCotizacion(esCredito: _esCredito);
-    final label = simplificado
+    final label = flujoDirecto
         ? 'GENERAR VENTA'
         : (_esCredito ? 'Crear cotización (CR)' : 'Crear cotización (C)');
-    final bg = simplificado
+    final bg = flujoDirecto
         ? AppColors.primary
         : (_esCredito ? AppColors.warning : AppColors.primary);
     return Material(

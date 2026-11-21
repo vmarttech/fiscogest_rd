@@ -141,7 +141,8 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       impuestoId: producto.impuestoId,
       categoriaId: producto.categoriaId,
       impuestos: _ref.read(impuestoControllerProvider).valueOrNull ?? const [],
-      categorias: _ref.read(categoriaControllerProvider).valueOrNull ?? const [],
+      categorias:
+          _ref.read(categoriaControllerProvider).valueOrNull ?? const [],
       tasaGlobal: _tasaItbis,
     );
   }
@@ -188,7 +189,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     state = state.copyWith(clienteId: 0, clienteNombre: 'Consumidor Final');
   }
 
-
   void establecerUsuarioId(int usuarioId) {
     state = state.copyWith(usuarioId: usuarioId);
   }
@@ -212,7 +212,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       tipoPago: esCredito ? 'Credito' : 'Contado',
     );
   }
-
 
   bool _lineaTieneOferta(Map<String, dynamic> item) {
     if (item['esOferta'] == true) return true;
@@ -290,11 +289,9 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     return bruto;
   }
 
-  bool get tieneDescuentoPorLinea =>
-      state.detalles.any(_lineaTieneDesc);
+  bool get tieneDescuentoPorLinea => state.detalles.any(_lineaTieneDesc);
 
-  bool get tieneOfertaEnLineas =>
-      state.detalles.any(_lineaTieneOferta);
+  bool get tieneOfertaEnLineas => state.detalles.any(_lineaTieneOferta);
 
   bool get tieneDescuentoGeneral => state.montoDescuento > 0.001;
 
@@ -421,7 +418,6 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     _recalcularTotal(nuevoSubtotal: nuevoSubtotal, detalles: nuevosDetalles);
   }
 
-
   void cambiarCantidad(int productoId, double nuevaCantidad) {
     if (nuevaCantidad <= 0) {
       quitarProducto(productoId);
@@ -536,8 +532,8 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
     final subt = nuevoSubtotal ?? state.subtotal;
     final dets = detalles ?? state.detalles;
     final desc0 = nuevoDescuento ?? state.montoDescuento;
-    final itb = nuevoItbis ??
-        _itbisDetalles(dets, subtotal: subt, descuento: desc0);
+    final itb =
+        nuevoItbis ?? _itbisDetalles(dets, subtotal: subt, descuento: desc0);
     final env = nuevoEnvio ?? state.costoEnvio;
     final desc = nuevoDescuento ?? state.montoDescuento;
     final total = subt + itb + env - desc;
@@ -660,6 +656,8 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
           subtotal: sub,
           nombreProducto: m['productoNombre'] as String?,
           subtotalLinea: sub,
+          montoDescuento: (m['montoDescuento'] as num?)?.toDouble() ?? 0.0,
+          tasaImpuesto: (m['tasaImpuesto'] as num?)?.toDouble() ?? 0.0,
         );
       }).toList(),
       montoSubtotal: state.subtotal,

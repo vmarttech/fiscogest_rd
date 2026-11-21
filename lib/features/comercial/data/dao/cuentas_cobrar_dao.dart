@@ -189,8 +189,14 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<double> totalVencido() async {
-    final cuentas = await listarCuentas(estado: CobrarEstado.vencido);
-    return cuentas.fold<double>(0.0, (sum, c) => sum + c.saldoPendiente);
+    final cuentas = await listarCuentas();
+    final vencidas = cuentas.where((c) {
+      if (c.estado == CobrarEstado.pagado) return false;
+      if (c.saldoPendiente <= 0.001) return false;
+      final f = c.fechaVencimiento;
+      return DateTime.now().difference(f).inDays > 0;
+    }).toList();
+    return vencidas.fold<double>(0.0, (s, c) => s + c.saldoPendiente);
   }
 
   Future<int> cantidadClientesConDeuda() async {
@@ -205,17 +211,27 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<int> cantidadClientesVencidos() async {
-    final cuentas = await listarCuentas(estado: CobrarEstado.vencido);
-    final Set<int> clientes = {};
-    for (final c in cuentas) {
-      clientes.add(c.clienteId);
-    }
-    return clientes.length;
+    final cuentas = await listarCuentas();
+    final vencidas = cuentas.where((c) {
+      if (c.estado == CobrarEstado.pagado) return false;
+      if (c.saldoPendiente <= 0.001) return false;
+      final f = c.fechaVencimiento;
+      return DateTime.now().difference(f).inDays > 0;
+    }).toList();
+    return vencidas.map((c) => c.clienteId).toSet().length;
   }
 
   Future<List<CuentaCobrarData>> listarVencidas({int? limite}) async {
-    final lista = await listarCuentas(estado: CobrarEstado.vencido);
-    return limite != null ? lista.take(limite).toList() : lista;
+    final cuentas = await listarCuentas();
+    final vencidas =
+        cuentas.where((c) {
+            if (c.estado == CobrarEstado.pagado) return false;
+            if (c.saldoPendiente <= 0.001) return false;
+            final f = c.fechaVencimiento;
+            return DateTime.now().difference(f).inDays > 0;
+          }).toList()
+          ..sort((a, b) => b.fechaVencimiento.compareTo(a.fechaVencimiento));
+    return vencidas;
   }
 
   Future<List<CuentaCobrarData>> listarProximasAVencer({
@@ -317,13 +333,15 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   Future<void> insertarCuotasPlan({
     required int cuentaCobrarId,
     required List<
-        ({
-          int numero,
-          DateTime fechaVencimiento,
-          double monto,
-          double montoCapital,
-          double montoInteres,
-        })> cuotas,
+      ({
+        int numero,
+        DateTime fechaVencimiento,
+        double monto,
+        double montoCapital,
+        double montoInteres,
+      })
+    >
+    cuotas,
   }) async {
     await (delete(
       cuotasCuentaTable,

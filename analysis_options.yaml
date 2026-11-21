@@ -32,6 +32,10 @@ analyzer:
     uri_has_not_been_generated: warning
   exclude:
     - backups/**
+    - respaldo_gastro/**
+    - respaldo_*/**
+    - _antes_restore/**
+    - "**/*.bak_gastro"
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "**/*.drift.dart"

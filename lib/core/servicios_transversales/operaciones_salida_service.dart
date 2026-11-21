@@ -3,16 +3,21 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/salida.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/i_salida_repository.dart';
+import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
+import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
+import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 
 class OperacionesSalidaService {
   OperacionesSalidaService({
     required this.salidaRepository,
     required this.productoRepository,
+    required this.kardexRepository,
     required this.db,
   });
 
   final ISalidaRepository salidaRepository;
   final IProductoRepository productoRepository;
+  final IKardexRepository kardexRepository;
   final AppDatabase db;
 
   bool puedeDescontar(Producto producto, double cantidad) {
@@ -51,8 +56,28 @@ class OperacionesSalidaService {
         ),
       );
 
+      final saldoAnterior = producto.stock ?? 0.0;
       final actualizado = descontarStock(producto, cantidad);
       await productoRepository.actualizarProducto(actualizado);
+
+      final costo = (producto.costoPromedio > 0)
+          ? producto.costoPromedio
+          : (producto.precioCompra > 0 ? producto.precioCompra : 0.0);
+      await kardexRepository.registrarMovimiento(
+        Kardex(
+          productoId: productoId,
+          tipoMovimiento: TipoMovimiento.salida,
+          cantidad: cantidad,
+          saldoAnterior: saldoAnterior,
+          saldoNuevo: actualizado.stock ?? saldoAnterior - cantidad,
+          costoUnitario: costo,
+          totalMovimiento: costo * cantidad,
+          fechaMovimiento: DateTime.now(),
+          documentoReferencia: 'Salida manual',
+          observacion: motivo,
+          usuarioId: 1,
+        ),
+      );
     });
   }
 }

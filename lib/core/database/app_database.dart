@@ -59,7 +59,6 @@ import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.da
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_table.dart';
 import 'package:fiscogest_rd/features/ventas/data/dao/abonos_fiao_table.dart';
-import 'package:fiscogest_rd/features/gastronomia/data/dao/gastronomia_tables.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -121,15 +120,6 @@ part 'app_database.g.dart';
     TransferenciasTable,
     PresentacionesTable,
     ImpuestosTable,
-    ExtrasGastronomiaTable,
-    ProductoExtraTable,
-    SectoresDeliveryTable,
-    RepartidoresTable,
-    PedidosGastronomiaTable,
-    PedidoGastronomiaLineaTable,
-    PedidoLineaExtraTable,
-    ProductosGastroMetaTable,
-    CategoriasMenuMetaTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -144,7 +134,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 76;
+  int get schemaVersion => 80;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -188,6 +178,9 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 80) {
+        await m.addColumn(productosTable, productosTable.costoPromedio);
+      }
       // Fase A fiao: tabla abonos + columna fecha compromiso (idempotente)
       try {
         await m.createTable(abonosFiaoTable);
@@ -206,9 +199,7 @@ class AppDatabase extends _$AppDatabase {
       try {
         await m.addColumn(fiosTable, fiosTable.fechaCompromiso);
       } catch (_) {}
-      // V76: propina en pedidos de gastronomia (idempotente)
       try {
-        await m.addColumn(pedidosGastronomiaTable, pedidosGastronomiaTable.propina);
       } catch (_) {}
 
       if (from < 70) {
@@ -1046,18 +1037,6 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         await m.createTable(cuotasCuentaTable);
       }
 
-      // V75: incorporar el módulo de Gastronomía.
-      if (from < 75) {
-        await m.createTable(extrasGastronomiaTable);
-        await m.createTable(productoExtraTable);
-        await m.createTable(sectoresDeliveryTable);
-        await m.createTable(repartidoresTable);
-        await m.createTable(pedidosGastronomiaTable);
-        await m.createTable(pedidoGastronomiaLineaTable);
-        await m.createTable(pedidoLineaExtraTable);
-        await m.createTable(productosGastroMetaTable);
-        await m.createTable(categoriasMenuMetaTable);
-      }
     },
   );
 }

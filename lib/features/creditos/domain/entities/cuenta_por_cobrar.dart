@@ -24,6 +24,8 @@ class CuentaPorCobrar {
     this.estado = EstadoCredito.alDia,
     this.observaciones,
     this.usuarioId,
+    this.moraCalculada = 0.0,
+    this.diasVencidoActual = 0,
   });
 
   final int? id;
@@ -67,6 +69,12 @@ class CuentaPorCobrar {
   final String? observaciones;
   final int? usuarioId;
 
+  /// Mora calculada por días vencidos (lectura; no sustituye la fase de BD).
+  final double moraCalculada;
+
+  /// Días transcurridos desde la fecha de vencimiento al momento de leer.
+  final int diasVencidoActual;
+
   // ============================================
   // CAMPOS CALCULADOS
   // ============================================
@@ -91,6 +99,10 @@ class CuentaPorCobrar {
     return (totalAPagar - totalAbonado).clamp(0.0, double.infinity);
   }
 
+  /// Saldo exigible ahora: principal pendiente + mora calculada.
+  double get totalConMora =>
+      double.parse((saldoPendiente + moraCalculada).toStringAsFixed(2));
+
   /// Si ya está totalmente pagada
   bool get estaPagada {
     return saldoPendiente <= 0.001;
@@ -100,6 +112,16 @@ class CuentaPorCobrar {
   int diasVencido(DateTime hoy) {
     if (estaPagada) return 0;
     return hoy.difference(fechaVencimiento).inDays;
+  }
+
+  /// Mora estimada al mostrar: tasa mensual configurada / 30 por cada día
+  /// vencido, aplicada sobre el saldo pendiente. No se persiste en BD.
+  double moraEstimada({required double moraMensual, DateTime? hoy}) {
+    final dias = diasVencido(hoy ?? DateTime.now());
+    if (dias <= 0 || saldoPendiente <= 0.001 || moraMensual <= 0) return 0.0;
+    final tasaDiaria = moraMensual / 30.0;
+    final monto = saldoPendiente * tasaDiaria * dias;
+    return double.parse(monto.toStringAsFixed(2));
   }
 
   CuentaPorCobrar copyWith({
@@ -121,6 +143,8 @@ class CuentaPorCobrar {
     EstadoCredito? estado,
     String? observaciones,
     int? usuarioId,
+    double? moraCalculada,
+    int? diasVencidoActual,
   }) {
     return CuentaPorCobrar(
       id: id ?? this.id,
@@ -141,6 +165,8 @@ class CuentaPorCobrar {
       estado: estado ?? this.estado,
       observaciones: observaciones ?? this.observaciones,
       usuarioId: usuarioId ?? this.usuarioId,
+      moraCalculada: moraCalculada ?? this.moraCalculada,
+      diasVencidoActual: diasVencidoActual ?? this.diasVencidoActual,
     );
   }
 }

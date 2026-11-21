@@ -30,6 +30,19 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+    
+    // IDENTIDAD INDEPENDIENTE DE CADA APLICACION
+    flavorDimensions += "producto"
+
+    productFlavors {
+        create("fiscogest") {
+            dimension = "producto"
+            applicationId = "com.fiscogest.fiscogest_rd"
+            manifestPlaceholders["appLabel"] = "FiscoGest"
+        }
+
+    }
+
 
     signingConfigs {
         create("release") {

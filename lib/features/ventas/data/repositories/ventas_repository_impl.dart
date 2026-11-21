@@ -14,6 +14,12 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/descuento.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/oferta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
+import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+
+import 'package:flutter/foundation.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/venta_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
 
 class VentasRepositoryImpl implements IVentasRepository {
   VentasRepositoryImpl(
@@ -27,6 +33,48 @@ class VentasRepositoryImpl implements IVentasRepository {
   final VentasDao _ventasDao;
   final ProductosDao? _productosDao;
   final OfertasDao? _ofertasDao;
+
+
+  /// Sube ventas (+ productos por stock) a Supabase al instante si hay red.
+  /// Nunca rompe el flujo local: errores solo se loguean.
+  Future<void> _pushVentaAhora() async {
+    if (!SupabaseConfig.isConfigured) return;
+    try {
+      if (!await SupabaseConfig.hayRed()) {
+        debugPrint('VentaSync: sin red — queda para el scheduler');
+        return;
+      }
+      await VentaSync(_ventasDao.db).pushTodos();
+      // Stock ya cambió en local → alinear inventario en la nube
+      await ProductoSync(_ventasDao.db).pushTodos();
+    } catch (e, st) {
+      debugPrint('VentaSync inmediato: $e');
+      debugPrint('$st');
+    }
+  }
+
+  ({double sub, double itbis, double total}) _totalesDesdeLineas(
+    List<DetalleVenta> lineas, {
+    required double costoEnvio,
+    required double montoDescuento,
+  }) {
+    final sub = double.parse(
+      lineas
+          .fold<double>(0.0, (sum, d) => sum + (d.subtotalLinea ?? d.subtotal))
+          .toStringAsFixed(2),
+    );
+    final itbis = double.parse(
+      itbisDeLineas(
+        subtotales: lineas.map((d) => d.subtotalLinea ?? d.subtotal),
+        tasas: lineas.map((d) => d.tasaImpuesto),
+        descuentoGeneral: montoDescuento,
+      ).toStringAsFixed(2),
+    );
+    final total = double.parse(
+      (sub + itbis + costoEnvio - montoDescuento).toStringAsFixed(2),
+    );
+    return (sub: sub, itbis: itbis, total: total < 0.0 ? 0.0 : total);
+  }
 
   Future<List<DetalleVenta>> _mapearDetalles(
     List<VentaDetalleData> filas,
@@ -135,6 +183,13 @@ class VentasRepositoryImpl implements IVentasRepository {
     bool esCotizacion = false,
     List<DetalleVenta> detalles = const [],
   }) {
+    final tot = detalles.isEmpty
+        ? null
+        : _totalesDesdeLineas(
+            detalles,
+            costoEnvio: datos.costoEnvio,
+            montoDescuento: datos.montoDescuento,
+          );
     return Venta(
       id: datos.id,
       numeroCotizacion: datos.numeroCotizacion,
@@ -146,10 +201,10 @@ class VentasRepositoryImpl implements IVentasRepository {
       clienteDireccion: datos.clienteDireccion,
       fecha: datos.fecha,
       detalles: detalles,
-      montoSubtotal: datos.montoSubtotal,
+      montoSubtotal: tot?.sub ?? datos.montoSubtotal,
       descuentoGlobal: datos.descuentoGlobal,
-      itbis: datos.itbis,
-      montoTotal: datos.montoTotal,
+      itbis: tot?.itbis ?? datos.itbis,
+      montoTotal: tot?.total ?? datos.montoTotal,
       formaPago: datos.formaPago,
       costoEnvio: datos.costoEnvio,
       abonoInicial: datos.abonoInicial,
@@ -376,7 +431,9 @@ class VentasRepositoryImpl implements IVentasRepository {
     await _guardarDetalles(id, venta.detalles);
     final registro = await _ventasDao.obtenerVentaPorId(id);
     final dets = await _mapearDetalles(await _ventasDao.listarDetalles(id));
-    return _mapearDesdeVentasTableData(registro!, detalles: dets);
+    final mapped = _mapearDesdeVentasTableData(registro!, detalles: dets);
+    await _pushVentaAhora();
+    return mapped;
   }
 
   @override
@@ -387,6 +444,12 @@ class VentasRepositoryImpl implements IVentasRepository {
         'CR',
       ),
     );
+    final tot = _totalesDesdeLineas(
+      cotizacion.detalles,
+      costoEnvio: cotizacion.costoEnvio,
+      montoDescuento: cotizacion.montoDescuento,
+    );
+
     final id = await _ventasDao.insertarVenta(
       VentasTableCompanion(
         numeroCotizacion: Value(numero),
@@ -397,10 +460,10 @@ class VentasRepositoryImpl implements IVentasRepository {
         clienteWhatsapp: Value(cotizacion.clienteWhatsapp),
         clienteDireccion: Value(cotizacion.clienteDireccion),
         fecha: Value(cotizacion.fecha),
-        montoSubtotal: Value(cotizacion.montoSubtotal),
+        montoSubtotal: Value(tot.sub),
         descuentoGlobal: Value(cotizacion.descuentoGlobal),
-        itbis: Value(cotizacion.itbis),
-        montoTotal: Value(cotizacion.montoTotal),
+        itbis: Value(tot.itbis),
+        montoTotal: Value(tot.total),
         formaPago: Value(cotizacion.formaPago),
         costoEnvio: Value(cotizacion.costoEnvio),
         abonoInicial: Value(cotizacion.abonoInicial),
@@ -440,6 +503,14 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> actualizarVentaBorrador(Venta cotizacion) async {
+    final tot = cotizacion.detalles.isEmpty
+        ? null
+        : _totalesDesdeLineas(
+            cotizacion.detalles,
+            costoEnvio: cotizacion.costoEnvio,
+            montoDescuento: cotizacion.montoDescuento,
+          );
+
     await _ventasDao.actualizarVenta(
       cotizacion.id!,
       VentasTableCompanion(
@@ -447,10 +518,10 @@ class VentasRepositoryImpl implements IVentasRepository {
         numeroFactura: Value(cotizacion.numeroFactura),
         clienteId: Value(cotizacion.clienteId),
         fecha: Value(cotizacion.fecha),
-        montoSubtotal: Value(cotizacion.montoSubtotal),
+        montoSubtotal: Value(tot?.sub ?? cotizacion.montoSubtotal),
         descuentoGlobal: Value(cotizacion.descuentoGlobal),
-        itbis: Value(cotizacion.itbis),
-        montoTotal: Value(cotizacion.montoTotal),
+        itbis: Value(tot?.itbis ?? cotizacion.itbis),
+        montoTotal: Value(tot?.total ?? cotizacion.montoTotal),
         formaPago: Value(cotizacion.formaPago),
         costoEnvio: Value(cotizacion.costoEnvio),
         abonoInicial: Value(cotizacion.abonoInicial),
@@ -493,16 +564,32 @@ class VentasRepositoryImpl implements IVentasRepository {
     final ya = (actual?.numeroFactura ?? '').trim();
     /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
     final numeroFactura = ya;
+    final lineas = await _mapearDetalles(
+      await _ventasDao.listarDetalles(cotizacionId),
+    );
+    final tot = lineas.isEmpty
+        ? null
+        : _totalesDesdeLineas(
+            lineas,
+            costoEnvio: actual?.costoEnvio ?? 0.0,
+            montoDescuento: actual?.montoDescuento ?? 0.0,
+          );
+
     await _ventasDao.actualizarVenta(
       cotizacionId,
       VentasTableCompanion(
         estadoDocumento: Value(EstadoDocumento.facturado.name),
         numeroFactura: Value(numeroFactura),
         formaPago: formaPago != null ? Value(formaPago) : const Value.absent(),
+        montoSubtotal: tot != null ? Value(tot.sub) : const Value.absent(),
+        itbis: tot != null ? Value(tot.itbis) : const Value.absent(),
+        montoTotal: tot != null ? Value(tot.total) : const Value.absent(),
       ),
     );
     final registro = await _ventasDao.obtenerVentaPorId(cotizacionId);
-    return _mapearDesdeVentasTableData(registro!);
+    final mapped = _mapearDesdeVentasTableData(registro!, detalles: lineas);
+    await _pushVentaAhora();
+    return mapped;
   }
 
   /// Cotización crédito: solo abono + venc. SIN factura fiscal.

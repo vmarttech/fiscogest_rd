@@ -61,18 +61,30 @@ class EnviarRecordatorioWhatsApp {
     required double saldoPendiente,
     String? numeroCuenta,
     String? notaExtra,
+    int? diasAtraso,
+    double? montoMoraEstimada,
   }) {
     final nombre = nombreCliente.trim().isEmpty
         ? 'estimado cliente'
         : nombreCliente.trim().split(RegExp(r'\s+')).first;
 
     final buffer = StringBuffer();
-    buffer.writeln(
-      '¡Hola, $nombre! Te saluda $nombreNegocio.',
-    );
+    buffer.writeln('¡Hola, $nombre! Te saluda $nombreNegocio.');
     buffer.writeln(
       'Esperamos que estés bien. Te escribimos para recordarte que tienes un balance pendiente de ${formatRd(saldoPendiente)}.',
     );
+    final dias = diasAtraso ?? 0;
+    if (dias > 0) {
+      buffer.writeln(
+        'Tu cuenta lleva $dias día${dias == 1 ? '' : 's'} vencida${dias == 1 ? '' : 's'} desde la fecha de pago.',
+      );
+    }
+    final mora = montoMoraEstimada ?? 0.0;
+    if (mora > 0.009) {
+      buffer.writeln(
+        'Mora estimada por el atraso: ${formatRd(mora)}. Te sugerimos regularizar el saldo pronto.',
+      );
+    }
     if (numeroCuenta != null && numeroCuenta.trim().isNotEmpty) {
       buffer.writeln('Referencia: ${numeroCuenta.trim()}.');
     }
@@ -94,6 +106,8 @@ class EnviarRecordatorioWhatsApp {
     required double saldoPendiente,
     String? numeroCuenta,
     String? notaExtra,
+    int? diasAtraso,
+    double? montoMoraEstimada,
   }) {
     final e164 = normalizarTelefonoRd(telefonoCliente);
     if (e164 == null) {
@@ -111,6 +125,8 @@ class EnviarRecordatorioWhatsApp {
       saldoPendiente: saldoPendiente,
       numeroCuenta: numeroCuenta,
       notaExtra: notaExtra,
+      diasAtraso: diasAtraso,
+      montoMoraEstimada: montoMoraEstimada,
     );
 
     final uri = Uri.parse(

@@ -56,9 +56,17 @@ class _DetalleCuentaCobrarPageState
   Future<void> _enviarRecordatorioWhatsApp(CuentaPorCobrar c) async {
     try {
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
+      final params = await ref.read(parametrosCreditoProvider.future);
+      final dias = c.diasVencido(DateTime.now());
+      final mora = c.moraEstimada(moraMensual: params.moraPorcentaje);
       await ref
           .read(recordatorioWhatsAppServiceProvider)
-          .enviarDesdeCuenta(cuenta: c, empresa: empresa);
+          .enviarDesdeCuenta(
+            cuenta: c,
+            empresa: empresa,
+            diasAtraso: dias > 0 ? dias : null,
+            montoMoraEstimada: mora > 0.009 ? mora : null,
+          );
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -92,7 +100,11 @@ class _DetalleCuentaCobrarPageState
         );
       }
     } finally {
-      if (mounted) setState(() { _imprimiendoCronograma = false; });
+      if (mounted) {
+        setState(() {
+          _imprimiendoCronograma = false;
+        });
+      }
     }
   }
 
@@ -110,7 +122,11 @@ class _DetalleCuentaCobrarPageState
         );
       }
     } finally {
-      if (mounted) setState(() { _imprimiendoEstadoCuenta = false; });
+      if (mounted) {
+        setState(() {
+          _imprimiendoEstadoCuenta = false;
+        });
+      }
     }
   }
 
@@ -278,7 +294,11 @@ class _DetalleCuentaCobrarPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _pagando = false; });
+      if (mounted) {
+        setState(() {
+          _pagando = false;
+        });
+      }
     }
   }
 
@@ -373,6 +393,11 @@ class _DetalleCuentaCobrarPageState
 
   Widget _buildBody(CuentaPorCobrar c) {
     final mobile = AppBreakpoints.isMobile(context);
+    final params = ref.watch(parametrosCreditoProvider).valueOrNull;
+    final diasAtraso = c.diasVencido(DateTime.now());
+    final moraEstimada = c.moraEstimada(
+      moraMensual: params?.moraPorcentaje ?? 0.0,
+    );
     final pctPagado = c.totalAPagar > 0
         ? ((c.totalAbonado / c.totalAPagar) * 100).clamp(0.0, 100.0)
         : 0.0;
@@ -684,6 +709,18 @@ class _DetalleCuentaCobrarPageState
                   valueColor: const Color(0xFF1D4ED8),
                   labelColor: const Color(0xFF1E40AF),
                 ),
+                if (diasAtraso > 0)
+                  kpi(
+                    label: 'Días vencido / Mora est.',
+                    value: '${diasAtraso}d · ${formatRd(moraEstimada)}',
+                    hint: moraEstimada > 0.009
+                        ? 'Tasa mensual configurada / 30 por día'
+                        : 'Sin tasa de mora configurada',
+                    bg: const Color(0xFFFFFBEB),
+                    border: const Color(0xFFFDE68A),
+                    valueColor: const Color(0xFFB45309),
+                    labelColor: const Color(0xFF92400E),
+                  ),
                 kpi(
                   label: 'Próximo Vencimiento',
                   value: _fmtFecha.format(c.fechaVencimiento),

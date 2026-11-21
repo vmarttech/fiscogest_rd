@@ -290,8 +290,6 @@ String planMinimoPara(String funcion) {
     case 'import_export':
     case 'fiao':
       return 'gratis';
-    case 'gastronomia':
-      return 'basico';
     default:
       return 'pro';
   }
@@ -354,7 +352,6 @@ List<String> beneficiosPlanUi(String plan) {
         'Reportes básicos',
         'Sync en la nube + backup automático',
         'Fiao · 1 equipo',
-        'Gastronomía: venta rápida, delivery y menú digital',
       ];
     case 'simplificado':
       return const [
@@ -364,7 +361,6 @@ List<String> beneficiosPlanUi(String plan) {
         'Fiao sin tope',
         'Reportes avanzados + dashboard económico',
         'Importar / Exportar datos',
-        'Gastronomía: venta rápida, delivery y menú digital',
         'Sin módulo fiscal ni e-CF',
       ];
     case 'pro':
@@ -375,7 +371,6 @@ List<String> beneficiosPlanUi(String plan) {
         'Facturación electrónica e-CF (DGII)',
         'Declaraciones 606 / 607',
         'Almacenes + transferencias',
-        'Gastronomía: venta rápida, delivery y menú digital',
         'Usuarios ilimitados por rol',
         'Onboarding personalizado',
       ];
