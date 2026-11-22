@@ -9,6 +9,8 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_activo_provider.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 
 @immutable
 class VentaBorradorState {
@@ -326,10 +328,10 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 
   /// null = ok; String = mensaje de error (sin stock).
-  String? validarStockParaAgregar(Producto producto, double cantidadExtra) {
-    final stock = producto.stock;
-    // null = no controla inventario (servicio / no rastrea stock)
-    if (stock == null) return null;
+  Future<String?> validarStockParaAgregar(Producto producto, double cantidadExtra) async {
+    final stockGlobal = producto.stock;
+    if (stockGlobal == null) return null;
+
     final indice = state.detalles.indexWhere(
       (item) => item['productoId'] == producto.id,
     );
@@ -337,18 +339,38 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
         ? (state.detalles[indice]['cantidad'] as num?)?.toDouble() ?? 0
         : 0.0;
     final total = enCarrito + cantidadExtra;
-    if (total > stock + 1e-9) {
-      final disp = stock == stock.roundToDouble()
-          ? '${stock.toInt()}'
-          : stock.toStringAsFixed(2);
-      return 'Sin existencia suficiente: ${producto.nombre} '
-          '(disponible: $disp, solicitado: ${total == total.roundToDouble() ? total.toInt() : total})';
+
+    final almacenId = _ref.read(almacenActivoIdEfectivoProvider);
+    if (almacenId == null) {
+      if (total > stockGlobal + 1e-9) {
+        final disp = stockGlobal == stockGlobal.roundToDouble()
+            ? '${stockGlobal.toInt()}'
+            : stockGlobal.toStringAsFixed(2);
+        return 'Sin existencia suficiente: ${producto.nombre} '
+            '(disponible: $disp, solicitado: ${total == total.roundToDouble() ? total.toInt() : total})';
+      }
+      return null;
+    }
+
+    final db = _ref.read(databaseProvider);
+    final productoId = producto.id;
+    final disponible = productoId == null
+        ? 0
+        : await StockAlmacenDao(db).cantidad(productoId, almacenId);
+    final dispReal = disponible > 0 ? disponible : stockGlobal;
+
+    if (total > dispReal + 1e-9) {
+      final dispTxt = dispReal == dispReal.roundToDouble()
+          ? '${dispReal.toInt()}'
+          : dispReal.toStringAsFixed(2);
+      return 'Sin existencia suficiente en este almacén: ${producto.nombre} '
+          '(disponible: $dispTxt, solicitado: ${total == total.roundToDouble() ? total.toInt() : total})';
     }
     return null;
   }
 
-  void agregarProducto(Producto producto, double cantidad) {
-    final errorStock = validarStockParaAgregar(producto, cantidad);
+  Future<void> agregarProducto(Producto producto, double cantidad) async {
+    final errorStock = await validarStockParaAgregar(producto, cantidad);
     if (errorStock != null) {
       throw StateError(errorStock);
     }

@@ -12,6 +12,7 @@ class RegistrarCompraUseCase {
   Future<Compra> call({
     required Compra compra,
     required List<DetalleCompra> detalles,
+    int? almacenId,
   }) async {
     if (detalles.isEmpty) {
       throw Exception('La compra debe contener al menos un producto.');
@@ -25,6 +26,7 @@ class RegistrarCompraUseCase {
     );
 
     final compraActualizada = compra.copyWith(
+      almacenId: almacenId,
       subtotalSinImpuestos: totales.subtotalSinImpuestos,
       montoDescuentoGlobal: totales.montoDescuentoGlobal,
       montoImpuesto: totales.montoImpuesto,

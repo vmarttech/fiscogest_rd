@@ -20,6 +20,7 @@ import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/compra_rapida_page.dart';
 
 class RegistrarCompraPage extends ConsumerStatefulWidget {
@@ -45,13 +46,16 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
   final _diasCreditoController = TextEditingController(text: '0');
   final _fechaVencimientoController = TextEditingController();
   EstadoCompra _estadoGuardado = EstadoCompra.borrador;
+  int? _almacenDestinoId;
 
   final List<DetalleLinea> _lineas = [];
   final List<ControladoresLinea> _controladores = [];
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _redirigirSiSimplificado());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _redirigirSiSimplificado(),
+    );
 
     super.initState();
     _fechaController.text = DateTime.now().toLocal().toString().split(' ')[0];
@@ -266,7 +270,6 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     });
   }
 
-  
   void _redirigirSiSimplificado() {
     if (!mounted) return;
     final simple = ref.read(modoSimplificadoProvider);
@@ -275,7 +278,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
     }
   }
 
-Future<void> _guardarCompra() async {
+  Future<void> _guardarCompra() async {
     for (var i = 0; i < _lineas.length; i++) {
       final ctrl = _controladores[i];
       _lineas[i].productoId = int.tryParse(ctrl.productoId.text.trim());
@@ -368,6 +371,7 @@ Future<void> _guardarCompra() async {
       estado: _estadoGuardado,
       creadoEn: ahora,
       actualizadoEn: null,
+      almacenId: _almacenDestinoId,
     );
 
     final detalles = _lineas.asMap().entries.map((entry) {
@@ -460,9 +464,13 @@ Future<void> _guardarCompra() async {
       comprobanteController: _comprobanteController,
       ncfController: _ncfController,
       tipoComprobante: _tipoComprobante,
-      onTipoComprobanteChanged: (v) => setState(() { _tipoComprobante = v; }),
+      onTipoComprobanteChanged: (v) => setState(() {
+        _tipoComprobante = v;
+      }),
       formaPago: _formaPago,
-      onFormaPagoChanged: (v) => setState(() { _formaPago = v; }),
+      onFormaPagoChanged: (v) => setState(() {
+        _formaPago = v;
+      }),
       condicionPagoController: _condicionPagoController,
       diasCreditoController: _diasCreditoController,
       fechaVencimientoController: _fechaVencimientoController,
@@ -648,6 +656,45 @@ Future<void> _guardarCompra() async {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       cabecera,
+                      const SizedBox(height: 16),
+                      // ─── SELECCIÓN DE ALMACÉN DE DESTINO ───
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final almacenesAsync = ref.watch(
+                            almacenControllerProvider,
+                          );
+                          return almacenesAsync.when(
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (e, _) =>
+                                Text('Error al cargar almacenes: $e'),
+                            data: (almacenes) => DropdownButtonFormField<int>(
+                              initialValue: _almacenDestinoId,
+                              decoration: const InputDecoration(
+                                labelText: 'Almacén de Destino *',
+                                hintText:
+                                    'Seleccione a qué almacén ingresarán estos productos',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.warehouse),
+                              ),
+                              items: almacenes
+                                  .map(
+                                    (almacen) => DropdownMenuItem<int>(
+                                      value: almacen.id,
+                                      child: Text(almacen.nombre),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (valor) =>
+                                  setState(() => _almacenDestinoId = valor),
+                              validator: (valor) =>
+                                  valor == null ? 'Campo requerido' : null,
+                              isExpanded: true,
+                            ),
+                          );
+                        },
+                      ),
                       const SizedBox(height: 20),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,

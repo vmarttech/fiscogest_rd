@@ -29910,6 +29910,17 @@ class $ComprasTableTable extends ComprasTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _almacenIdMeta = const VerificationMeta(
+    'almacenId',
+  );
+  @override
+  late final GeneratedColumn<int> almacenId = GeneratedColumn<int>(
+    'almacen_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -29935,6 +29946,7 @@ class $ComprasTableTable extends ComprasTable
     observaciones,
     creadoEn,
     actualizadoEn,
+    almacenId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -30152,6 +30164,12 @@ class $ComprasTableTable extends ComprasTable
         ),
       );
     }
+    if (data.containsKey('almacen_id')) {
+      context.handle(
+        _almacenIdMeta,
+        almacenId.isAcceptableOrUnknown(data['almacen_id']!, _almacenIdMeta),
+      );
+    }
     return context;
   }
 
@@ -30255,6 +30273,10 @@ class $ComprasTableTable extends ComprasTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}actualizado_en'],
       ),
+      almacenId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}almacen_id'],
+      ),
     );
   }
 
@@ -30292,6 +30314,7 @@ class ComprasTableData extends DataClass
   final String? observaciones;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
+  final int? almacenId;
   const ComprasTableData({
     required this.id,
     required this.numeroComprobante,
@@ -30316,6 +30339,7 @@ class ComprasTableData extends DataClass
     this.observaciones,
     required this.creadoEn,
     this.actualizadoEn,
+    this.almacenId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -30359,6 +30383,9 @@ class ComprasTableData extends DataClass
     if (!nullToAbsent || actualizadoEn != null) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
     }
+    if (!nullToAbsent || almacenId != null) {
+      map['almacen_id'] = Variable<int>(almacenId);
+    }
     return map;
   }
 
@@ -30399,6 +30426,9 @@ class ComprasTableData extends DataClass
       actualizadoEn: actualizadoEn == null && nullToAbsent
           ? const Value.absent()
           : Value(actualizadoEn),
+      almacenId: almacenId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(almacenId),
     );
   }
 
@@ -30439,6 +30469,7 @@ class ComprasTableData extends DataClass
       observaciones: serializer.fromJson<String?>(json['observaciones']),
       creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
       actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+      almacenId: serializer.fromJson<int?>(json['almacenId']),
     );
   }
   @override
@@ -30468,6 +30499,7 @@ class ComprasTableData extends DataClass
       'observaciones': serializer.toJson<String?>(observaciones),
       'creadoEn': serializer.toJson<DateTime>(creadoEn),
       'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+      'almacenId': serializer.toJson<int?>(almacenId),
     };
   }
 
@@ -30495,6 +30527,7 @@ class ComprasTableData extends DataClass
     Value<String?> observaciones = const Value.absent(),
     DateTime? creadoEn,
     Value<DateTime?> actualizadoEn = const Value.absent(),
+    Value<int?> almacenId = const Value.absent(),
   }) => ComprasTableData(
     id: id ?? this.id,
     numeroComprobante: numeroComprobante ?? this.numeroComprobante,
@@ -30529,6 +30562,7 @@ class ComprasTableData extends DataClass
     actualizadoEn: actualizadoEn.present
         ? actualizadoEn.value
         : this.actualizadoEn,
+    almacenId: almacenId.present ? almacenId.value : this.almacenId,
   );
   ComprasTableData copyWithCompanion(ComprasTableCompanion data) {
     return ComprasTableData(
@@ -30589,6 +30623,7 @@ class ComprasTableData extends DataClass
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
           : this.actualizadoEn,
+      almacenId: data.almacenId.present ? data.almacenId.value : this.almacenId,
     );
   }
 
@@ -30617,7 +30652,8 @@ class ComprasTableData extends DataClass
           ..write('estado: $estado, ')
           ..write('observaciones: $observaciones, ')
           ..write('creadoEn: $creadoEn, ')
-          ..write('actualizadoEn: $actualizadoEn')
+          ..write('actualizadoEn: $actualizadoEn, ')
+          ..write('almacenId: $almacenId')
           ..write(')'))
         .toString();
   }
@@ -30647,6 +30683,7 @@ class ComprasTableData extends DataClass
     observaciones,
     creadoEn,
     actualizadoEn,
+    almacenId,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -30674,7 +30711,8 @@ class ComprasTableData extends DataClass
           other.estado == this.estado &&
           other.observaciones == this.observaciones &&
           other.creadoEn == this.creadoEn &&
-          other.actualizadoEn == this.actualizadoEn);
+          other.actualizadoEn == this.actualizadoEn &&
+          other.almacenId == this.almacenId);
 }
 
 class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
@@ -30701,6 +30739,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
   final Value<String?> observaciones;
   final Value<DateTime> creadoEn;
   final Value<DateTime?> actualizadoEn;
+  final Value<int?> almacenId;
   const ComprasTableCompanion({
     this.id = const Value.absent(),
     this.numeroComprobante = const Value.absent(),
@@ -30725,6 +30764,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     this.observaciones = const Value.absent(),
     this.creadoEn = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
+    this.almacenId = const Value.absent(),
   });
   ComprasTableCompanion.insert({
     this.id = const Value.absent(),
@@ -30750,6 +30790,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     this.observaciones = const Value.absent(),
     required DateTime creadoEn,
     this.actualizadoEn = const Value.absent(),
+    this.almacenId = const Value.absent(),
   }) : numeroComprobante = Value(numeroComprobante),
        tipoComprobante = Value(tipoComprobante),
        fechaEmision = Value(fechaEmision),
@@ -30786,6 +30827,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Expression<String>? observaciones,
     Expression<DateTime>? creadoEn,
     Expression<DateTime>? actualizadoEn,
+    Expression<int>? almacenId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -30813,6 +30855,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       if (observaciones != null) 'observaciones': observaciones,
       if (creadoEn != null) 'creado_en': creadoEn,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+      if (almacenId != null) 'almacen_id': almacenId,
     });
   }
 
@@ -30840,6 +30883,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     Value<String?>? observaciones,
     Value<DateTime>? creadoEn,
     Value<DateTime?>? actualizadoEn,
+    Value<int?>? almacenId,
   }) {
     return ComprasTableCompanion(
       id: id ?? this.id,
@@ -30865,6 +30909,7 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
       observaciones: observaciones ?? this.observaciones,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+      almacenId: almacenId ?? this.almacenId,
     );
   }
 
@@ -30946,6 +30991,9 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
     if (actualizadoEn.present) {
       map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
     }
+    if (almacenId.present) {
+      map['almacen_id'] = Variable<int>(almacenId.value);
+    }
     return map;
   }
 
@@ -30974,7 +31022,8 @@ class ComprasTableCompanion extends UpdateCompanion<ComprasTableData> {
           ..write('estado: $estado, ')
           ..write('observaciones: $observaciones, ')
           ..write('creadoEn: $creadoEn, ')
-          ..write('actualizadoEn: $actualizadoEn')
+          ..write('actualizadoEn: $actualizadoEn, ')
+          ..write('almacenId: $almacenId')
           ..write(')'))
         .toString();
   }
@@ -59433,6 +59482,7 @@ typedef $$ComprasTableTableCreateCompanionBuilder =
       Value<String?> observaciones,
       required DateTime creadoEn,
       Value<DateTime?> actualizadoEn,
+      Value<int?> almacenId,
     });
 typedef $$ComprasTableTableUpdateCompanionBuilder =
     ComprasTableCompanion Function({
@@ -59459,6 +59509,7 @@ typedef $$ComprasTableTableUpdateCompanionBuilder =
       Value<String?> observaciones,
       Value<DateTime> creadoEn,
       Value<DateTime?> actualizadoEn,
+      Value<int?> almacenId,
     });
 
 final class $$ComprasTableTableReferences
@@ -59609,6 +59660,11 @@ class $$ComprasTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$ProveedoresTableTableFilterComposer get proveedorId {
     final $$ProveedoresTableTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -59752,6 +59808,11 @@ class $$ComprasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ProveedoresTableTableOrderingComposer get proveedorId {
     final $$ProveedoresTableTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -59883,6 +59944,9 @@ class $$ComprasTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get almacenId =>
+      $composableBuilder(column: $table.almacenId, builder: (column) => column);
+
   $$ProveedoresTableTableAnnotationComposer get proveedorId {
     final $$ProveedoresTableTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -59958,6 +60022,7 @@ class $$ComprasTableTableTableManager
                 Value<String?> observaciones = const Value.absent(),
                 Value<DateTime> creadoEn = const Value.absent(),
                 Value<DateTime?> actualizadoEn = const Value.absent(),
+                Value<int?> almacenId = const Value.absent(),
               }) => ComprasTableCompanion(
                 id: id,
                 numeroComprobante: numeroComprobante,
@@ -59982,6 +60047,7 @@ class $$ComprasTableTableTableManager
                 observaciones: observaciones,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
+                almacenId: almacenId,
               ),
           createCompanionCallback:
               ({
@@ -60008,6 +60074,7 @@ class $$ComprasTableTableTableManager
                 Value<String?> observaciones = const Value.absent(),
                 required DateTime creadoEn,
                 Value<DateTime?> actualizadoEn = const Value.absent(),
+                Value<int?> almacenId = const Value.absent(),
               }) => ComprasTableCompanion.insert(
                 id: id,
                 numeroComprobante: numeroComprobante,
@@ -60032,6 +60099,7 @@ class $$ComprasTableTableTableManager
                 observaciones: observaciones,
                 creadoEn: creadoEn,
                 actualizadoEn: actualizadoEn,
+                almacenId: almacenId,
               ),
           withReferenceMapper: (p0) => p0
               .map(

@@ -205,10 +205,11 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _procesando = false;
         });
+      }
     }
   }
 

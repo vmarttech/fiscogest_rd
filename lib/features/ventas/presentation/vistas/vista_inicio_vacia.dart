@@ -133,10 +133,11 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 

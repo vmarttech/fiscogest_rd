@@ -854,10 +854,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _procesando = false;
         });
+      }
     }
   }
 
@@ -1153,10 +1154,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _procesando = false;
         });
+      }
     }
   }
 
@@ -1205,10 +1207,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       );
     } finally {
       svc.dispose();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _buscandoRnc = false;
         });
+      }
     }
   }
 
@@ -1881,10 +1884,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           );
         }
       } finally {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _procesando = false;
           });
+        }
       }
       return;
     }
@@ -2300,10 +2304,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _procesando = false;
         });
+      }
     }
   }
 
@@ -2724,10 +2729,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     try {
       final repo = ref.read(ventasRepositoryProvider);
       final lista = await repo.listarPendientesCobro();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _pendientes = lista;
         });
+      }
     } catch (_) {}
     if (!mounted) return;
     final qCtrl = TextEditingController();

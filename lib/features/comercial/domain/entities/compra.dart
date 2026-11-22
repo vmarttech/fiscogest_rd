@@ -25,6 +25,7 @@ class Compra {
     this.observaciones,
     required this.creadoEn,
     this.actualizadoEn,
+    this.almacenId,
   });
 
   final int id;
@@ -50,6 +51,7 @@ class Compra {
   final String? observaciones;
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
+  final int? almacenId;
 
   bool get esConfirmada => estado == EstadoCompra.confirmada;
 
@@ -98,6 +100,7 @@ class Compra {
     String? observaciones,
     DateTime? creadoEn,
     DateTime? actualizadoEn,
+    int? almacenId,
   }) {
     return Compra(
       id: id ?? this.id,
@@ -123,6 +126,7 @@ class Compra {
       observaciones: observaciones ?? this.observaciones,
       creadoEn: creadoEn ?? this.creadoEn,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+      almacenId: almacenId ?? this.almacenId,
     );
   }
 }

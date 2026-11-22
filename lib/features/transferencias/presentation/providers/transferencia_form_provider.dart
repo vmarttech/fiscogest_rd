@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/features/inventario/presentation/providers/inventario_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/transferencias/data/services/transferencia_service.dart';
 import 'package:fiscogest_rd/features/transferencias/domain/entities/transferencia.dart';
 
 final transferenciaServiceProvider = Provider<TransferenciaService>((ref) {
-  return TransferenciaService(ref.watch(databaseProvider));
+  final db = ref.watch(databaseProvider);
+  final kardexRepo = ref.watch(kardexRepositoryProvider);
+  return TransferenciaService(db, kardexRepo);
 });
 
 class TransferenciaFormState {
@@ -84,7 +87,6 @@ class TransferenciaFormNotifier extends Notifier<TransferenciaFormState> {
     state = state.copiar(nota: valor);
   }
 
-  /// true + última transferencia creada (para PDF).
   Future<Transferencia?> enviar() async {
     if (!state.esValido) return null;
     state = state.copiar(enviando: true, clearError: true);

@@ -8,6 +8,8 @@ import 'package:fiscogest_rd/features/comercial/domain/repositories/i_compra_rep
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/compra_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/producto_sync.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
+import 'package:fiscogest_rd/features/inventario/data/datasources/drift_kardex_datasource.dart';
 
 int _extraerId(dynamic valor) {
   if (valor == null) return 0;
@@ -43,6 +45,7 @@ ComprasTableCompanion _compraToCompanion(Compra compra) {
     id: Value(compra.id),
     proveedorId: Value(compra.proveedorId),
     nombreProveedor: Value(compra.nombreProveedor),
+    almacenId: Value(compra.almacenId),
     fechaEmision: Value(compra.fechaEmision),
     fechaVencimiento: Value(compra.fechaVencimiento ?? ahora),
     fechaRecepcion: Value(compra.fechaRecepcion),
@@ -71,6 +74,7 @@ Compra _filaToCompra(ComprasTableData fila) {
     id: fila.id,
     proveedorId: fila.proveedorId,
     nombreProveedor: _str(fila.nombreProveedor, 'Sin nombre'),
+    almacenId: fila.almacenId,
     fechaEmision: fila.fechaEmision,
     fechaVencimiento: fila.fechaVencimiento,
     fechaRecepcion: fila.fechaRecepcion,
@@ -180,7 +184,6 @@ class CompraRepositoryImpl implements ICompraRepository {
     return filas.map((DetalleCompraTableData f) => _filaToDetalle(f)).toList();
   }
 
-
   /// Sube compras (+ productos) a Supabase si hay red. No rompe el flujo local.
   Future<void> _pushCompraAhora({bool incluirProductos = true}) async {
     if (!SupabaseConfig.isConfigured) return;
@@ -213,9 +216,7 @@ class CompraRepositoryImpl implements ICompraRepository {
         for (final detalle in detalles) {
           batch.insert(
             db.detalleCompraTable,
-            _detalleToCompanion(
-              detalle.copyWith(compraId: idCabecera),
-            ),
+            _detalleToCompanion(detalle.copyWith(compraId: idCabecera)),
           );
         }
       });
@@ -259,6 +260,71 @@ class CompraRepositoryImpl implements ICompraRepository {
           'Solo se puede marcar como Recibida una compra en estado Confirmada',
         );
       }
+
+      // --- INICIO: Actualizar inventario al recibir compra ---
+      final almacenDestinoId = compra.almacenId;
+      if (almacenDestinoId == null) {
+        throw StateError('La compra no tiene un almacén de destino asignado');
+      }
+
+      // Obtener el almacén principal para saber si debemos actualizar el stock global
+      final almacenPrincipalId = await StockAlmacenDao(db).idPrincipal();
+      final esAlmacenPrincipal = (almacenDestinoId == almacenPrincipalId);
+
+      // Obtener líneas de detalle de la compra
+      final detalles = await listarDetallesDeCompra(compraId);
+
+      final stockDao = StockAlmacenDao(db);
+      final kardexDao = DriftKardexDatasource(db);
+
+      for (final linea in detalles) {
+        // 1. Sumar cantidad al stock del almacén destino
+        final stockAnterior = await stockDao.cantidad(
+          linea.productoId,
+          almacenDestinoId,
+        );
+        final nuevaCantidad = stockAnterior + linea.cantidad;
+        await stockDao.setCantidad(
+          linea.productoId,
+          almacenDestinoId,
+          nuevaCantidad,
+        );
+
+        // 2. Si es el almacén principal, actualizar también el stock global en productos_table
+        if (esAlmacenPrincipal) {
+          final productoActual = await (db.select(
+            db.productosTable,
+          )..where((t) => t.id.equals(linea.productoId))).getSingleOrNull();
+          if (productoActual != null) {
+            final stockGlobalAnterior = productoActual.stock ?? 0.0;
+            final nuevoStockGlobal = stockGlobalAnterior + linea.cantidad;
+            await (db.update(db.productosTable)
+                  ..where((t) => t.id.equals(linea.productoId)))
+                .write(ProductosTableCompanion(stock: Value(nuevoStockGlobal)));
+          }
+        }
+
+        // 3. Registrar movimiento en kardex con el almacén
+        await kardexDao.insertar(
+          KardexTableCompanion(
+            productoId: Value(linea.productoId),
+            fechaMovimiento: Value(DateTime.now().millisecondsSinceEpoch),
+            tipoMovimiento: const Value('ENTRADA_COMPRA'),
+            cantidad: Value(linea.cantidad),
+            costoUnitario: Value(linea.costoUnitario),
+            saldoAnterior: Value(stockAnterior),
+            saldoNuevo: Value(nuevaCantidad),
+            referenciaId: Value(compraId),
+            documentoReferencia: Value('Compra #$compraId'),
+            observacion: Value(
+              'Entrada por compra desde ${compra.nombreProveedor} '
+              '(almacén $almacenDestinoId)',
+            ),
+          ),
+        );
+      }
+      // --- FIN: Actualizar inventario ---
+
       final compraRecibida = compra.copyWith(
         estado: EstadoCompra.recibida,
         fechaRecepcion: DateTime.now(),

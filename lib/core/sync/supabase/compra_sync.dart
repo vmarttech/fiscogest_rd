@@ -28,7 +28,7 @@ class CompraSync {
             return <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': c.id,
-              'proveedor_id_local': c.proveedorId,
+              'proveedor_id': c.proveedorId,
               'nombre_proveedor': c.nombreProveedor,
               'numero_comprobante': c.numeroComprobante,
               'tipo_comprobante': c.tipoComprobante,
@@ -73,8 +73,8 @@ class CompraSync {
         .map((d) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': d.id,
-              'compra_id_local': d.compraId,
-              'producto_id_local': d.productoId,
+              'compra_id': d.compraId,
+              'producto_id': d.productoId,
               'nombre_producto': d.nombreProducto,
               'cantidad': d.cantidad ?? 0,
               'costo_unitario': d.costoUnitario ?? 0,

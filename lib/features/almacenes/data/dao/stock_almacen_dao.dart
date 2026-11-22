@@ -63,6 +63,15 @@ class StockAlmacenDao {
     }
   }
 
+  Future<void> sumarCantidad(
+    int productoId,
+    int almacenId,
+    double cantidad,
+  ) async {
+    final actual = await this.cantidad(productoId, almacenId);
+    await setCantidad(productoId, almacenId, actual + cantidad);
+  }
+
   /// Copia stock global → almacén principal solo para SKUs que aún no tienen fila.
   Future<void> sembrarDesdeProductos() async {
     await _db.transaction(() async {

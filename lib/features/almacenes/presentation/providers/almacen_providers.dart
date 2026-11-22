@@ -1,69 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/almacenes_dao.dart';
-import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
 import 'package:fiscogest_rd/features/almacenes/domain/entities/almacen.dart';
-import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
-import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 
-final almacenesHabilitadosProvider = Provider<bool>((ref) {
-  return ref
-      .watch(licenciaActualProvider)
-      .maybeWhen(
-        data: (lic) => LicenciaGates(lic).permiteAlmacenes,
-        orElse: () => false,
-      );
-});
+/// Controlador CRUD de almacenes. La lista se expone como AsyncValue para
+/// compatibilidad con los watchers existentes; las mutaciones van por
+/// `.notifier.guardar(...)` / `.notifier.marcarPrincipal(id)`.
+class AlmacenesController extends AsyncNotifier<List<Almacen>> {
+  AlmacenesDao get _dao => AlmacenesDao(ref.read(databaseProvider));
 
-final almacenesDaoProvider = Provider<AlmacenesDao>((ref) {
-  return AlmacenesDao(ref.watch(databaseProvider));
-});
-
-final stockAlmacenDaoProvider = Provider<StockAlmacenDao>((ref) {
-  return StockAlmacenDao(ref.watch(databaseProvider));
-});
-
-class AlmacenesNotifier extends StateNotifier<AsyncValue<List<Almacen>>> {
-  AlmacenesNotifier(this._dao, this._stock)
-    : super(const AsyncValue.loading()) {
-    cargar();
+  @override
+  Future<List<Almacen>> build() async {
+    final db = ref.watch(databaseProvider);
+    return AlmacenesDao(db).obtenerTodos();
   }
 
-  final AlmacenesDao _dao;
-  final StockAlmacenDao _stock;
-
-  Future<void> cargar() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await _dao.asegurarPrincipal();
-      try {
-        await _stock.sembrarDesdeProductos();
-      } catch (_) {
-        // Unique / carrera: el stock ya está sembrado.
-      }
-      return _dao.obtenerTodos();
-    });
-  }
-
-  Future<void> guardar(Almacen a) async {
-    if (a.id == null) {
-      await _dao.insertar(a);
+  Future<void> guardar(Almacen almacen) async {
+    if (almacen.id == null) {
+      await _dao.insertar(almacen);
     } else {
-      await _dao.actualizar(a);
+      await _dao.actualizar(almacen);
     }
-    await cargar();
+    state = AsyncData(await _dao.obtenerTodos());
   }
 
   Future<void> marcarPrincipal(int id) async {
     await _dao.marcarPrincipal(id);
-    await cargar();
+    state = AsyncData(await _dao.obtenerTodos());
   }
 }
 
 final almacenesControllerProvider =
-    StateNotifierProvider<AlmacenesNotifier, AsyncValue<List<Almacen>>>((ref) {
-      return AlmacenesNotifier(
-        ref.watch(almacenesDaoProvider),
-        ref.watch(stockAlmacenDaoProvider),
-      );
-    });
+    AsyncNotifierProvider<AlmacenesController, List<Almacen>>(
+  AlmacenesController.new,
+);
+
+/// Alias en singular que usan la página de compras y los selectores.
+final almacenControllerProvider = almacenesControllerProvider;
+
+/// Interruptor de la función multi-almacén; habilitada para esta fase.
+final almacenesHabilitadosProvider = Provider<bool>((ref) => true);

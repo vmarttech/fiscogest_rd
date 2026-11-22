@@ -134,7 +134,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 81;
+  int get schemaVersion => 82;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -199,8 +199,7 @@ class AppDatabase extends _$AppDatabase {
       try {
         await m.addColumn(fiosTable, fiosTable.fechaCompromiso);
       } catch (_) {}
-      try {
-      } catch (_) {}
+      try {} catch (_) {}
 
       if (from < 70) {
         await m.database.customStatement('''
@@ -1037,22 +1036,36 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         await m.createTable(cuotasCuentaTable);
       }
 
-
       if (from < 81) {
-        final colsVentas =
-            await m.database.customSelect('PRAGMA table_info(ventas_table)').get();
+        final colsVentas = await m.database
+            .customSelect('PRAGMA table_info(ventas_table)')
+            .get();
         if (!colsVentas.any((r) => r.read<String>('name') == 'almacen_id')) {
           await m.database.customStatement(
-              'ALTER TABLE ventas_table ADD COLUMN almacen_id INTEGER NULL');
+            'ALTER TABLE ventas_table ADD COLUMN almacen_id INTEGER NULL',
+          );
         }
-        final colsCaja =
-            await m.database.customSelect('PRAGMA table_info(caja_sesiones_table)').get();
+        final colsCaja = await m.database
+            .customSelect('PRAGMA table_info(caja_sesiones_table)')
+            .get();
         if (!colsCaja.any((r) => r.read<String>('name') == 'almacen_id')) {
           await m.database.customStatement(
-              'ALTER TABLE caja_sesiones_table ADD COLUMN almacen_id INTEGER NULL');
+            'ALTER TABLE caja_sesiones_table ADD COLUMN almacen_id INTEGER NULL',
+          );
         }
       }
 
+      if (from < 82) {
+        final colsCompras = await m.database
+            .customSelect('PRAGMA table_info(compras_table)')
+            .get();
+        if (!colsCompras
+            .any((r) => r.read<String>('name') == 'almacen_id')) {
+          await m.database.customStatement(
+            'ALTER TABLE compras_table ADD COLUMN almacen_id INTEGER NULL',
+          );
+        }
+      }
     },
   );
 }

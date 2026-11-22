@@ -68,4 +68,6 @@ class ComprasTable extends Table {
   DateTimeColumn get creadoEn => dateTime()();
 
   DateTimeColumn get actualizadoEn => dateTime().nullable()();
+
+  IntColumn get almacenId => integer().nullable()();
 }

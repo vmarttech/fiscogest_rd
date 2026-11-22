@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_activo_provider.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
@@ -11,6 +10,7 @@ import 'package:fiscogest_rd/features/ventas/data/services/venta_inventario_serv
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
 import 'package:fiscogest_rd/features/ventas/domain/usecases/registrar_venta.dart';
 
 final inventarioServiceProvider = Provider<IInventarioService>((ref) {
@@ -21,6 +21,11 @@ final inventarioServiceProvider = Provider<IInventarioService>((ref) {
 final productosDaoProvider = Provider<ProductosDao>((ref) {
   final db = ref.watch(databaseProvider);
   return ProductosDao(db);
+});
+
+final stockAlmacenDaoProvider = Provider<StockAlmacenDao>((ref) {
+  final db = ref.watch(databaseProvider);
+  return StockAlmacenDao(db);
 });
 
 class RegistrarVentaUseCase {

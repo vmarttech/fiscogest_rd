@@ -515,10 +515,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       );
     } finally {
       svc.dispose();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _buscandoRnc = false;
         });
+      }
     }
   }
 
@@ -861,10 +862,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _procesando = false;
         });
+      }
     }
   }
 
@@ -899,10 +901,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       final repo = ref.read(cajaRepositoryProvider);
       final sesion = await repo.obtenerSesionAbierta();
       if (sesion == null) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _efectivoCajon = null;
           });
+        }
         return;
       }
       final resumen = await repo.obtenerResumenSesion(sesion.id);
@@ -927,10 +930,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         _cxcPendientes = abiertas;
       });
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cxcPendientes = [];
         });
+      }
     }
   }
 
@@ -1089,10 +1093,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _procesando = false;
         });
+      }
     }
   }
 
@@ -3474,30 +3479,33 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 label: const Text('B02 · Consumidor final'),
                                 selected: _tipoNcf == 'B02',
                                 onSelected: (sel) {
-                                  if (sel)
+                                  if (sel) {
                                     setState(() {
                                       _tipoNcf = 'B02';
                                     });
+                                  }
                                 },
                               ),
                               ChoiceChip(
                                 label: const Text('B01 · Crédito fiscal'),
                                 selected: _tipoNcf == 'B01',
                                 onSelected: (sel) {
-                                  if (sel)
+                                  if (sel) {
                                     setState(() {
                                       _tipoNcf = 'B01';
                                     });
+                                  }
                                 },
                               ),
                               ChoiceChip(
                                 label: const Text('B14 · Regímenes especiales'),
                                 selected: _tipoNcf == 'B14',
                                 onSelected: (sel) {
-                                  if (sel)
+                                  if (sel) {
                                     setState(() {
                                       _tipoNcf = 'B14';
                                     });
+                                  }
                                 },
                               ),
                             ],

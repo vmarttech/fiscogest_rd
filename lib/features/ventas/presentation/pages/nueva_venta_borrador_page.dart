@@ -278,7 +278,7 @@ class _NuevaVentaBorradorPageState
     double cantidad,
   ) async {
     try {
-      ref
+      await ref
           .read(ventaBorradorProvider.notifier)
           .agregarProducto(producto, cantidad);
     } on StateError catch (e) {
@@ -826,10 +826,11 @@ class _NuevaVentaBorradorPageState
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 
