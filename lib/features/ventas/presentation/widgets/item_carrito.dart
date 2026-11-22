@@ -23,10 +23,7 @@ class ItemCarrito extends ConsumerWidget {
   final int indice;
   final VoidCallback alEliminar;
 
-  Future<void> _abrirEditarCantidad(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _abrirEditarCantidad(BuildContext context, WidgetRef ref) async {
     final controlador = TextEditingController(
       text: detalle.cantidad.toString(),
     );
@@ -65,10 +62,8 @@ class ItemCarrito extends ConsumerWidget {
               ),
             ),
             onPressed: () {
-              final v = double.tryParse(
-                    controlador.text.replaceAll(',', '.'),
-                  ) ??
-                  0;
+              final v =
+                  double.tryParse(controlador.text.replaceAll(',', '.')) ?? 0;
               Navigator.pop(ctx, v > 0 ? v : null);
             },
             child: const Text('Aceptar'),

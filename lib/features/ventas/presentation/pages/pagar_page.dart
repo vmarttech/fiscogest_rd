@@ -16,11 +16,10 @@ class PagarPage extends ConsumerStatefulWidget {
 class _PagarPageState extends ConsumerState<PagarPage> {
   @override
   Widget build(BuildContext context) {
-    
     return const AppScaffold(
       backgroundColor: AppColors.pageBackground,
-      // design system
 
+      // design system
       title: 'Cuentas por Pagar',
       body: SingleChildScrollView(
         padding: AppLayout.pantallaPadding,

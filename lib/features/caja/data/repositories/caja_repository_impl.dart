@@ -213,6 +213,7 @@ class CajaRepositoryImpl implements ICajaRepository {
   Future<int> abrirSesion({
     required double fondoInicial,
     int usuarioId = 1,
+    int? almacenId,
   }) async {
     if (fondoInicial < 0) {
       throw Exception('El fondo inicial no puede ser negativo');
@@ -229,6 +230,7 @@ class CajaRepositoryImpl implements ICajaRepository {
     final id = await cajaSesionesDao.abrirSesion(
       fondoInicial: fondoInicial,
       usuarioId: usuarioId,
+      almacenId: almacenId,
     );
     return id;
   }

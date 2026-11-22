@@ -22,13 +22,18 @@ class CajaSesionesDao extends DatabaseAccessor<AppDatabase>
         .getSingleOrNull();
   }
 
-  Future<int> abrirSesion({required double fondoInicial, int usuarioId = 1}) {
+  Future<int> abrirSesion({
+    required double fondoInicial,
+    int usuarioId = 1,
+    int? almacenId,
+  }) {
     return into(cajaSesionesTable).insert(
       CajaSesionesTableCompanion.insert(
         fechaApertura: DateTime.now(),
         fondoInicial: fondoInicial,
         usuarioId: Value(usuarioId),
         estado: const Value('abierta'),
+        almacenId: Value(almacenId),
       ),
     );
   }

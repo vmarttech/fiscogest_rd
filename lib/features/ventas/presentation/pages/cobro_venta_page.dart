@@ -1,7 +1,9 @@
-import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart' show listadoCuentasCobrarProvider;
+import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart'
+    show listadoCuentasCobrarProvider;
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
@@ -78,8 +80,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   bool _procesando = false;
   bool _argsListos = false;
   bool _modoBusqueda = true;
+
   /// Modo terminal: cotización vs cuenta por cobrar
   bool _modoCxc = false;
+
   /// Header: venta | cotizacion | cxc (filtra lista izquierda)
   String _filtroModo = 'venta';
   CuentaPorCobrar? _cxcActiva;
@@ -511,7 +515,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       );
     } finally {
       svc.dispose();
-      if (mounted) setState(() { _buscandoRnc = false; });
+      if (mounted)
+        setState(() {
+          _buscandoRnc = false;
+        });
     }
   }
 
@@ -854,7 +861,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         );
       }
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -889,7 +899,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       final repo = ref.read(cajaRepositoryProvider);
       final sesion = await repo.obtenerSesionAbierta();
       if (sesion == null) {
-        if (mounted) setState(() { _efectivoCajon = null; });
+        if (mounted)
+          setState(() {
+            _efectivoCajon = null;
+          });
         return;
       }
       final resumen = await repo.obtenerResumenSesion(sesion.id);
@@ -900,20 +913,24 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     } catch (_) {}
   }
 
-
   Future<void> _cargarCxcPendientes() async {
     try {
       final repo = ref.read(cuentaPorCobrarRepositoryProvider);
       final todas = await repo.listarCuentas();
       final abiertas = todas
-          .where((c) => c.id != null && !c.estaPagada && c.saldoPendiente > 0.009)
+          .where(
+            (c) => c.id != null && !c.estaPagada && c.saldoPendiente > 0.009,
+          )
           .toList();
       if (!mounted) return;
       setState(() {
         _cxcPendientes = abiertas;
       });
     } catch (_) {
-      if (mounted) setState(() { _cxcPendientes = []; });
+      if (mounted)
+        setState(() {
+          _cxcPendientes = [];
+        });
     }
   }
 
@@ -921,14 +938,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     if (c.id == null) return;
     CuentaPorCobrar cuenta = c;
     try {
-      final full =
-          await ref.read(cuentaPorCobrarRepositoryProvider).obtenerPorId(c.id!);
+      final full = await ref
+          .read(cuentaPorCobrarRepositoryProvider)
+          .obtenerPorId(c.id!);
       if (full != null) cuenta = full;
     } catch (_) {}
     ProntoPagoAcuerdoData? acuerdo;
     try {
-      acuerdo = await ProntoPagoAcuerdosDao(ref.read(databaseProvider))
-          .activoPorCuenta(c.id!);
+      acuerdo = await ProntoPagoAcuerdosDao(
+        ref.read(databaseProvider),
+      ).activoPorCuenta(c.id!);
     } catch (_) {}
     // Monto sugerido: próxima cuota pendiente, o liquidación pronto pago
     double montoDef = cuenta.saldoPendiente;
@@ -986,19 +1005,25 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final c = _cxcActiva!;
     final monto = _parseMontoCobro(_cxcMontoController.text) ?? 0;
     if (monto <= 0) {
-      FiscoGestNotifications.show(const SnackBar(
-        content: Text('Indique un monto válido'),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-      ));
+      FiscoGestNotifications.show(
+        const SnackBar(
+          content: Text('Indique un monto válido'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
     if (monto > c.saldoPendiente + 0.01) {
-      FiscoGestNotifications.show(SnackBar(
-        content: Text('El monto supera el saldo (${formatRd(c.saldoPendiente)})'),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-      ));
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text(
+            'El monto supera el saldo (${formatRd(c.saldoPendiente)})',
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
     if (!await _exigirCajaAbierta()) return;
@@ -1008,7 +1033,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     try {
       final metodo = _formaPago.nombre;
       await ref.read(databaseProvider).transaction(() async {
-        await ref.read(cuentaPorCobrarRepositoryProvider).registrarAbono(
+        await ref
+            .read(cuentaPorCobrarRepositoryProvider)
+            .registrarAbono(
               AbonoCredito(
                 cuentaId: c.id!,
                 monto: monto,
@@ -1019,7 +1046,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     : 'Abono · Caja',
               ),
             );
-        await ref.read(cajaRepositoryProvider).registrarMovimiento(
+        await ref
+            .read(cajaRepositoryProvider)
+            .registrarMovimiento(
               referencia: c.numero ?? 'CXC-${c.id}',
               monto: monto,
               tipo: 'ingreso',
@@ -1031,31 +1060,39 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       if (_cxcProntoPago != null &&
           monto + 0.01 >= _cxcProntoPago!.montoLiquidacion) {
         try {
-          await ProntoPagoAcuerdosDao(ref.read(databaseProvider))
-              .marcarAplicado(_cxcProntoPago!.id);
+          await ProntoPagoAcuerdosDao(
+            ref.read(databaseProvider),
+          ).marcarAplicado(_cxcProntoPago!.id);
         } catch (_) {}
       }
       try {
         ref.invalidate(listadoCuentasCobrarProvider(0));
       } catch (_) {}
       if (!mounted) return;
-      FiscoGestNotifications.show(SnackBar(
-        content: Text('Abono CXC registrado: ${formatRd(monto)}'),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-      ));
+      FiscoGestNotifications.show(
+        SnackBar(
+          content: Text('Abono CXC registrado: ${formatRd(monto)}'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       _limpiarTicket();
       await _refrescarCajon();
     } catch (e) {
       if (mounted) {
-        FiscoGestNotifications.show(SnackBar(
-          content: Text('Error al cobrar CXC: $e'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ));
+        FiscoGestNotifications.show(
+          SnackBar(
+            content: Text('Error al cobrar CXC: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -1129,11 +1166,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           _mostrarArqueoRapido();
         },
       },
-      child: Focus(
-        autofocus: true,
-        focusNode: _focusRoot,
-        child: child,
-      ),
+      child: Focus(autofocus: true, focusNode: _focusRoot, child: child),
     );
   }
 
@@ -1193,9 +1226,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             }
             return Dialog(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520, maxHeight: 640),
+                constraints: const BoxConstraints(
+                  maxWidth: 520,
+                  maxHeight: 640,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -1203,14 +1240,18 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.account_balance_wallet,
-                              color: Color(0xFF059669)),
+                          const Icon(
+                            Icons.account_balance_wallet,
+                            color: Color(0xFF059669),
+                          ),
                           const SizedBox(width: 8),
                           const Expanded(
                             child: Text(
                               'Arqueo & Cierre de Caja',
                               style: TextStyle(
-                                  fontWeight: FontWeight.w900, fontSize: 16),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                           IconButton(
@@ -1223,13 +1264,17 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       Text(
                         'Sesión #${sesion.id} · Fondo ${formatRd(resumen.fondoInicial)}',
                         style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF64748B)),
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
                       ),
                       Text(
                         '+ Ingresos ef. ${formatRd(resumen.ingresosEfectivo)}'
                         '  − Egresos ${formatRd(resumen.egresosEfectivo)}',
                         style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF64748B)),
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -1241,21 +1286,28 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 color: const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                    color: const Color(0xFFE2E8F0)),
+                                  color: const Color(0xFFE2E8F0),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Esperado en Caja',
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF64748B))),
+                                  const Text(
+                                    'Esperado en Caja',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
                                   const SizedBox(height: 4),
-                                  Text(formatRd(teorico),
-                                      style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900)),
+                                  Text(
+                                    formatRd(teorico),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -1268,22 +1320,29 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 color: const Color(0xFFECFDF5),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                    color: const Color(0xFFBBF7D0)),
+                                  color: const Color(0xFFBBF7D0),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Conteo Físico',
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF065F46))),
+                                  const Text(
+                                    'Conteo Físico',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF065F46),
+                                    ),
+                                  ),
                                   const SizedBox(height: 4),
-                                  Text(formatRd(contado),
-                                      style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900,
-                                          color: Color(0xFF047857))),
+                                  Text(
+                                    formatRd(contado),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFF047857),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -1293,42 +1352,55 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: difColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border:
-                              Border.all(color: difColor.withValues(alpha: 0.35)),
+                          border: Border.all(
+                            color: difColor.withValues(alpha: 0.35),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Text(difLabel,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    color: difColor)),
+                            Text(
+                              difLabel,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: difColor,
+                              ),
+                            ),
                             const Spacer(),
-                            Text(formatRd(dif),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    color: difColor,
-                                    fontSize: 15)),
+                            Text(
+                              formatRd(dif),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                color: difColor,
+                                fontSize: 15,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text('Denominaciones (RD\$)',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF64748B))),
+                      const Text(
+                        'Denominaciones (RD\$)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
                       const SizedBox(height: 6),
                       Expanded(
                         child: ListView(
                           children: [
                             for (final d in dens.keys)
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 3,
+                                ),
                                 child: Row(
                                   children: [
                                     SizedBox(
@@ -1336,13 +1408,17 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       child: Text(
                                         formatRd(d.toDouble()),
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 13),
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
-                                    const Text('×',
-                                        style: TextStyle(
-                                            color: Color(0xFF94A3B8))),
+                                    const Text(
+                                      '×',
+                                      style: TextStyle(
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
                                     const SizedBox(width: 8),
                                     SizedBox(
                                       width: 72,
@@ -1354,10 +1430,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                           isDense: true,
                                           contentPadding:
                                               const EdgeInsets.symmetric(
-                                                  horizontal: 8, vertical: 8),
+                                                horizontal: 8,
+                                                vertical: 8,
+                                              ),
                                           border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                         ),
                                         onChanged: (_) => setLocal(() {}),
@@ -1365,14 +1444,18 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     ),
                                     const Spacer(),
                                     Text(
-                                      formatRd(d *
-                                          (int.tryParse(
-                                                  dens[d]!.text.trim()) ??
-                                              0)
-                                              .toDouble()),
+                                      formatRd(
+                                        d *
+                                            (int.tryParse(
+                                                      dens[d]!.text.trim(),
+                                                    ) ??
+                                                    0)
+                                                .toDouble(),
+                                      ),
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 12),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1401,7 +1484,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               ScaffoldMessenger.of(ctx).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                      'Explique el faltante o sobrante antes de cerrar.'),
+                                    'Explique el faltante o sobrante antes de cerrar.',
+                                  ),
                                   backgroundColor: Color(0xFFD97706),
                                 ),
                               );
@@ -1424,7 +1508,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           child: const Text(
                             'CERRAR TURNO Y GENERAR INFORME Z',
                             style: TextStyle(
-                                fontWeight: FontWeight.w900, fontSize: 12),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -1484,18 +1570,20 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     }
   }
 
-
   Widget _buildTerminalPos(BuildContext context) {
     final listaRaw = _busquedaController.text.trim().isEmpty
         ? _pendientes
         : _resultados;
     // Filtrar lista según modo del header (respeta búsqueda en listaRaw)
     final lista = switch (_filtroModo) {
-      'cotizacion' => listaRaw
-          .where((v) => v.numeroCotizacion.toUpperCase().startsWith('C'))
-          .toList(),
+      'cotizacion' =>
+        listaRaw
+            .where((v) => v.numeroCotizacion.toUpperCase().startsWith('C'))
+            .toList(),
       'cxc' => <Venta>[], // CxC usa _cxcPendientes / panel propio
-      _ => List<Venta>.from(listaRaw), // VENTA: pendientes o resultados de búsqueda
+      _ => List<Venta>.from(
+        listaRaw,
+      ), // VENTA: pendientes o resultados de búsqueda
     };
     ref.watch(cajaProvider);
     final esPagoEfectivo = !esCredito && _formaPago == FormaPago.efectivo;
@@ -1504,20 +1592,21 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final montoCobrar = _modoCxc
         ? (_parseMontoCobro(_cxcMontoController.text) ?? 0.0)
         : (esCredito
-            ? (_parseMontoCobro(_abonoController.text) ?? 0.0)
-            : montoTotal);
-    final cambioADevolver =
-        (efectivoRecibido - montoCobrar).clamp(0.0, double.infinity).toDouble();
+              ? (_parseMontoCobro(_abonoController.text) ?? 0.0)
+              : montoTotal);
+    final cambioADevolver = (efectivoRecibido - montoCobrar)
+        .clamp(0.0, double.infinity)
+        .toDouble();
     final hayTicket = ventaId > 0 || (_modoCxc && _cxcActiva != null);
     final qBusq = _busquedaController.text.trim().toLowerCase();
     final cxcFiltradas = (_filtroModo == 'cxc' || _filtroModo == 'venta')
         ? (qBusq.isEmpty
-            ? _cxcPendientes
-            : _cxcPendientes.where((c) {
-                final n = (c.numero ?? '').toLowerCase();
-                final cl = (c.clienteNombre ?? '').toLowerCase();
-                return n.contains(qBusq) || cl.contains(qBusq);
-              }).toList())
+              ? _cxcPendientes
+              : _cxcPendientes.where((c) {
+                  final n = (c.numero ?? '').toLowerCase();
+                  final cl = (c.clienteNombre ?? '').toLowerCase();
+                  return n.contains(qBusq) || cl.contains(qBusq);
+                }).toList())
         : <CuentaPorCobrar>[];
     final showCxcList = _filtroModo == 'cxc';
     final showVentaList = _filtroModo != 'cxc';
@@ -1603,8 +1692,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             side: const BorderSide(color: Color(0xFFE2E8F0)),
             foregroundColor: const Color(0xFF334155),
           ),
-          child: Text('$key $label',
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          child: Text(
+            '$key $label',
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          ),
         ),
       );
     }
@@ -1631,21 +1722,31 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       color: const Color(0xFF0F172A),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.point_of_sale,
-                        color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.point_of_sale,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('CAJA UNIFICADA',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 15,
-                              color: Color(0xFF0F172A))),
-                      Text('Venta · Cotización · CxC',
-                          style: TextStyle(
-                              fontSize: 11, color: Color(0xFF94A3B8))),
+                      Text(
+                        'CAJA UNIFICADA',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      Text(
+                        'Venta · Cotización · CxC',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(width: 20),
@@ -1711,16 +1812,21 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 const Spacer(),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFDBEAFE),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: const Text('F2',
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF1D4ED8))),
+                                  child: const Text(
+                                    'F2',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF1D4ED8),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1744,28 +1850,37 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: const BorderSide(
-                                      color: Color(0xFFE2E8F0)),
+                                    color: Color(0xFFE2E8F0),
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: const BorderSide(
-                                      color: Color(0xFFE2E8F0)),
+                                    color: Color(0xFFE2E8F0),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                           if (_errorBusqueda != null)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 14),
-                              child: Text(_errorBusqueda!,
-                                  style: const TextStyle(
-                                      color: Color(0xFFBE123C), fontSize: 12)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              child: Text(
+                                _errorBusqueda!,
+                                style: const TextStyle(
+                                  color: Color(0xFFBE123C),
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           // Cabecera tipo tabla
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
                             color: const Color(0xFFF8FAFC),
                             child: Row(
                               children: [
@@ -1774,41 +1889,53 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                   child: Text(
                                     hayTicket && !_modoCxc
                                         ? 'DESCRIPCIÓN'
-                                        : (showCxcList ? 'CUENTA / CLIENTE' : 'DOCUMENTO'),
+                                        : (showCxcList
+                                              ? 'CUENTA / CLIENTE'
+                                              : 'DOCUMENTO'),
                                     style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF94A3B8)),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ),
                                 if (hayTicket && !_modoCxc) ...[
                                   const SizedBox(
                                     width: 48,
-                                    child: Text('CANT',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF94A3B8))),
+                                    child: Text(
+                                      'CANT',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(
                                     width: 80,
-                                    child: Text('TOTAL',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF94A3B8))),
+                                    child: Text(
+                                      'TOTAL',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
                                   ),
                                 ] else
                                   const SizedBox(
                                     width: 90,
-                                    child: Text('MONTO',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF94A3B8))),
+                                    child: Text(
+                                      'MONTO',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
                                   ),
                               ],
                             ),
@@ -1816,19 +1943,20 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           Expanded(
                             child: _cargandoLista
                                 ? const Center(
-                                    child: CircularProgressIndicator())
+                                    child: CircularProgressIndicator(),
+                                  )
                                 : (hayTicket && !_modoCxc)
-                                    ? _buildLineasVenta()
-                                    : (hayTicket && _modoCxc)
-                                        ? _buildPanelCxcDetalle()
-                                        : _buildListaPendientes(
-                                            showVentaList ? lista : const [],
-                                            showCxcList
-                                                ? cxcFiltradas
-                                                : (_filtroModo == 'venta'
-                                                    ? cxcFiltradas
-                                                    : const []),
-                                          ),
+                                ? _buildLineasVenta()
+                                : (hayTicket && _modoCxc)
+                                ? _buildPanelCxcDetalle()
+                                : _buildListaPendientes(
+                                    showVentaList ? lista : const [],
+                                    showCxcList
+                                        ? cxcFiltradas
+                                        : (_filtroModo == 'venta'
+                                              ? cxcFiltradas
+                                              : const []),
+                                  ),
                           ),
                           // Totales inferiores izquierda
                           if (hayTicket && !_modoCxc)
@@ -1836,7 +1964,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               padding: const EdgeInsets.all(14),
                               decoration: const BoxDecoration(
                                 border: Border(
-                                    top: BorderSide(color: Color(0xFFE2E8F0))),
+                                  top: BorderSide(color: Color(0xFFE2E8F0)),
+                                ),
                               ),
                               child: Column(
                                 children: [
@@ -1844,8 +1973,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                   _totRow('Gravado', formatRd(gravado)),
                                   _totRow('ITBIS', formatRd(itbisLineas)),
                                   const Divider(height: 12),
-                                  _totRow('TOTAL', formatRd(montoTotal),
-                                      bold: true, green: true),
+                                  _totRow(
+                                    'TOTAL',
+                                    formatRd(montoTotal),
+                                    bold: true,
+                                    green: true,
+                                  ),
                                   Align(
                                     alignment: Alignment.centerRight,
                                     child: TextButton(
@@ -1861,18 +1994,23 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               padding: const EdgeInsets.all(14),
                               decoration: const BoxDecoration(
                                 border: Border(
-                                    top: BorderSide(color: Color(0xFFE2E8F0))),
+                                  top: BorderSide(color: Color(0xFFE2E8F0)),
+                                ),
                               ),
                               child: Column(
                                 children: [
-                                  _totRow('Saldo pendiente',
-                                      formatRd(_cxcActiva!.saldoPendiente),
-                                      bold: true, green: true),
+                                  _totRow(
+                                    'Saldo pendiente',
+                                    formatRd(_cxcActiva!.saldoPendiente),
+                                    bold: true,
+                                    green: true,
+                                  ),
                                   if (_cxcProntoPago != null)
                                     _totRow(
                                       'Liquidación pronto pago',
                                       formatRd(
-                                          _cxcProntoPago!.montoLiquidacion),
+                                        _cxcProntoPago!.montoLiquidacion,
+                                      ),
                                       bold: true,
                                     ),
                                   Align(
@@ -1905,14 +2043,19 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.point_of_sale,
-                                      size: 48, color: Color(0xFFCBD5E1)),
+                                  Icon(
+                                    Icons.point_of_sale,
+                                    size: 48,
+                                    color: Color(0xFFCBD5E1),
+                                  ),
                                   SizedBox(height: 12),
                                   Text(
                                     'Seleccione un documento o busque con F2',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                        color: Color(0xFF94A3B8), fontSize: 14),
+                                      color: Color(0xFF94A3B8),
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1922,12 +2065,15 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   // Cliente
-                                  const Text('CLIENTE',
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF64748B),
-                                          letterSpacing: 0.4)),
+                                  const Text(
+                                    'CLIENTE',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF64748B),
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
                                   const SizedBox(height: 6),
                                   Container(
                                     padding: const EdgeInsets.all(12),
@@ -1935,37 +2081,46 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       color: const Color(0xFFF8FAFC),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                          color: const Color(0xFFE2E8F0)),
+                                        color: const Color(0xFFE2E8F0),
+                                      ),
                                     ),
                                     child: Text(
                                       (_modoCxc
                                               ? (_cxcActiva?.clienteNombre ??
-                                                  'Cliente')
+                                                    'Cliente')
                                               : (nombreCliente ??
-                                                  'Consumidor final'))
+                                                    'Consumidor final'))
                                           .trim(),
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 15),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 15,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 14),
                                   if (!_modoCxc) ...[
-                                    const Text('1. COMPROBANTE FISCAL (DGII)',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF64748B),
-                                            letterSpacing: 0.4)),
+                                    const Text(
+                                      '1. COMPROBANTE FISCAL (DGII)',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF64748B),
+                                        letterSpacing: 0.4,
+                                      ),
+                                    ),
                                     const SizedBox(height: 8),
                                     Row(
                                       children: [
-                                        for (final ncf
-                                            in ['B02', 'B01', 'B14']) ...[
+                                        for (final ncf in [
+                                          'B02',
+                                          'B01',
+                                          'B14',
+                                        ]) ...[
                                           Expanded(
                                             child: Padding(
                                               padding: const EdgeInsets.only(
-                                                  right: 6),
+                                                right: 6,
+                                              ),
                                               child: Material(
                                                 color: _tipoNcf == ncf
                                                     ? const Color(0xFFDBEAFE)
@@ -1974,24 +2129,28 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                     BorderRadius.circular(10),
                                                 child: InkWell(
                                                   onTap: () => setState(
-                                                      () => _tipoNcf = ncf),
+                                                    () => _tipoNcf = ncf,
+                                                  ),
                                                   borderRadius:
                                                       BorderRadius.circular(10),
                                                   child: Container(
                                                     padding:
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                            vertical: 12),
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 12,
+                                                        ),
                                                     decoration: BoxDecoration(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              10),
+                                                            10,
+                                                          ),
                                                       border: Border.all(
                                                         color: _tipoNcf == ncf
                                                             ? const Color(
-                                                                0xFF3B82F6)
+                                                                0xFF3B82F6,
+                                                              )
                                                             : const Color(
-                                                                0xFFE2E8F0),
+                                                                0xFFE2E8F0,
+                                                              ),
                                                         width: _tipoNcf == ncf
                                                             ? 2
                                                             : 1,
@@ -1999,29 +2158,35 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                     ),
                                                     child: Column(
                                                       children: [
-                                                        Text(ncf,
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w800,
-                                                              fontSize: 13,
-                                                              color: _tipoNcf ==
-                                                                      ncf
-                                                                  ? const Color(
-                                                                      0xFF1D4ED8)
-                                                                  : const Color(
-                                                                      0xFF475569),
-                                                            )),
+                                                        Text(
+                                                          ncf,
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            fontSize: 13,
+                                                            color:
+                                                                _tipoNcf == ncf
+                                                                ? const Color(
+                                                                    0xFF1D4ED8,
+                                                                  )
+                                                                : const Color(
+                                                                    0xFF475569,
+                                                                  ),
+                                                          ),
+                                                        ),
                                                         Text(
                                                           ncf == 'B02'
                                                               ? 'Consumidor'
                                                               : ncf == 'B01'
-                                                                  ? 'Crédito fiscal'
-                                                                  : 'Especial',
-                                                          style: const TextStyle(
-                                                              fontSize: 10,
-                                                              color: Color(
-                                                                  0xFF94A3B8)),
+                                                              ? 'Crédito fiscal'
+                                                              : 'Especial',
+                                                          style:
+                                                              const TextStyle(
+                                                                fontSize: 10,
+                                                                color: Color(
+                                                                  0xFF94A3B8,
+                                                                ),
+                                                              ),
                                                         ),
                                                       ],
                                                     ),
@@ -2041,8 +2206,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                         decoration: InputDecoration(
                                           labelText: 'RNC / Cédula cliente',
                                           border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10)),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
                                           isDense: true,
                                         ),
                                       ),
@@ -2055,27 +2222,33 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFEEF2FF),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                           border: Border.all(
-                                              color: const Color(0xFFC7D2FE)),
+                                            color: const Color(0xFFC7D2FE),
+                                          ),
                                         ),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            const Text('PRONTO PAGO ACTIVO',
-                                                style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: Color(0xFF4F46E5))),
+                                            const Text(
+                                              'PRONTO PAGO ACTIVO',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w900,
+                                                color: Color(0xFF4F46E5),
+                                              ),
+                                            ),
                                             const SizedBox(height: 4),
                                             Text(
                                               'Liquidar por ${formatRd(_cxcProntoPago!.montoLiquidacion)}'
                                               ' (desc. interés ${formatRd(_cxcProntoPago!.descuentoMonto)})',
                                               style: const TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w700),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                             ),
                                             if (_cxcProntoPago!
                                                     .cuotasPendientes >
@@ -2083,31 +2256,38 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                               Text(
                                                 '${_cxcProntoPago!.cuotasPendientes} cuota(s) pendientes cubiertas al liquidar',
                                                 style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Color(0xFF64748B)),
+                                                  fontSize: 12,
+                                                  color: Color(0xFF64748B),
+                                                ),
                                               ),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(height: 12),
                                     ],
-                                    const Text('MONTO A ABONAR',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF64748B))),
+                                    const Text(
+                                      'MONTO A ABONAR',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
                                     const SizedBox(height: 6),
                                     TextField(
                                       controller: _cxcMontoController,
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
-                                              decimal: true),
+                                            decimal: true,
+                                          ),
                                       onChanged: (_) => setState(() {}),
                                       decoration: InputDecoration(
                                         prefixText: 'RD\$ ',
                                         border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -2129,10 +2309,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                 m = pend.first.montoTotal;
                                               }
                                             }
-                                            _cxcMontoController.text =
-                                                m.toStringAsFixed(2);
-                                            _efectivoRecibidoController.text =
-                                                m.toStringAsFixed(2);
+                                            _cxcMontoController.text = m
+                                                .toStringAsFixed(2);
+                                            _efectivoRecibidoController.text = m
+                                                .toStringAsFixed(2);
                                             setState(() {});
                                           },
                                           child: const Text('1 cuota'),
@@ -2142,10 +2322,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                             onPressed: () {
                                               final m = _cxcProntoPago!
                                                   .montoLiquidacion;
-                                              _cxcMontoController.text =
+                                              _cxcMontoController.text = m
+                                                  .toStringAsFixed(2);
+                                              _efectivoRecibidoController.text =
                                                   m.toStringAsFixed(2);
-                                              _efectivoRecibidoController
-                                                  .text = m.toStringAsFixed(2);
                                               setState(() {});
                                             },
                                             child: const Text('Liquidar PP'),
@@ -2154,10 +2334,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                           onPressed: () {
                                             final m =
                                                 _cxcActiva?.saldoPendiente ?? 0;
-                                            _cxcMontoController.text =
-                                                m.toStringAsFixed(2);
-                                            _efectivoRecibidoController.text =
-                                                m.toStringAsFixed(2);
+                                            _cxcMontoController.text = m
+                                                .toStringAsFixed(2);
+                                            _efectivoRecibidoController.text = m
+                                                .toStringAsFixed(2);
                                             setState(() {});
                                           },
                                           child: const Text('Saldo total'),
@@ -2166,18 +2346,22 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     ),
                                     const SizedBox(height: 14),
                                   ],
-                                  const Text('2. FORMA DE PAGO',
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF64748B),
-                                          letterSpacing: 0.4)),
+                                  const Text(
+                                    '2. FORMA DE PAGO',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF64748B),
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
                                   const SizedBox(height: 8),
                                   Wrap(
                                     spacing: 8,
                                     children: [
                                       for (final f in _formasDisponibles(
-                                          esCredito: esCredito && !_modoCxc))
+                                        esCredito: esCredito && !_modoCxc,
+                                      ))
                                         ChoiceChip(
                                           label: Text(f.nombre),
                                           selected: _formaPago == f,
@@ -2186,41 +2370,49 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                               _formaPago = f;
                                             });
                                             if (f == FormaPago.efectivo) {
-                                              _efectivoRecibidoController
-                                                      .text =
-                                                  montoCobrar
-                                                      .toStringAsFixed(2);
+                                              _efectivoRecibidoController.text =
+                                                  montoCobrar.toStringAsFixed(
+                                                    2,
+                                                  );
                                               WidgetsBinding.instance
                                                   .addPostFrameCallback((_) {
-                                                _focusEfectivo.requestFocus();
-                                              });
+                                                    _focusEfectivo
+                                                        .requestFocus();
+                                                  });
                                             }
                                           },
-                                          selectedColor:
-                                              const Color(0xFFD1FAE5),
+                                          selectedColor: const Color(
+                                            0xFFD1FAE5,
+                                          ),
                                         ),
                                     ],
                                   ),
                                   const SizedBox(height: 14),
                                   if (esPagoEfectivo) ...[
-                                    const Text('3. EFECTIVO RECIBIDO',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF64748B))),
+                                    const Text(
+                                      '3. EFECTIVO RECIBIDO',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
                                     const SizedBox(height: 8),
                                     TextField(
                                       controller: _efectivoRecibidoController,
                                       focusNode: _focusEfectivo,
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
-                                              decimal: true),
+                                            decimal: true,
+                                          ),
                                       onChanged: (_) => setState(() {}),
                                       decoration: InputDecoration(
                                         prefixText: 'RD\$ ',
                                         border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -2238,26 +2430,32 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                         Text(
                                           'Cambio: ${formatRd(cambioADevolver)}',
                                           style: const TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 16,
-                                              color: Color(0xFF059669)),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16,
+                                            color: Color(0xFF059669),
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ] else ...[
-                                    const Text('3. REFERENCIA',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            color: Color(0xFF64748B))),
+                                    const Text(
+                                      '3. REFERENCIA',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
                                     const SizedBox(height: 8),
                                     TextField(
                                       controller: _referenciaController,
                                       decoration: InputDecoration(
                                         hintText: 'N° referencia',
                                         border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -2267,13 +2465,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       controller: _abonoController,
                                       keyboardType:
                                           const TextInputType.numberWithOptions(
-                                              decimal: true),
+                                            decimal: true,
+                                          ),
                                       decoration: InputDecoration(
                                         labelText: 'Abono inicial',
                                         prefixText: 'RD\$ ',
                                         border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
                                       ),
                                       onChanged: (_) => setState(() {}),
                                     ),
@@ -2285,7 +2486,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       color: const Color(0xFFF0FDF4),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                          color: const Color(0xFFBBF7D0)),
+                                        color: const Color(0xFFBBF7D0),
+                                      ),
                                     ),
                                     child: Row(
                                       children: [
@@ -2294,16 +2496,18 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                               ? 'A ABONAR'
                                               : 'TOTAL A COBRAR',
                                           style: const TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 13),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 13,
+                                          ),
                                         ),
                                         const Spacer(),
                                         Text(
                                           formatRd(montoCobrar),
                                           style: const TextStyle(
-                                              fontSize: 26,
-                                              fontWeight: FontWeight.w900,
-                                              color: Color(0xFF059669)),
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w900,
+                                            color: Color(0xFF059669),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -2316,14 +2520,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       onPressed: _procesando
                                           ? null
                                           : (_modoCxc
-                                              ? _cobrarCxcDesdeTerminal
-                                              : _cobrarYGenerarFactura),
+                                                ? _cobrarCxcDesdeTerminal
+                                                : _cobrarYGenerarFactura),
                                       icon: _procesando
                                           ? const SizedBox(
                                               width: 20,
                                               height: 20,
-                                              child:
-                                                  CircularProgressIndicator(
+                                              child: CircularProgressIndicator(
                                                 strokeWidth: 2,
                                                 color: Colors.white,
                                               ),
@@ -2333,19 +2536,22 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                         _procesando
                                             ? 'Procesando…'
                                             : (_modoCxc
-                                                ? 'REGISTRAR ABONO (F12)'
-                                                : 'PROCESAR COBRO (F12)'),
+                                                  ? 'REGISTRAR ABONO (F12)'
+                                                  : 'PROCESAR COBRO (F12)'),
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 15),
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 15,
+                                        ),
                                       ),
                                       style: FilledButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFF059669),
+                                        backgroundColor: const Color(
+                                          0xFF059669,
+                                        ),
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -2355,7 +2561,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     'Atajos: F2 Buscar · F3 Cotiz · F6 CxC · F4 Arqueo · F12 Cobrar · Esc Limpiar',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                        fontSize: 11, color: Color(0xFF94A3B8)),
+                                      fontSize: 11,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -2367,43 +2575,54 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             ),
             // ═══════ FOOTER ═══════
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: const BoxDecoration(
                 color: Color(0xFF0F172A),
                 border: Border(top: BorderSide(color: Color(0xFF1E293B))),
               ),
               child: Row(
                 children: [
-                  Text('Efectivo en cajón: ',
-                      style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12)),
-                  Text(formatRd(_efectivoCajon ?? 0),
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800)),
+                  Text(
+                    'Efectivo en cajón: ',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    formatRd(_efectivoCajon ?? 0),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   const SizedBox(width: 16),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF064E3B),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text('Sesión abierta',
-                        style: TextStyle(
-                            color: Color(0xFF6EE7B7),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'Sesión abierta',
+                      style: TextStyle(
+                        color: Color(0xFF6EE7B7),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                   const Spacer(),
                   Text(
                     'F2 · F3 · F4 · F6 · F8 NCF · F12 · Esc',
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 11),
+                      color: Colors.white.withValues(alpha: 0.45),
+                      fontSize: 11,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   TextButton(
@@ -2412,9 +2631,13 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       foregroundColor: const Color(0xFF94A3B8),
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                     ),
-                    child: const Text('Arqueo (F4)',
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'Arqueo (F4)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -2430,19 +2653,23 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(k,
-              style: TextStyle(
-                fontSize: bold ? 13 : 12,
-                fontWeight: bold ? FontWeight.w900 : FontWeight.w600,
-                color: const Color(0xFF475569),
-              )),
+          Text(
+            k,
+            style: TextStyle(
+              fontSize: bold ? 13 : 12,
+              fontWeight: bold ? FontWeight.w900 : FontWeight.w600,
+              color: const Color(0xFF475569),
+            ),
+          ),
           const Spacer(),
-          Text(v,
-              style: TextStyle(
-                fontSize: bold ? 16 : 13,
-                fontWeight: FontWeight.w900,
-                color: green ? const Color(0xFF059669) : const Color(0xFF0F172A),
-              )),
+          Text(
+            v,
+            style: TextStyle(
+              fontSize: bold ? 16 : 13,
+              fontWeight: FontWeight.w900,
+              color: green ? const Color(0xFF059669) : const Color(0xFF0F172A),
+            ),
+          ),
         ],
       ),
     );
@@ -2451,8 +2678,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   Widget _buildLineasVenta() {
     if (_detalles.isEmpty) {
       return const Center(
-          child: Text('Sin líneas en el ticket',
-              style: TextStyle(color: Color(0xFF94A3B8))));
+        child: Text(
+          'Sin líneas en el ticket',
+          style: TextStyle(color: Color(0xFF94A3B8)),
+        ),
+      );
     }
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -2463,33 +2693,43 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         final nom = (d.nombreProducto ?? '').trim().isNotEmpty
             ? d.nombreProducto!.trim()
             : 'Producto #${d.productoId}';
-        final sub =
-            d.subtotal > 0 ? d.subtotal : d.cantidad * d.precioUnitario;
+        final sub = d.subtotal > 0 ? d.subtotal : d.cantidad * d.precioUnitario;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
               Expanded(
                 flex: 5,
-                child: Text(nom,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w700)),
+                child: Text(
+                  nom,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               SizedBox(
                 width: 48,
-                child: Text(d.cantidad.toStringAsFixed(
-                        d.cantidad == d.cantidad.roundToDouble() ? 0 : 2),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13)),
+                child: Text(
+                  d.cantidad.toStringAsFixed(
+                    d.cantidad == d.cantidad.roundToDouble() ? 0 : 2,
+                  ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13),
+                ),
               ),
               SizedBox(
                 width: 80,
-                child: Text(formatRd(sub),
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w800)),
+                child: Text(
+                  formatRd(sub),
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
@@ -2507,10 +2747,14 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
       children: [
-        Text(c.numero ?? 'CXC-${c.id}',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
-        Text(c.clienteNombre ?? 'Cliente',
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+        Text(
+          c.numero ?? 'CXC-${c.id}',
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+        ),
+        Text(
+          c.clienteNombre ?? 'Cliente',
+          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+        ),
         const SizedBox(height: 8),
         if (_cxcProntoPago != null)
           Container(
@@ -2524,9 +2768,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
               'Pronto pago: liquidar ${formatRd(_cxcProntoPago!.montoLiquidacion)} '
               '(${_cxcProntoPago!.cuotasPendientes} cuotas · desc. ${formatRd(_cxcProntoPago!.descuentoMonto)})',
               style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF4338CA)),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF4338CA),
+              ),
             ),
           ),
         if (plan != null) ...[
@@ -2537,8 +2782,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           const SizedBox(height: 6),
         ],
         if (pend.isEmpty && cuotas.isEmpty)
-          const Text('Sin plan de cuotas — abono libre al saldo.',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+          const Text(
+            'Sin plan de cuotas — abono libre al saldo.',
+            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+          ),
         for (final q in (pend.isEmpty ? cuotas : pend).take(12))
           Container(
             margin: const EdgeInsets.only(bottom: 6),
@@ -2549,15 +2796,20 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                   : const Color(0xFFFFFBEB),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                  color: q.pagada
-                      ? const Color(0xFFE2E8F0)
-                      : const Color(0xFFFDE68A)),
+                color: q.pagada
+                    ? const Color(0xFFE2E8F0)
+                    : const Color(0xFFFDE68A),
+              ),
             ),
             child: Row(
               children: [
-                Text('#${q.numeroCuota}',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 12)),
+                Text(
+                  '#${q.numeroCuota}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -2567,14 +2819,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
-                Text(q.pagada ? 'Pagada' : formatRd(q.montoTotal),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                      color: q.pagada
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF0F172A),
-                    )),
+                Text(
+                  q.pagada ? 'Pagada' : formatRd(q.montoTotal),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    color: q.pagada
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF0F172A),
+                  ),
+                ),
               ],
             ),
           ),
@@ -2583,7 +2837,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
   }
 
   Widget _buildListaPendientes(
-      List<Venta> lista, List<CuentaPorCobrar> cxcFiltradas) {
+    List<Venta> lista,
+    List<CuentaPorCobrar> cxcFiltradas,
+  ) {
     if (lista.isEmpty && cxcFiltradas.isEmpty) {
       return Center(
         child: Text(
@@ -2622,39 +2878,58 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEEF2FF),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text('CXC',
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF4F46E5))),
+                      child: const Text(
+                        'CXC',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF4F46E5),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(c.numero ?? 'CXC-${c.id}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w800, fontSize: 13)),
-                          Text(c.clienteNombre ?? 'Cliente',
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF64748B))),
+                          Text(
+                            c.numero ?? 'CXC-${c.id}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            c.clienteNombre ?? 'Cliente',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
                           Text(
                             '${c.numeroCuotas} cuota(s) · saldo ${formatRd(c.saldoPendiente)}',
                             style: const TextStyle(
-                                fontSize: 11, color: Color(0xFF94A3B8)),
+                              fontSize: 11,
+                              color: Color(0xFF94A3B8),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    Text(formatRd(c.saldoPendiente),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800, fontSize: 13)),
+                    Text(
+                      formatRd(c.saldoPendiente),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -2695,18 +2970,30 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('N° ${v.numeroCotizacion}',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w800, fontSize: 13)),
-                        Text(v.nombreCliente ?? 'Sin cliente',
-                            style: const TextStyle(
-                                fontSize: 12, color: Color(0xFF64748B))),
+                        Text(
+                          'N° ${v.numeroCotizacion}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          v.nombreCliente ?? 'Sin cliente',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  Text(formatRd(v.montoTotal),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 13)),
+                  Text(
+                    formatRd(v.montoTotal),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -3187,21 +3474,30 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 label: const Text('B02 · Consumidor final'),
                                 selected: _tipoNcf == 'B02',
                                 onSelected: (sel) {
-                                  if (sel) setState(() { _tipoNcf = 'B02'; });
+                                  if (sel)
+                                    setState(() {
+                                      _tipoNcf = 'B02';
+                                    });
                                 },
                               ),
                               ChoiceChip(
                                 label: const Text('B01 · Crédito fiscal'),
                                 selected: _tipoNcf == 'B01',
                                 onSelected: (sel) {
-                                  if (sel) setState(() { _tipoNcf = 'B01'; });
+                                  if (sel)
+                                    setState(() {
+                                      _tipoNcf = 'B01';
+                                    });
                                 },
                               ),
                               ChoiceChip(
                                 label: const Text('B14 · Regímenes especiales'),
                                 selected: _tipoNcf == 'B14',
                                 onSelected: (sel) {
-                                  if (sel) setState(() { _tipoNcf = 'B14'; });
+                                  if (sel)
+                                    setState(() {
+                                      _tipoNcf = 'B14';
+                                    });
                                 },
                               ),
                             ],

@@ -32,6 +32,7 @@ class VentasTable extends Table {
   IntColumn get descuentoId => integer().nullable()();
   TextColumn get descuentoNombre => text().nullable()();
   RealColumn get montoDescuento => real().withDefault(const Constant(0.0))();
+  IntColumn get almacenId => integer().nullable()();
   BoolColumn get comprobanteEntregaImpreso =>
       boolean().withDefault(const Constant(false))();
   DateTimeColumn get fechaComprobanteEntrega => dateTime().nullable()();

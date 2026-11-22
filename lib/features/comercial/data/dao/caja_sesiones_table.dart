@@ -18,4 +18,5 @@ class CajaSesionesTable extends Table {
   RealColumn get montoContado => real().named('monto_contado').nullable()();
   RealColumn get diferencia => real().named('diferencia').nullable()();
   TextColumn get observacion => text().named('observacion').nullable()();
+  IntColumn get almacenId => integer().named('almacen_id').nullable()();
 }

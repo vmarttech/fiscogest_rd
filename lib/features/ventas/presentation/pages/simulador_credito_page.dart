@@ -109,7 +109,9 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900,
+            ),
             child: SingleChildScrollView(
               padding: AppLayout.pantallaPadding.add(
                 const EdgeInsets.only(bottom: 24),
@@ -228,8 +230,9 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                               ChoiceChip(
                                 label: Text(n == 1 ? '1 cuota' : '$n cuotas'),
                                 selected: _numeroCuotas == n,
-                                onSelected: (_) =>
-                                    setState(() { _numeroCuotas = n; }),
+                                onSelected: (_) => setState(() {
+                                  _numeroCuotas = n;
+                                }),
                               ),
                           ],
                         ),

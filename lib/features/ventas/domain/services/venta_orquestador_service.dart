@@ -13,8 +13,14 @@ class VentaOrquestadorService {
   final RegistrarVentaConInventarioUseCase _registrarVenta;
   final ActualizarVentasEnCascada _actualizarEnCascada;
 
-  Future<Venta> ejecutarVentaCompleta(RegistrarVentaState estado) async {
-    final ventaRegistrada = await _registrarVenta.ejecutar(estado);
+  Future<Venta> ejecutarVentaCompleta(
+    RegistrarVentaState estado, {
+    int? almacenId,
+  }) async {
+    final ventaRegistrada = await _registrarVenta.ejecutar(
+      estado,
+      almacenId: almacenId,
+    );
     final idVenta = ventaRegistrada.id!;
     await _actualizarEnCascada(idVenta);
     return ventaRegistrada;

@@ -125,10 +125,8 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
       return;
     }
     if (_formaPago == 'Efectivo') {
-      final rec = double.tryParse(
-            _efectivoCtrl.text.trim().replaceAll(',', '.'),
-          ) ??
-          0;
+      final rec =
+          double.tryParse(_efectivoCtrl.text.trim().replaceAll(',', '.')) ?? 0;
       if (rec + 0.001 < monto) {
         FiscoGestNotifications.show(
           const SnackBar(content: Text('Efectivo recibido insuficiente')),
@@ -148,7 +146,9 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
           : 'Abono · Caja';
 
       await ref.read(databaseProvider).transaction(() async {
-        await ref.read(cuentaPorCobrarRepositoryProvider).registrarAbono(
+        await ref
+            .read(cuentaPorCobrarRepositoryProvider)
+            .registrarAbono(
               AbonoCredito(
                 cuentaId: c.id!,
                 monto: monto,
@@ -157,7 +157,9 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                 nota: nota,
               ),
             );
-        await ref.read(cajaRepositoryProvider).registrarMovimiento(
+        await ref
+            .read(cajaRepositoryProvider)
+            .registrarMovimiento(
               referencia: c.numero ?? 'CXC-${c.id}',
               monto: monto,
               tipo: 'ingreso',
@@ -168,7 +170,9 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
       });
 
       try {
-        await ref.read(bitacoraOperacionesServiceProvider).registrar(
+        await ref
+            .read(bitacoraOperacionesServiceProvider)
+            .registrar(
               accion: 'pago_caja_cxc',
               entidad: 'cuenta_por_cobrar',
               entidadId: c.id,
@@ -201,7 +205,10 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
         );
       }
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -226,271 +233,272 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _error != null && c == null
-              ? Center(child: Text(_error!))
-              : Align(
-                  alignment: Alignment.topCenter,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      mobile ? 16 : 24,
-                      16,
-                      mobile ? 16 : 24,
-                      32,
-                    ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Resumen deuda (como cotización)
-                          Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+          ? Center(child: Text(_error!))
+          : Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  mobile ? 16 : 24,
+                  16,
+                  mobile ? 16 : 24,
+                  32,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Resumen deuda (como cotización)
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFECFDF5),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(
-                                        Icons.receipt_long,
-                                        color: Color(0xFF059669),
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            c?.numero ?? 'CXC-${widget.cuentaId}',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                          Text(
-                                            c?.clienteNombre ??
-                                                'Cliente #${c?.clienteId ?? ''}',
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Color(0xFF64748B),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 14),
-                                const Divider(height: 1),
-                                const SizedBox(height: 12),
-                                _rowInfo(
-                                  'Saldo pendiente',
-                                  formatRd(c?.saldoPendiente ?? 0),
-                                ),
-                                if (c?.ventaId != null)
-                                  _rowInfo('Venta', '#${c!.ventaId}'),
-                                _rowInfo(
-                                  'Vence',
-                                  c != null
-                                      ? _fmtFecha.format(c.fechaVencimiento)
-                                      : '—',
-                                ),
-                                const SizedBox(height: 12),
-                                const Divider(height: 1),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'TOTAL A COBRAR',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Text(
-                                      formatRd(_monto > 0
-                                          ? _monto
-                                          : (c?.saldoPendiente ?? 0)),
-                                      style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF059669),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Monto a cobrar',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _montoCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              prefixText: 'RD\$ ',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              hintText: 'Monto de la cuota o abono',
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Puede cobrar la cuota sugerida o un abono parcial/total del saldo.',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Forma de pago',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              for (final f in [
-                                'Efectivo',
-                                'Tarjeta',
-                                'Transferencia',
-                              ])
-                                ChoiceChip(
-                                  label: Text(f),
-                                  selected: _formaPago == f,
-                                  onSelected: (_) =>
-                                      setState(() { _formaPago = f; }),
-                                  selectedColor: const Color(0xFFD1FAE5),
-                                  labelStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: _formaPago == f
-                                        ? const Color(0xFF065F46)
-                                        : const Color(0xFF334155),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFECFDF5),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.receipt_long,
+                                    color: Color(0xFF059669),
+                                    size: 20,
                                   ),
                                 ),
-                            ],
-                          ),
-                          if (_formaPago == 'Efectivo') ...[
-                            const SizedBox(height: 14),
-                            const Text(
-                              'Efectivo recibido',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            TextField(
-                              controller: _efectivoCtrl,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: InputDecoration(
-                                prefixText: 'RD\$ ',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ],
-                          if (_formaPago != 'Efectivo') ...[
-                            const SizedBox(height: 14),
-                            const Text(
-                              'N° referencia',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            TextField(
-                              controller: _refCtrl,
-                              decoration: InputDecoration(
-                                hintText: 'Ej: TR-99882',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 28),
-                          SizedBox(
-                            height: 50,
-                            child: FilledButton.icon(
-                              onPressed: _procesando ||
-                                      (c?.estaPagada ?? true)
-                                  ? null
-                                  : _cobrar,
-                              icon: _procesando
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        c?.numero ?? 'CXC-${widget.cuentaId}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                        ),
                                       ),
-                                    )
-                                  : const Icon(Icons.point_of_sale),
-                              label: Text(
-                                _procesando
-                                    ? 'Procesando…'
-                                    : 'COBRAR ABONO / CUOTA',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
+                                      Text(
+                                        c?.clienteNombre ??
+                                            'Cliente #${c?.clienteId ?? ''}',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF059669),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            const Divider(height: 1),
+                            const SizedBox(height: 12),
+                            _rowInfo(
+                              'Saldo pendiente',
+                              formatRd(c?.saldoPendiente ?? 0),
+                            ),
+                            if (c?.ventaId != null)
+                              _rowInfo('Venta', '#${c!.ventaId}'),
+                            _rowInfo(
+                              'Vence',
+                              c != null
+                                  ? _fmtFecha.format(c.fechaVencimiento)
+                                  : '—',
+                            ),
+                            const SizedBox(height: 12),
+                            const Divider(height: 1),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                const Text(
+                                  'TOTAL A COBRAR',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF64748B),
+                                  ),
                                 ),
+                                const Spacer(),
+                                Text(
+                                  formatRd(
+                                    _monto > 0
+                                        ? _monto
+                                        : (c?.saldoPendiente ?? 0),
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF059669),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Monto a cobrar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _montoCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          prefixText: 'RD\$ ',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          hintText: 'Monto de la cuota o abono',
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Puede cobrar la cuota sugerida o un abono parcial/total del saldo.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Forma de pago',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final f in [
+                            'Efectivo',
+                            'Tarjeta',
+                            'Transferencia',
+                          ])
+                            ChoiceChip(
+                              label: Text(f),
+                              selected: _formaPago == f,
+                              onSelected: (_) => setState(() {
+                                _formaPago = f;
+                              }),
+                              selectedColor: const Color(0xFFD1FAE5),
+                              labelStyle: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: _formaPago == f
+                                    ? const Color(0xFF065F46)
+                                    : const Color(0xFF334155),
                               ),
                             ),
-                          ),
                         ],
                       ),
-                    ),
+                      if (_formaPago == 'Efectivo') ...[
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Efectivo recibido',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _efectivoCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            prefixText: 'RD\$ ',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_formaPago != 'Efectivo') ...[
+                        const SizedBox(height: 14),
+                        const Text(
+                          'N° referencia',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _refCtrl,
+                          decoration: InputDecoration(
+                            hintText: 'Ej: TR-99882',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 28),
+                      SizedBox(
+                        height: 50,
+                        child: FilledButton.icon(
+                          onPressed: _procesando || (c?.estaPagada ?? true)
+                              ? null
+                              : _cobrar,
+                          icon: _procesando
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.point_of_sale),
+                          label: Text(
+                            _procesando
+                                ? 'Procesando…'
+                                : 'COBRAR ABONO / CUOTA',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF059669),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
+            ),
     );
   }
 

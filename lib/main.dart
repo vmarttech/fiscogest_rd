@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/sync/supabase/roles_acceso_sync.dart';
@@ -162,6 +164,7 @@ void main() async {
 
   await initializeDateFormatting('es_DO', null);
   final db = AppDatabase();
+  await _seedStockAlmacenUnaVez(db);
   await RepositoryInjection.initialize(db);
 
   // Licencia offline: demo 15 días si no hay fila; limpia pedidos >7 días.
@@ -345,4 +348,20 @@ class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+
+/// Siembra one-time (flag en SharedPreferences): productos.stock ->
+/// stock_almacen del principal en filas inexistentes. No usar tool `dart run`
+/// porque la app Flutter no corre en VM (dart:ui ausente).
+Future<void> _seedStockAlmacenUnaVez(AppDatabase db) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    const flag = 'seed_stock_almacen_v1';
+    if (prefs.getBool(flag) == true) return;
+    await StockAlmacenDao(db).sembrarDesdeProductos();
+    await prefs.setBool(flag, true);
+  } catch (_) {
+    // Reintento en el próximo arranque de la app.
+  }
 }

@@ -201,7 +201,7 @@ class _NuevaVentaBorradorPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(ventaBorradorProvider.notifier).establecerConsumidorFinal();
     });
-  
+
     // Scanner USB: añade producto aunque el buscador no tenga foco
     _usbScanSub = UsbBarcodeScannerService.instance.onScan.listen((codigo) {
       if (!mounted) return;
@@ -220,7 +220,6 @@ class _NuevaVentaBorradorPageState
     super.dispose();
   }
 
-  
   /// Scanner USB → busca por código de barras / código y agrega a la cotización.
   /// Permanece activo: solo hay que pasar productos por el lector.
   Future<void> _aplicarCodigoUsbCotizacion(String codigo) async {
@@ -586,14 +585,12 @@ class _NuevaVentaBorradorPageState
           final esMovil =
               defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS;
-          final cfgCaja =
-              ref.read(configuracionControllerProvider).valueOrNull;
+          final cfgCaja = ref.read(configuracionControllerProvider).valueOrNull;
           final cajaRepo = ref.read(cajaRepositoryProvider);
           final sesionCaja = await cajaRepo.obtenerSesionAbierta();
 
           if (sesionCaja != null && sesionCaja.estaAbierta) {
-            final nFactura =
-                venta.numeroFactura ?? venta.numeroCotizacion;
+            final nFactura = venta.numeroFactura ?? venta.numeroCotizacion;
             await cajaRepo.registrarMovimiento(
               referencia: nFactura,
               monto: montoTotal,
@@ -648,7 +645,9 @@ class _NuevaVentaBorradorPageState
             context: context,
             builder: (ctx) => AlertDialog(
               title: const Text('Comprobante'),
-              content: const Text('Elija cómo entregar el comprobante al cliente.'),
+              content: const Text(
+                'Elija cómo entregar el comprobante al cliente.',
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
@@ -827,7 +826,10 @@ class _NuevaVentaBorradorPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -1636,7 +1638,12 @@ class _NuevaVentaBorradorPageState
                                       setState(() {
                                         _esCredito = false;
                                       });
-                                      if (simp || (!_esCredito && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS))) {
+                                      if (simp ||
+                                          (!_esCredito &&
+                                              (defaultTargetPlatform ==
+                                                      TargetPlatform.android ||
+                                                  defaultTargetPlatform ==
+                                                      TargetPlatform.iOS))) {
                                         _onGenerarVentaSimplificada();
                                       } else {
                                         _guardarCotizacion(esCredito: false);
@@ -1702,11 +1709,16 @@ class _NuevaVentaBorradorPageState
                             onPressed: disabled
                                 ? null
                                 : () {
-                                    if (simp || (!_esCredito && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS))) {
-                                        _onGenerarVentaSimplificada();
-                                      } else {
-                                        _guardarCotizacion(esCredito: _esCredito);
-                                      }
+                                    if (simp ||
+                                        (!_esCredito &&
+                                            (defaultTargetPlatform ==
+                                                    TargetPlatform.android ||
+                                                defaultTargetPlatform ==
+                                                    TargetPlatform.iOS))) {
+                                      _onGenerarVentaSimplificada();
+                                    } else {
+                                      _guardarCotizacion(esCredito: _esCredito);
+                                    }
                                   },
                           ),
                         ],
@@ -2678,9 +2690,11 @@ class _NuevaVentaBorradorPageState
     }
     // Móvil: barra inferior
     final simplificado = ref.watch(modoColmadoProvider);
-    final esPlataformaMovil = defaultTargetPlatform == TargetPlatform.android ||
+    final esPlataformaMovil =
+        defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
-    final flujoDirecto = simplificado ||
+    final flujoDirecto =
+        simplificado ||
         (!_esCredito && (esPantallaPequena || esPlataformaMovil));
     final onTap = !puedeGenerar || _guardando
         ? null

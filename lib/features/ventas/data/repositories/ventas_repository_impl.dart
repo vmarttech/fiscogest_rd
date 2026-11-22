@@ -34,7 +34,6 @@ class VentasRepositoryImpl implements IVentasRepository {
   final ProductosDao? _productosDao;
   final OfertasDao? _ofertasDao;
 
-
   /// Sube ventas (+ productos por stock) a Supabase al instante si hay red.
   /// Nunca rompe el flujo local: errores solo se loguean.
   Future<void> _pushVentaAhora() async {
@@ -219,6 +218,7 @@ class VentasRepositoryImpl implements IVentasRepository {
       descuentoId: datos.descuentoId,
       descuentoNombre: datos.descuentoNombre,
       montoDescuento: datos.montoDescuento,
+      almacenId: datos.almacenId,
     );
   }
 
@@ -426,6 +426,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         descuentoId: Value(venta.descuentoId),
         descuentoNombre: Value(venta.descuentoNombre),
         montoDescuento: Value(venta.montoDescuento),
+        almacenId: Value(venta.almacenId),
       ),
     );
     await _guardarDetalles(id, venta.detalles);
@@ -477,6 +478,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         fechaRegistro: Value(cotizacion.fechaRegistro),
         descuentoId: Value(cotizacion.descuentoId),
         descuentoNombre: Value(cotizacion.descuentoNombre),
+        almacenId: Value(cotizacion.almacenId),
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );

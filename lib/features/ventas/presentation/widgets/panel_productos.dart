@@ -89,9 +89,8 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
               StatefulBuilder(
                 builder: (ctx2, setLocal) {
                   void aplicarDelta(double delta) {
-                    final actual = double.tryParse(
-                          controller.text.replaceAll(',', '.'),
-                        ) ??
+                    final actual =
+                        double.tryParse(controller.text.replaceAll(',', '.')) ??
                         1;
                     var n = actual + delta;
                     if (n < 0.001) n = 0.001;
@@ -147,10 +146,8 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
-                final v = double.tryParse(
-                      controller.text.replaceAll(',', '.'),
-                    ) ??
-                    0;
+                final v =
+                    double.tryParse(controller.text.replaceAll(',', '.')) ?? 0;
                 Navigator.pop(ctx, v > 0 ? v : null);
               },
               child: const Text('Agregar'),
@@ -162,9 +159,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.dispose();
     });
-    if (cantidadSeleccionada != null &&
-        cantidadSeleccionada > 0 &&
-        mounted) {
+    if (cantidadSeleccionada != null && cantidadSeleccionada > 0 && mounted) {
       await widget.alAgregar(prod, cantidadSeleccionada);
       if (mounted) {
         _buscador.clear();
@@ -264,28 +259,28 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
             return ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 280),
               child: ListView.builder(
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              itemCount: lista.length,
-              itemBuilder: (context, i) {
-                final prod = lista[i];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-                  child: ListTile(
-                    title: Text(prod.nombre),
-                    subtitle: Text(
-                      '${prod.codigo.trim().isNotEmpty ? '[${prod.codigo}] · ' : ''}'
-                      'Precio: ${formatRd(prod.precioVenta)}'
-                      '${prod.stock != null ? ' • Stock: ${prod.stock}' : ''}',
-                      style: AppTypography.bodySmall,
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                itemCount: lista.length,
+                itemBuilder: (context, i) {
+                  final prod = lista[i];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                    child: ListTile(
+                      title: Text(prod.nombre),
+                      subtitle: Text(
+                        '${prod.codigo.trim().isNotEmpty ? '[${prod.codigo}] · ' : ''}'
+                        'Precio: ${formatRd(prod.precioVenta)}'
+                        '${prod.stock != null ? ' • Stock: ${prod.stock}' : ''}',
+                        style: AppTypography.bodySmall,
+                      ),
+                      trailing: ElevatedButton(
+                        onPressed: () => _pedirCantidadYAgregar(prod),
+                        child: const Text('Agregar'),
+                      ),
                     ),
-                    trailing: ElevatedButton(
-                      onPressed: () => _pedirCantidadYAgregar(prod),
-                      child: const Text('Agregar'),
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
               ),
             );
           },

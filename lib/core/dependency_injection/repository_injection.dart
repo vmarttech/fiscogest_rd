@@ -1,4 +1,5 @@
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/ventas/data/repositories/ventas_repository_impl.dart';
@@ -70,11 +71,13 @@ class RepositoryInjection {
       productosDao,
       OfertasDao(db),
     );
+    final stockAlmacenDaoInst = StockAlmacenDao(db);
     final ventaInventarioService = VentaInventarioServiceImpl(
       ventasRepository: ventasRepository,
       kardexRepository: kardexRepo,
       inventarioService: inventarioService,
       productosDao: productosDao,
+      stockAlmacenDao: stockAlmacenDaoInst,
     );
     final apartadoRepository = ApartadoRepositoryImpl(
       apartadosDao: apartadosDao,

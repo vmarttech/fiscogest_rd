@@ -25,7 +25,6 @@ class VistaInventario extends ConsumerStatefulWidget {
 class _VistaInventarioState extends ConsumerState<VistaInventario> {
   final TextEditingController _busqueda = TextEditingController();
   String? _terminoBusqueda;
-  
 
   @override
   void dispose() {
@@ -77,7 +76,9 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
       precioUnitario: precioUnitario,
       subtotal: subtotal,
       subtotalLinea: subtotal,
-      tasaImpuesto: ref.read(registrarVentaProvider.notifier).tasaPara(producto),
+      tasaImpuesto: ref
+          .read(registrarVentaProvider.notifier)
+          .tasaPara(producto),
     );
     ref.read(registrarVentaProvider.notifier).agregarProducto(linea);
     ref

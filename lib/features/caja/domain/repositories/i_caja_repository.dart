@@ -15,7 +15,11 @@ abstract class ICajaRepository {
   Future<CajaSesionResumen?> obtenerSesionAbierta();
   Future<CajaSesionResumen?> obtenerUltimaSesionCerrada();
 
-  Future<int> abrirSesion({required double fondoInicial, int usuarioId = 1});
+  Future<int> abrirSesion({
+    required double fondoInicial,
+    int usuarioId = 1,
+    int? almacenId,
+  });
 
   /// Resumen de cuadre de una sesión (abierta o cerrada).
   Future<ResumenSesionCaja> obtenerResumenSesion(int sesionId);

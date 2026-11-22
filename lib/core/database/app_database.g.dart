@@ -15450,6 +15450,17 @@ class $VentasTableTable extends VentasTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _almacenIdMeta = const VerificationMeta(
+    'almacenId',
+  );
+  @override
+  late final GeneratedColumn<int> almacenId = GeneratedColumn<int>(
+    'almacen_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _comprobanteEntregaImpresoMeta =
       const VerificationMeta('comprobanteEntregaImpreso');
   @override
@@ -15505,6 +15516,7 @@ class $VentasTableTable extends VentasTable
     descuentoId,
     descuentoNombre,
     montoDescuento,
+    almacenId,
     comprobanteEntregaImpreso,
     fechaComprobanteEntrega,
   ];
@@ -15747,6 +15759,12 @@ class $VentasTableTable extends VentasTable
         ),
       );
     }
+    if (data.containsKey('almacen_id')) {
+      context.handle(
+        _almacenIdMeta,
+        almacenId.isAcceptableOrUnknown(data['almacen_id']!, _almacenIdMeta),
+      );
+    }
     if (data.containsKey('comprobante_entrega_impreso')) {
       context.handle(
         _comprobanteEntregaImpresoMeta,
@@ -15882,6 +15900,10 @@ class $VentasTableTable extends VentasTable
         DriftSqlType.double,
         data['${effectivePrefix}monto_descuento'],
       )!,
+      almacenId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}almacen_id'],
+      ),
       comprobanteEntregaImpreso: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}comprobante_entrega_impreso'],
@@ -15927,6 +15949,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
   final int? descuentoId;
   final String? descuentoNombre;
   final double montoDescuento;
+  final int? almacenId;
   final bool comprobanteEntregaImpreso;
   final DateTime? fechaComprobanteEntrega;
   const VentasTableData({
@@ -15957,6 +15980,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     this.descuentoId,
     this.descuentoNombre,
     required this.montoDescuento,
+    this.almacenId,
     required this.comprobanteEntregaImpreso,
     this.fechaComprobanteEntrega,
   });
@@ -16006,6 +16030,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       map['descuento_nombre'] = Variable<String>(descuentoNombre);
     }
     map['monto_descuento'] = Variable<double>(montoDescuento);
+    if (!nullToAbsent || almacenId != null) {
+      map['almacen_id'] = Variable<int>(almacenId);
+    }
     map['comprobante_entrega_impreso'] = Variable<bool>(
       comprobanteEntregaImpreso,
     );
@@ -16062,6 +16089,9 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           ? const Value.absent()
           : Value(descuentoNombre),
       montoDescuento: Value(montoDescuento),
+      almacenId: almacenId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(almacenId),
       comprobanteEntregaImpreso: Value(comprobanteEntregaImpreso),
       fechaComprobanteEntrega: fechaComprobanteEntrega == null && nullToAbsent
           ? const Value.absent()
@@ -16102,6 +16132,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       descuentoId: serializer.fromJson<int?>(json['descuentoId']),
       descuentoNombre: serializer.fromJson<String?>(json['descuentoNombre']),
       montoDescuento: serializer.fromJson<double>(json['montoDescuento']),
+      almacenId: serializer.fromJson<int?>(json['almacenId']),
       comprobanteEntregaImpreso: serializer.fromJson<bool>(
         json['comprobanteEntregaImpreso'],
       ),
@@ -16141,6 +16172,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       'descuentoId': serializer.toJson<int?>(descuentoId),
       'descuentoNombre': serializer.toJson<String?>(descuentoNombre),
       'montoDescuento': serializer.toJson<double>(montoDescuento),
+      'almacenId': serializer.toJson<int?>(almacenId),
       'comprobanteEntregaImpreso': serializer.toJson<bool>(
         comprobanteEntregaImpreso,
       ),
@@ -16178,6 +16210,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     Value<int?> descuentoId = const Value.absent(),
     Value<String?> descuentoNombre = const Value.absent(),
     double? montoDescuento,
+    Value<int?> almacenId = const Value.absent(),
     bool? comprobanteEntregaImpreso,
     Value<DateTime?> fechaComprobanteEntrega = const Value.absent(),
   }) => VentasTableData(
@@ -16220,6 +16253,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
         ? descuentoNombre.value
         : this.descuentoNombre,
     montoDescuento: montoDescuento ?? this.montoDescuento,
+    almacenId: almacenId.present ? almacenId.value : this.almacenId,
     comprobanteEntregaImpreso:
         comprobanteEntregaImpreso ?? this.comprobanteEntregaImpreso,
     fechaComprobanteEntrega: fechaComprobanteEntrega.present
@@ -16295,6 +16329,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
       montoDescuento: data.montoDescuento.present
           ? data.montoDescuento.value
           : this.montoDescuento,
+      almacenId: data.almacenId.present ? data.almacenId.value : this.almacenId,
       comprobanteEntregaImpreso: data.comprobanteEntregaImpreso.present
           ? data.comprobanteEntregaImpreso.value
           : this.comprobanteEntregaImpreso,
@@ -16334,6 +16369,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           ..write('descuentoId: $descuentoId, ')
           ..write('descuentoNombre: $descuentoNombre, ')
           ..write('montoDescuento: $montoDescuento, ')
+          ..write('almacenId: $almacenId, ')
           ..write('comprobanteEntregaImpreso: $comprobanteEntregaImpreso, ')
           ..write('fechaComprobanteEntrega: $fechaComprobanteEntrega')
           ..write(')'))
@@ -16369,6 +16405,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
     descuentoId,
     descuentoNombre,
     montoDescuento,
+    almacenId,
     comprobanteEntregaImpreso,
     fechaComprobanteEntrega,
   ]);
@@ -16403,6 +16440,7 @@ class VentasTableData extends DataClass implements Insertable<VentasTableData> {
           other.descuentoId == this.descuentoId &&
           other.descuentoNombre == this.descuentoNombre &&
           other.montoDescuento == this.montoDescuento &&
+          other.almacenId == this.almacenId &&
           other.comprobanteEntregaImpreso == this.comprobanteEntregaImpreso &&
           other.fechaComprobanteEntrega == this.fechaComprobanteEntrega);
 }
@@ -16435,6 +16473,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
   final Value<int?> descuentoId;
   final Value<String?> descuentoNombre;
   final Value<double> montoDescuento;
+  final Value<int?> almacenId;
   final Value<bool> comprobanteEntregaImpreso;
   final Value<DateTime?> fechaComprobanteEntrega;
   const VentasTableCompanion({
@@ -16465,6 +16504,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     this.descuentoId = const Value.absent(),
     this.descuentoNombre = const Value.absent(),
     this.montoDescuento = const Value.absent(),
+    this.almacenId = const Value.absent(),
     this.comprobanteEntregaImpreso = const Value.absent(),
     this.fechaComprobanteEntrega = const Value.absent(),
   });
@@ -16496,6 +16536,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     this.descuentoId = const Value.absent(),
     this.descuentoNombre = const Value.absent(),
     this.montoDescuento = const Value.absent(),
+    this.almacenId = const Value.absent(),
     this.comprobanteEntregaImpreso = const Value.absent(),
     this.fechaComprobanteEntrega = const Value.absent(),
   }) : clienteId = Value(clienteId),
@@ -16533,6 +16574,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Expression<int>? descuentoId,
     Expression<String>? descuentoNombre,
     Expression<double>? montoDescuento,
+    Expression<int>? almacenId,
     Expression<bool>? comprobanteEntregaImpreso,
     Expression<DateTime>? fechaComprobanteEntrega,
   }) {
@@ -16564,6 +16606,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
       if (descuentoId != null) 'descuento_id': descuentoId,
       if (descuentoNombre != null) 'descuento_nombre': descuentoNombre,
       if (montoDescuento != null) 'monto_descuento': montoDescuento,
+      if (almacenId != null) 'almacen_id': almacenId,
       if (comprobanteEntregaImpreso != null)
         'comprobante_entrega_impreso': comprobanteEntregaImpreso,
       if (fechaComprobanteEntrega != null)
@@ -16599,6 +16642,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     Value<int?>? descuentoId,
     Value<String?>? descuentoNombre,
     Value<double>? montoDescuento,
+    Value<int?>? almacenId,
     Value<bool>? comprobanteEntregaImpreso,
     Value<DateTime?>? fechaComprobanteEntrega,
   }) {
@@ -16630,6 +16674,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
       descuentoId: descuentoId ?? this.descuentoId,
       descuentoNombre: descuentoNombre ?? this.descuentoNombre,
       montoDescuento: montoDescuento ?? this.montoDescuento,
+      almacenId: almacenId ?? this.almacenId,
       comprobanteEntregaImpreso:
           comprobanteEntregaImpreso ?? this.comprobanteEntregaImpreso,
       fechaComprobanteEntrega:
@@ -16721,6 +16766,9 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
     if (montoDescuento.present) {
       map['monto_descuento'] = Variable<double>(montoDescuento.value);
     }
+    if (almacenId.present) {
+      map['almacen_id'] = Variable<int>(almacenId.value);
+    }
     if (comprobanteEntregaImpreso.present) {
       map['comprobante_entrega_impreso'] = Variable<bool>(
         comprobanteEntregaImpreso.value,
@@ -16764,6 +16812,7 @@ class VentasTableCompanion extends UpdateCompanion<VentasTableData> {
           ..write('descuentoId: $descuentoId, ')
           ..write('descuentoNombre: $descuentoNombre, ')
           ..write('montoDescuento: $montoDescuento, ')
+          ..write('almacenId: $almacenId, ')
           ..write('comprobanteEntregaImpreso: $comprobanteEntregaImpreso, ')
           ..write('fechaComprobanteEntrega: $fechaComprobanteEntrega')
           ..write(')'))
@@ -29030,6 +29079,17 @@ class $CajaSesionesTableTable extends CajaSesionesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _almacenIdMeta = const VerificationMeta(
+    'almacenId',
+  );
+  @override
+  late final GeneratedColumn<int> almacenId = GeneratedColumn<int>(
+    'almacen_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -29042,6 +29102,7 @@ class $CajaSesionesTableTable extends CajaSesionesTable
     montoContado,
     diferencia,
     observacion,
+    almacenId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -29134,6 +29195,12 @@ class $CajaSesionesTableTable extends CajaSesionesTable
         ),
       );
     }
+    if (data.containsKey('almacen_id')) {
+      context.handle(
+        _almacenIdMeta,
+        almacenId.isAcceptableOrUnknown(data['almacen_id']!, _almacenIdMeta),
+      );
+    }
     return context;
   }
 
@@ -29183,6 +29250,10 @@ class $CajaSesionesTableTable extends CajaSesionesTable
         DriftSqlType.string,
         data['${effectivePrefix}observacion'],
       ),
+      almacenId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}almacen_id'],
+      ),
     );
   }
 
@@ -29205,6 +29276,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
   final double? montoContado;
   final double? diferencia;
   final String? observacion;
+  final int? almacenId;
   const CajaSesionData({
     required this.id,
     required this.fechaApertura,
@@ -29216,6 +29288,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
     this.montoContado,
     this.diferencia,
     this.observacion,
+    this.almacenId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -29239,6 +29312,9 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
     }
     if (!nullToAbsent || observacion != null) {
       map['observacion'] = Variable<String>(observacion);
+    }
+    if (!nullToAbsent || almacenId != null) {
+      map['almacen_id'] = Variable<int>(almacenId);
     }
     return map;
   }
@@ -29265,6 +29341,9 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
       observacion: observacion == null && nullToAbsent
           ? const Value.absent()
           : Value(observacion),
+      almacenId: almacenId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(almacenId),
     );
   }
 
@@ -29284,6 +29363,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
       montoContado: serializer.fromJson<double?>(json['montoContado']),
       diferencia: serializer.fromJson<double?>(json['diferencia']),
       observacion: serializer.fromJson<String?>(json['observacion']),
+      almacenId: serializer.fromJson<int?>(json['almacenId']),
     );
   }
   @override
@@ -29300,6 +29380,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
       'montoContado': serializer.toJson<double?>(montoContado),
       'diferencia': serializer.toJson<double?>(diferencia),
       'observacion': serializer.toJson<String?>(observacion),
+      'almacenId': serializer.toJson<int?>(almacenId),
     };
   }
 
@@ -29314,6 +29395,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
     Value<double?> montoContado = const Value.absent(),
     Value<double?> diferencia = const Value.absent(),
     Value<String?> observacion = const Value.absent(),
+    Value<int?> almacenId = const Value.absent(),
   }) => CajaSesionData(
     id: id ?? this.id,
     fechaApertura: fechaApertura ?? this.fechaApertura,
@@ -29325,6 +29407,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
     montoContado: montoContado.present ? montoContado.value : this.montoContado,
     diferencia: diferencia.present ? diferencia.value : this.diferencia,
     observacion: observacion.present ? observacion.value : this.observacion,
+    almacenId: almacenId.present ? almacenId.value : this.almacenId,
   );
   CajaSesionData copyWithCompanion(CajaSesionesTableCompanion data) {
     return CajaSesionData(
@@ -29352,6 +29435,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
       observacion: data.observacion.present
           ? data.observacion.value
           : this.observacion,
+      almacenId: data.almacenId.present ? data.almacenId.value : this.almacenId,
     );
   }
 
@@ -29367,7 +29451,8 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
           ..write('saldoTeorico: $saldoTeorico, ')
           ..write('montoContado: $montoContado, ')
           ..write('diferencia: $diferencia, ')
-          ..write('observacion: $observacion')
+          ..write('observacion: $observacion, ')
+          ..write('almacenId: $almacenId')
           ..write(')'))
         .toString();
   }
@@ -29384,6 +29469,7 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
     montoContado,
     diferencia,
     observacion,
+    almacenId,
   );
   @override
   bool operator ==(Object other) =>
@@ -29398,7 +29484,8 @@ class CajaSesionData extends DataClass implements Insertable<CajaSesionData> {
           other.saldoTeorico == this.saldoTeorico &&
           other.montoContado == this.montoContado &&
           other.diferencia == this.diferencia &&
-          other.observacion == this.observacion);
+          other.observacion == this.observacion &&
+          other.almacenId == this.almacenId);
 }
 
 class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
@@ -29412,6 +29499,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
   final Value<double?> montoContado;
   final Value<double?> diferencia;
   final Value<String?> observacion;
+  final Value<int?> almacenId;
   const CajaSesionesTableCompanion({
     this.id = const Value.absent(),
     this.fechaApertura = const Value.absent(),
@@ -29423,6 +29511,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
     this.montoContado = const Value.absent(),
     this.diferencia = const Value.absent(),
     this.observacion = const Value.absent(),
+    this.almacenId = const Value.absent(),
   });
   CajaSesionesTableCompanion.insert({
     this.id = const Value.absent(),
@@ -29435,6 +29524,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
     this.montoContado = const Value.absent(),
     this.diferencia = const Value.absent(),
     this.observacion = const Value.absent(),
+    this.almacenId = const Value.absent(),
   }) : fechaApertura = Value(fechaApertura),
        fondoInicial = Value(fondoInicial);
   static Insertable<CajaSesionData> custom({
@@ -29448,6 +29538,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
     Expression<double>? montoContado,
     Expression<double>? diferencia,
     Expression<String>? observacion,
+    Expression<int>? almacenId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -29460,6 +29551,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
       if (montoContado != null) 'monto_contado': montoContado,
       if (diferencia != null) 'diferencia': diferencia,
       if (observacion != null) 'observacion': observacion,
+      if (almacenId != null) 'almacen_id': almacenId,
     });
   }
 
@@ -29474,6 +29566,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
     Value<double?>? montoContado,
     Value<double?>? diferencia,
     Value<String?>? observacion,
+    Value<int?>? almacenId,
   }) {
     return CajaSesionesTableCompanion(
       id: id ?? this.id,
@@ -29486,6 +29579,7 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
       montoContado: montoContado ?? this.montoContado,
       diferencia: diferencia ?? this.diferencia,
       observacion: observacion ?? this.observacion,
+      almacenId: almacenId ?? this.almacenId,
     );
   }
 
@@ -29522,6 +29616,9 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
     if (observacion.present) {
       map['observacion'] = Variable<String>(observacion.value);
     }
+    if (almacenId.present) {
+      map['almacen_id'] = Variable<int>(almacenId.value);
+    }
     return map;
   }
 
@@ -29537,7 +29634,8 @@ class CajaSesionesTableCompanion extends UpdateCompanion<CajaSesionData> {
           ..write('saldoTeorico: $saldoTeorico, ')
           ..write('montoContado: $montoContado, ')
           ..write('diferencia: $diferencia, ')
-          ..write('observacion: $observacion')
+          ..write('observacion: $observacion, ')
+          ..write('almacenId: $almacenId')
           ..write(')'))
         .toString();
   }
@@ -47866,6 +47964,7 @@ typedef $$VentasTableTableCreateCompanionBuilder =
       Value<int?> descuentoId,
       Value<String?> descuentoNombre,
       Value<double> montoDescuento,
+      Value<int?> almacenId,
       Value<bool> comprobanteEntregaImpreso,
       Value<DateTime?> fechaComprobanteEntrega,
     });
@@ -47898,6 +47997,7 @@ typedef $$VentasTableTableUpdateCompanionBuilder =
       Value<int?> descuentoId,
       Value<String?> descuentoNombre,
       Value<double> montoDescuento,
+      Value<int?> almacenId,
       Value<bool> comprobanteEntregaImpreso,
       Value<DateTime?> fechaComprobanteEntrega,
     });
@@ -48193,6 +48293,11 @@ class $$VentasTableTableFilterComposer
 
   ColumnFilters<double> get montoDescuento => $composableBuilder(
     column: $table.montoDescuento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -48502,6 +48607,11 @@ class $$VentasTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get comprobanteEntregaImpreso => $composableBuilder(
     column: $table.comprobanteEntregaImpreso,
     builder: (column) => ColumnOrderings(column),
@@ -48642,6 +48752,9 @@ class $$VentasTableTableAnnotationComposer
     column: $table.montoDescuento,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get almacenId =>
+      $composableBuilder(column: $table.almacenId, builder: (column) => column);
 
   GeneratedColumn<bool> get comprobanteEntregaImpreso => $composableBuilder(
     column: $table.comprobanteEntregaImpreso,
@@ -48872,6 +48985,7 @@ class $$VentasTableTableTableManager
                 Value<int?> descuentoId = const Value.absent(),
                 Value<String?> descuentoNombre = const Value.absent(),
                 Value<double> montoDescuento = const Value.absent(),
+                Value<int?> almacenId = const Value.absent(),
                 Value<bool> comprobanteEntregaImpreso = const Value.absent(),
                 Value<DateTime?> fechaComprobanteEntrega = const Value.absent(),
               }) => VentasTableCompanion(
@@ -48902,6 +49016,7 @@ class $$VentasTableTableTableManager
                 descuentoId: descuentoId,
                 descuentoNombre: descuentoNombre,
                 montoDescuento: montoDescuento,
+                almacenId: almacenId,
                 comprobanteEntregaImpreso: comprobanteEntregaImpreso,
                 fechaComprobanteEntrega: fechaComprobanteEntrega,
               ),
@@ -48934,6 +49049,7 @@ class $$VentasTableTableTableManager
                 Value<int?> descuentoId = const Value.absent(),
                 Value<String?> descuentoNombre = const Value.absent(),
                 Value<double> montoDescuento = const Value.absent(),
+                Value<int?> almacenId = const Value.absent(),
                 Value<bool> comprobanteEntregaImpreso = const Value.absent(),
                 Value<DateTime?> fechaComprobanteEntrega = const Value.absent(),
               }) => VentasTableCompanion.insert(
@@ -48964,6 +49080,7 @@ class $$VentasTableTableTableManager
                 descuentoId: descuentoId,
                 descuentoNombre: descuentoNombre,
                 montoDescuento: montoDescuento,
+                almacenId: almacenId,
                 comprobanteEntregaImpreso: comprobanteEntregaImpreso,
                 fechaComprobanteEntrega: fechaComprobanteEntrega,
               ),
@@ -58972,6 +59089,7 @@ typedef $$CajaSesionesTableTableCreateCompanionBuilder =
       Value<double?> montoContado,
       Value<double?> diferencia,
       Value<String?> observacion,
+      Value<int?> almacenId,
     });
 typedef $$CajaSesionesTableTableUpdateCompanionBuilder =
     CajaSesionesTableCompanion Function({
@@ -58985,6 +59103,7 @@ typedef $$CajaSesionesTableTableUpdateCompanionBuilder =
       Value<double?> montoContado,
       Value<double?> diferencia,
       Value<String?> observacion,
+      Value<int?> almacenId,
     });
 
 class $$CajaSesionesTableTableFilterComposer
@@ -59043,6 +59162,11 @@ class $$CajaSesionesTableTableFilterComposer
 
   ColumnFilters<String> get observacion => $composableBuilder(
     column: $table.observacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -59105,6 +59229,11 @@ class $$CajaSesionesTableTableOrderingComposer
     column: $table.observacion,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get almacenId => $composableBuilder(
+    column: $table.almacenId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CajaSesionesTableTableAnnotationComposer
@@ -59159,6 +59288,9 @@ class $$CajaSesionesTableTableAnnotationComposer
     column: $table.observacion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get almacenId =>
+      $composableBuilder(column: $table.almacenId, builder: (column) => column);
 }
 
 class $$CajaSesionesTableTableTableManager
@@ -59211,6 +59343,7 @@ class $$CajaSesionesTableTableTableManager
                 Value<double?> montoContado = const Value.absent(),
                 Value<double?> diferencia = const Value.absent(),
                 Value<String?> observacion = const Value.absent(),
+                Value<int?> almacenId = const Value.absent(),
               }) => CajaSesionesTableCompanion(
                 id: id,
                 fechaApertura: fechaApertura,
@@ -59222,6 +59355,7 @@ class $$CajaSesionesTableTableTableManager
                 montoContado: montoContado,
                 diferencia: diferencia,
                 observacion: observacion,
+                almacenId: almacenId,
               ),
           createCompanionCallback:
               ({
@@ -59235,6 +59369,7 @@ class $$CajaSesionesTableTableTableManager
                 Value<double?> montoContado = const Value.absent(),
                 Value<double?> diferencia = const Value.absent(),
                 Value<String?> observacion = const Value.absent(),
+                Value<int?> almacenId = const Value.absent(),
               }) => CajaSesionesTableCompanion.insert(
                 id: id,
                 fechaApertura: fechaApertura,
@@ -59246,6 +59381,7 @@ class $$CajaSesionesTableTableTableManager
                 montoContado: montoContado,
                 diferencia: diferencia,
                 observacion: observacion,
+                almacenId: almacenId,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

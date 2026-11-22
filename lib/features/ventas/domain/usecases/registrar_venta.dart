@@ -7,7 +7,7 @@ class RegistrarVentaConInventarioUseCase {
   RegistrarVentaConInventarioUseCase(this._servicioInventario);
   final IVentaInventarioService _servicioInventario;
 
-  Future<Venta> ejecutar(RegistrarVentaState estado) async {
+  Future<Venta> ejecutar(RegistrarVentaState estado, {int? almacenId}) async {
     final ahora = DateTime.now();
     final venta = Venta(
       id: null,
@@ -31,6 +31,7 @@ class RegistrarVentaConInventarioUseCase {
       descuentoId: estado.descuentoId,
       descuentoNombre: estado.descuentoNombre,
       montoDescuento: estado.montoDescuento,
+      almacenId: almacenId,
     );
     return await _servicioInventario.registrarVentaConInventario(venta);
   }

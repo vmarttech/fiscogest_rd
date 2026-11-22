@@ -16,16 +16,14 @@ class ReciboDigitalService {
     final texto = generarReciboDigital(
       venta: venta,
       empresa: empresa,
-      mensajeCierre: mensajeCierre ?? '¡Dios bendiga tu día! Vuélvenos a visitar.',
+      mensajeCierre:
+          mensajeCierre ?? '¡Dios bendiga tu día! Vuélvenos a visitar.',
     );
 
     final numero = (venta.numeroFactura?.trim().isNotEmpty == true)
         ? venta.numeroFactura!.trim()
         : venta.numeroCotizacion;
 
-    await Share.share(
-      texto,
-      subject: 'Recibo #$numero',
-    );
+    await Share.share(texto, subject: 'Recibo #$numero');
   }
 }

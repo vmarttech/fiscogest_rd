@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_activo_provider.dart';
 
 @immutable
 class VentaBorradorState {
@@ -673,6 +674,7 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
       descuentoId: state.descuentoId,
       descuentoNombre: state.descuentoNombre,
       montoDescuento: state.montoDescuento,
+      almacenId: _ref.read(almacenActivoIdEfectivoProvider),
     );
     final guardada = await repositorio.registrarVentaBorrador(venta);
     state = state.copyWith(id: guardada.id);

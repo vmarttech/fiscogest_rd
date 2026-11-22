@@ -110,14 +110,15 @@ class _EditarPreciosProductoPageState
 
     return AppScaffold(
       // design system
-
       title: 'Precios de Venta',
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
           padding: AppLayout.pantallaPadding,
           child: datosPrecios.when(
-            loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary, )),
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
             error: (error, _) => Center(child: Text('Error: $error')),
             data: (datos) {
               if (datos != null) {

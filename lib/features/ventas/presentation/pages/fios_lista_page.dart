@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/configuracion/presentation/providers/confi
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/avisar_atrasados_button.dart';
+
 class FiosListaPage extends ConsumerWidget {
   const FiosListaPage({super.key});
 
@@ -28,18 +29,27 @@ class FiosListaPage extends ConsumerWidget {
     final fechaFmt = DateFormat('dd/MM/yyyy');
 
     return AppScaffold(
-  floatingActionButton: Consumer(builder: (context, ref, _) {
-    final fios = ref.watch(fiosPendientesProvider).asData?.value ?? const [];
-    final ahora = DateTime.now();
-    final atrasados = fios.where((f) =>
-        f.estado != 'pagado' &&
-        (f.fechaCompromiso == null || f.fechaCompromiso!.isBefore(ahora))).toList();
-    return FloatingActionButton.extended(
-      onPressed: () => AvisarAtrasadosButton.avisar(context, ref, atrasados),
-      icon: const Icon(Icons.chat_bubble_outline),
-      label: const Text('Avisar atrasados'),
-    );
-  }),
+      floatingActionButton: Consumer(
+        builder: (context, ref, _) {
+          final fios =
+              ref.watch(fiosPendientesProvider).asData?.value ?? const [];
+          final ahora = DateTime.now();
+          final atrasados = fios
+              .where(
+                (f) =>
+                    f.estado != 'pagado' &&
+                    (f.fechaCompromiso == null ||
+                        f.fechaCompromiso!.isBefore(ahora)),
+              )
+              .toList();
+          return FloatingActionButton.extended(
+            onPressed: () =>
+                AvisarAtrasadosButton.avisar(context, ref, atrasados),
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: const Text('Avisar atrasados'),
+          );
+        },
+      ),
 
       title: 'FIAO',
       body: async.when(
@@ -135,7 +145,9 @@ class FiosListaPage extends ConsumerWidget {
                       fechaFmt: fechaFmt,
                       onAbonar: () => _abrirAbonar(context, ref, f),
                       onRecordatorio: () {
-                        final gatesWA = LicenciaGates(ref.read(licenciaActualProvider).valueOrNull);
+                        final gatesWA = LicenciaGates(
+                          ref.read(licenciaActualProvider).valueOrNull,
+                        );
                         if (!gatesWA.permiteNotifWhatsappFiao) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -159,7 +171,6 @@ class FiosListaPage extends ConsumerWidget {
       ),
     );
   }
-
 
   Future<void> _abrirRecordatorioWhatsApp(
     BuildContext context,
@@ -185,7 +196,9 @@ class FiosListaPage extends ConsumerWidget {
 
     try {
       final empresa = ref.read(configuracionControllerProvider).valueOrNull;
-      await ref.read(recordatorioWhatsAppServiceProvider).enviarDesdeFiao(
+      await ref
+          .read(recordatorioWhatsAppServiceProvider)
+          .enviarDesdeFiao(
             nombreCliente: fio.nombreCliente,
             saldoPendiente: fio.saldoPendiente,
             telefonoCliente: telefono,
@@ -406,11 +419,13 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
-  
   Widget _botonMonto(String label, double valor) {
     final saldo = widget.fio.saldoPendiente;
     final activo = valor <= saldo + 0.01;
@@ -421,21 +436,24 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
           onPressed: (_guardando || !activo)
               ? null
               : () => setState(() {
-                    _monto.text = valor.toStringAsFixed(2);
-                  }),
+                  _monto.text = valor.toStringAsFixed(2);
+                }),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: Text(label,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
       ),
     );
   }
-@override
+
+  @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
     final saldo = widget.fio.saldoPendiente;
@@ -450,135 +468,139 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: SingleChildScrollView(
-              child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Abonar fiao',
-              style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.fio.nombreCliente,
-              style: AppTypography.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: 12),
+              Text(
+                'Abonar fiao',
+                style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
               ),
-            ),
-            Text(
-              'Saldo: ${formatRd(saldo)}',
+              const SizedBox(height: 4),
+              Text(
+                widget.fio.nombreCliente,
+                style: AppTypography.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                'Saldo: ${formatRd(saldo)}',
 
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.warning,
-                fontWeight: FontWeight.w700,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.warning,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            const SizedBox(height: 8),
-            Row(children: [
-              _botonMonto('50', 50),
-              _botonMonto('100', 100),
-              _botonMonto('200', 200),
-              _botonMonto('500', 500),
-            ]),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _guardando
-                    ? null
-                    : () => setState(() {
+              const SizedBox(height: 14),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _botonMonto('50', 50),
+                  _botonMonto('100', 100),
+                  _botonMonto('200', 200),
+                  _botonMonto('500', 500),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _guardando
+                      ? null
+                      : () => setState(() {
                           _monto.text = saldo.toStringAsFixed(2);
                         }),
-                icon: const Icon(Icons.check_circle_outline, size: 20),
-                label: const Text('SALDAR TODO',
-                    style: TextStyle(fontWeight: FontWeight.w800)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  icon: const Icon(Icons.check_circle_outline, size: 20),
+                  label: const Text(
+                    'SALDAR TODO',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _monto,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: 'Monto a abonar',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _monto,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-                isDense: true,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () => setState(() {
-                    _monto.text = (saldo / 2).toStringAsFixed(2);
-                  }),
-                  child: const Text('Mitad'),
-                ),
-                TextButton(
-                  onPressed: () => setState(() {
-                    _monto.text = saldo.toStringAsFixed(2);
-                  }),
-                  child: const Text('Todo'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _guardando ? null : _confirmar,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Monto a abonar',
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  isDense: true,
                 ),
-                child: _guardando
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _monto.text = (saldo / 2).toStringAsFixed(2);
+                    }),
+                    child: const Text('Mitad'),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _monto.text = saldo.toStringAsFixed(2);
+                    }),
+                    child: const Text('Todo'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _guardando ? null : _confirmar,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _guardando
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'REGISTRAR ABONO',
+                          style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                      )
-                    : const Text(
-                        'REGISTRAR ABONO',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: _guardando ? null : () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-          ],
+              TextButton(
+                onPressed: _guardando ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+            ],
+          ),
         ),
-            ),
       ),
     );
   }
@@ -654,8 +676,7 @@ class _RecordatorioWhatsAppDialogState
           child: const Text('Cancelar'),
         ),
         FilledButton.icon(
-          onPressed: () =>
-              Navigator.pop(context, _telefonoCtrl.text.trim()),
+          onPressed: () => Navigator.pop(context, _telefonoCtrl.text.trim()),
           icon: const Icon(Icons.chat, size: 18),
           label: const Text('Enviar'),
         ),

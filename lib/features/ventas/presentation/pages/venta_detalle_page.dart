@@ -36,8 +36,9 @@ class _VentaDetallePageState extends ConsumerState<VentaDetallePage> {
       Venta? v = widget.venta;
       final id = widget.ventaId ?? v?.id;
       if (id != null) {
-        final full =
-            await ref.read(ventasRepositoryProvider).obtenerVentaPorId(id);
+        final full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(id);
         if (full != null) v = full;
       }
       if (!mounted) return;
@@ -74,8 +75,8 @@ class _VentaDetallePageState extends ConsumerState<VentaDetallePage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!))
-              : MostrarDetalleVenta(venta: _venta!),
+          ? Center(child: Text(_error!))
+          : MostrarDetalleVenta(venta: _venta!),
     );
   }
 }

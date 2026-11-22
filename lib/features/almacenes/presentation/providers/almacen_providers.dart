@@ -7,7 +7,9 @@ import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 
 final almacenesHabilitadosProvider = Provider<bool>((ref) {
-  return ref.watch(licenciaActualProvider).maybeWhen(
+  return ref
+      .watch(licenciaActualProvider)
+      .maybeWhen(
         data: (lic) => LicenciaGates(lic).permiteAlmacenes,
         orElse: () => false,
       );
@@ -22,7 +24,8 @@ final stockAlmacenDaoProvider = Provider<StockAlmacenDao>((ref) {
 });
 
 class AlmacenesNotifier extends StateNotifier<AsyncValue<List<Almacen>>> {
-  AlmacenesNotifier(this._dao, this._stock) : super(const AsyncValue.loading()) {
+  AlmacenesNotifier(this._dao, this._stock)
+    : super(const AsyncValue.loading()) {
     cargar();
   }
 
@@ -59,8 +62,8 @@ class AlmacenesNotifier extends StateNotifier<AsyncValue<List<Almacen>>> {
 
 final almacenesControllerProvider =
     StateNotifierProvider<AlmacenesNotifier, AsyncValue<List<Almacen>>>((ref) {
-  return AlmacenesNotifier(
-    ref.watch(almacenesDaoProvider),
-    ref.watch(stockAlmacenDaoProvider),
-  );
-});
+      return AlmacenesNotifier(
+        ref.watch(almacenesDaoProvider),
+        ref.watch(stockAlmacenDaoProvider),
+      );
+    });

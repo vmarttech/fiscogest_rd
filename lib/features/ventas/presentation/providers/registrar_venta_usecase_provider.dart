@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_activo_provider.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/inventario_providers.dart';
@@ -22,7 +24,8 @@ final productosDaoProvider = Provider<ProductosDao>((ref) {
 });
 
 class RegistrarVentaUseCase {
-  RegistrarVentaUseCase(this._servicioInventario);
+  RegistrarVentaUseCase(this._ref, this._servicioInventario);
+  final Ref _ref;
   final IVentaInventarioService _servicioInventario;
 
   Future<Venta> ejecutar(RegistrarVentaState estado) async {
@@ -49,6 +52,7 @@ class RegistrarVentaUseCase {
       descuentoId: estado.descuentoId,
       descuentoNombre: estado.descuentoNombre,
       montoDescuento: estado.montoDescuento,
+      almacenId: _ref.read(almacenActivoIdEfectivoProvider),
     );
     return await _servicioInventario.registrarVentaConInventario(venta);
   }
@@ -59,13 +63,15 @@ final registrarVentaUseCaseProvider = Provider<RegistrarVentaUseCase>((ref) {
   final kardexRepo = ref.read(kardexRepositoryProvider);
   final inventarioServ = ref.read(inventarioServiceProvider);
   final productosDaoInst = ref.read(productosDaoProvider);
+  final stockAlmacenDaoInst = ref.read(stockAlmacenDaoProvider);
   final servicio = VentaInventarioServiceImpl(
     ventasRepository: repositorio,
     kardexRepository: kardexRepo,
     inventarioService: inventarioServ,
     productosDao: productosDaoInst,
+    stockAlmacenDao: stockAlmacenDaoInst,
   );
-  return RegistrarVentaUseCase(servicio);
+  return RegistrarVentaUseCase(ref, servicio);
 });
 
 final registrarVentaConInventarioUseCaseProvider =
@@ -74,11 +80,13 @@ final registrarVentaConInventarioUseCaseProvider =
       final kardexRepo = ref.read(kardexRepositoryProvider);
       final inventarioServ = ref.read(inventarioServiceProvider);
       final productosDaoInst = ref.read(productosDaoProvider);
+      final stockAlmacenDaoInst = ref.read(stockAlmacenDaoProvider);
       final servicio = VentaInventarioServiceImpl(
         ventasRepository: repositorio,
         kardexRepository: kardexRepo,
         inventarioService: inventarioServ,
         productosDao: productosDaoInst,
+        stockAlmacenDao: stockAlmacenDaoInst,
       );
       return RegistrarVentaConInventarioUseCase(servicio);
     });
@@ -88,10 +96,12 @@ final ventaInventarioServiceProvider = Provider<IVentaInventarioService>((ref) {
   final kardexRepo = ref.read(kardexRepositoryProvider);
   final inventarioServ = ref.read(inventarioServiceProvider);
   final productosDaoInst = ref.read(productosDaoProvider);
+  final stockAlmacenDaoInst = ref.read(stockAlmacenDaoProvider);
   return VentaInventarioServiceImpl(
     ventasRepository: repositorio,
     kardexRepository: kardexRepo,
     inventarioService: inventarioServ,
     productosDao: productosDaoInst,
+    stockAlmacenDao: stockAlmacenDaoInst,
   );
 });

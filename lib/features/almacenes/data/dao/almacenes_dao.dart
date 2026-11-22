@@ -7,19 +7,19 @@ class AlmacenesDao {
   final AppDatabase _db;
 
   Almacen _map(AlmacenData r, {double stockTotal = 0, int skus = 0}) => Almacen(
-        id: r.id,
-        codigo: r.codigo,
-        nombre: r.nombre,
-        tipo: TipoAlmacenX.fromStorage(r.tipo),
-        direccion: r.direccion,
-        telefono: r.telefono,
-        responsable: r.responsable,
-        activo: r.activo,
-        creadoEn: r.creadoEn,
-        actualizadoEn: r.actualizadoEn,
-        stockTotal: stockTotal,
-        skus: skus,
-      );
+    id: r.id,
+    codigo: r.codigo,
+    nombre: r.nombre,
+    tipo: TipoAlmacenX.fromStorage(r.tipo),
+    direccion: r.direccion,
+    telefono: r.telefono,
+    responsable: r.responsable,
+    activo: r.activo,
+    creadoEn: r.creadoEn,
+    actualizadoEn: r.actualizadoEn,
+    stockTotal: stockTotal,
+    skus: skus,
+  );
 
   Future<List<Almacen>> obtenerTodos({bool soloActivos = false}) async {
     final q = _db.select(_db.almacenesTable)
@@ -38,9 +38,9 @@ class AlmacenesDao {
   }
 
   Future<(double, int)> _stats(int almacenId) async {
-    final rows = await (_db.select(_db.stockAlmacenTable)
-          ..where((t) => t.almacenId.equals(almacenId)))
-        .get();
+    final rows = await (_db.select(
+      _db.stockAlmacenTable,
+    )..where((t) => t.almacenId.equals(almacenId))).get();
     var total = 0.0;
     var skus = 0;
     for (final r in rows) {
@@ -53,9 +53,9 @@ class AlmacenesDao {
   }
 
   Future<int> contarActivos() async {
-    final rows = await (_db.select(_db.almacenesTable)
-          ..where((t) => t.activo.equals(true)))
-        .get();
+    final rows = await (_db.select(
+      _db.almacenesTable,
+    )..where((t) => t.activo.equals(true))).get();
     return rows.length;
   }
 
@@ -73,7 +73,9 @@ class AlmacenesDao {
     if (a.tipo == TipoAlmacen.principal) {
       await _quitarPrincipal();
     }
-    return _db.into(_db.almacenesTable).insert(
+    return _db
+        .into(_db.almacenesTable)
+        .insert(
           AlmacenesTableCompanion.insert(
             codigo: a.codigo.trim(),
             nombre: a.nombre.trim(),
@@ -101,8 +103,9 @@ class AlmacenesDao {
     if (a.tipo == TipoAlmacen.principal) {
       await _quitarPrincipal(exceptId: a.id);
     }
-    await (_db.update(_db.almacenesTable)..where((t) => t.id.equals(a.id!)))
-        .write(
+    await (_db.update(
+      _db.almacenesTable,
+    )..where((t) => t.id.equals(a.id!))).write(
       AlmacenesTableCompanion(
         codigo: Value(a.codigo.trim()),
         nombre: Value(a.nombre.trim()),
@@ -117,22 +120,23 @@ class AlmacenesDao {
   }
 
   Future<Almacen?> obtenerPorId(int id) async {
-    final r = await (_db.select(_db.almacenesTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final r = await (_db.select(
+      _db.almacenesTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     if (r == null) return null;
     final stats = await _stats(id);
     return _map(r, stockTotal: stats.$1, skus: stats.$2);
   }
 
   Future<void> _quitarPrincipal({int? exceptId}) async {
-    final rows = await (_db.select(_db.almacenesTable)
-          ..where((t) => t.tipo.equals('principal')))
-        .get();
+    final rows = await (_db.select(
+      _db.almacenesTable,
+    )..where((t) => t.tipo.equals('principal'))).get();
     for (final r in rows) {
       if (exceptId != null && r.id == exceptId) continue;
-      await (_db.update(_db.almacenesTable)..where((t) => t.id.equals(r.id)))
-          .write(
+      await (_db.update(
+        _db.almacenesTable,
+      )..where((t) => t.id.equals(r.id))).write(
         AlmacenesTableCompanion(
           tipo: const Value('tienda'),
           actualizadoEn: Value(DateTime.now()),

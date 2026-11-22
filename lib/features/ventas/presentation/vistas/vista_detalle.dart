@@ -262,8 +262,10 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     }
   }
 
-
-  Future<void> _compartirReciboDigital(BuildContext context, WidgetRef ref) async {
+  Future<void> _compartirReciboDigital(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     try {
       Venta v = venta;
       if (v.detalles.isEmpty && v.id != null) {

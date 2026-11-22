@@ -133,7 +133,10 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
         );
       }
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -412,7 +415,8 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (!esConsumidorFinal && (estado.clienteId ?? 0) > 0)
+                            if (!esConsumidorFinal &&
+                                (estado.clienteId ?? 0) > 0)
                               FutureBuilder(
                                 future: ref
                                     .read(clienteRepositoryProvider)
@@ -526,7 +530,9 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                                   ?.modoSimplificado ??
                               false))
                             _FilaResumen(
-                              label: etiquetaItbisLineas(estado.detalles.map((d) => d.tasaImpuesto)),
+                              label: etiquetaItbisLineas(
+                                estado.detalles.map((d) => d.tasaImpuesto),
+                              ),
                               value: _formatearMonto(estado.itbis),
                             ),
                         ],
@@ -618,6 +624,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           .read(ventasNavegacionProvider.notifier)
           .cambiarVista(VistaActual.historial);
     }
+
     void irHistorialCotizaciones() {
       context.push('/ventas/cotizaciones/historial');
     }
@@ -842,11 +849,11 @@ class _PosCtaCard extends StatelessWidget {
                       Text(
                         simplificado
                             ? (isMobile
-                                ? 'Productos → Contado o Fiao'
-                                : 'Arme el pedido y cobre: contado o fiao')
+                                  ? 'Productos → Contado o Fiao'
+                                  : 'Arme el pedido y cobre: contado o fiao')
                             : (isMobile
-                                ? 'Arme el pedido y envíe a Caja'
-                                : 'Arme el pedido, aplique crédito si aplica y envíe a Caja'),
+                                  ? 'Arme el pedido y envíe a Caja'
+                                  : 'Arme el pedido, aplique crédito si aplica y envíe a Caja'),
                         style: AppTypography.bodyMedium.copyWith(
                           color: Colors.white.withValues(alpha: 0.92),
                           height: 1.3,
@@ -947,9 +954,7 @@ class _PosContextoCard extends StatelessWidget {
                       ),
                     ] else ...[
                       Text(
-                        simplificado
-                            ? 'Ventas recientes'
-                            : 'Solo ventas',
+                        simplificado ? 'Ventas recientes' : 'Solo ventas',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 11,

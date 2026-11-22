@@ -37,7 +37,8 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(almacenesHabilitadosProvider)) {
-      final plan = ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
+      final plan =
+          ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
       return PlanRequeridoAlmacenes(
         titulo: 'Almacenes',
         planActual: plan,
@@ -77,229 +78,234 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     24,
                   ),
                   child: async.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: _accent),
-                ),
-                error: (e, _) => Center(
-                  child: Text('Error: $e', style: const TextStyle(color: Colors.red)),
-                ),
-                data: (lista) {
-                  final activos = lista.where((a) => a.activo).length;
-                  final stock = lista.fold<double>(0, (s, a) => s + a.stockTotal);
-                  final visible = lista.where((a) {
-                    if (_chip == 'activos' && !a.activo) return false;
-                    if (_chip == 'inactivos' && a.activo) return false;
-                    if (_filtro.contains('__ubic__')) {
-                      final d = (a.direccion ?? '').trim();
-                      if (d.isEmpty) return false;
-                    }
-                    final raw = _filtro.replaceAll('__ubic__', '').trim();
-                    if (raw.isEmpty) return true;
-                    final q = raw.toLowerCase();
-                    return a.codigo.toLowerCase().contains(q) ||
-                        a.nombre.toLowerCase().contains(q) ||
-                        (a.responsable ?? '').toLowerCase().contains(q) ||
-                        (a.direccion ?? '').toLowerCase().contains(q);
-                  }).toList();
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(color: _accent),
+                    ),
+                    error: (e, _) => Center(
+                      child: Text(
+                        'Error: $e',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    data: (lista) {
+                      final activos = lista.where((a) => a.activo).length;
+                      final stock = lista.fold<double>(
+                        0,
+                        (s, a) => s + a.stockTotal,
+                      );
+                      final visible = lista.where((a) {
+                        if (_chip == 'activos' && !a.activo) return false;
+                        if (_chip == 'inactivos' && a.activo) return false;
+                        if (_filtro.contains('__ubic__')) {
+                          final d = (a.direccion ?? '').trim();
+                          if (d.isEmpty) return false;
+                        }
+                        final raw = _filtro.replaceAll('__ubic__', '').trim();
+                        if (raw.isEmpty) return true;
+                        final q = raw.toLowerCase();
+                        return a.codigo.toLowerCase().contains(q) ||
+                            a.nombre.toLowerCase().contains(q) ||
+                            (a.responsable ?? '').toLowerCase().contains(q) ||
+                            (a.direccion ?? '').toLowerCase().contains(q);
+                      }).toList();
 
-                  return ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      // Header: título + CTA
-                      if (mobile) ...[
-                        // Sin flecha aquí: AppScaffold ya muestra leading atrás
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: FilledButton.icon(
-                            onPressed: () => _formulario(context),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: _accent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              elevation: 0,
-                            ),
-                            icon: const Icon(Icons.add, size: 20),
-                            label: const Text(
-                              'Añadir Nuevo Almacén',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ] else
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 25),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_back,
-                                  color: _ink,
-                                  size: 22,
-                                ),
-                                onPressed: () =>
-                                    safeBack(context, fallback: '/'),
-                              ),
-                              const SizedBox(width: 4),
-                              const Expanded(
-                                child: Text(
-                                  'Almacenes',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                    color: _ink,
-                                  ),
-                                ),
-                              ),
-                              FilledButton.icon(
+                      return ListView(
+                        padding: EdgeInsets.zero,
+                        children: [
+                          // Header: título + CTA
+                          if (mobile) ...[
+                            // Sin flecha aquí: AppScaffold ya muestra leading atrás
+                            SizedBox(
+                              width: double.infinity,
+                              height: 48,
+                              child: FilledButton.icon(
                                 onPressed: () => _formulario(context),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: _accent,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   elevation: 0,
                                 ),
-                                icon: const Icon(
-                                  Icons.warehouse_outlined,
-                                  size: 18,
-                                ),
+                                icon: const Icon(Icons.add, size: 20),
                                 label: const Text(
                                   'Añadir Nuevo Almacén',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-
-                      // Filter bar
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: mobile
-                            ? Column(
-                                children: [
-                                  _searchField(),
-                                  const SizedBox(height: 10),
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(children: _chipWidgets()),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                children: [
-                                  Expanded(child: _searchField()),
-                                  const SizedBox(width: 12),
-                                  ..._chipWidgets(),
-                                ],
-                              ),
-                      ),
-
-                      // Metrics 3-col
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: mobile
-                            ? Column(
-                                children: [
-                                  _metricPrimary(
-                                    'Total Almacenes',
-                                    '${lista.length}',
-                                    '${lista.length} Almacén${lista.length == 1 ? '' : 'es'} Configurado${lista.length == 1 ? '' : 's'}',
-                                    Icons.warehouse_outlined,
-                                    compact: true,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _metricPlain(
-                                    'Estado Operativo',
-                                    '$activos',
-                                    '$activos Almacén${activos == 1 ? '' : 'es'} Activo${activos == 1 ? '' : 's'}',
-                                    Icons.check_circle,
-                                    showBar: true,
-                                    ratio: lista.isEmpty
-                                        ? 0
-                                        : activos / lista.length,
-                                    compact: true,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  _metricPlain(
-                                    'Inventario Global',
-                                    stock.toStringAsFixed(0),
-                                    '${stock.toStringAsFixed(0)} Unidades en Stock',
-                                    Icons.inventory_2_outlined,
-                                    compact: true,
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                children: [
-                                  Expanded(
-                                    child: _metricPrimary(
-                                      'Total Almacenes',
-                                      '${lista.length}',
-                                      '${lista.length} Almacén${lista.length == 1 ? '' : 'es'} Configurado${lista.length == 1 ? '' : 's'}',
-                                      Icons.warehouse_outlined,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: _metricPlain(
-                                      'Estado Operativo',
-                                      '$activos',
-                                      '$activos Almacén${activos == 1 ? '' : 'es'} Activo${activos == 1 ? '' : 's'}',
-                                      Icons.check_circle_outline,
-                                      showBar: true,
-                                      ratio: lista.isEmpty
-                                          ? 0
-                                          : activos / lista.length,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: _metricPlain(
-                                      'Inventario Global',
-                                      stock.toStringAsFixed(0),
-                                      '${stock.toStringAsFixed(0)} Unidades en Stock',
-                                      Icons.inventory_2_outlined,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-
-                      // Lista (mismo scroll que métricas)
-                      if (visible.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Center(
-                            child: Text(
-                              'Sin almacenes para este filtro.',
-                              style: TextStyle(color: _muted),
                             ),
+                          ] else
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 25),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.arrow_back,
+                                      color: _ink,
+                                      size: 22,
+                                    ),
+                                    onPressed: () =>
+                                        safeBack(context, fallback: '/'),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Expanded(
+                                    child: Text(
+                                      'Almacenes',
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w700,
+                                        color: _ink,
+                                      ),
+                                    ),
+                                  ),
+                                  FilledButton.icon(
+                                    onPressed: () => _formulario(context),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: _accent,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.warehouse_outlined,
+                                      size: 18,
+                                    ),
+                                    label: const Text(
+                                      'Añadir Nuevo Almacén',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Filter bar
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: mobile
+                                ? Column(
+                                    children: [
+                                      _searchField(),
+                                      const SizedBox(height: 10),
+                                      SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(children: _chipWidgets()),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Expanded(child: _searchField()),
+                                      const SizedBox(width: 12),
+                                      ..._chipWidgets(),
+                                    ],
+                                  ),
                           ),
-                        )
-                      else
-                        ...[
-                          for (var i = 0; i < visible.length; i++) ...[
-                            if (i > 0) const SizedBox(height: 12),
-                            _almacenCard(visible[i]),
+
+                          // Metrics 3-col
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: mobile
+                                ? Column(
+                                    children: [
+                                      _metricPrimary(
+                                        'Total Almacenes',
+                                        '${lista.length}',
+                                        '${lista.length} Almacén${lista.length == 1 ? '' : 'es'} Configurado${lista.length == 1 ? '' : 's'}',
+                                        Icons.warehouse_outlined,
+                                        compact: true,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      _metricPlain(
+                                        'Estado Operativo',
+                                        '$activos',
+                                        '$activos Almacén${activos == 1 ? '' : 'es'} Activo${activos == 1 ? '' : 's'}',
+                                        Icons.check_circle,
+                                        showBar: true,
+                                        ratio: lista.isEmpty
+                                            ? 0
+                                            : activos / lista.length,
+                                        compact: true,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      _metricPlain(
+                                        'Inventario Global',
+                                        stock.toStringAsFixed(0),
+                                        '${stock.toStringAsFixed(0)} Unidades en Stock',
+                                        Icons.inventory_2_outlined,
+                                        compact: true,
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Expanded(
+                                        child: _metricPrimary(
+                                          'Total Almacenes',
+                                          '${lista.length}',
+                                          '${lista.length} Almacén${lista.length == 1 ? '' : 'es'} Configurado${lista.length == 1 ? '' : 's'}',
+                                          Icons.warehouse_outlined,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        child: _metricPlain(
+                                          'Estado Operativo',
+                                          '$activos',
+                                          '$activos Almacén${activos == 1 ? '' : 'es'} Activo${activos == 1 ? '' : 's'}',
+                                          Icons.check_circle_outline,
+                                          showBar: true,
+                                          ratio: lista.isEmpty
+                                              ? 0
+                                              : activos / lista.length,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        child: _metricPlain(
+                                          'Inventario Global',
+                                          stock.toStringAsFixed(0),
+                                          '${stock.toStringAsFixed(0)} Unidades en Stock',
+                                          Icons.inventory_2_outlined,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+
+                          // Lista (mismo scroll que métricas)
+                          if (visible.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 32),
+                              child: Center(
+                                child: Text(
+                                  'Sin almacenes para este filtro.',
+                                  style: TextStyle(color: _muted),
+                                ),
+                              ),
+                            )
+                          else ...[
+                            for (var i = 0; i < visible.length; i++) ...[
+                              if (i > 0) const SizedBox(height: 12),
+                              _almacenCard(visible[i]),
+                            ],
+                            const SizedBox(height: 24),
                           ],
-                          const SizedBox(height: 24),
                         ],
-                    ],
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
                 ),
               ),
             );
@@ -309,10 +315,11 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
     );
   }
 
-  Widget _searchField()
- {
+  Widget _searchField() {
     return TextField(
-      onChanged: (v) => setState(() { _filtro = v.trim(); }),
+      onChanged: (v) => setState(() {
+        _filtro = v.trim();
+      }),
       style: const TextStyle(fontSize: 14, color: _ink),
       decoration: InputDecoration(
         hintText: 'Buscar código, nombre, responsable, o ubicación...',
@@ -320,8 +327,10 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
         prefixIcon: const Icon(Icons.search, color: _muted2, size: 20),
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
@@ -341,22 +350,34 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
   List<Widget> _chipWidgets() {
     final items = <(String, String, Color?, Color?, Color?)>[
       ('todos', 'Todos', null, null, null),
-      ('activos', 'Activos', const Color(0xFFD1FAE5), const Color(0xFF34D399), const Color(0xFF047857)),
-      ('inactivos', 'Inactivos', const Color(0xFFFEE2E2), const Color(0xFFF87171), const Color(0xFFB91C1C)),
+      (
+        'activos',
+        'Activos',
+        const Color(0xFFD1FAE5),
+        const Color(0xFF34D399),
+        const Color(0xFF047857),
+      ),
+      (
+        'inactivos',
+        'Inactivos',
+        const Color(0xFFFEE2E2),
+        const Color(0xFFF87171),
+        const Color(0xFFB91C1C),
+      ),
     ];
     return [
       for (final it in items) ...[
         Padding(
           padding: const EdgeInsets.only(right: 8),
           child: InkWell(
-            onTap: () => setState(() { _chip = it.$1; }),
+            onTap: () => setState(() {
+              _chip = it.$1;
+            }),
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: _chip == it.$1
-                    ? (it.$3 ?? _chipActiveBg)
-                    : Colors.white,
+                color: _chip == it.$1 ? (it.$3 ?? _chipActiveBg) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   width: 1.5,
@@ -391,9 +412,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: _filtro.contains('__ubic__')
-                ? _chipActiveBg
-                : Colors.white,
+            color: _filtro.contains('__ubic__') ? _chipActiveBg : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               width: 1.5,
@@ -595,11 +614,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                   ),
                 ),
                 if (!isOperativo)
-                  Icon(
-                    icon,
-                    size: 36,
-                    color: _muted2.withValues(alpha: 0.35),
-                  ),
+                  Icon(icon, size: 36, color: _muted2.withValues(alpha: 0.35)),
               ],
             ),
           ),
@@ -767,11 +782,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     ),
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      color: _muted2,
-                      size: 20,
-                    ),
+                    icon: const Icon(Icons.more_vert, color: _muted2, size: 20),
                     onSelected: (v) async {
                       if (v == 'editar') {
                         await _formulario(context, existente: a);
@@ -846,9 +857,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                 await _formulario(context, existente: a);
                               } else if (v == 'principal' && a.id != null) {
                                 await ref
-                                    .read(
-                                      almacenesControllerProvider.notifier,
-                                    )
+                                    .read(almacenesControllerProvider.notifier)
                                     .marcarPrincipal(a.id!);
                               }
                             },
@@ -891,7 +900,6 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
       ),
     );
   }
-
 
   void _verDetalle(BuildContext context, Almacen a) {
     showModalBottomSheet<void>(

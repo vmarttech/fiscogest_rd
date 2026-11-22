@@ -30,13 +30,15 @@ class FiosRepository {
     if (monto <= 0) throw ArgumentError('El abono debe ser mayor a 0');
 
     await _db.transaction(() async {
-      final row = await (_db.select(_db.fiosTable)
-            ..where((t) => t.id.equals(id)))
-          .getSingle();
+      final row = await (_db.select(
+        _db.fiosTable,
+      )..where((t) => t.id.equals(id))).getSingle();
 
       final nuevoAbonado = row.montoAbonado + monto;
-      final nuevoSaldo =
-          (row.saldoPendiente - monto).clamp(0.0, double.infinity);
+      final nuevoSaldo = (row.saldoPendiente - monto).clamp(
+        0.0,
+        double.infinity,
+      );
       final estado = nuevoSaldo <= 0.001 ? 'pagado' : 'pendiente';
 
       await (_db.update(_db.fiosTable)..where((t) => t.id.equals(id))).write(
@@ -47,18 +49,17 @@ class FiosRepository {
         ),
       );
 
-      await _db.into(_db.abonosFiaoTable).insert(
-        AbonosFiaoTableCompanion.insert(fioId: id, monto: monto),
-      );
+      await _db
+          .into(_db.abonosFiaoTable)
+          .insert(AbonosFiaoTableCompanion.insert(fioId: id, monto: monto));
     });
   }
 
-
   /// Fios con saldo pendiente > 0 (cuentan para tope del plan).
   Future<int> contarFiosAbiertos() async {
-    final rows = await (_db.select(_db.fiosTable)
-          ..where((t) => t.saldoPendiente.isBiggerThanValue(0.01)))
-        .get();
+    final rows = await (_db.select(
+      _db.fiosTable,
+    )..where((t) => t.saldoPendiente.isBiggerThanValue(0.01))).get();
     return rows.length;
   }
 }
@@ -67,13 +68,12 @@ final fiosRepositoryProvider = Provider<FiosRepository>((ref) {
   return FiosRepository(ref.watch(databaseProvider));
 });
 
-
 /// Historial de abonos de un fiao especifico.
-final abonosFioProvider =
-    StreamProvider.autoDispose.family<List<AbonoFioData>, int>((ref, fioId) {
-  final db = ref.watch(databaseProvider);
-  return (db.select(db.abonosFiaoTable)
-        ..where((t) => t.fioId.equals(fioId))
-        ..orderBy([(t) => OrderingTerm.desc(t.fecha)]))
-      .watch();
-});
+final abonosFioProvider = StreamProvider.autoDispose
+    .family<List<AbonoFioData>, int>((ref, fioId) {
+      final db = ref.watch(databaseProvider);
+      return (db.select(db.abonosFiaoTable)
+            ..where((t) => t.fioId.equals(fioId))
+            ..orderBy([(t) => OrderingTerm.desc(t.fecha)]))
+          .watch();
+    });

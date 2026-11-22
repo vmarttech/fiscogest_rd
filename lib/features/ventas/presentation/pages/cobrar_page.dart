@@ -273,8 +273,9 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                       width: double.infinity,
                       child: TextField(
                         controller: _busquedaController,
-                        onChanged: (valor) =>
-                            setState(() { _textoBusqueda = valor; }),
+                        onChanged: (valor) => setState(() {
+                          _textoBusqueda = valor;
+                        }),
                         decoration: InputDecoration(
                           hintText: 'Buscar nombre, RNC o cédula',
                           isDense: true,

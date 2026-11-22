@@ -33,6 +33,7 @@ class Venta {
     required this.montoDescuento,
     this.comprobanteEntregaImpreso = false,
     this.fechaComprobanteEntrega,
+    this.almacenId,
   });
 
   final int? id;
@@ -65,6 +66,7 @@ class Venta {
   final double montoDescuento;
   final bool comprobanteEntregaImpreso;
   final DateTime? fechaComprobanteEntrega;
+  final int? almacenId;
 
   // ==============================================
   // ✅ GETTERS DE COMPATIBILIDAD — NOMBRES ANTIGUOS
@@ -108,6 +110,7 @@ class Venta {
     double? montoDescuento,
     bool? comprobanteEntregaImpreso,
     DateTime? fechaComprobanteEntrega,
+    int? almacenId,
   }) {
     return Venta(
       id: id ?? this.id,
@@ -142,6 +145,8 @@ class Venta {
           comprobanteEntregaImpreso ?? this.comprobanteEntregaImpreso,
       fechaComprobanteEntrega:
           fechaComprobanteEntrega ?? this.fechaComprobanteEntrega,
+
+      almacenId: almacenId ?? this.almacenId,
     );
   }
 }

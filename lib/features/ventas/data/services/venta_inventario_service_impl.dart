@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/features/inventario/data/dao/productos_dao.dart';
+import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/kardex.dart';
 import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
@@ -15,16 +16,76 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     required this.kardexRepository,
     required this.inventarioService,
     required this.productosDao,
+    required this.stockAlmacenDao,
   });
 
   final IVentasRepository ventasRepository;
   final IKardexRepository kardexRepository;
   final IInventarioService inventarioService;
   final ProductosDao productosDao;
+  final StockAlmacenDao stockAlmacenDao;
 
   /// `productos_table.stock` es el saldo que muestran las pantallas de
   /// inventario. Algunas entradas antiguas actualizaron esa columna sin crear
   /// un movimiento de kárdex; por eso Caja debe usarla como fuente principal.
+  /// Almacén de la venta: venta.almacenId; si es nulo (borradores viejos),
+  /// se cae al almacén principal.
+  Future<int> _almacenIdDeVenta(Venta venta) async {
+    final id = venta.almacenId;
+    if (id != null) return id;
+    final principal = await stockAlmacenDao.idPrincipal();
+    if (principal != null) return principal;
+    throw StateError(
+      'No hay almacén principal definido para registrar ventas.',
+    );
+  }
+
+  /// Existencia en una sucursal específica (stock_almacen).
+  Future<double> _stockEnAlmacen(int productoId, int almacenId) async {
+    final cantidad = await stockAlmacenDao.cantidad(productoId, almacenId);
+    final principal = await stockAlmacenDao.idPrincipal();
+    // FALLBACK_PRINCIPAL: fila ausente (seed pendiente o producto nuevo) en el
+    // principal: no bloquear la venta; se cae al stock global (espejo).
+    if (principal != null && almacenId == principal && cantidad <= 0) {
+      final producto = await productosDao.obtenerPorId(productoId);
+      final global = producto?.stock;
+      if (global != null && global > 0) return global;
+    }
+    return cantidad;
+  }
+
+  Future<void> _descontarEnAlmacen(
+    int productoId,
+    int almacenId,
+    double cantidad,
+  ) async {
+    var actual = await stockAlmacenDao.cantidad(productoId, almacenId);
+    final principal = await stockAlmacenDao.idPrincipal();
+    if (principal != null && almacenId == principal && actual <= 0) {
+      final producto = await productosDao.obtenerPorId(productoId);
+      final global = producto?.stock ?? 0.0;
+      if (global > 0) actual = global;
+    }
+    await stockAlmacenDao.setCantidad(productoId, almacenId, actual - cantidad);
+    if (principal != null && almacenId == principal) {
+      await inventarioService.restarStock(productoId, cantidad);
+    }
+  }
+
+  Future<void> _sumarEnAlmacen(
+    int productoId,
+    int almacenId,
+    double cantidad,
+  ) async {
+    final actual = await stockAlmacenDao.cantidad(productoId, almacenId);
+    await stockAlmacenDao.setCantidad(productoId, almacenId, actual + cantidad);
+    final principal = await stockAlmacenDao.idPrincipal();
+    if (principal != null && almacenId == principal) {
+      await inventarioService.sumarStock(productoId, cantidad);
+    }
+  }
+
+  // ignore: unused_element
   Future<double> _stockActual(int productoId) async {
     final producto = await productosDao.obtenerPorId(productoId);
     if (producto == null) {
@@ -35,17 +96,21 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     return kardexRepository.obtenerSaldoActual(productoId);
   }
 
-  Future<void> _validarExistencias(List<DetalleVenta> detalles) async {
+  Future<void> _validarExistencias(
+    List<DetalleVenta> detalles,
+    int almacenId,
+  ) async {
     final cantidades = <int, double>{};
     final disponibles = <int, double>{};
     for (final detalle in detalles) {
       final id = detalle.productoId;
-      disponibles[id] ??= await _stockActual(id);
+      disponibles[id] ??= await _stockEnAlmacen(id, almacenId);
       final acumulada = (cantidades[id] ?? 0) + detalle.cantidad;
       cantidades[id] = acumulada;
       if (acumulada > disponibles[id]!) {
         throw StateError(
-          'Stock insuficiente: ${detalle.nombreProducto ?? 'producto'}, '
+          'Stock insuficiente en esta sucursal (almacén $almacenId): '
+          '${detalle.nombreProducto ?? 'producto'}, '
           'disponible=${disponibles[id]}, vendiendo=$acumulada',
         );
       }
@@ -54,8 +119,10 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
 
   @override
   Future<Venta> registrarVentaConInventario(Venta venta) async {
-    // Comprobar antes de guardar para evitar una venta incompleta si no alcanza.
-    await _validarExistencias(venta.detalles);
+    final almacenId = await _almacenIdDeVenta(venta);
+
+    // Validar contra la existencia de la sucursal activa (stock_almacen).
+    await _validarExistencias(venta.detalles, almacenId);
     final ventaRegistrada = await ventasRepository.registrarVenta(venta);
 
     if (ventaRegistrada.id == null) {
@@ -65,16 +132,23 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     for (final elemento in venta.detalles) {
       final detalle = elemento;
 
-      final saldoAnterior = await _stockActual(detalle.productoId);
+      final saldoAnterior = await _stockEnAlmacen(
+        detalle.productoId,
+        almacenId,
+      );
       if (saldoAnterior < detalle.cantidad) {
         throw Exception(
-          'Stock insuficiente: producto ${detalle.nombreProducto}, disponible=$saldoAnterior, vendiendo=${detalle.cantidad}',
+          'Stock insuficiente en esta sucursal: '
+          '${detalle.nombreProducto ?? "producto"}, '
+          'disponible=$saldoAnterior, vendiendo=${detalle.cantidad}',
         );
       }
 
       final producto = await productosDao.obtenerPorId(detalle.productoId);
       final promedio = producto?.costoPromedio ?? 0.0;
-      final costoUnitario = promedio > 0 ? promedio : (producto?.precioCompra ?? 0.0);
+      final costoUnitario = promedio > 0
+          ? promedio
+          : (producto?.precioCompra ?? 0.0);
       final saldoNuevo = saldoAnterior - detalle.cantidad;
 
       final movimientoKardex = Kardex(
@@ -87,13 +161,15 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         totalMovimiento: costoUnitario * detalle.cantidad,
         fechaMovimiento: venta.fecha,
         documentoReferencia: 'Venta #${ventaRegistrada.numero}',
-        observacion: 'Venta de ${detalle.nombreProducto ?? "Producto"}',
+        observacion:
+            'Venta de ${detalle.nombreProducto ?? "Producto"} — almacén $almacenId',
         usuarioId: venta.usuarioId,
       );
 
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.restarStock(
+      await _descontarEnAlmacen(
         detalle.productoId,
+        almacenId,
         detalle.cantidad.toDouble(),
       );
     }
@@ -111,6 +187,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
 
   @override
   Future<void> aplicarSalidaInventario(Venta venta) async {
+    final almacenId = await _almacenIdDeVenta(venta);
     if (venta.id == null) {
       throw Exception('La venta no tiene id');
     }
@@ -119,14 +196,15 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         'La venta no tiene líneas de detalle. No se puede descontar inventario.',
       );
     }
-    await _validarExistencias(venta.detalles);
+    await _validarExistencias(venta.detalles, almacenId);
     final refDoc =
         (venta.numeroFactura != null && venta.numeroFactura!.isNotEmpty)
         ? 'Factura ${venta.numeroFactura}'
         : 'Venta #${venta.numeroCotizacion}';
     for (final detalle in venta.detalles) {
-      final historial = await kardexRepository
-          .obtenerHistorialPorProducto(detalle.productoId);
+      final historial = await kardexRepository.obtenerHistorialPorProducto(
+        detalle.productoId,
+      );
       final yaRegistrada = historial.any(
         (m) =>
             m.tipoMovimiento == TipoMovimiento.salida &&
@@ -140,7 +218,10 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
               detalle.nombreProducto!.trim().isNotEmpty)
           ? detalle.nombreProducto!.trim()
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
-      final saldoAnterior = await _stockActual(detalle.productoId);
+      final saldoAnterior = await _stockEnAlmacen(
+        detalle.productoId,
+        almacenId,
+      );
       final cant = detalle.cantidad.toDouble();
       if (saldoAnterior < cant) {
         throw Exception(
@@ -148,7 +229,9 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         );
       }
       final promedio = producto?.costoPromedio ?? 0.0;
-      final costoUnitario = promedio > 0 ? promedio : (producto?.precioCompra ?? 0.0);
+      final costoUnitario = promedio > 0
+          ? promedio
+          : (producto?.precioCompra ?? 0.0);
       final saldoNuevo = saldoAnterior - cant;
       final movimientoKardex = Kardex(
         productoId: detalle.productoId,
@@ -164,7 +247,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         usuarioId: venta.usuarioId,
       );
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.restarStock(detalle.productoId, cant);
+      await _descontarEnAlmacen(detalle.productoId, almacenId, cant);
     }
   }
 
@@ -173,6 +256,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
     Venta venta, {
     required String ncfNc,
   }) async {
+    final almacenId = await _almacenIdDeVenta(venta);
     if (venta.id == null) {
       throw Exception('La venta no tiene id');
     }
@@ -190,10 +274,15 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
               detalle.nombreProducto!.trim().isNotEmpty)
           ? detalle.nombreProducto!.trim()
           : (producto?.nombre ?? 'Producto ${detalle.productoId}');
-      final saldoAnterior = await _stockActual(detalle.productoId);
+      final saldoAnterior = await _stockEnAlmacen(
+        detalle.productoId,
+        almacenId,
+      );
       final cant = detalle.cantidad.toDouble();
       final promedio = producto?.costoPromedio ?? 0.0;
-      final costoUnitario = promedio > 0 ? promedio : (producto?.precioCompra ?? 0.0);
+      final costoUnitario = promedio > 0
+          ? promedio
+          : (producto?.precioCompra ?? 0.0);
       final saldoNuevo = saldoAnterior + cant;
       final movimientoKardex = Kardex(
         productoId: detalle.productoId,
@@ -209,7 +298,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
         usuarioId: venta.usuarioId,
       );
       await kardexRepository.registrarMovimiento(movimientoKardex);
-      await inventarioService.sumarStock(detalle.productoId, cant);
+      await _sumarEnAlmacen(detalle.productoId, almacenId, cant);
     }
   }
 }

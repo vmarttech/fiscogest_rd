@@ -54,6 +54,8 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_activo_provider.dart';
+import 'package:fiscogest_rd/features/almacenes/presentation/widgets/selector_almacen_activo.dart';
 
 /// Hub de la estación de Caja — responsive PC / tablet / móvil.
 class CajaInicioPage extends ConsumerStatefulWidget {
@@ -774,6 +776,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             ),
           ),
           actions: [
+            const SelectorAlmacenActivo(),
+
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancelar'),
@@ -813,7 +817,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     try {
       final sesionId = await ref
           .read(cajaRepositoryProvider)
-          .abrirSesion(fondoInicial: fondo, usuarioId: _usuarioActual!.id);
+          .abrirSesion(
+            fondoInicial: fondo,
+            usuarioId: _usuarioActual!.id,
+            almacenId: ref.read(almacenActivoIdEfectivoProvider),
+          );
       ref.invalidate(dashCajaProvider);
       try {
         await ref
@@ -846,7 +854,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -1142,7 +1153,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -1191,7 +1205,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       );
     } finally {
       svc.dispose();
-      if (mounted) setState(() { _buscandoRnc = false; });
+      if (mounted)
+        setState(() {
+          _buscandoRnc = false;
+        });
     }
   }
 
@@ -1864,7 +1881,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           );
         }
       } finally {
-        if (mounted) setState(() { _procesando = false; });
+        if (mounted)
+          setState(() {
+            _procesando = false;
+          });
       }
       return;
     }
@@ -2280,7 +2300,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         );
       }
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -2701,7 +2724,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     try {
       final repo = ref.read(ventasRepositoryProvider);
       final lista = await repo.listarPendientesCobro();
-      if (mounted) setState(() { _pendientes = lista; });
+      if (mounted)
+        setState(() {
+          _pendientes = lista;
+        });
     } catch (_) {}
     if (!mounted) return;
     final qCtrl = TextEditingController();
@@ -5144,7 +5170,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         color: bg,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () => setState(() { _formaPagoUi = id; }),
+          onTap: () => setState(() {
+            _formaPagoUi = id;
+          }),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             width: double.infinity,

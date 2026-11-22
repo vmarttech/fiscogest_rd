@@ -337,7 +337,6 @@ class RegistrarVentaNotifier extends Notifier<RegistrarVentaState> {
     return aplicarDescuentoGeneral(valor, esPorcentaje: true);
   }
 
-
   void quitarDescuento() {
     state = state.copyWith(
       descuentoId: null,

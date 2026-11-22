@@ -5,25 +5,38 @@ class StockAlmacenDao {
   StockAlmacenDao(this._db);
   final AppDatabase _db;
 
+  Future<int?> idPrincipal() async {
+    final r =
+        await (_db.select(_db.almacenesTable)
+              ..where((t) => t.tipo.equals('principal'))
+              ..limit(1))
+            .getSingleOrNull();
+    return r?.id;
+  }
+
   Future<double> cantidad(int productoId, int almacenId) async {
-    final r = await (_db.select(_db.stockAlmacenTable)
-          ..where(
-            (t) =>
-                t.productoId.equals(productoId) & t.almacenId.equals(almacenId),
-          ))
-        .getSingleOrNull();
+    final r =
+        await (_db.select(_db.stockAlmacenTable)..where(
+              (t) =>
+                  t.productoId.equals(productoId) &
+                  t.almacenId.equals(almacenId),
+            ))
+            .getSingleOrNull();
     return r?.cantidad ?? 0;
   }
 
   Future<void> setCantidad(int productoId, int almacenId, double cant) async {
-    final existente = await (_db.select(_db.stockAlmacenTable)
-          ..where(
-            (t) =>
-                t.productoId.equals(productoId) & t.almacenId.equals(almacenId),
-          ))
-        .getSingleOrNull();
+    final existente =
+        await (_db.select(_db.stockAlmacenTable)..where(
+              (t) =>
+                  t.productoId.equals(productoId) &
+                  t.almacenId.equals(almacenId),
+            ))
+            .getSingleOrNull();
     if (existente == null) {
-      await _db.into(_db.stockAlmacenTable).insert(
+      await _db
+          .into(_db.stockAlmacenTable)
+          .insert(
             StockAlmacenTableCompanion.insert(
               productoId: productoId,
               almacenId: almacenId,
@@ -31,13 +44,13 @@ class StockAlmacenDao {
             ),
             mode: InsertMode.insertOrIgnore,
           );
-      final otraVez = await (_db.select(_db.stockAlmacenTable)
-            ..where(
-              (t) =>
-                  t.productoId.equals(productoId) &
-                  t.almacenId.equals(almacenId),
-            ))
-          .getSingleOrNull();
+      final otraVez =
+          await (_db.select(_db.stockAlmacenTable)..where(
+                (t) =>
+                    t.productoId.equals(productoId) &
+                    t.almacenId.equals(almacenId),
+              ))
+              .getSingleOrNull();
       if (otraVez != null && (otraVez.cantidad - cant).abs() > 1e-9) {
         await (_db.update(_db.stockAlmacenTable)
               ..where((t) => t.id.equals(otraVez.id)))
@@ -67,7 +80,9 @@ class StockAlmacenDao {
         } catch (_) {
           cant = 0;
         }
-        await _db.into(_db.stockAlmacenTable).insert(
+        await _db
+            .into(_db.stockAlmacenTable)
+            .insert(
               StockAlmacenTableCompanion.insert(
                 productoId: p.id,
                 almacenId: principal.id,

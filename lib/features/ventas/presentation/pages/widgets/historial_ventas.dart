@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_venta
 /// Historial de ventas — en PC alineado al Dashboard; en móvil vista compacta.
 class HistorialVentas extends ConsumerStatefulWidget {
   const HistorialVentas({super.key, this.standalone = false});
+
   /// true cuando se monta en /ventas/historial (fuera del contenedor).
   final bool standalone;
 
@@ -106,8 +107,9 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
     Venta venta = v;
     if (v.id != null) {
       try {
-        final Venta? full =
-            await ref.read(ventasRepositoryProvider).obtenerVentaPorId(v.id!);
+        final Venta? full = await ref
+            .read(ventasRepositoryProvider)
+            .obtenerVentaPorId(v.id!);
         if (full != null) venta = full;
       } catch (_) {}
     }
@@ -119,8 +121,12 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
       return;
     }
 
-    ref.read(ventaCargadaDesdeHistorialProvider.notifier).establecerVenta(venta);
-    ref.read(ventasNavegacionProvider.notifier).cambiarVista(VistaActual.detalle);
+    ref
+        .read(ventaCargadaDesdeHistorialProvider.notifier)
+        .establecerVenta(venta);
+    ref
+        .read(ventasNavegacionProvider.notifier)
+        .cambiarVista(VistaActual.detalle);
   }
 
   @override
@@ -193,14 +199,18 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                   padding: const EdgeInsets.only(top: 4, bottom: 10),
                   child: Row(
                     children: [
-                      const Icon(Icons.history_rounded,
-                          color: AppColors.primary, size: 22),
+                      const Icon(
+                        Icons.history_rounded,
+                        color: AppColors.primary,
+                        size: 22,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Historial de ventas',
-                          style: AppTypography.h4
-                              .copyWith(fontWeight: FontWeight.w800),
+                          style: AppTypography.h4.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                       TextButton.icon(
@@ -220,8 +230,10 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Center(
-                    child: Text('Error: $e',
-                        style: const TextStyle(color: AppColors.error)),
+                    child: Text(
+                      'Error: $e',
+                      style: const TextStyle(color: AppColors.error),
+                    ),
                   ),
                   data: (ventas) {
                     // Toda la lista; el chip/filtro decide venta vs cotización por estado
@@ -248,7 +260,9 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                 child: _KpiCard(
                                   icon: Icons.payments_outlined,
                                   label: 'MONTO HOY',
-                                  value: _monto((kpis['montoHoy'] as num).toDouble()),
+                                  value: _monto(
+                                    (kpis['montoHoy'] as num).toDouble(),
+                                  ),
                                   color: AppColors.primary,
                                 ),
                               ),
@@ -282,7 +296,9 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
                             ),
                             child: Row(
                               children: [
@@ -293,7 +309,10 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     decoration: InputDecoration(
                                       hintText:
                                           'Buscar por número, cliente o NCF…',
-                                      prefixIcon: const Icon(Icons.search, size: 20),
+                                      prefixIcon: const Icon(
+                                        Icons.search,
+                                        size: 20,
+                                      ),
                                       isDense: true,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -309,9 +328,9 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                       ),
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 10,
-                                      ),
+                                            horizontal: 12,
+                                            vertical: 10,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -328,10 +347,11 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     child: FilterChip(
                                       label: Text(e.$2),
                                       selected: sel,
-                                      onSelected: (_) =>
-                                          setState(() { _filtro = e.$1; }),
-                                      selectedColor:
-                                          AppColors.primary.withValues(alpha: 0.15),
+                                      onSelected: (_) => setState(() {
+                                        _filtro = e.$1;
+                                      }),
+                                      selectedColor: AppColors.primary
+                                          .withValues(alpha: 0.15),
                                       checkmarkColor: AppColors.primary,
                                       labelStyle: TextStyle(
                                         fontWeight: FontWeight.w700,
@@ -372,8 +392,8 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     final etiqueta = _tipo(v);
                                     final cliente =
                                         (v.nombreCliente ?? '').trim().isEmpty
-                                            ? 'Consumidor final'
-                                            : v.nombreCliente!.trim();
+                                        ? 'Consumidor final'
+                                        : v.nombreCliente!.trim();
                                     final ncf = (v.numeroFactura ?? '').trim();
 
                                     return Material(
@@ -388,18 +408,23 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                             vertical: desktop ? 14 : 12,
                                           ),
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             border: Border.all(
                                               color: const Color(0xFFE2E8F0),
                                             ),
                                             boxShadow: desktop
                                                 ? [
                                                     BoxShadow(
-                                                      color: const Color(0xFF0F172A)
-                                                          .withValues(alpha: 0.04),
+                                                      color: const Color(
+                                                        0xFF0F172A,
+                                                      ).withValues(alpha: 0.04),
                                                       blurRadius: 8,
-                                                      offset: const Offset(0, 2),
+                                                      offset: const Offset(
+                                                        0,
+                                                        2,
+                                                      ),
                                                     ),
                                                   ]
                                                 : null,
@@ -413,14 +438,19 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                                   height: 42,
                                                   decoration: BoxDecoration(
                                                     color: color.withValues(
-                                                        alpha: 0.12),
+                                                      alpha: 0.12,
+                                                    ),
                                                     borderRadius:
-                                                        BorderRadius.circular(10),
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
                                                   ),
                                                   child: Icon(
                                                     _esCotizacion(v)
-                                                        ? Icons.request_quote_outlined
-                                                        : Icons.receipt_long_outlined,
+                                                        ? Icons
+                                                              .request_quote_outlined
+                                                        : Icons
+                                                              .receipt_long_outlined,
                                                     color: color,
                                                     size: 22,
                                                   ),
@@ -437,33 +467,39 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                                         Flexible(
                                                           child: Text(
                                                             v.numero,
-                                                            style: const TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight.w800,
-                                                              color: Color(
-                                                                  0xFF0F172A),
-                                                            ),
-                                                            overflow: TextOverflow
-                                                                .ellipsis,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                  color: Color(
+                                                                    0xFF0F172A,
+                                                                  ),
+                                                                ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
                                                           ),
                                                         ),
-                                                        const SizedBox(width: 8),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
                                                         Container(
                                                           padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                            horizontal: 8,
-                                                            vertical: 3,
-                                                          ),
-                                                          decoration:
-                                                              BoxDecoration(
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 3,
+                                                              ),
+                                                          decoration: BoxDecoration(
                                                             color: color
                                                                 .withValues(
-                                                                    alpha: 0.12),
+                                                                  alpha: 0.12,
+                                                                ),
                                                             borderRadius:
-                                                                BorderRadius
-                                                                    .circular(20),
+                                                                BorderRadius.circular(
+                                                                  20,
+                                                                ),
                                                           ),
                                                           child: Text(
                                                             etiqueta,
@@ -503,8 +539,9 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                                           fontSize: 11.5,
                                                           fontWeight:
                                                               FontWeight.w600,
-                                                          color:
-                                                              Color(0xFF64748B),
+                                                          color: Color(
+                                                            0xFF64748B,
+                                                          ),
                                                         ),
                                                       ),
                                                     ],

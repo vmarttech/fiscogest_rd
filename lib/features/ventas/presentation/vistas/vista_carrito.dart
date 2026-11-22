@@ -300,8 +300,7 @@ class _FilaProducto extends ConsumerWidget {
   final int indice;
   final Color colorPrincipal;
 
-  String formatearMonto(double valor) =>
-      formatRd(valor);
+  String formatearMonto(double valor) => formatRd(valor);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -50,7 +50,12 @@ class DatosVenta extends ConsumerWidget {
           ),
           const Divider(height: AppSpacing.l),
           _buildFilaTotal('Subtotal', estadoLocal.subtotal),
-          _buildFilaTotal(etiquetaItbisLineas(estadoLocal.detalles.map((d) => d.tasaImpuesto)), estadoLocal.itbis),
+          _buildFilaTotal(
+            etiquetaItbisLineas(
+              estadoLocal.detalles.map((d) => d.tasaImpuesto),
+            ),
+            estadoLocal.itbis,
+          ),
           const Divider(),
           _buildFilaTotal('TOTAL A PAGAR', estadoLocal.total, esTotal: true),
         ],

@@ -143,7 +143,9 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
     setState(() => _guardando = true);
     try {
       final db = ref.read(databaseProvider);
-      await db.into(db.fiosTable).insert(
+      await db
+          .into(db.fiosTable)
+          .insert(
             FiosTableCompanion.insert(
               nombreCliente: nombre,
               montoOriginal: widget.total,

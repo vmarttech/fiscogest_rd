@@ -10,7 +10,7 @@ BRANCH="main"
 UPDATE_FILE="update.json"
 PUBSPEC="pubspec.yaml"
 SCRIPT="scripts/publicar_version.sh"
-APK="build/app/outputs/flutter-apk/app-release.apk"
+APK="build/app/outputs/flutter-apk/app-fiscogest-release.apk"
 BASE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/update.json"
 
 fail() {
@@ -144,6 +144,10 @@ flutter build apk --release \
   fail "Falló la compilación del APK."
 
 [[ -s "$APK" ]] || fail "No se generó un APK válido."
+# Nombre estable en la release (enlace de descarga)
+STABLE_APK="build/app/outputs/flutter-apk/app-release.apk"
+cp -f "$APK" "$STABLE_APK"
+APK="$STABLE_APK"
 
 # Publica primero el código de versión, para que el tag apunte al código
 # que contiene esa versión. update.json todavía no anuncia la actualización.

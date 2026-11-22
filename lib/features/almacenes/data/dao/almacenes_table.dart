@@ -13,7 +13,6 @@ class AlmacenesTable extends Table {
   TextColumn get telefono => text().nullable()();
   TextColumn get responsable => text().nullable()();
   BoolColumn get activo => boolean().withDefault(const Constant(true))();
-  DateTimeColumn get creadoEn =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get creadoEn => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get actualizadoEn => dateTime().nullable()();
 }

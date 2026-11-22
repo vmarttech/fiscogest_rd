@@ -398,7 +398,6 @@ class _CotizacionesHistorialPageState
     );
   }
 
-
   void _enviarPorCorreo(String numero) {
     FiscoGestNotifications.show(
       SnackBar(

@@ -161,8 +161,9 @@ class _ConsultaStockLecturaSheetState
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onChanged: (v) =>
-                              setState(() { _filtro = v.trim().toLowerCase(); }),
+                          onChanged: (v) => setState(() {
+                            _filtro = v.trim().toLowerCase();
+                          }),
                         ),
                       ),
                       // Lista

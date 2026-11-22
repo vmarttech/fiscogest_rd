@@ -39,7 +39,9 @@ class CotizacionServiceImpl implements ICotizacionService {
     );
     for (var i = 0; i < cotizacion.detalles.length; i++) {
       final detalle = cotizacion.detalles[i];
-      texto.writeln('${i + 1}. ${detalle.nombreProducto ?? "Producto"}${sufijoTasaLinea(detalle.tasaImpuesto, ceroEsExento: ceroExento)}');
+      texto.writeln(
+        '${i + 1}. ${detalle.nombreProducto ?? "Producto"}${sufijoTasaLinea(detalle.tasaImpuesto, ceroEsExento: ceroExento)}',
+      );
       texto.writeln(
         '   Cant: ${detalle.cantidad}  x  ${formatearMonto(detalle.precioUnitario)}',
       );
@@ -57,7 +59,9 @@ class CotizacionServiceImpl implements ICotizacionService {
     }
     texto.writeln('----------------------------------------');
     texto.writeln('Subtotal:          ${formatearMonto(cotizacion.subtotal)}');
-    texto.writeln('${etiquetaItbisLineas(cotizacion.detalles.map((d) => d.tasaImpuesto))}:       ${formatearMonto(cotizacion.itbis)}');
+    texto.writeln(
+      '${etiquetaItbisLineas(cotizacion.detalles.map((d) => d.tasaImpuesto))}:       ${formatearMonto(cotizacion.itbis)}',
+    );
     texto.writeln('========================================');
     texto.writeln('TOTAL COTIZACIÓN:  ${formatearMonto(cotizacion.total)}');
     texto.writeln('========================================');

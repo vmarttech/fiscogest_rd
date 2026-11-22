@@ -134,7 +134,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 80;
+  int get schemaVersion => 81;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -406,37 +406,37 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         await m.addColumn(productosTable, productosTable.impuestoId);
       }
       if (from < 59) {
-        await customStatement(
+        await m.database.customStatement(
           "ALTER TABLE categorias ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE categorias ADD COLUMN padre_id INTEGER NULL;',
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE categorias ADD COLUMN itbis_por_ciento REAL NULL;',
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE categorias ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;',
         );
-        await customStatement(
+        await m.database.customStatement(
           "ALTER TABLE marcas ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE marcas ADD COLUMN fabricante TEXT NULL;',
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE marcas ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;',
         );
-        await customStatement(
+        await m.database.customStatement(
           "ALTER TABLE unidades_medida ADD COLUMN codigo TEXT NOT NULL DEFAULT '';",
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE unidades_medida ADD COLUMN factor_a_base REAL NOT NULL DEFAULT 1.0;',
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE unidades_medida ADD COLUMN es_base INTEGER NOT NULL DEFAULT 0;',
         );
-        await customStatement(
+        await m.database.customStatement(
           'ALTER TABLE unidades_medida ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;',
         );
         await m.createTable(presentacionesTable);
@@ -457,7 +457,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
       }
 
       if (from < 52) {
-        await customStatement(
+        await m.database.customStatement(
           'CREATE TABLE IF NOT EXISTS ecfe_spec_version_table ('
           'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
           'codigo TEXT NOT NULL, '
@@ -476,7 +476,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
       }
 
       if (from < 50) {
-        await customStatement(
+        await m.database.customStatement(
           'CREATE TABLE IF NOT EXISTS ecfe_config_table ('
           'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
           'habilitado INTEGER NOT NULL DEFAULT 0, '
@@ -490,7 +490,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
           'actualizado_en INTEGER NOT NULL'
           ');',
         );
-        await customStatement(
+        await m.database.customStatement(
           'CREATE TABLE IF NOT EXISTS ecfe_documentos_table ('
           'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
           'venta_id INTEGER NULL, '
@@ -507,7 +507,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
           'actualizado_en INTEGER NULL'
           ');',
         );
-        await customStatement(
+        await m.database.customStatement(
           'CREATE TABLE IF NOT EXISTS ecfe_eventos_table ('
           'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
           'documento_id INTEGER NOT NULL, '
@@ -517,7 +517,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
           'creado_en INTEGER NOT NULL'
           ');',
         );
-        await customStatement(
+        await m.database.customStatement(
           'CREATE TABLE IF NOT EXISTS ecfe_secuencias_table ('
           'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
           'tipo_ecf INTEGER NOT NULL, '
@@ -573,7 +573,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
 
       Future<void> asegurarColumnaEcfe(String nombre, String tipo) async {
         if (!nombresColumnasEcfe.contains(nombre)) {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE ecfe_documentos_table ADD COLUMN $nombre $tipo;',
           );
           nombresColumnasEcfe.add(nombre);
@@ -650,7 +650,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
       }
       if (from < 31) {
         try {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE productos_table ADD COLUMN stock_reservado REAL NOT NULL DEFAULT 0.0',
           );
         } catch (_) {}
@@ -955,7 +955,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         };
         for (final e in cols.entries) {
           try {
-            await customStatement(
+            await m.database.customStatement(
               'ALTER TABLE configuracion_table ADD COLUMN ${e.key} ${e.value}',
             );
           } catch (_) {}
@@ -977,7 +977,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         };
         for (final e in cols.entries) {
           try {
-            await customStatement(
+            await m.database.customStatement(
               'ALTER TABLE configuracion_table ADD COLUMN ${e.key} ${e.value}',
             );
           } catch (_) {}
@@ -986,12 +986,12 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
 
       if (from < 36) {
         try {
-          await customStatement(
+          await m.database.customStatement(
             "ALTER TABLE configuracion_table ADD COLUMN prefijo_contado TEXT NOT NULL DEFAULT 'C'",
           );
         } catch (_) {}
         try {
-          await customStatement(
+          await m.database.customStatement(
             "ALTER TABLE configuracion_table ADD COLUMN prefijo_credito TEXT NOT NULL DEFAULT 'CR'",
           );
         } catch (_) {}
@@ -999,27 +999,27 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
 
       if (from < 37) {
         try {
-          await customStatement(
+          await m.database.customStatement(
             "ALTER TABLE configuracion_table ADD COLUMN caja_forma_pago_default TEXT NOT NULL DEFAULT 'efectivo'",
           );
         } catch (_) {}
         try {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE configuracion_table ADD COLUMN caja_permitir_tarjeta INTEGER NOT NULL DEFAULT 1',
           );
         } catch (_) {}
         try {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE configuracion_table ADD COLUMN caja_permitir_transferencia INTEGER NOT NULL DEFAULT 1',
           );
         } catch (_) {}
         try {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE configuracion_table ADD COLUMN caja_permitir_cheque INTEGER NOT NULL DEFAULT 0',
           );
         } catch (_) {}
         try {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE configuracion_table ADD COLUMN caja_exigir_sesion INTEGER NOT NULL DEFAULT 0',
           );
         } catch (_) {}
@@ -1027,7 +1027,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
 
       if (from < 38) {
         try {
-          await customStatement(
+          await m.database.customStatement(
             'ALTER TABLE configuracion_table ADD COLUMN modo_simplificado INTEGER NOT NULL DEFAULT 0',
           );
         } catch (_) {}
@@ -1035,6 +1035,22 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
 
       if (from < 39) {
         await m.createTable(cuotasCuentaTable);
+      }
+
+
+      if (from < 81) {
+        final colsVentas =
+            await m.database.customSelect('PRAGMA table_info(ventas_table)').get();
+        if (!colsVentas.any((r) => r.read<String>('name') == 'almacen_id')) {
+          await m.database.customStatement(
+              'ALTER TABLE ventas_table ADD COLUMN almacen_id INTEGER NULL');
+        }
+        final colsCaja =
+            await m.database.customSelect('PRAGMA table_info(caja_sesiones_table)').get();
+        if (!colsCaja.any((r) => r.read<String>('name') == 'almacen_id')) {
+          await m.database.customStatement(
+              'ALTER TABLE caja_sesiones_table ADD COLUMN almacen_id INTEGER NULL');
+        }
       }
 
     },
