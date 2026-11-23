@@ -55,7 +55,7 @@ class ItemCarrito extends ConsumerWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -128,10 +128,12 @@ class ItemCarrito extends ConsumerWidget {
                     child: ChoiceChip(
                       label: const Text('RD\$'),
                       selected: !esPorcentaje,
-                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      selectedColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
                         color: !esPorcentaje
-                            ? AppColors.primary
+                            ? Theme.of(context).colorScheme.primary
                             : AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
@@ -144,10 +146,12 @@ class ItemCarrito extends ConsumerWidget {
                     child: ChoiceChip(
                       label: const Text('%'),
                       selected: esPorcentaje,
-                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      selectedColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
                         color: esPorcentaje
-                            ? AppColors.primary
+                            ? Theme.of(context).colorScheme.primary
                             : AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
@@ -196,7 +200,7 @@ class ItemCarrito extends ConsumerWidget {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -330,7 +334,7 @@ class ItemCarrito extends ConsumerWidget {
           const SizedBox(width: 8),
           _ActionButton(
             icon: Icons.edit_outlined,
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             tooltip: 'Editar cantidad',
             onTap: () => _abrirEditarCantidad(context, ref),
           ),
@@ -420,7 +424,7 @@ class ItemCarrito extends ConsumerWidget {
             children: [
               _ActionButton(
                 icon: Icons.edit_outlined,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 tooltip: 'Editar cantidad',
                 onTap: () => _abrirEditarCantidad(context, ref),
               ),

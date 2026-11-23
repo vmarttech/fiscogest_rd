@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 
 /// Fondo de “producto premium”: gradiente frío + glow suave del acento.
 class AppAtmosphere extends StatelessWidget {
@@ -26,8 +25,12 @@ class AppAtmosphere extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: 0.12),
-                    AppColors.primary.withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.12),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.0),
                   ],
                 ),
               ),

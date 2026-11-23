@@ -60,10 +60,7 @@ class ComprobantePdf {
           if (d.precioOriginal != null) _money(d.precioOriginal!),
           _money(d.precioUnitario),
           (_money(d.subtotalLinea ?? d.subtotal) +
-              sufijoTasaLinea(
-                d.tasaImpuesto,
-                ceroEsExento: false,
-              )),
+              sufijoTasaLinea(d.tasaImpuesto, ceroEsExento: false)),
         ],
       ),
       _money(venta.montoSubtotal),
@@ -123,10 +120,9 @@ class ComprobantePdf {
       final safe = filename.replaceAll(RegExp(r'[^\w.\-]'), '_');
       final file = File('${dir.path}/$safe');
       await file.writeAsBytes(bytes, flush: true);
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/pdf', name: safe)],
-        subject: safe,
-      );
+      await Share.shareXFiles([
+        XFile(file.path, mimeType: 'application/pdf', name: safe),
+      ], subject: safe);
     } catch (_) {
       // Fallback
       await Printing.sharePdf(bytes: bytes, filename: filename);
@@ -1145,7 +1141,13 @@ class ComprobantePdf {
     );
 
     // Fila numérica: Cant | Precio | ITBIS | Importe (80 mm)
-    pw.Widget nums(String a, String b, String c, String d, {bool header = false}) {
+    pw.Widget nums(
+      String a,
+      String b,
+      String c,
+      String d, {
+      bool header = false,
+    }) {
       final st = pw.TextStyle(
         fontSize: header ? 6.5 : 7.5,
         fontWeight: header ? pw.FontWeight.bold : pw.FontWeight.normal,
@@ -1199,9 +1201,7 @@ class ComprobantePdf {
           ),
         );
       }
-      final itbisLinea = simple
-          ? 0.0
-          : sub * tasaComoFraccion(d.tasaImpuesto);
+      final itbisLinea = simple ? 0.0 : sub * tasaComoFraccion(d.tasaImpuesto);
       kids.add(
         nums(
           cant == cant.roundToDouble()

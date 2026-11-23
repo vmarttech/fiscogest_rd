@@ -38,7 +38,8 @@ abstract class AppTypography {
     color: AppColors.textPrimary,
   );
 
-  static TextStyle h4PrimaryBold = h4Bold.copyWith(color: AppColors.primary);
+  static TextStyle h4PrimaryBold(BuildContext context) =>
+      h4Bold.copyWith(color: Theme.of(context).colorScheme.primary);
 
   // Cuerpo de texto
   static const TextStyle bodyLarge = TextStyle(
@@ -114,8 +115,9 @@ abstract class AppTypography {
     color: AppColors.textSecondary,
   );
 
-  static TextStyle labelSmallPrimaryBold = labelSmall.copyWith(
-    color: AppColors.primary,
+  static TextStyle labelSmallPrimaryBold(BuildContext context) =>
+      labelSmall.copyWith(
+        color: Theme.of(context).colorScheme.primary,
     fontWeight: FontWeight.bold,
   );
 

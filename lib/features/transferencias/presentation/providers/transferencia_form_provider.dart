@@ -92,8 +92,7 @@ class TransferenciaFormNotifier extends Notifier<TransferenciaFormState> {
     state = state.copiar(enviando: true, clearError: true);
     try {
       final svc = ref.read(transferenciaServiceProvider);
-      final productos =
-          ref.read(productoControllerProvider).valueOrNull ?? [];
+      final productos = ref.read(productoControllerProvider).valueOrNull ?? [];
       final prod = productos.where((p) => p.id == state.productoId).toList();
       String? cod;
       String? nom;
@@ -126,8 +125,9 @@ final transferenciaFormProvider =
       TransferenciaFormNotifier.new,
     );
 
-final transferenciasHistorialProvider =
-    FutureProvider<List<Transferencia>>((ref) async {
+final transferenciasHistorialProvider = FutureProvider<List<Transferencia>>((
+  ref,
+) async {
   final svc = ref.watch(transferenciaServiceProvider);
   return svc.historial();
 });

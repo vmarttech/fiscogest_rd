@@ -58,7 +58,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
           title: isMobile ? 'COMPRAS' : null,
           showAppBar: isMobile,
           body: RefreshIndicator(
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             onRefresh: () async {
               ref.invalidate(dashboardComprasKpisProvider);
               ref.invalidate(actividadRecienteComprasProvider);
@@ -91,7 +91,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
           width: double.infinity,
           child: FilledButton.icon(
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF0D9488),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -100,7 +100,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               elevation: 0,
             ),
             onPressed: () => context.push('/compras/registrar'),
-            icon: const Icon(Icons.add_rounded, size: 20),
+            icon: Icon(Icons.add_rounded, size: 20),
             label: const Text(
               'Registrar compra',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
@@ -123,8 +123,8 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                 'Este mes',
                 formatRd(k.comprasEsteMes),
                 Icons.calendar_month_rounded,
-                const Color(0xFF0D9488),
-                const Color(0xFFCCFBF1),
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primaryContainer,
               ),
               _kpiTile(
                 'A crédito',
@@ -189,10 +189,10 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                     : 'Cuentas',
                 color: alertas > 0
                     ? const Color(0xFFDC2626)
-                    : const Color(0xFF0D9488),
+                    : Theme.of(context).colorScheme.primary,
                 bg: alertas > 0
                     ? const Color(0xFFFEF2F2)
-                    : const Color(0xFFCCFBF1),
+                    : Theme.of(context).colorScheme.primaryContainer,
                 onTap: () => context.goNamed(ListaCuentasPagarPage.routeName),
               ),
             ),
@@ -216,7 +216,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
             TextButton(
               onPressed: () => context.push('/compras/lista'),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF0D9488),
+                foregroundColor: Theme.of(context).colorScheme.primary,
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -440,9 +440,9 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                   color: const Color(0xFFF0FDFA),
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.storefront_rounded,
-                  color: Color(0xFF0D9488),
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
               ),
@@ -559,7 +559,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                 _metricBar(
                                   'Este mes',
                                   formatRd(k.comprasEsteMes),
-                                  const Color(0xFF0D9488),
+                                  Theme.of(context).colorScheme.primary,
                                   Icons.calendar_today,
                                 ),
                                 const SizedBox(height: 6),
@@ -606,7 +606,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                       fontSize: 11,
                                       color: Color(0xFF94A3B8),
                                     ),
-                                    prefixIcon: const Icon(
+                                    prefixIcon: Icon(
                                       Icons.search,
                                       size: 16,
                                       color: Color(0xFF94A3B8),
@@ -620,13 +620,13 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: const BorderSide(
+                                      borderSide: BorderSide(
                                         color: Color(0xFFE2E8F0),
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: const BorderSide(
+                                      borderSide: BorderSide(
                                         color: Color(0xFFE2E8F0),
                                       ),
                                     ),
@@ -860,7 +860,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                                             )
                                                           : Colors.transparent,
                                                     ),
-                                                    bottom: const BorderSide(
+                                                    bottom: BorderSide(
                                                       color: Color(0xFFF1F5F9),
                                                     ),
                                                   ),
@@ -1279,7 +1279,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.shopping_cart_outlined,
               size: 20,
               color: Color(0xFF334155),

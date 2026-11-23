@@ -51,7 +51,11 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     super.initState();
     final now = DateTime.now();
     _desde = DateTime(now.year, now.month, 1);
-    _hasta = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+    _hasta = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(const Duration(days: 1));
     WidgetsBinding.instance.addPostFrameCallback((_) => _generar());
   }
 
@@ -115,7 +119,11 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     );
     if (d != null) {
       setState(
-        () => _hasta = DateTime(d.year, d.month, d.day).add(const Duration(days: 1)),
+        () => _hasta = DateTime(
+          d.year,
+          d.month,
+          d.day,
+        ).add(const Duration(days: 1)),
       );
     }
   }
@@ -143,9 +151,9 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     }
   }
 
-
   List<Map<String, dynamic>> get _regsFiltrados {
-    final regs = (_data?['registros'] as List?)?.cast<Map<String, dynamic>>() ??
+    final regs =
+        (_data?['registros'] as List?)?.cast<Map<String, dynamic>>() ??
         <Map<String, dynamic>>[];
     final q = _busqueda.trim().toLowerCase();
     if (q.isEmpty) return regs;
@@ -223,7 +231,6 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     };
   }
 
-
   List<List<String>> _filasExport() {
     final cols = (_data?['columnas'] as List?)?.cast<String>() ?? <String>[];
     final regs = _regsFiltrados;
@@ -234,7 +241,11 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     return out;
   }
 
-  Future<void> _guardarArchivo(String name, List<int> bytes, String mime) async {
+  Future<void> _guardarArchivo(
+    String name,
+    List<int> bytes,
+    String mime,
+  ) async {
     final dir = await getDownloadsDirectory() ?? await getTemporaryDirectory();
     final file = File('${dir.path}/$name');
     await file.writeAsBytes(bytes, flush: true);
@@ -243,11 +254,17 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       SnackBar(content: Text('Guardado: ${file.path}')),
     );
     if (Platform.isLinux) {
-      try { await Process.run('xdg-open', [file.path]); } catch (_) {}
+      try {
+        await Process.run('xdg-open', [file.path]);
+      } catch (_) {}
     } else if (Platform.isWindows) {
-      try { await Process.run('cmd', ['/c', 'start', '', file.path]); } catch (_) {}
+      try {
+        await Process.run('cmd', ['/c', 'start', '', file.path]);
+      } catch (_) {}
     } else if (Platform.isMacOS) {
-      try { await Process.run('open', [file.path]); } catch (_) {}
+      try {
+        await Process.run('open', [file.path]);
+      } catch (_) {}
     } else {
       try {
         await Share.shareXFiles([XFile(file.path, mimeType: mime, name: name)]);
@@ -261,19 +278,21 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
       final filas = _filasExport();
       final buf = StringBuffer();
       for (final f in filas) {
-        buf.writeln(f.map((c) {
+        buf.writeln(
+          f
+              .map((c) {
           final s = c.replaceAll('"', '""');
           return '"$s"';
-        }).join(','));
+              })
+              .join(','),
+        );
       }
       final name =
           'reporte_${widget.tipo}_${DateTime.now().millisecondsSinceEpoch}.csv';
       await _guardarArchivo(name, buf.toString().codeUnits, 'text/csv');
     } catch (e) {
       if (!mounted) return;
-      FiscoGestNotifications.show(
-        SnackBar(content: Text('Error CSV: $e')),
-      );
+      FiscoGestNotifications.show(SnackBar(content: Text('Error CSV: $e')));
     }
   }
 
@@ -313,9 +332,14 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                   fontSize: 9,
                 ),
                 cellStyle: const pw.TextStyle(fontSize: 8),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                headerDecoration: const pw.BoxDecoration(
+                  color: PdfColors.grey300,
+                ),
                 cellAlignment: pw.Alignment.centerLeft,
-                border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.4),
+                border: pw.TableBorder.all(
+                  color: PdfColors.grey400,
+                  width: 0.4,
+                ),
               ),
           ],
         ),
@@ -335,7 +359,6 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final mobile = AppBreakpoints.isMobile(context);
@@ -352,12 +375,12 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
         IconButton(
           tooltip: 'CSV',
           onPressed: _data == null || _cargando ? null : _exportarCsv,
-          icon: const Icon(Icons.table_view_outlined),
+          icon: Icon(Icons.table_view_outlined),
         ),
         IconButton(
           tooltip: 'PDF',
           onPressed: _data == null || _cargando ? null : _exportarPdf,
-          icon: const Icon(Icons.picture_as_pdf_outlined),
+          icon: Icon(Icons.picture_as_pdf_outlined),
         ),
       ],
       body: SafeArea(
@@ -387,7 +410,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                             tooltip: 'Atrás',
                             onPressed: () =>
                                 safeBack(context, fallback: '/reports/hub'),
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.arrow_back,
                               color: Color(0xFF0F172A),
                             ),
@@ -432,7 +455,10 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
 
                     // Barra de control (mockup): 1 fila desktop / apilada móvil
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -444,24 +470,28 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                           final dates = <Widget>[
                             OutlinedButton.icon(
                               onPressed: _cargando ? null : _pickDesde,
-                              icon: const Icon(Icons.calendar_today, size: 16),
+                              icon: Icon(Icons.calendar_today, size: 16),
                               label: Text(
                                 'Desde ${_fmtFecha.format(_desde)}',
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             OutlinedButton.icon(
                               onPressed: _cargando ? null : _pickHasta,
-                              icon: const Icon(Icons.event, size: 16),
+                              icon: Icon(Icons.event, size: 16),
                               label: Text(
                                 'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             FilledButton.icon(
                               onPressed: _cargando ? null : _generar,
                               style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF00796B),
+                                backgroundColor: Theme.of(context).colorScheme.primary,
                                 foregroundColor: Colors.white,
                               ),
                               icon: _cargando
@@ -473,10 +503,12 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Icon(Icons.play_arrow_rounded),
+                                  : Icon(Icons.play_arrow_rounded),
                               label: Text(
                                 _cargando ? 'Generando…' : 'Generar',
-                                style: const TextStyle(fontWeight: FontWeight.w800),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ];
@@ -484,15 +516,19 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                               ? null
                               : TextField(
                                   controller: _busquedaCtrl,
-                                  onChanged: (v) => setState(() { _busqueda = v; }),
-                                  style: const TextStyle(fontWeight: FontWeight.w700),
+                                  onChanged: (v) => setState(() {
+                                    _busqueda = v;
+                                  }),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: 'Buscar en resultados…',
-                                    prefixIcon: const Icon(Icons.search),
+                                    prefixIcon: Icon(Icons.search),
                                     suffixIcon: _busqueda.isEmpty
                                         ? null
                                         : IconButton(
-                                            icon: const Icon(Icons.clear),
+                                            icon: Icon(Icons.clear),
                                             onPressed: () {
                                               _busquedaCtrl.clear();
                                               setState(() {
@@ -513,7 +549,11 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Wrap(spacing: 8, runSpacing: 8, children: dates),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: dates,
+                                ),
                                 if (search != null) ...[
                                   const SizedBox(height: 10),
                                   search,
@@ -543,8 +583,9 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                       const SizedBox(height: 12),
                       Text(
                         _error!,
-                        style: AppTypography.bodyMedium
-                            .copyWith(color: AppColors.error),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.error,
+                        ),
                       ),
                     ],
 
@@ -571,14 +612,12 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                           ),
                         ),
                       )
-                    else if (_data != null && mobile)
-                      ...[
+                    else if (_data != null && mobile) ...[
                         for (var i = 0; i < regs.length; i++) ...[
                           if (i > 0) const SizedBox(height: 8),
                           Builder(
                             builder: (_) {
-                              final row =
-                                  Map<String, dynamic>.from(regs[i]);
+                            final row = Map<String, dynamic>.from(regs[i]);
                               final vals = _valoresFila(row);
                               return Container(
                                 padding: const EdgeInsets.all(12),
@@ -590,39 +629,35 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                                   ),
                                 ),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    for (var c = 0;
+                                  for (
+                                    var c = 0;
                                         c < cols.length && c < vals.length;
-                                        c++)
+                                    c++
+                                  )
                                       Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 4),
+                                      padding: const EdgeInsets.only(bottom: 4),
                                         child: Row(
                                           children: [
                                             SizedBox(
                                               width: 100,
                                               child: Text(
                                                 cols[c],
-                                                style: AppTypography
-                                                    .labelSmall
+                                              style: AppTypography.labelSmall
                                                     .copyWith(
-                                                  color: AppColors
-                                                      .textSecondary,
-                                                  fontWeight:
-                                                      FontWeight.w700,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                    fontWeight: FontWeight.w700,
                                                 ),
                                               ),
                                             ),
                                             Expanded(
                                               child: Text(
                                                 vals[c],
-                                                style: AppTypography
-                                                    .bodySmall
+                                              style: AppTypography.bodySmall
                                                     .copyWith(
-                                                  fontWeight:
-                                                      FontWeight.w700,
+                                                    fontWeight: FontWeight.w700,
                                                 ),
                                               ),
                                             ),
@@ -635,14 +670,12 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                             },
                           ),
                         ],
-                      ]
-                    else if (_data != null)
+                    ] else if (_data != null)
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: const Color(0xFFCBD5E1)),
+                          border: Border.all(color: const Color(0xFFCBD5E1)),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: LayoutBuilder(
@@ -650,13 +683,14 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                             return SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: ConstrainedBox(
-                                constraints: BoxConstraints(minWidth: tc.maxWidth),
+                                constraints: BoxConstraints(
+                                  minWidth: tc.maxWidth,
+                                ),
                                 child: DataTable(
                             columnSpacing: 28,
                             horizontalMargin: 16,
                             headingRowColor: WidgetStatePropertyAll(
-                              const Color(0xFF00796B)
-                                  .withValues(alpha: 0.08),
+                                    Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.35),
                             ),
                             columns: [
                               for (final c in cols)
@@ -719,7 +753,7 @@ class _ResumenCards extends StatelessWidget {
     final gananciaNeta = (data['gananciaNeta'] as num?)?.toDouble();
     final itbis = (data['itbis'] as num?)?.toDouble();
     final items = <(String, String, Color)>[
-      ('Registros', '$cant', AppColors.primary),
+      ('Registros', '$cant', Theme.of(context).colorScheme.primary),
       ('Total', formatRd(total), AppColors.success),
       if (ganancia != null) ('G. bruta', formatRd(ganancia), AppColors.warning),
       if (gastos != null) ('Gastos', formatRd(gastos), AppColors.error),
@@ -732,9 +766,7 @@ class _ResumenCards extends StatelessWidget {
       builder: (context, c) {
         const gap = 10.0;
         final narrow = c.maxWidth < 600;
-        final cols = narrow
-            ? 2
-            : (items.length <= 4 ? items.length : 3);
+        final cols = narrow ? 2 : (items.length <= 4 ? items.length : 3);
         final w = (c.maxWidth - gap * (cols - 1)) / cols;
 
         return Wrap(

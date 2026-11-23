@@ -11,7 +11,6 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/providers/presentacion_providers.dart';
 import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
-import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
@@ -41,13 +40,6 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
       subtitle: 'Presentaciones y factores de conversión',
       backgroundColor: const Color(0xFFEEF2F3),
       showAppBar: isMobile,
-      leading: isMobile
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              tooltip: 'Atrás',
-              onPressed: () => safeBack(context, fallback: '/inventario'),
-            )
-          : null,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -111,7 +103,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                   color: Color(0xFF1E293B),
                                   fontSize: 13,
                                 ),
-                                prefixIcon: const Icon(
+                                prefixIcon: Icon(
                                   Icons.search_rounded,
                                   size: 20,
                                   color: Color(0xFF1E293B),
@@ -125,20 +117,22 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Color(0xFF114E54),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     width: 1.5,
                                   ),
                                 ),
@@ -147,10 +141,11 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                           ),
                           const SizedBox(width: 12),
                           FilledButton.icon(
-                            onPressed: () =>
-                                _mostrarModalRegistro(context),
+                            onPressed: () => _mostrarModalRegistro(context),
                             style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF114E54),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
@@ -161,7 +156,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.layers_outlined, size: 20),
+                            icon: Icon(Icons.layers_outlined, size: 20),
                             label: const Text(
                               'Nueva presentación',
                               style: TextStyle(
@@ -180,17 +175,18 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         width: double.infinity,
                         height: 48,
                         child: FilledButton.icon(
-                          onPressed: () =>
-                              _mostrarModalRegistro(context),
+                          onPressed: () => _mostrarModalRegistro(context),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF114E54),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                             elevation: 0,
                           ),
-                          icon: const Icon(Icons.layers_outlined, size: 20),
+                          icon: Icon(Icons.layers_outlined, size: 20),
                           label: const Text(
                             'Nueva presentación',
                             style: TextStyle(fontWeight: FontWeight.w700),
@@ -200,9 +196,8 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                     ),
                     TextField(
                       controller: _searchController,
-                      onChanged: (v) => setState(
-                        () => _filtroBusqueda = v.toLowerCase(),
-                      ),
+                      onChanged: (v) =>
+                          setState(() => _filtroBusqueda = v.toLowerCase()),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF0F172A),
@@ -213,7 +208,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                           color: Color(0xFF1E293B),
                           fontSize: 13,
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search_rounded,
                           color: Color(0xFF1E293B),
                         ),
@@ -225,20 +220,16 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE2E8F0),
-                          ),
+                          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE2E8F0),
-                          ),
+                          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF114E54),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
                             width: 1.5,
                           ),
                         ),
@@ -249,8 +240,10 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                   if (!isMobile) const SizedBox(height: 16),
                   Expanded(
                     child: asyncList.when(
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF114E54)),
+                      loading: () => Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       error: (e, _) => Center(
                         child: Text(
@@ -263,7 +256,17 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                       data: (items) {
                         final filtradas = _filtroBusqueda.isEmpty
                             ? items
-                            : items.where((p) => p.nombre.toLowerCase().contains(_filtroBusqueda) || p.abreviatura.toLowerCase().contains(_filtroBusqueda)).toList();
+                            : items
+                                  .where(
+                                    (p) =>
+                                        p.nombre.toLowerCase().contains(
+                                          _filtroBusqueda,
+                                        ) ||
+                                        p.abreviatura.toLowerCase().contains(
+                                          _filtroBusqueda,
+                                        ),
+                                  )
+                                  .toList();
 
                         if (filtradas.isEmpty) {
                           return Center(
@@ -276,13 +279,18 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                     width: 64,
                                     height: 64,
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: 0.10),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.10),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.straighten,
                                       size: 32,
-                                      color: AppColors.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                   ),
                                   const SizedBox(height: 16),
@@ -329,9 +337,12 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                               final p = filtradas[i];
                               return _PresentacionCard(
                                 item: p,
-                                badge: p.abreviatura.isNotEmpty ? p.abreviatura : '—',
+                                badge: p.abreviatura.isNotEmpty
+                                    ? p.abreviatura
+                                    : '—',
                                 title: p.nombre,
-                                subtitle: '${p.abreviatura} · factor ${p.factorUnidades}',
+                                subtitle:
+                                    '${p.abreviatura} · factor ${p.factorUnidades}',
                                 onEdit: () => _mostrarModalRegistro(
                                   context,
                                   presentacionToEdit: p,
@@ -347,7 +358,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.10),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.10),
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -366,7 +379,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.04),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.04),
                                   border: const Border(
                                     bottom: BorderSide(color: AppColors.border),
                                   ),
@@ -377,11 +392,12 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                     Expanded(
                                       child: Text(
                                         'NOMBRE',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: const Color(0xFF1E293B),
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.4,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: const Color(0xFF1E293B),
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.4,
+                                            ),
                                       ),
                                     ),
                                     SizedBox(
@@ -389,11 +405,12 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                       child: Text(
                                         'ACCIONES',
                                         textAlign: TextAlign.center,
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: const Color(0xFF1E293B),
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.4,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: const Color(0xFF1E293B),
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.4,
+                                            ),
                                       ),
                                     ),
                                   ],
@@ -411,7 +428,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                     return Material(
                                       color: i.isEven
                                           ? Colors.white
-                                          : AppColors.grey50.withValues(alpha: 0.55),
+                                          : AppColors.grey50.withValues(
+                                              alpha: 0.55,
+                                            ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
@@ -423,19 +442,27 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                               width: 40,
                                               height: 40,
                                               decoration: BoxDecoration(
-                                                color: AppColors.primary
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
                                                     .withValues(alpha: 0.12),
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
                                               child: Center(
                                                 child: Text(
-                                                  p.abreviatura.isNotEmpty ? p.abreviatura : '—',
-                                                  style: AppTypography.labelSmall
+                                                  p.abreviatura.isNotEmpty
+                                                      ? p.abreviatura
+                                                      : '—',
+                                                  style: AppTypography
+                                                      .labelSmall
                                                       .copyWith(
-                                                    color: AppColors.primary,
-                                                    fontWeight: FontWeight.w800,
-                                                  ),
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).colorScheme.primary,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
                                                 ),
                                               ),
                                             ),
@@ -447,37 +474,43 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                                 children: [
                                                   Text(
                                                     p.nombre,
-                                                    style: AppTypography.bodyLarge
+                                                    style: AppTypography
+                                                        .bodyLarge
                                                         .copyWith(
-                                                      fontWeight: FontWeight.w700,
-                                                    ),
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
                                                   ),
                                                   const SizedBox(height: 2),
                                                   Text(
                                                     '${p.abreviatura} · factor ${p.factorUnidades}',
-                                                    style: AppTypography.bodySmall
+                                                    style: AppTypography
+                                                        .bodySmall
                                                         .copyWith(
-                                                      color:
-                                                          const Color(0xFF1E293B),
-                                                    ),
+                                                          color: const Color(
+                                                            0xFF1E293B,
+                                                          ),
+                                                        ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             IconButton(
-                                              icon: const Icon(
+                                              icon: Icon(
                                                 Icons.edit_outlined,
-                                                color: AppColors.primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                                 size: 20,
                                               ),
                                               onPressed: () =>
                                                   _mostrarModalRegistro(
-                                                context,
-                                                presentacionToEdit: p,
-                                              ),
+                                                    context,
+                                                    presentacionToEdit: p,
+                                                  ),
                                             ),
                                             IconButton(
-                                              icon: const Icon(
+                                              icon: Icon(
                                                 Icons.delete_outline,
                                                 color: AppColors.error,
                                                 size: 20,
@@ -507,7 +540,6 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
     );
   }
 
-
   void _onDelete(BuildContext context, Presentacion item) {
     AppDialog.show<void>(
       context,
@@ -522,7 +554,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
           text: 'Eliminar',
           onPressed: () {
             if (item.id != null) {
-              ref.read(presentacionControllerProvider.notifier).eliminar(item.id!);
+              ref
+                  .read(presentacionControllerProvider.notifier)
+                  .eliminar(item.id!);
             }
             Navigator.pop(context);
           },
@@ -640,10 +674,12 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                 .trim()
                                 .toUpperCase(),
                             codigo: codigoController.text.trim(),
-                            factorUnidades: double.tryParse(
-                                  factorController.text
-                                      .trim()
-                                      .replaceAll(',', '.'),
+                            factorUnidades:
+                                double.tryParse(
+                                  factorController.text.trim().replaceAll(
+                                    ',',
+                                    '.',
+                                  ),
                                 ) ??
                                 1,
                             activo: activoN.value,
@@ -687,9 +723,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
       activoN.dispose();
     });
   }
-
 }
-
 
 class _PresentacionCard extends StatelessWidget {
   const _PresentacionCard({
@@ -715,7 +749,9 @@ class _PresentacionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -730,14 +766,16 @@ class _PresentacionCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
               child: Text(
                 badge,
                 style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -767,11 +805,15 @@ class _PresentacionCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+            icon: Icon(
+              Icons.edit_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: Icon(Icons.delete_outline, color: AppColors.error, size: 20),
             onPressed: onDelete,
           ),
         ],

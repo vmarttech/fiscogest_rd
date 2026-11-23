@@ -2,14 +2,6 @@ import 'package:flutter/material.dart';
 
 abstract class AppColors {
   // ─────────────────────────────────────────────
-  // PRIMARY (Teal institucional - NO azul)
-  // ─────────────────────────────────────────────
-  static const Color primary = Color(0xFF0F766E); // Teal-700
-  static const Color primaryDark = Color(0xFF115E59); // Teal-800
-  static const Color primaryLight = Color(0xFF14B8A6); // Teal-500
-  static const Color primaryContainer = Color(0xFFCCFBF1); // Teal-100
-
-  // ─────────────────────────────────────────────
   // SECONDARY
   // ─────────────────────────────────────────────
   static const Color secondary = Color(0xFF334155); // Slate-700
@@ -51,7 +43,6 @@ abstract class AppColors {
   static const Color surface = white;
   static const Color cardBackground = white;
   static const Color darkSurface = grey800;
-  static const Color sidebarBackground = Color(0xFF081A38);
 
   // ─────────────────────────────────────────────
   // TEXTO
@@ -67,12 +58,9 @@ abstract class AppColors {
   // ─────────────────────────────────────────────
   static const Color border = grey200;
   static const Color inputBorder = grey200;
-  static const Color focusedBorder = primary;
   static const Color divider = grey800;
-  static const Color tabIndicator = primaryLight;
 
   // Compatibilidad temporal
   static const Color white70 = Colors.white70;
   static const Color formBackground = grey50;
-  static const Color focusedBlue = primary;
 }

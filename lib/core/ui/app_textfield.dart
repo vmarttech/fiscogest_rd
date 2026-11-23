@@ -41,17 +41,24 @@ class AppTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final textColor =
-        isDark ? Colors.white.withValues(alpha: 0.95) : AppColors.textPrimary;
-    final labelColor =
-        isDark ? Colors.white.withValues(alpha: 0.72) : AppColors.textSecondary;
-    final hintColor =
-        isDark ? Colors.white.withValues(alpha: 0.35) : AppColors.grey400;
-    final iconColor =
-        isDark ? Colors.white.withValues(alpha: 0.65) : AppColors.grey600;
-    final borderColor =
-        isDark ? Colors.white.withValues(alpha: 0.18) : AppColors.grey300;
-    final focusColor = isDark ? const Color(0xFF2DD4BF) : AppColors.primary;
+    final textColor = isDark
+        ? Colors.white.withValues(alpha: 0.95)
+        : AppColors.textPrimary;
+    final labelColor = isDark
+        ? Colors.white.withValues(alpha: 0.72)
+        : AppColors.textSecondary;
+    final hintColor = isDark
+        ? Colors.white.withValues(alpha: 0.35)
+        : AppColors.grey400;
+    final iconColor = isDark
+        ? Colors.white.withValues(alpha: 0.65)
+        : AppColors.grey600;
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.18)
+        : AppColors.grey300;
+    final focusColor = isDark
+        ? const Color(0xFF2DD4BF)
+        : Theme.of(context).colorScheme.primary;
 
     return SizedBox(
       height: height,
@@ -116,11 +123,11 @@ class AppTextField extends StatelessWidget {
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.error),
+            borderSide: BorderSide(color: AppColors.error),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+            borderSide: BorderSide(color: AppColors.error, width: 1.5),
           ),
         ),
       ),

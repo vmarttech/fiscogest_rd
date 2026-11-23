@@ -66,7 +66,8 @@ class CompraRapidaDefaults {
         'CR-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
     final pv = (precioVenta != null && precioVenta > 0) ? precioVenta : costo;
-    final mg = margenGanancia ??
+    final mg =
+        margenGanancia ??
         (costo > 0 && pv > 0 ? ((pv - costo) / costo) * 100 : null);
 
     final nuevo = Producto(

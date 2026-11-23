@@ -80,5 +80,4 @@ class CajaSesionesDao extends DatabaseAccessor<AppDatabase>
           ..limit(1))
         .getSingleOrNull();
   }
-
 }

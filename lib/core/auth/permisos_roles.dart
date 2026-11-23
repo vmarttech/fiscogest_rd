@@ -1,4 +1,3 @@
-
 import 'package:fiscogest_rd/core/sync/supabase/roles_acceso_sync.dart';
 
 /// API global de autorización.
@@ -125,8 +124,8 @@ String normalizarRol(String rol) {
 bool rolTienePermiso(String rol, String permiso) {
   final key = normalizarRol(rol);
   // Preferir catálogo runtime (Supabase / caché). Fallback: matriz del APK.
-  final Set<String>? set = RolesAccesoSync.permisosRuntime[key] ??
-      permisosPorRol[key];
+  final Set<String>? set =
+      RolesAccesoSync.permisosRuntime[key] ?? permisosPorRol[key];
   if (set == null) return false;
   if (set.contains('*')) return true;
   return set.contains(permiso);
@@ -134,9 +133,7 @@ bool rolTienePermiso(String rol, String permiso) {
 
 String rutaInicioParaRol(String rol) {
   final key = normalizarRol(rol);
-  return RolesAccesoSync.rutasRuntime[key] ??
-      rutaInicioPorRol[key] ??
-      '/';
+  return RolesAccesoSync.rutasRuntime[key] ?? rutaInicioPorRol[key] ?? '/';
 }
 
 /// Ruta de la app → permiso mínimo (null = solo autenticado / público controlado).
@@ -149,7 +146,8 @@ String? permisoParaRuta(String path) {
     return null; // público
   }
   if (p == '/') return Permiso.dashboardVer;
-  if (p.startsWith('/ventas/cobrar') || p == '/ventas/cobrar') return Permiso.cajaCobrar;
+  if (p.startsWith('/ventas/cobrar') || p == '/ventas/cobrar')
+    return Permiso.cajaCobrar;
   if (p.startsWith('/ventas/cobro')) return Permiso.cajaCobrar;
   if (p.startsWith('/ventas/fios')) return Permiso.fiaoUsar;
   if (p.startsWith('/ventas')) return Permiso.ventasCotizar;

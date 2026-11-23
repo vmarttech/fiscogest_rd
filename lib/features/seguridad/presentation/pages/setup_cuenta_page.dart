@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
@@ -65,7 +66,8 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
     try {
       final db = ref.read(databaseProvider);
       final auth = AuthService(db);
-      final esInvitado = sesion == null ||
+      final esInvitado =
+          sesion == null ||
           sesion.id == 0 ||
           sesion.username.toLowerCase() == 'invitado';
       if (esInvitado) {
@@ -112,6 +114,10 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
           requiereSetupInicial: false,
         );
       }
+      final sesionActualizada = ref.read(sesionProvider);
+      if (sesionActualizada != null) {
+        await SesionPersistente.guardar(sesionActualizada);
+      }
       if (!mounted) return;
       final s = ref.read(sesionProvider);
       context.go(s?.rutaInicio ?? '/');
@@ -122,7 +128,10 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
             : 'No se pudo guardar la cuenta',
       );
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -192,8 +201,9 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                                     : Icons.visibility_off_outlined,
                                 color: Colors.white54,
                               ),
-                              onPressed: () =>
-                                  setState(() { _ocultar = !_ocultar; }),
+                              onPressed: () => setState(() {
+                                _ocultar = !_ocultar;
+                              }),
                             ),
                           ),
                         ),
@@ -261,7 +271,9 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                         FilledButton(
                           onPressed: _cargando ? null : _guardar,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF14B8A6),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.tertiary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -318,7 +330,7 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
+        borderSide: BorderSide(color: Color(0xFF2DD4BF)),
       ),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );

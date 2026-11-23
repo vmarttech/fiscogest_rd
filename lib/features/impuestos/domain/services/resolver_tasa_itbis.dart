@@ -49,15 +49,15 @@ double itbisDeLineas({
   for (var i = 0; i < n; i++) {
     subtotal += subs[i];
   }
-  final factor =
-      subtotal > 0 ? (1 - (descuentoGeneral / subtotal).clamp(0.0, 1.0)) : 1.0;
+  final factor = subtotal > 0
+      ? (1 - (descuentoGeneral / subtotal).clamp(0.0, 1.0))
+      : 1.0;
   var itbis = 0.0;
   for (var i = 0; i < n; i++) {
     itbis += subs[i] * factor * tasaComoFraccion(tas[i]);
   }
   return itbis;
 }
-
 
 /// "ITBIS (18%)" si todas las líneas gravadas comparten tasa; si no, "ITBIS".
 String etiquetaItbisLineas(Iterable<double> tasas) {
@@ -69,7 +69,6 @@ String etiquetaItbisLineas(Iterable<double> tasas) {
   if (pct.length == 1) return 'ITBIS (${pct.first}%)';
   return 'ITBIS';
 }
-
 
 /// " (18%)", " (16%)", " (exento)" o vacio.
 bool lineasCeroSonExentas(Iterable<double> tasas, double itbis) {

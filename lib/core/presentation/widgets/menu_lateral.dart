@@ -13,10 +13,7 @@ Widget menuLateral({
 }) {
   return ListTile(
     leading: Icon(icono, color: AppColors.textSecondary),
-    title: Text(
-      texto,
-      style: AppTypography.labelMedium.copyWith(fontSize: 16),
-    ),
+    title: Text(texto, style: AppTypography.labelMedium.copyWith(fontSize: 16)),
     onTap: onTap,
     shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
     contentPadding: AppSpacing.hM.copyWith(

@@ -16,9 +16,6 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 
 // ─── Paleta local (alineada al resto de la app) ─────────────────────────────
 class _C {
-  static const teal = Color(0xFF0D9488);
-  static const tealDark = Color(0xFF0F766E);
-  static const tealSoft = Color(0xFFE6F7F5);
   static const navy = Color(0xFF0B1C2E);
   static const ink = Color(0xFF1E293B);
   static const muted = Color(0xFF64748B);
@@ -67,8 +64,7 @@ class _LineaRapida {
     return c * k;
   }
 
-  double? get costoNum =>
-      double.tryParse(costo.text.replaceAll(',', '.'));
+  double? get costoNum => double.tryParse(costo.text.replaceAll(',', '.'));
 
   double? get precioVentaNum =>
       double.tryParse(precioVenta.text.replaceAll(',', '.'));
@@ -114,7 +110,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
 
   double get _total => _lineas.fold(0.0, (a, l) => a + l.subtotal);
 
-  void _agregarLinea() => setState(() { _lineas.add(_LineaRapida()); });
+  void _agregarLinea() => setState(() {
+    _lineas.add(_LineaRapida());
+  });
 
   void _quitarLinea(int i) {
     if (_lineas.length <= 1) return;
@@ -291,10 +289,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
         creadoEn: ahora,
       );
 
-      final registrada = await ref.read(registrarCompraUseCaseProvider).call(
-            compra: compra,
-            detalles: detalles,
-          );
+      final registrada = await ref
+          .read(registrarCompraUseCaseProvider)
+          .call(compra: compra, detalles: detalles);
 
       await ref.read(confirmarCompraUseCaseProvider).call(registrada.id);
 
@@ -334,33 +331,36 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
         FiscoGestNotifications.show(SnackBar(content: Text('Error: $e')));
       }
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
-  InputDecoration _fieldDeco({
-    required String label,
-    Widget? suffix,
-  }) {
+  InputDecoration _fieldDeco({required String label, Widget? suffix}) {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(fontSize: 12, color: _C.muted),
-      floatingLabelStyle: const TextStyle(fontSize: 12, color: _C.tealDark),
+      floatingLabelStyle: TextStyle(
+        fontSize: 12,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       isDense: true,
       filled: true,
       fillColor: _C.bg,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _C.border),
+        borderSide: BorderSide(color: _C.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _C.border),
+        borderSide: BorderSide(color: _C.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _C.teal, width: 1.5),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
       ),
       suffixIcon: suffix,
     );
@@ -381,11 +381,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: _C.white,
-                border: Border(
-                  bottom: BorderSide(color: _C.border),
-                ),
+                border: Border(bottom: BorderSide(color: _C.border)),
               ),
               child: Row(
                 children: [
@@ -393,12 +391,12 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: _C.tealSoft,
+                      color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.flash_on_rounded,
-                      color: _C.tealDark,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 22,
                     ),
                   ),
@@ -446,14 +444,14 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                   OutlinedButton.icon(
                     onPressed: _guardando ? null : _agregarLinea,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: _C.tealDark,
-                      side: const BorderSide(color: Color(0xFF99D5CE)),
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      side: BorderSide(color: Color(0xFF99D5CE)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: const Icon(Icons.add_circle_outline, size: 18),
+                    icon: Icon(Icons.add_circle_outline, size: 18),
                     label: const Text(
                       'Agregar otra línea',
                       style: TextStyle(fontWeight: FontWeight.w600),
@@ -510,8 +508,8 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                         child: FilledButton(
                           onPressed: _guardando ? null : _registrarYConfirmar,
                           style: FilledButton.styleFrom(
-                            backgroundColor: _C.teal,
-                            disabledBackgroundColor: _C.teal.withValues(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(
                               alpha: 0.5,
                             ),
                             shape: RoundedRectangleBorder(
@@ -583,39 +581,44 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                 height: 26,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: _C.tealSoft,
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '${i + 1}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 12,
-                    color: _C.tealDark,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               if (deInventario)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: _C.tealSoft,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.inventory_2_outlined,
-                          size: 12, color: _C.tealDark),
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 12,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Inventario',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: _C.tealDark,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ],
@@ -640,8 +643,11 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                     minHeight: 34,
                   ),
                   onPressed: _guardando ? null : () => _quitarLinea(i),
-                  icon: Icon(Icons.close_rounded,
-                      size: 18, color: Colors.grey.shade500),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: Colors.grey.shade500,
+                  ),
                 ),
             ],
           ),
@@ -666,7 +672,10 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
               suffix: IconButton(
                 tooltip: 'Buscar en inventario',
                 onPressed: _guardando ? null : () => _buscarProducto(i),
-                icon: const Icon(Icons.search_rounded, color: _C.tealDark),
+                icon: Icon(
+                  Icons.search_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
           ),
@@ -679,8 +688,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                   controller: l.cantidad,
                   enabled: !_guardando,
                   style: const TextStyle(fontSize: 14, color: _C.ink),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                   ],
@@ -695,8 +705,9 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                   controller: l.costo,
                   enabled: !_guardando,
                   style: const TextStyle(fontSize: 14, color: _C.ink),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                   ],
@@ -711,8 +722,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
             controller: l.precioVenta,
             enabled: !_guardando,
             style: const TextStyle(fontSize: 14, color: _C.ink),
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
             ],
@@ -729,7 +739,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
                             color: l.margenCalculado! >= 0
-                                ? _C.tealDark
+                                ? Theme.of(context).colorScheme.primary
                                 : const Color(0xFFB91C1C),
                           ),
                         ),
@@ -748,7 +758,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: l.margenCalculado! >= 0
-                    ? _C.tealDark
+                    ? Theme.of(context).colorScheme.primary
                     : const Color(0xFFB91C1C),
               ),
             ),
@@ -759,10 +769,10 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
               alignment: Alignment.centerRight,
               child: Text(
                 'Subtotal RD\$ ${l.subtotal.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: _C.tealDark,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
@@ -873,26 +883,30 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                 isDense: true,
                 filled: true,
                 fillColor: _C.bg,
-                prefixIcon:
-                    const Icon(Icons.search_rounded, color: _C.tealDark),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: _C.border),
+                  borderSide: BorderSide(color: _C.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: _C.border),
+                  borderSide: BorderSide(color: _C.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: _C.teal, width: 1.5),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 12,
                 ),
               ),
-              onChanged: (v) => setState(() { _filtrados = _filtrar(v); }),
+              onChanged: (v) => setState(() {
+                _filtrados = _filtrar(v);
+              }),
             ),
           ),
           // Opción fija: crear producto con el texto buscado
@@ -900,7 +914,7 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: Material(
-                color: _C.tealSoft,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
@@ -919,9 +933,9 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                             color: _C.white,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.add_rounded,
-                            color: _C.tealDark,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -929,12 +943,12 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Crear producto nuevo',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 14,
-                                  color: _C.tealDark,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -950,10 +964,10 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                             ],
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 14,
-                          color: _C.tealDark,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ),
@@ -969,8 +983,11 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.search_off_rounded,
-                              size: 40, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 40,
+                            color: Colors.grey.shade400,
+                          ),
                           const SizedBox(height: 10),
                           Text(
                             _q.text.trim().isEmpty
@@ -1003,12 +1020,12 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _C.tealSoft,
+                            color: Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.inventory_2_outlined,
-                            color: _C.tealDark,
+                            color: Theme.of(context).colorScheme.primary,
                             size: 20,
                           ),
                         ),
@@ -1026,12 +1043,9 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                           '${p.codigo} · Costo ${p.precioCompra.toStringAsFixed(2)} · Stock ${(p.stock ?? 0).toStringAsFixed(0)}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: _C.muted,
+                          style: const TextStyle(fontSize: 11, color: _C.muted),
                           ),
-                        ),
-                        trailing: const Icon(
+                        trailing: Icon(
                           Icons.chevron_right_rounded,
                           color: _C.muted,
                         ),

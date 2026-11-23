@@ -38,7 +38,7 @@ class SelectorAlmacenWidget extends ConsumerWidget {
           decoration: InputDecoration(
             labelText: label,
             labelStyle: AppTypography.labelMedium.copyWith(
-              color: AppColors.primaryDark,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
             border: const OutlineInputBorder(),

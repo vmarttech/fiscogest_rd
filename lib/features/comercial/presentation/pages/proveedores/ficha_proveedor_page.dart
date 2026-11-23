@@ -209,7 +209,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
   Widget build(BuildContext context) {
     return AppScaffold(
       title: 'Ficha del Proveedor',
-      backgroundColor: AppColors.primary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       bottom: _proveedor == null
           ? null
           : TabBar(
@@ -422,7 +422,11 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
             ],
           ),
         );
@@ -448,7 +452,9 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'No hay cuentas pendientes',
-                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             )
           else
@@ -504,7 +510,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
-                            icon: const Icon(Icons.payments, size: 18),
+                            icon: Icon(Icons.payments, size: 18),
                             label: const Text('Registrar abono'),
                             style: TextButton.styleFrom(
                               foregroundColor: const Color(0xFF3B82F6),
@@ -531,14 +537,16 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'No hay pagos registrados',
-                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             )
           else
             ..._pagosRealizados.map((pago) {
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.payments_outlined, size: 22),
+                leading: Icon(Icons.payments_outlined, size: 22),
                 title: Text(
                   _formatearMonto(pago.monto),
                   style: const TextStyle(fontWeight: FontWeight.w600),

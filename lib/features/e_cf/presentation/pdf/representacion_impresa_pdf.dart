@@ -69,9 +69,15 @@ class RepresentacionImpresaPdf {
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    pw.Text('RNC: $rncEmisor', style: const pw.TextStyle(fontSize: 10)),
+                    pw.Text(
+                      'RNC: $rncEmisor',
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
                     if ((empresa?.direccion ?? '').isNotEmpty)
-                      pw.Text(empresa!.direccion, style: const pw.TextStyle(fontSize: 9)),
+                      pw.Text(
+                        empresa!.direccion,
+                        style: const pw.TextStyle(fontSize: 9),
+                      ),
                   ],
                 ),
               ),
@@ -98,14 +104,22 @@ class RepresentacionImpresaPdf {
                       ),
                     ),
                   pw.SizedBox(height: 4),
-                  pw.Text('e-NCF: $encf',
+                  pw.Text(
+                    'e-NCF: $encf',
                       style: pw.TextStyle(
-                          fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Cód. seguridad: $codigo',
-                      style: const pw.TextStyle(fontSize: 10)),
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'Cód. seguridad: $codigo',
+                    style: const pw.TextStyle(fontSize: 10),
+                  ),
                   if (trackId != null && trackId.isNotEmpty)
-                    pw.Text('TrackId: $trackId',
-                        style: const pw.TextStyle(fontSize: 8)),
+                    pw.Text(
+                      'TrackId: $trackId',
+                      style: const pw.TextStyle(fontSize: 8),
+                    ),
                 ],
               ),
             ],
@@ -149,10 +163,14 @@ class RepresentacionImpresaPdf {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text('Subtotal: ${formatRd(venta.montoSubtotal)}',
-                    style: const pw.TextStyle(fontSize: 10)),
-                pw.Text('ITBIS: ${formatRd(venta.itbis)}',
-                    style: const pw.TextStyle(fontSize: 10)),
+                pw.Text(
+                  'Subtotal: ${formatRd(venta.montoSubtotal)}',
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
+                pw.Text(
+                  'ITBIS: ${formatRd(venta.itbis)}',
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
                 pw.Text(
                   'TOTAL: ${formatRd(venta.montoTotal)}',
                   style: pw.TextStyle(
@@ -183,10 +201,7 @@ class RepresentacionImpresaPdf {
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                     pw.SizedBox(height: 4),
-                    pw.Text(
-                      url,
-                      style: const pw.TextStyle(fontSize: 7),
-                    ),
+                    pw.Text(url, style: const pw.TextStyle(fontSize: 7)),
                     pw.SizedBox(height: 8),
                     pw.Text(
                       'Esta es una representación impresa del comprobante fiscal electrónico. '

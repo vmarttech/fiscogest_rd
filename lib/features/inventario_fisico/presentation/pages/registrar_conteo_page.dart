@@ -32,9 +32,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  static const _teal = Color(0xFF0D9488);
-  static const _tealDark = Color(0xFF0F766E);
-
+  
   @override
   void dispose() {
     _nombreCtrl.dispose();
@@ -274,19 +272,19 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+            gradient: LinearGradient(
+              colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.tertiary],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: _teal.withValues(alpha: 0.35),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.assignment_outlined,
             color: Colors.white,
             size: 26,
@@ -369,7 +367,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: active ? _tealDark : _textMuted,
+              color: active ? Theme.of(context).colorScheme.primary : _textMuted,
             ),
           ),
         ),
@@ -398,8 +396,8 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         const SizedBox(height: 10),
         _infoCard(
           icon: Icons.calendar_today_rounded,
-          iconBg: const Color(0xFFCCFBF1),
-          iconFg: _teal,
+          iconBg: Theme.of(context).colorScheme.primaryContainer,
+          iconFg: Theme.of(context).colorScheme.primary,
           label: 'Fecha de Apertura',
           value: _fmtFechaLarga(fechaApertura),
           onTap: null, // informativa
@@ -426,7 +424,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               ? null
               : '${ultimo.nombreConteo} · ${ultimo.estado.etiqueta}',
           trailing: ultimo?.id != null
-              ? const Icon(Icons.chevron_right_rounded,
+              ? Icon(Icons.chevron_right_rounded,
                   color: Color(0xFF94A3B8))
               : null,
           onTap: ultimo?.id == null
@@ -553,11 +551,11 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCCFBF1),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: const Icon(Icons.edit_note_rounded,
-                    color: _teal, size: 20),
+                child: Icon(Icons.edit_note_rounded,
+                    color: Theme.of(context).colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -643,7 +641,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(Icons.add_rounded, size: 22),
+                  : Icon(Icons.add_rounded, size: 22),
               label: Text(
                 _cargando ? 'Creando…' : 'Crear Conteo',
                 style: const TextStyle(
@@ -652,9 +650,9 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                 ),
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: _teal,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: _teal.withValues(alpha: 0.5),
+                disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -706,15 +704,15 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: const BorderSide(color: _border),
+              borderSide: BorderSide(color: _border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: const BorderSide(color: _border),
+              borderSide: BorderSide(color: _border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: const BorderSide(color: _teal, width: 1.6),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.6),
             ),
           ),
         ),
@@ -876,7 +874,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: _teal),
+              Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -890,7 +888,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                 ),
               ),
               if (onTap != null)
-                const Icon(Icons.chevron_right,
+                Icon(Icons.chevron_right,
                     size: 16, color: Color(0xFF94A3B8)),
             ],
           ),
@@ -918,21 +916,32 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
           Icon(icon, size: 18, color: color),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w800,
-                color: _textPrimary,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              color: color,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: _textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                  ),
+                ),
+              ],
             ),
           ),
           if (onTap != null) ...[

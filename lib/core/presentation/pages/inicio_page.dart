@@ -216,7 +216,7 @@ class InicioPage extends ConsumerWidget {
                               icon: Icons.point_of_sale,
                               titulo: 'Ventas',
                               sub: 'Cotizar y cobrar',
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               onTap: () => _go(context, '/ventas'),
                             ),
                           ),
@@ -374,7 +374,7 @@ class InicioPage extends ConsumerWidget {
                   Icons.people_outline,
                   'Clientes',
                   'Cartera y fichas',
-                  AppColors.primary,
+                  Theme.of(context).colorScheme.primary,
                   '/clientes',
                 ),
                 tile(
@@ -431,7 +431,7 @@ class _DashboardColmado extends StatelessWidget {
         Icons.business_outlined,
         'Proveedores',
         'Mis proveedores',
-        AppColors.primary,
+        Theme.of(context).colorScheme.primary,
         onProveedores,
       ),
       (
@@ -459,14 +459,14 @@ class _DashboardColmado extends StatelessWidget {
         Icons.shopping_cart_rounded,
         'Compras',
         'Al proveedor',
-        AppColors.primary,
+        Theme.of(context).colorScheme.primary,
         onCompras,
       ),
       (
         Icons.people_rounded,
         'Clientes',
         'Mis clientes',
-        AppColors.primary,
+        Theme.of(context).colorScheme.primary,
         onClientes,
       ),
     ];
@@ -478,7 +478,7 @@ class _DashboardColmado extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.primary.withValues(alpha: 0.10),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.035),
             AppColors.pageBackground,
             AppColors.pageBackground,
           ],
@@ -499,8 +499,12 @@ class _DashboardColmado extends StatelessWidget {
                   center: const Alignment(0, -0.2),
                   radius: 0.95,
                   colors: [
-                    AppColors.primary.withValues(alpha: 0.14),
-                    AppColors.primary.withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.055),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -510,7 +514,7 @@ class _DashboardColmado extends StatelessWidget {
           Positioned.fill(
             child: CustomPaint(
               painter: _FondoPuntosPainter(
-                color: AppColors.primary.withValues(alpha: 0.04),
+                color: AppColors.grey400.withValues(alpha: 0.10),
               ),
             ),
           ),
@@ -531,15 +535,17 @@ class _DashboardColmado extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.primaryDark,
-                      AppColors.primary,
-                      AppColors.primaryLight.withValues(alpha: 0.95),
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(
+                        context,
+                      ).colorScheme.tertiary.withValues(alpha: 0.95),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.28),
-                      blurRadius: 16,
+                      color: const Color(0x1F0F172A),
+                      blurRadius: 14,
                       offset: const Offset(0, 6),
                     ),
                   ],
@@ -581,13 +587,15 @@ class _DashboardColmado extends StatelessWidget {
                         onPressed: onNuevaVenta,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: AppColors.primaryDark,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon: const Icon(Icons.add_shopping_cart_rounded),
+                        icon: Icon(Icons.add_shopping_cart_rounded),
                         label: const Text(
                           'NUEVA VENTA',
                           style: TextStyle(
@@ -783,15 +791,15 @@ class _HeroBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryDark,
-            AppColors.primary,
-            AppColors.primaryLight.withValues(alpha: 0.95),
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.95),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
-            blurRadius: 28,
+            color: const Color(0x240F172A),
+            blurRadius: 24,
             offset: const Offset(0, 12),
           ),
         ],
@@ -902,8 +910,12 @@ class _FondoFuturista extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: 0.18),
-                    AppColors.primary.withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.18),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -941,10 +953,16 @@ class _FondoFuturista extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: 0.0),
-                    AppColors.primary.withValues(alpha: 0.55),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.55),
                     AppColors.info.withValues(alpha: 0.45),
-                    AppColors.primary.withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -989,7 +1007,7 @@ class _KpiTile extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.08),
+            color: const Color(0x0F0F172A),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1118,7 +1136,7 @@ class _Acceso extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
               color: AppColors.grey400,
@@ -1286,7 +1304,7 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
     return [
       _InsightSlide(
         icon: Icons.point_of_sale_rounded,
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         badge: 'VENTAS · HOY',
         title: 'Ventas de hoy',
         body: hoy == null
@@ -1326,7 +1344,7 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
       ),
       _InsightSlide(
         icon: Icons.payments_outlined,
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         badge: 'COBROS · MES',
         title: 'Forma de pago principal',
         body: formasPago.isEmpty
@@ -1386,9 +1404,9 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
           actionLabel: 'Ver cuentas',
           onAction: widget.onVerCobros,
         ),
-      const _InsightSlide(
+      _InsightSlide(
         icon: Icons.bolt_outlined,
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         badge: 'ATAJO',
         title: 'Empezar ahora',
         body: 'Genera una cotización y avanza el flujo en minutos.',
@@ -1559,13 +1577,12 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
                                         onPressed:
                                             s.onAction ??
                                             widget.onNuevaCotizacion,
-                                        icon: const Icon(
-                                          Icons.open_in_new,
-                                          size: 18,
-                                        ),
+                                        icon: Icon(Icons.open_in_new, size: 18),
                                         label: Text(s.actionLabel),
                                         style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.primary,
+                                          backgroundColor: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                           foregroundColor: Colors.white,
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 12,
@@ -1703,8 +1720,8 @@ class _ActionBigCard extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: gradient.first.withValues(alpha: 0.28),
-                blurRadius: 16,
+                color: const Color(0x1F0F172A),
+                blurRadius: 14,
                 offset: const Offset(0, 6),
               ),
             ],

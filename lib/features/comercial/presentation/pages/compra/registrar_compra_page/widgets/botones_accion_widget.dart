@@ -24,13 +24,15 @@ class BotonesAccionWidget extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onGuardarBorrador,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary),
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          side: BorderSide(color: Theme.of(context).colorScheme.primary),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
         ),
         child: Text(
           'Guardar borrador',
-          style: AppTypography.button.copyWith(color: AppColors.primary),
+          style: AppTypography.button.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       ),
     );
@@ -49,11 +51,7 @@ class BotonesAccionWidget extends StatelessWidget {
     if (mobile) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          registrar,
-          AppLayout.vS,
-          borrador,
-        ],
+        children: [registrar, AppLayout.vS, borrador],
       );
     }
 
@@ -62,11 +60,7 @@ class BotonesAccionWidget extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: _maxBarWidth),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            borrador,
-            AppLayout.hM,
-            registrar,
-          ],
+          children: [borrador, AppLayout.hM, registrar],
         ),
       ),
     );

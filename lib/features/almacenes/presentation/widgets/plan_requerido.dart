@@ -37,13 +37,15 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F766E).withValues(alpha: 0.12),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_outline,
                     size: 36,
-                    color: Color(0xFF0F766E),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -72,13 +74,13 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                   height: 48,
                   child: FilledButton.icon(
                     onPressed: () => context.push('/licencia/comprar'),
-                    icon: const Icon(Icons.workspace_premium_outlined),
+                    icon: Icon(Icons.workspace_premium_outlined),
                     label: const Text(
                       'Ver planes y pagar',
                       style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F766E),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),

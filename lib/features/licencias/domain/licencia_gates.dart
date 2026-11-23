@@ -79,7 +79,6 @@ class LicenciaGates {
         'Actualiza tu plan en Licencia y pagos para liberar más.';
   }
 
-
   int? get maxProductos => limites.maxProductos;
 
   int? get maxClientes => limites.maxClientes;

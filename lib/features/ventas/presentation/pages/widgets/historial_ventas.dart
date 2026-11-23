@@ -188,20 +188,20 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                               .cambiarVista(VistaActual.inicio);
                         }
                       },
-                      icon: const Icon(Icons.arrow_back, size: 18),
+                      icon: Icon(Icons.arrow_back, size: 18),
                       label: const Text('Volver'),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-              ] else ...[
+              ] else if (!widget.standalone) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 4, bottom: 10),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.history_rounded,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 22,
                       ),
                       const SizedBox(width: 10),
@@ -217,7 +217,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                         onPressed: () => ref
                             .read(ventasNavegacionProvider.notifier)
                             .cambiarVista(VistaActual.inicio),
-                        icon: const Icon(Icons.arrow_back, size: 18),
+                        icon: Icon(Icons.arrow_back, size: 18),
                         label: const Text('Volver'),
                       ),
                     ],
@@ -263,7 +263,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                   value: _monto(
                                     (kpis['montoHoy'] as num).toDouble(),
                                   ),
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -309,20 +309,17 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     decoration: InputDecoration(
                                       hintText:
                                           'Buscar por número, cliente o NCF…',
-                                      prefixIcon: const Icon(
-                                        Icons.search,
-                                        size: 20,
-                                      ),
+                                      prefixIcon: Icon(Icons.search, size: 20),
                                       isDense: true,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: const BorderSide(
+                                        borderSide: BorderSide(
                                           color: Color(0xFFE2E8F0),
                                         ),
                                       ),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: const BorderSide(
+                                        borderSide: BorderSide(
                                           color: Color(0xFFE2E8F0),
                                         ),
                                       ),
@@ -350,14 +347,20 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                       onSelected: (_) => setState(() {
                                         _filtro = e.$1;
                                       }),
-                                      selectedColor: AppColors.primary
+                                      selectedColor: Theme.of(context)
+                                          .colorScheme
+                                          .primary
                                           .withValues(alpha: 0.15),
-                                      checkmarkColor: AppColors.primary,
+                                      checkmarkColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       labelStyle: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 12.5,
                                         color: sel
-                                            ? AppColors.primary
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
                                             : AppColors.textSecondary,
                                       ),
                                     ),
@@ -553,11 +556,13 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                                 style: TextStyle(
                                                   fontSize: desktop ? 15 : 13.5,
                                                   fontWeight: FontWeight.w900,
-                                                  color: AppColors.primary,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
                                                 ),
                                               ),
                                               const SizedBox(width: 4),
-                                              const Icon(
+                                              Icon(
                                                 Icons.chevron_right,
                                                 size: 20,
                                                 color: Color(0xFF94A3B8),

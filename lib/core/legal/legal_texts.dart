@@ -8,5 +8,6 @@ library;
 
 const kUrlPrivacidad = 'https://fiscogest-web.web.app/privacidad.html';
 const kUrlTerminos = 'https://fiscogest-web.web.app/terminos.html';
-const kUrlEliminarCuenta = 'https://fiscogest-web.web.app/eliminacion-cuenta.html';
+const kUrlEliminarCuenta =
+    'https://fiscogest-web.web.app/eliminacion-cuenta.html';
 const kUrlSitioWeb = 'https://fiscogest-web.web.app/';

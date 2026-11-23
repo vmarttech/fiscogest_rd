@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/sync/supabase/sync_pull.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
 
 class UsuarioSesion {
   const UsuarioSesion({
@@ -55,7 +56,6 @@ final modoColmadoProvider = Provider<bool>((ref) {
   return s.puede(Permiso.fiaoUsar);
 });
 
-
 /// Revalida que el usuario de la sesión siga Activo (local + nube).
 /// Si está inactivo → limpia sesión y devuelve false.
 Future<bool> revalidarSesionActiva(WidgetRef ref) async {
@@ -75,15 +75,17 @@ Future<bool> revalidarSesionActiva(WidgetRef ref) async {
   // 2) Consulta puntual activo en nube
   final activoNube = await UsuarioSync.verificarActivoEnNube(ses.username);
   if (activoNube == false) {
+    await SesionPersistente.limpiar();
     ref.read(sesionProvider.notifier).state = null;
     return false;
   }
 
   // 3) Estado local
-  final row = await (db.select(db.usuariosTable)
-        ..where((t) => t.id.equals(ses.id)))
-      .getSingleOrNull();
+  final row = await (db.select(
+    db.usuariosTable,
+  )..where((t) => t.id.equals(ses.id))).getSingleOrNull();
   if (row == null || row.estado.toLowerCase() != 'activo') {
+    await SesionPersistente.limpiar();
     ref.read(sesionProvider.notifier).state = null;
     return false;
   }

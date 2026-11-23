@@ -186,7 +186,9 @@ class _DetalleCuentaPagarPageState
                   ),
                   const SizedBox(height: 20),
                   Card(
-                    color: AppColors.primary.withValues(alpha: 0.06),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.06),
                     child: Padding(
                       padding: AppSpacing.allM,
                       child: Column(
@@ -230,7 +232,9 @@ class _DetalleCuentaPagarPageState
                                     .copyWith(
                                       color: vencida
                                           ? Colors.red.shade700
-                                          : AppColors.primary,
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
                                     ),
                               ),
                               Text(
@@ -238,7 +242,7 @@ class _DetalleCuentaPagarPageState
                                 style: AppTypography.h4Bold.copyWith(
                                   color: vencida
                                       ? Colors.red.shade700
-                                      : AppColors.primary,
+                                      : Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -327,16 +331,18 @@ class _DetalleCuentaPagarPageState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       TextButton.icon(
-                        icon: const Icon(Icons.arrow_back, size: 18),
+                        icon: Icon(Icons.arrow_back, size: 18),
                         label: const Text('Volver'),
                         onPressed: () => context.pop(),
                       ),
                       if (!esPequena && puedeAbonar)
                         ElevatedButton.icon(
-                          icon: const Icon(Icons.payment, size: 18),
+                          icon: Icon(Icons.payment, size: 18),
                           label: const Text('Registrar Abono'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () => context.goNamed(
@@ -353,10 +359,12 @@ class _DetalleCuentaPagarPageState
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        icon: const Icon(Icons.payment, size: 18),
+                        icon: Icon(Icons.payment, size: 18),
                         label: const Text('Registrar Abono'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () => context.goNamed(

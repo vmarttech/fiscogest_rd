@@ -46,8 +46,7 @@ class InformeZPdf {
     final doc = pw.Document();
     final nombre = (nombreComercio ?? 'NEGOCIO').trim().toUpperCase();
 
-    pw.Widget line() =>
-        pw.Divider(thickness: 0.8, color: PdfColors.grey800);
+    pw.Widget line() => pw.Divider(thickness: 0.8, color: PdfColors.grey800);
 
     pw.Widget row(String a, String b, {bool bold = false}) {
       final style = pw.TextStyle(
@@ -120,8 +119,7 @@ class InformeZPdf {
               ),
               pw.SizedBox(height: 6),
               row('Sesión', '#${resumen.sesionId}'),
-              if (fechaApertura != null)
-                row('Apertura', _fecha(fechaApertura)),
+              if (fechaApertura != null) row('Apertura', _fecha(fechaApertura)),
               row('Cierre', _fecha(cerradoEn)),
               line(),
               row('Fondo inicial', _rd(resumen.fondoInicial)),

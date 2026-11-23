@@ -65,13 +65,13 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
                   onPressed: () => context.push('/ecfe/spec'),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Icon(Icons.rule_folder_rounded, size: 23),
+                  child: Icon(Icons.rule_folder_rounded, size: 23),
                 ),
               ),
             ),
@@ -81,11 +81,11 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
             padding: const EdgeInsets.only(right: 8),
             child: FilledButton.icon(
               onPressed: () => context.push('/ecfe/spec'),
-              icon: const Icon(Icons.rule_folder_rounded, size: 19),
+              icon: Icon(Icons.rule_folder_rounded, size: 19),
               label: const Text('Especificación'),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
+                foregroundColor: Theme.of(context).colorScheme.primary,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 shape: RoundedRectangleBorder(
@@ -135,10 +135,12 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
                         ),
                         FilledButton.icon(
                           onPressed: () => context.push('/ecfe/spec'),
-                          icon: const Icon(Icons.rule_folder_rounded, size: 19),
+                          icon: Icon(Icons.rule_folder_rounded, size: 19),
                           label: const Text('Especificación'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -272,13 +274,13 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                         padding: EdgeInsets.all(mobile ? 16 : 22),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(18),
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
                               Color(0xFF0F172A),
-                              Color(0xFF0D9488),
-                              Color(0xFF14B8A6),
+                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context).colorScheme.tertiary,
                             ],
                           ),
                         ),
@@ -585,20 +587,21 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                             ),
                             selected: _filtro == entry.$1,
                             showCheckmark: true,
-                            selectedColor: AppColors.primary.withValues(
-                              alpha: 0.14,
-                            ),
+                            selectedColor: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.14),
                             backgroundColor: AppColors.grey50,
                             side: BorderSide(
                               color: _filtro == entry.$1
-                                  ? AppColors.primary
+                                  ? Theme.of(context).colorScheme.primary
                                   : AppColors.border,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            onSelected: (_) =>
-                                setState(() { _filtro = entry.$1; }),
+                            onSelected: (_) => setState(() {
+                              _filtro = entry.$1;
+                            }),
                           ),
                         ),
                     ],
@@ -633,7 +636,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.receipt_long_outlined,
                               size: 48,
                               color: AppColors.grey400,
@@ -729,7 +732,9 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                                       Text(
                                         '→ $accion',
                                         style: AppTypography.bodySmall.copyWith(
-                                          color: AppColors.primary,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -744,7 +749,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                                     ],
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   Icons.chevron_right,
                                   color: AppColors.grey400,
                                 ),
@@ -1109,7 +1114,9 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                         'Controla la habilitación del módulo fiscal electrónico.',
                       ),
                       value: _habilitado,
-                      onChanged: (v) => setState(() { _habilitado = v; }),
+                      onChanged: (v) => setState(() {
+                        _habilitado = v;
+                      }),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<AmbienteDgii>(
@@ -1124,7 +1131,10 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                           DropdownMenuItem(value: a, child: Text(a.etiqueta)),
                       ],
                       onChanged: (v) {
-                        if (v != null) setState(() { _ambiente = v; });
+                        if (v != null)
+                          setState(() {
+                            _ambiente = v;
+                          });
                       },
                     ),
                     const SizedBox(height: 14),
@@ -1260,7 +1270,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.shield_outlined,
                         color: Color(0xFF008F83),
                         size: 24,
@@ -1423,14 +1433,14 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                     '${s.activo ? '' : ' · INACTIVA'}',
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.edit),
+                    icon: Icon(Icons.edit),
                     onPressed: () => _editar(context, ref, s),
                   ),
                 ),
               ),
             TextButton.icon(
               onPressed: () => _editar(context, ref, null),
-              icon: const Icon(Icons.add),
+              icon: Icon(Icons.add),
               label: const Text('Agregar / otro tipo'),
             ),
           ],
@@ -1526,7 +1536,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                             ? 'Sin vencimiento'
                             : 'Vence: ${DateFormat('dd/MM/yyyy').format(venc!)}',
                       ),
-                      trailing: const Icon(Icons.calendar_today),
+                      trailing: Icon(Icons.calendar_today),
                       onTap: () async {
                         final d = await showDatePicker(
                           context: ctx,
@@ -1713,10 +1723,14 @@ class _GuiaTab extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.25),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.25),
             ),
           ),
           child: Text(
@@ -1962,11 +1976,13 @@ class _EcfeAccesoCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: destacado ? AppColors.primary : AppColors.border,
+              color: destacado
+                  ? Theme.of(context).colorScheme.primary
+                  : AppColors.border,
               width: destacado ? 1.5 : 1,
             ),
             color: destacado
-                ? AppColors.primary.withValues(alpha: 0.06)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)
                 : AppColors.white,
           ),
           child: Row(
@@ -1975,10 +1991,16 @@ class _EcfeAccesoCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: AppColors.primary, size: 22),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -2001,7 +2023,7 @@ class _EcfeAccesoCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.grey400),
+              Icon(Icons.chevron_right, color: AppColors.grey400),
             ],
           ),
         ),

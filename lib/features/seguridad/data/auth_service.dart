@@ -64,7 +64,6 @@ class AuthService {
     return !stored.trim().startsWith(_prefix);
   }
 
-
   Future<AuthResult?> login(String username, String password) async {
     final u = username.trim();
     if (u.isEmpty || password.isEmpty) return null;
@@ -77,8 +76,7 @@ class AuthService {
 
     // AUTHZ comercial: si hay nube, ella manda sobre activo.
     // Si la nube dice inactivo → rechazar aunque el SQLite local diga Activo.
-    final activoNube =
-        await UsuarioSync.verificarActivoEnNube(row.username);
+    final activoNube = await UsuarioSync.verificarActivoEnNube(row.username);
     if (activoNube == false) {
       // Alinear BD local para el próximo pull/UI
       await (_db.update(_db.usuariosTable)..where((t) => t.id.equals(row.id)))
@@ -95,7 +93,6 @@ class AuthService {
     await (_db.update(
       _db.usuariosTable,
     )..where((t) => t.id.equals(row.id))).write(updates);
-
 
     // Contraseña solo se valida como hash; no se acepta texto plano.
 

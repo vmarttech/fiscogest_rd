@@ -8,11 +8,7 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.da
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 
 class AvisarAtrasadosButton extends ConsumerWidget {
-
-  const AvisarAtrasadosButton({
-    super.key,
-    required this.fiosAtrasados,
-  });
+  const AvisarAtrasadosButton({super.key, required this.fiosAtrasados});
   final List<dynamic> fiosAtrasados;
 
   static String _normalizar(String texto) {
@@ -73,10 +69,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
   }
 
   /// Resuelve teléfono: 1) fiao.telefono  2) match en clientes
-  static String? _resolverTelefono(
-    FioData fio,
-    List<ClienteEntity> clientes,
-  ) {
+  static String? _resolverTelefono(FioData fio, List<ClienteEntity> clientes) {
     final propio = _soloDigitos(fio.telefono);
     if (propio != null) return propio;
     return _buscarTelefonoCliente(fio.nombreCliente, clientes);
@@ -86,6 +79,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List<dynamic> fiosAtrasados, {
+
     /// Punto 6: solo fios con al menos [minDiasAtraso] días de atraso
     /// (respecto a fechaCompromiso). 0 = todos los atrasados.
     int minDiasAtraso = 0,
@@ -199,7 +193,10 @@ class AvisarAtrasadosButton extends ConsumerWidget {
       final numero = entrada.key;
       final datos = entrada.value;
       final nombres = (datos['nombres'] as List).join(' + ');
-      final total = (datos['saldos'] as List<double>).fold(0.0, (a, b) => a + b);
+      final total = (datos['saldos'] as List<double>).fold(
+        0.0,
+        (a, b) => a + b,
+      );
 
       final mensaje = Uri.encodeComponent(
         'Estimado(a) $nombres, le informamos que tiene un saldo pendiente de cobro de RD\$ ${total.toStringAsFixed(2)}. '
@@ -315,9 +312,8 @@ class AvisarAtrasadosButton extends ConsumerWidget {
         if (tel == null) continue;
         resueltos[f] = tel;
         try {
-          await (db.update(db.fiosTable)..where((t) => t.id.equals(f.id))).write(
-            FiosTableCompanion(telefono: Value(raw.trim())),
-          );
+          await (db.update(db.fiosTable)..where((t) => t.id.equals(f.id)))
+              .write(FiosTableCompanion(telefono: Value(raw.trim())));
         } catch (_) {}
       }
     }

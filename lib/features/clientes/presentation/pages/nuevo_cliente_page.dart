@@ -146,11 +146,13 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
+        ),
       ),
     );
   }
@@ -165,14 +167,14 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       child: ElevatedButton.icon(
         onPressed: _guardar,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF115E59),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        icon: const Icon(Icons.save_rounded, size: 20),
+        icon: Icon(Icons.save_rounded, size: 20),
         label: Text(
           _esEdicion ? 'ACTUALIZAR' : 'GUARDAR CLIENTE',
           style: const TextStyle(fontWeight: FontWeight.w800),
@@ -228,7 +230,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                         color: const Color(0xFFE2E8F0),
                                       ),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.arrow_back_rounded,
                                       size: 20,
                                       color: Color(0xFF0F172A),
@@ -510,7 +512,11 @@ class _SeccionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: AppColors.primary),
+              Icon(
+                icon,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 titulo,

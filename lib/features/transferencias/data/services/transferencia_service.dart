@@ -10,10 +10,8 @@ import 'package:fiscogest_rd/features/transferencias/data/dao/transferencias_dao
 import 'package:fiscogest_rd/features/transferencias/domain/entities/transferencia.dart';
 
 class TransferenciaService {
-  TransferenciaService(
-    this._db,
-    this._kardexRepo,
-  )   : _almacenes = AlmacenesDao(_db),
+  TransferenciaService(this._db, this._kardexRepo)
+    : _almacenes = AlmacenesDao(_db),
         _stock = StockAlmacenDao(_db),
         _productos = ProductosDao(_db),
         _transf = TransferenciasDao(_db),
@@ -64,8 +62,8 @@ class TransferenciaService {
     }
 
     final producto = await _productos.obtenerPorId(productoId);
-    final costoUnitario = producto?.costoPromedio ??
-        (producto?.precioCompra ?? 0.0);
+    final costoUnitario =
+        producto?.costoPromedio ?? (producto?.precioCompra ?? 0.0);
 
     late Transferencia creada;
     await _db.transaction(() async {
@@ -77,12 +75,24 @@ class TransferenciaService {
       }
       final saldoDestinoAntes = await _stock.cantidad(productoId, destinoId);
 
-      await _stock.setCantidad(productoId, origenId, saldoOrigenAntes - cantidad);
-      await _stock.setCantidad(productoId, destinoId, saldoDestinoAntes + cantidad);
+      await _stock.setCantidad(
+        productoId,
+        origenId,
+        saldoOrigenAntes - cantidad,
+      );
+      await _stock.setCantidad(
+        productoId,
+        destinoId,
+        saldoDestinoAntes + cantidad,
+      );
 
       final docRef = 'TRF-${DateTime.now().millisecondsSinceEpoch}';
-      final observacionSalida = 'Salida por transferencia hacia ${destino.nombre} — ${nota ?? ''}'.trim();
-      final observacionEntrada = 'Entrada por transferencia desde ${origen.nombre} — ${nota ?? ''}'.trim();
+      final observacionSalida =
+          'Salida por transferencia hacia ${destino.nombre} — ${nota ?? ''}'
+              .trim();
+      final observacionEntrada =
+          'Entrada por transferencia desde ${origen.nombre} — ${nota ?? ''}'
+              .trim();
 
       await _registrarKardex.ejecutar(
         productoId: productoId,

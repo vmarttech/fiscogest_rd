@@ -26,14 +26,17 @@ class MarcaRepositoryImpl implements MarcaRepository {
 
   @override
   Future<Marca?> obtenerPorId(int id) async {
-    final d = await (_db.select(_db.marcas)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final d = await (_db.select(
+      _db.marcas,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return d == null ? null : _map(d);
   }
 
   @override
   Future<void> guardar(Marca marca) async {
-    await _db.into(_db.marcas).insert(
+    await _db
+        .into(_db.marcas)
+        .insert(
           MarcasCompanion(
             nombre: Value(marca.nombre),
             descripcion: Value(marca.descripcion),

@@ -71,32 +71,33 @@ class DispositivoService {
   Future<DispositivoInfo> ensureDispositivoRegistrado() async {
     final fp = await DeviceFingerprint.obtener();
     final ahora = DateTime.now().toIso8601String();
-    final existentes = await (_db.select(_db.dispositivosLicenciaTable)
-          ..where((t) => t.fingerprint.equals(fp)))
-        .get();
+    final existentes = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.fingerprint.equals(fp))).get();
 
     if (existentes.isNotEmpty) {
       final row = existentes.first;
-      await (_db.update(_db.dispositivosLicenciaTable)
-            ..where((t) => t.id.equals(row.id)))
-          .write(
+      await (_db.update(
+        _db.dispositivosLicenciaTable,
+      )..where((t) => t.id.equals(row.id))).write(
         DispositivosLicenciaTableCompanion(
           ultimoUso: Value(ahora),
           activo: const Value(true),
           pendienteSync: const Value(true),
         ),
       );
-      return (await listar(soloActivos: false))
-          .firstWhere((d) => d.fingerprint == fp);
+      return (await listar(
+        soloActivos: false,
+      )).firstWhere((d) => d.fingerprint == fp);
     }
 
     // Cupo local (cuando haya sync, contar activos remotos + locales)
     final lic = await LicenciaService(_db).obtenerActual();
-    final max = lic?.maxDispositivos ??
-        maxInstalacionesPermitidas(lic?.plan ?? 'demo');
-    final activos = await (_db.select(_db.dispositivosLicenciaTable)
-          ..where((t) => t.activo.equals(true)))
-        .get();
+    final max =
+        lic?.maxDispositivos ?? maxInstalacionesPermitidas(lic?.plan ?? 'demo');
+    final activos = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.activo.equals(true))).get();
 
     if (activos.length >= max && max < 999) {
       // Desarrollador / vitalicio: max alto. Si cupo lleno, aún registramos
@@ -104,7 +105,9 @@ class DispositivoService {
       // Política v1 offline: siempre permitir ESTE equipo (BD propia).
     }
 
-    final id = await _db.into(_db.dispositivosLicenciaTable).insert(
+    final id = await _db
+        .into(_db.dispositivosLicenciaTable)
+        .insert(
           DispositivosLicenciaTableCompanion(
             fingerprint: Value(fp),
             alias: Value(DeviceFingerprint.aliasSugerido()),
@@ -118,9 +121,9 @@ class DispositivoService {
           ),
         );
 
-    final row = await (_db.select(_db.dispositivosLicenciaTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingle();
+    final row = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.id.equals(id))).getSingle();
 
     return DispositivoInfo(
       id: row.id,
@@ -158,7 +161,9 @@ class DispositivoService {
 
   Future<void> marcarSincronizados() async {
     final ahora = DateTime.now().toIso8601String();
-    await _db.update(_db.dispositivosLicenciaTable).write(
+    await _db
+        .update(_db.dispositivosLicenciaTable)
+        .write(
           DispositivosLicenciaTableCompanion(
             pendienteSync: const Value(false),
             sincronizadoEn: Value(ahora),
@@ -167,9 +172,9 @@ class DispositivoService {
   }
 
   Future<int> contarActivos() async {
-    final rows = await (_db.select(_db.dispositivosLicenciaTable)
-          ..where((t) => t.activo.equals(true)))
-        .get();
+    final rows = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.activo.equals(true))).get();
     return rows.length;
   }
 }

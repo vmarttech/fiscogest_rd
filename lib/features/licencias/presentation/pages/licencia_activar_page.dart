@@ -15,7 +15,8 @@ class LicenciaActivarPage extends ConsumerStatefulWidget {
   static const path = '/licencia/activar';
 
   @override
-  ConsumerState<LicenciaActivarPage> createState() => _LicenciaActivarPageState();
+  ConsumerState<LicenciaActivarPage> createState() =>
+      _LicenciaActivarPageState();
 }
 
 class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
@@ -48,7 +49,9 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
         final db = ref.read(databaseProvider);
         await SyncEngine(db).pullAll();
       } catch (_) {}
-      await ref.read(licenciaServiceProvider).aplicarLicenciaSiYaEmitida(refCode);
+      await ref
+          .read(licenciaServiceProvider)
+          .aplicarLicenciaSiYaEmitida(refCode);
       ref.invalidate(licenciaActualProvider);
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -60,7 +63,10 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
         SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -71,14 +77,22 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
     return AppScaffold(
       title: 'Activar licencia',
       body: ListView(
-        padding: EdgeInsets.fromLTRB(esMovil ? 16 : 24, 16, esMovil ? 16 : 24, 32),
+        padding: EdgeInsets.fromLTRB(
+          esMovil ? 16 : 24,
+          16,
+          esMovil ? 16 : 24,
+          32,
+        ),
         children: [
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0F766E), Color(0xFF14B8A6)],
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.tertiary,
+                ],
               ),
             ),
             child: const Row(
@@ -138,7 +152,7 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
                   child: FilledButton(
                     onPressed: _cargando ? null : _activar,
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F766E),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),

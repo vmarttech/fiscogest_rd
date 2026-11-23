@@ -25,8 +25,8 @@ final listadoCuentasPagarProvider =
       .toList();
 });
 
-final cuentaPagarPorIdProvider =
-    FutureProvider.autoDispose.family<CuentaPagar?, int>((Ref ref, int id) async {
+final cuentaPagarPorIdProvider = FutureProvider.autoDispose
+    .family<CuentaPagar?, int>((Ref ref, int id) async {
   final dao = ref.watch(cuentasPagarDaoProvider);
   final cuenta = await dao.obtenerCuentaPorId(id);
   if (cuenta == null) return null;
@@ -45,8 +45,8 @@ final cuentaPagarPorIdProvider =
   );
 });
 
-final historialAbonosProvider =
-    FutureProvider.autoDispose.family<List<Abono>, int>((Ref ref, int cuentaId) async {
+final historialAbonosProvider = FutureProvider.autoDispose
+    .family<List<Abono>, int>((Ref ref, int cuentaId) async {
   final dao = ref.watch(cuentasPagarDaoProvider);
   final registros = await dao.listarPagosPorCuenta(cuentaId);
   return registros
@@ -66,7 +66,8 @@ final historialAbonosProvider =
 
 /// Firma compatible con [RegistrarAbonoPage].
 /// Internamente: CXC pagar + egreso en Caja (si sesión abierta y medio real).
-final registrarAbonoProvider = Provider.autoDispose<
+final registrarAbonoProvider =
+    Provider.autoDispose<
     Future<bool> Function({
       required int cuentaPagarId,
       required double monto,
@@ -74,7 +75,8 @@ final registrarAbonoProvider = Provider.autoDispose<
       String formaPago,
       String? referencia,
       String? nota,
-    })>((Ref ref) {
+      })
+    >((Ref ref) {
   final dao = ref.read(cuentasPagarDaoProvider);
   final caja = ref.read(cajaRepositoryProvider);
 

@@ -27,15 +27,17 @@ class CategoriaRepositoryImpl implements CategoriaRepository {
 
   @override
   Future<Categoria?> obtenerPorId(int id) async {
-    final d = await (_db.select(_db.categorias)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final d = await (_db.select(
+      _db.categorias,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return d == null ? null : _map(d);
   }
 
   @override
   Future<void> guardar(Categoria categoria) async {
-    await _db.into(_db.categorias).insert(
+    await _db
+        .into(_db.categorias)
+        .insert(
           CategoriasCompanion(
             nombre: Value(categoria.nombre),
             descripcion: Value(categoria.descripcion),
@@ -50,9 +52,9 @@ class CategoriaRepositoryImpl implements CategoriaRepository {
 
   @override
   Future<void> actualizar(Categoria categoria) async {
-    await (_db.update(_db.categorias)
-          ..where((t) => t.id.equals(categoria.id!)))
-        .write(
+    await (_db.update(
+      _db.categorias,
+    )..where((t) => t.id.equals(categoria.id!))).write(
       CategoriasCompanion(
         nombre: Value(categoria.nombre),
         descripcion: Value(categoria.descripcion),

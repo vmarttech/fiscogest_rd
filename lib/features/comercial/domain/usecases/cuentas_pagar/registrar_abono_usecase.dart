@@ -2,10 +2,7 @@ import 'package:fiscogest_rd/features/caja/domain/repositories/i_caja_repository
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_pagar_dao.dart';
 
 class RegistrarAbonoUseCase {
-  RegistrarAbonoUseCase({
-    required this.cuentasPagarDao,
-    this.cajaRepository,
-  });
+  RegistrarAbonoUseCase({required this.cuentasPagarDao, this.cajaRepository});
 
   final CuentasPagarDao cuentasPagarDao;
   final ICajaRepository? cajaRepository;
@@ -38,7 +35,8 @@ class RegistrarAbonoUseCase {
     // Crédito u otro medio no físico: no mueve cajón.
     final caja = cajaRepository;
     final fp = formaPago.toLowerCase();
-    final mueveCaja = caja != null &&
+    final mueveCaja =
+        caja != null &&
         (fp.contains('efectivo') ||
             fp.contains('tarjeta') ||
             fp.contains('transfer') ||

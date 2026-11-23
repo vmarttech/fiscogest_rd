@@ -63,15 +63,15 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E0)),
+        borderSide: BorderSide(color: Color(0xFFCBD5E0)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E0)),
+        borderSide: BorderSide(color: Color(0xFFCBD5E0)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: const BorderSide(color: Color(0xFF127369)),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -122,8 +122,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight:
-                                tiene ? FontWeight.w600 : FontWeight.w400,
+                            fontWeight: tiene
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                             color: tiene
                                 ? const Color(0xFF333333)
                                 : const Color(0xFFA0AEC0),
@@ -136,14 +137,13 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                             ? 'Ocultar costos extra'
                             : 'Flete / seguro / aranceles / descuento',
                         icon: Icon(
-                          _expandido
-                              ? Icons.expand_less
-                              : Icons.expand_more,
+                          _expandido ? Icons.expand_less : Icons.expand_more,
                           size: 20,
                           color: const Color(0xFF666666),
                         ),
-                        onPressed: () =>
-                            setState(() { _expandido = !_expandido; }),
+                        onPressed: () => setState(() {
+                          _expandido = !_expandido;
+                        }),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(
                           minWidth: 32,
@@ -166,8 +166,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
                         RegExp(r'^\d+\.?\d{0,4}'),
@@ -188,8 +189,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                     child: TextField(
                       controller: widget.ctrl.costoUnitario,
                       style: const TextStyle(fontSize: 14),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
                           RegExp(r'^\d+\.?\d{0,2}'),
@@ -231,15 +233,17 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                 width: 40,
                 child: IconButton(
                   tooltip: 'Eliminar',
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
                     color: Color(0xFFE53E3E),
                     size: 20,
                   ),
                   onPressed: widget.onEliminar,
                   padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                 ),
               ),
             ],
@@ -325,8 +329,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                           ),
                         ],
                         onChanged: widget.onGastosChanged,
-                        decoration:
-                            _miniDec().copyWith(labelText: 'Otros gastos'),
+                        decoration: _miniDec().copyWith(
+                          labelText: 'Otros gastos',
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -342,8 +347,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                           ),
                         ],
                         onChanged: widget.onDescuentoChanged,
-                        decoration:
-                            _miniDec().copyWith(labelText: 'Descuento %'),
+                        decoration: _miniDec().copyWith(
+                          labelText: 'Descuento %',
+                        ),
                       ),
                     ),
                   ],
@@ -372,15 +378,17 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                   style: AppTypography.labelMedium,
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
                     color: AppColors.error,
                     size: 20,
                   ),
                   onPressed: widget.onEliminar,
                   padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints(minWidth: 28, minHeight: 28),
+                  constraints: const BoxConstraints(
+                    minWidth: 28,
+                    minHeight: 28,
+                  ),
                 ),
               ],
             ),
@@ -410,8 +418,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
               child1: AppTextField(
                 controller: widget.ctrl.cantidad,
                 label: 'Cantidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,4}')),
                 ],
@@ -421,8 +430,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                 controller: widget.ctrl.costoUnitario,
                 label: 'Costo Compra (RD\$)',
                 prefixIcon: Icons.payments_outlined,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -434,8 +444,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
               child1: AppTextField(
                 controller: widget.ctrl.fleteUnitario,
                 label: 'Flete por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -444,8 +455,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
               child2: AppTextField(
                 controller: widget.ctrl.seguroUnitario,
                 label: 'Seguro por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -457,8 +469,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
               child1: AppTextField(
                 controller: widget.ctrl.arancelesUnitario,
                 label: 'Aranceles por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -467,8 +480,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
               child2: AppTextField(
                 controller: widget.ctrl.gastosUnitario,
                 label: 'Otros Gastos por unidad',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -479,8 +493,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
             AppTextField(
               controller: widget.ctrl.descuento,
               label: 'Descuento (%)',
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
@@ -498,7 +513,9 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(alpha: 0.35),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.35),
                     borderRadius: AppRadius.allM,
                     border: Border.all(color: AppColors.border),
                   ),
@@ -522,7 +539,7 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                       Text(
                         'Total línea: ${formatRdNumero(widget.linea.totalLinea)}',
                         style: AppTypography.labelLarge.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

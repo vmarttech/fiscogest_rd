@@ -59,7 +59,6 @@ class CajaMovimientosDao extends DatabaseAccessor<AppDatabase>
     return ultimo?.saldoNuevo;
   }
 
-
   /// Evita doble ingreso: misma referencia en la misma sesión.
   Future<CajaMovimientoData?> obtenerPorReferenciaEnSesion({
     required int sesionId,

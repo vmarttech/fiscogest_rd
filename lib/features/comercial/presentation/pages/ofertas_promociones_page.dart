@@ -138,10 +138,7 @@ class _OfertasPromocionesPageState
               children: [
                 _indicador('Registradas', '${promociones.length}'),
                 _indicador('Vigentes', '$vigentes'),
-                _indicador(
-                  'Inactivas',
-                  '${promociones.length - vigentes}',
-                ),
+                _indicador('Inactivas', '${promociones.length - vigentes}'),
               ],
             ),
           ),
@@ -289,9 +286,9 @@ class _OfertasPromocionesPageState
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo guardar: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('No se pudo guardar: $error')));
     }
   }
 
@@ -446,12 +443,19 @@ class _OfertasPromocionesPageState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(icono, size: 40, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                icono,
+                size: 40,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(height: 12),
               Text(
                 mensaje,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
               Text(

@@ -5,9 +5,7 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 
 class ClienteCompletoRepository {
-  ClienteCompletoRepository(AppDatabase db)
-      : _db = db,
-        _dao = ClienteDao(db);
+  ClienteCompletoRepository(AppDatabase db) : _db = db, _dao = ClienteDao(db);
 
   final AppDatabase _db;
   final ClienteDao _dao;

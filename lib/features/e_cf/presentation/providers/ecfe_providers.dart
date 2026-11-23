@@ -25,24 +25,26 @@ final ecfeHabilitadoProvider = FutureProvider.autoDispose<bool>((ref) async {
   return cfg.listoParaPipeline;
 });
 
-final ecfeConfigProvider =
-    FutureProvider.autoDispose<EcfeConfig>((ref) async {
+final ecfeConfigProvider = FutureProvider.autoDispose<EcfeConfig>((ref) async {
   return ref.watch(ecfeRepositoryProvider).obtenerConfig();
 });
 
-final ecfeColaProvider =
-    FutureProvider.autoDispose<List<EcfeDocumento>>((ref) async {
+final ecfeColaProvider = FutureProvider.autoDispose<List<EcfeDocumento>>((
+  ref,
+) async {
   return ref.watch(ecfeRepositoryProvider).listarDocumentos();
 });
 
-final ecfeDocumentoProvider =
-    FutureProvider.autoDispose.family<EcfeDocumento?, int>((ref, id) async {
+final ecfeDocumentoProvider = FutureProvider.autoDispose
+    .family<EcfeDocumento?, int>((ref, id) async {
   return ref.watch(ecfeRepositoryProvider).obtenerPorId(id);
 });
 
 final ecfeEventosProvider = FutureProvider.autoDispose
-    .family<List<({String paso, bool ok, String? detalle, DateTime creadoEn})>,
-        int>((ref, id) async {
+    .family<
+      List<({String paso, bool ok, String? detalle, DateTime creadoEn})>,
+      int
+    >((ref, id) async {
   return ref.watch(ecfeRepositoryProvider).listarEventos(id);
 });
 
@@ -57,7 +59,6 @@ final generarXmlEcfeProvider = Provider<GenerarXmlEcfe>((ref) {
     builder: EcfeXmlBuilderImpl(),
   );
 });
-
 
 final encolarEcfeDesdeVentaProvider = Provider<EncolarEcfeDesdeVenta>((ref) {
   return EncolarEcfeDesdeVenta(
@@ -86,11 +87,9 @@ Future<void> intentarEncolarEcfe({
   } catch (_) {}
 }
 
-
 final firmarXmlEcfeProvider = Provider<FirmarXmlEcfe>((ref) {
   return FirmarXmlEcfe(repo: ref.watch(ecfeRepositoryProvider));
 });
-
 
 final enviarEcfeProvider = Provider<EnviarEcfe>((ref) {
   return EnviarEcfe(repo: ref.watch(ecfeRepositoryProvider));
@@ -100,9 +99,8 @@ final consultarEstadoEcfeProvider = Provider<ConsultarEstadoEcfe>((ref) {
   return ConsultarEstadoEcfe(repo: ref.watch(ecfeRepositoryProvider));
 });
 
-
-final ecfePorVentaProvider =
-    FutureProvider.autoDispose.family<EcfeDocumento?, int>((ref, ventaId) async {
+final ecfePorVentaProvider = FutureProvider.autoDispose
+    .family<EcfeDocumento?, int>((ref, ventaId) async {
   final repo = ref.watch(ecfeRepositoryProvider);
   return repo.buscarPorVentaId(ventaId);
 });
@@ -114,8 +112,8 @@ final ecfeSpecVersionsProvider =
   return repo.listarSpecVersions();
 });
 
-final ecfeSpecPorIdProvider =
-    FutureProvider.autoDispose.family<EcfeSpecVersion?, int>((ref, id) async {
+final ecfeSpecPorIdProvider = FutureProvider.autoDispose
+    .family<EcfeSpecVersion?, int>((ref, id) async {
   return ref.watch(ecfeRepositoryProvider).obtenerSpecPorId(id);
 });
 
@@ -127,8 +125,9 @@ final ecfeSecuenciasProvider =
   return svc.listar();
 });
 
-final certificadoInfoProvider =
-    FutureProvider.autoDispose<CertificadoInfo?>((ref) async {
+final certificadoInfoProvider = FutureProvider.autoDispose<CertificadoInfo?>((
+  ref,
+) async {
   final cfg = await ref.watch(ecfeConfigProvider.future);
   if (cfg.rutaCertificado.trim().isEmpty) return null;
   return CertificadoInfoService.inspeccionar(

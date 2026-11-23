@@ -55,8 +55,9 @@ class _FiltrosCompras {
       textoBusqueda: textoBusqueda ?? this.textoBusqueda,
       soloCredito: clearCredito ? null : (soloCredito ?? this.soloCredito),
       estado: clearEstado ? null : (estado ?? this.estado),
-      tipoComprobante:
-          clearTipo ? null : (tipoComprobante ?? this.tipoComprobante),
+      tipoComprobante: clearTipo
+          ? null
+          : (tipoComprobante ?? this.tipoComprobante),
       montoMin: clearMontos ? null : (montoMin ?? this.montoMin),
       montoMax: clearMontos ? null : (montoMax ?? this.montoMax),
       fechaDesde: clearFechas ? null : (fechaDesde ?? this.fechaDesde),
@@ -75,8 +76,9 @@ class _FiltrosCompras {
       fechaHasta != null;
 }
 
-final _filtrosComprasProvider =
-    StateProvider.autoDispose<_FiltrosCompras>((ref) => const _FiltrosCompras());
+final _filtrosComprasProvider = StateProvider.autoDispose<_FiltrosCompras>(
+  (ref) => const _FiltrosCompras(),
+);
 
 /// Lista de compras — layout analítica (HTML mock).
 class ListaComprasPage extends ConsumerWidget {
@@ -94,7 +96,8 @@ class ListaComprasPage extends ConsumerWidget {
     return compras.where((c) {
       if (f.textoBusqueda.isNotEmpty) {
         final q = f.textoBusqueda.toLowerCase();
-        final match = c.nombreProveedor.toLowerCase().contains(q) ||
+        final match =
+            c.nombreProveedor.toLowerCase().contains(q) ||
             c.ncf.toLowerCase().contains(q) ||
             c.numeroComprobante.toLowerCase().contains(q) ||
             c.id.toString().contains(q);
@@ -146,11 +149,7 @@ class ListaComprasPage extends ConsumerWidget {
     if (vencida &&
         (estado == EstadoCompra.registrada ||
             estado == EstadoCompra.confirmada)) {
-      return (
-        'Vencida',
-        const Color(0xFFFFEBEE),
-        const Color(0xFFC62828),
-      );
+      return ('Vencida', const Color(0xFFFFEBEE), const Color(0xFFC62828));
     }
     return switch (estado) {
       EstadoCompra.pagada => (
@@ -198,7 +197,8 @@ class ListaComprasPage extends ConsumerWidget {
     final confirmarCompra = ref.read(confirmarCompraUseCaseProvider);
     final anularCompra = ref.read(anularCompraProvider);
     final isMobile = AppBreakpoints.isMobile(context);
-    final modoSimplificado = ref
+    final modoSimplificado =
+        ref
             .watch(configuracionControllerProvider)
             .valueOrNull
             ?.modoSimplificado ??
@@ -245,8 +245,9 @@ class ListaComprasPage extends ConsumerWidget {
                       children: [
                         Text(
                           'Filtros de compras',
-                          style: AppTypography.h4
-                              .copyWith(fontWeight: FontWeight.bold),
+                          style: AppTypography.h4.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         TextField(
@@ -266,10 +267,8 @@ class ListaComprasPage extends ConsumerWidget {
                         SegmentedButton<bool?>(
                           segments: const [
                             ButtonSegment(value: null, label: Text('Todos')),
-                            ButtonSegment(
-                                value: false, label: Text('Contado')),
-                            ButtonSegment(
-                                value: true, label: Text('Crédito')),
+                            ButtonSegment(value: false, label: Text('Contado')),
+                            ButtonSegment(value: true, label: Text('Crédito')),
                           ],
                           selected: {creditoSel},
                           onSelectionChanged: (s) =>
@@ -299,8 +298,7 @@ class ListaComprasPage extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          onChanged: (v) =>
-                              setModalState(() => estadoSel = v),
+                          onChanged: (v) => setModalState(() => estadoSel = v),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -341,8 +339,10 @@ class ListaComprasPage extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                icon: const Icon(Icons.calendar_today,
-                                    size: 16),
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 16,
+                                ),
                                 label: Text(
                                   desde == null
                                       ? 'Desde'
@@ -353,8 +353,9 @@ class ListaComprasPage extends ConsumerWidget {
                                     context: ctx,
                                     initialDate: desde ?? DateTime.now(),
                                     firstDate: DateTime(2020),
-                                    lastDate: DateTime.now()
-                                        .add(const Duration(days: 365)),
+                                    lastDate: DateTime.now().add(
+                                      const Duration(days: 365),
+                                    ),
                                   );
                                   if (picked != null) {
                                     setModalState(() => desde = picked);
@@ -365,8 +366,10 @@ class ListaComprasPage extends ConsumerWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: OutlinedButton.icon(
-                                icon: const Icon(Icons.calendar_today,
-                                    size: 16),
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 16,
+                                ),
                                 label: Text(
                                   hasta == null
                                       ? 'Hasta'
@@ -377,8 +380,9 @@ class ListaComprasPage extends ConsumerWidget {
                                     context: ctx,
                                     initialDate: hasta ?? DateTime.now(),
                                     firstDate: DateTime(2020),
-                                    lastDate: DateTime.now()
-                                        .add(const Duration(days: 365)),
+                                    lastDate: DateTime.now().add(
+                                      const Duration(days: 365),
+                                    ),
                                   );
                                   if (picked != null) {
                                     setModalState(() => hasta = picked);
@@ -395,8 +399,11 @@ class ListaComprasPage extends ConsumerWidget {
                               child: OutlinedButton(
                                 onPressed: () {
                                   ref
-                                      .read(_filtrosComprasProvider.notifier)
-                                      .state = const _FiltrosCompras();
+                                          .read(
+                                            _filtrosComprasProvider.notifier,
+                                          )
+                                          .state =
+                                      const _FiltrosCompras();
                                   Navigator.pop(ctx);
                                 },
                                 child: const Text('Limpiar'),
@@ -406,7 +413,7 @@ class ListaComprasPage extends ConsumerWidget {
                             Expanded(
                               child: FilledButton(
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF00796B),
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
                                 ),
                                 onPressed: () {
                                   ref
@@ -477,8 +484,10 @@ class ListaComprasPage extends ConsumerWidget {
                     c.estado != EstadoCompra.borrador &&
                     c.estado != EstadoCompra.anulada,
               );
-              final totalMes =
-                  delMes.fold<double>(0, (s, c) => s + c.totalCompra);
+              final totalMes = delMes.fold<double>(
+                0,
+                (s, c) => s + c.totalCompra,
+              );
               final porPagar = todas
                   .where(
                     (c) =>
@@ -488,8 +497,10 @@ class ListaComprasPage extends ConsumerWidget {
                         c.estado != EstadoCompra.borrador,
                   )
                   .fold<double>(0, (s, c) => s + c.totalCompra);
-              final proveedores =
-                  todas.map((c) => c.nombreProveedor).toSet().length;
+              final proveedores = todas
+                  .map((c) => c.nombreProveedor)
+                  .toSet()
+                  .length;
               final mesLabel = switch (now.month) {
                 1 => 'Enero',
                 2 => 'Febrero',
@@ -515,8 +526,8 @@ class ListaComprasPage extends ConsumerWidget {
                       const _FiltrosCompras();
                   return;
                 }
-                ref.read(_filtrosComprasProvider.notifier).state =
-                    filtros.copyWith(
+                ref.read(_filtrosComprasProvider.notifier).state = filtros
+                    .copyWith(
                   estado: estado,
                   soloCredito: credito,
                   clearEstado: estado == null && credito == null,
@@ -527,8 +538,10 @@ class ListaComprasPage extends ConsumerWidget {
               Widget compraCard(Compra compra) {
                 final idLimpio = _limpiarId(compra.id);
                 final vencida = compra.estaVencida;
-                final (estadoTexto, bg, fg) =
-                    _estadoChip(compra.estado, vencida);
+                final (estadoTexto, bg, fg) = _estadoChip(
+                  compra.estado,
+                  vencida,
+                );
                 final titulo = compra.numeroComprobante.isNotEmpty
                     ? compra.numeroComprobante
                     : 'Compra #${compra.id}';
@@ -593,14 +606,14 @@ class ListaComprasPage extends ConsumerWidget {
                 Future<void> duplicar() async {
                   try {
                     final repo = ref.read(compraRepositoryProvider);
-                    final detalles =
-                        await repo.listarDetallesDeCompra(compra.id);
+                    final detalles = await repo.listarDetallesDeCompra(
+                      compra.id,
+                    );
                     final ahora = DateTime.now();
                     final nuevoId = ahora.millisecondsSinceEpoch;
                     final nuevaCompra = compra.copyWith(
                       id: nuevoId,
-                      numeroComprobante:
-                          '${compra.numeroComprobante}-COPIA',
+                      numeroComprobante: '${compra.numeroComprobante}-COPIA',
                       estado: EstadoCompra.borrador,
                       fechaEmision: ahora,
                       fechaConfirmacion: null,
@@ -612,10 +625,7 @@ class ListaComprasPage extends ConsumerWidget {
                     for (var i = 0; i < detalles.length; i++) {
                       final d = detalles[i];
                       nuevosDetalles.add(
-                        d.copyWith(
-                          id: nuevoId * 1000 + i,
-                          compraId: nuevoId,
-                        ),
+                        d.copyWith(id: nuevoId * 1000 + i, compraId: nuevoId),
                       );
                     }
                     await repo.registrarCompra(
@@ -647,9 +657,7 @@ class ListaComprasPage extends ConsumerWidget {
                     ..writeln(
                       'N°: ${compra.numeroComprobante.isNotEmpty ? compra.numeroComprobante : compra.id}',
                     )
-                    ..writeln(
-                      'Fecha: ${_formatearFecha(compra.fechaEmision)}',
-                    )
+                    ..writeln('Fecha: ${_formatearFecha(compra.fechaEmision)}')
                     ..writeln('Proveedor: ${compra.nombreProveedor}')
                     ..writeln(
                       'Pago: ${compra.esCredito ? 'Crédito' : 'Contado'}',
@@ -718,7 +726,7 @@ class ListaComprasPage extends ConsumerWidget {
                         EstadoCompra.recibida => const Color(0xFF7B1FA2),
                         EstadoCompra.borrador => const Color(0xFFF9A825),
                         EstadoCompra.anulada => const Color(0xFFC62828),
-                        EstadoCompra.vencida => const Color(0xFF00796B),
+                        EstadoCompra.vencida => Theme.of(context).colorScheme.primary,
                       };
                 return Material(
                   color: Colors.white,
@@ -900,20 +908,20 @@ class ListaComprasPage extends ConsumerWidget {
                               ),
                               InkWell(
                                 onTap: verDetalle,
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
                                       Icons.visibility_outlined,
                                       size: 15,
-                                      color: Color(0xFF00796B),
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
                                     SizedBox(width: 4),
                                     Text(
                                       'Ver más',
                                       style: TextStyle(
                                         fontSize: 12.5,
-                                        color: Color(0xFF00796B),
+                                        color: Theme.of(context).colorScheme.primary,
                                       ),
                                     ),
                                   ],
@@ -928,21 +936,16 @@ class ListaComprasPage extends ConsumerWidget {
                 );
               }
 
-
-
-
-
-
-
               Widget kpi({
                 required String title,
                 required String value,
                 required String sub,
                 IconData icon = Icons.show_chart,
                 Color? valueColor,
-                Color accent = const Color(0xFF00796B),
+                Color? accent,
               }) {
-                final accentColor = valueColor ?? accent;
+                final accentColor =
+                    valueColor ?? accent ?? Theme.of(context).colorScheme.primary;
                 return Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -1012,7 +1015,7 @@ class ListaComprasPage extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Material(
                     color: active
-                        ? const Color(0xFF00796B)
+                        ? Theme.of(context).colorScheme.primary
                         : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(6),
                     child: InkWell(
@@ -1122,7 +1125,7 @@ class ListaComprasPage extends ConsumerWidget {
                       icon: const Icon(Icons.add),
                       label: const Text('Nueva Compra / Gasto'),
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF00796B),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -1148,9 +1151,7 @@ class ListaComprasPage extends ConsumerWidget {
                       value: formatRd(porPagar),
                       sub: 'Crédito no pagado',
                       icon: Icons.description_outlined,
-                      valueColor: porPagar > 0
-                          ? const Color(0xFFC62828)
-                          : null,
+                      valueColor: porPagar > 0 ? const Color(0xFFC62828) : null,
                     ),
                     const SizedBox(height: 16),
                     aside,
@@ -1181,8 +1182,7 @@ class ListaComprasPage extends ConsumerWidget {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () =>
-                              context.go('/compras'),
+                          onPressed: () => context.go('/compras'),
                           icon: const Icon(Icons.arrow_back),
                           tooltip: 'Atrás',
                         ),
@@ -1220,7 +1220,10 @@ class ListaComprasPage extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(right: 8, bottom: 16),
+                              padding: const EdgeInsets.only(
+                                right: 8,
+                                bottom: 16,
+                              ),
                             child: Column(
                             children: [
                               Row(
@@ -1230,7 +1233,7 @@ class ListaComprasPage extends ConsumerWidget {
                                       title: 'Resumen del Mes ($mesLabel)',
                                       value: formatRd(totalMes),
                                       sub: 'Total Compras',
-                                      accent: const Color(0xFF00796B),
+                                      accent: Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -1281,14 +1284,17 @@ class ListaComprasPage extends ConsumerWidget {
                                   child: const Text(
                                     'Ninguna compra coincide con los filtros',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(color: Color(0xFF64748B)),
+                                        style: TextStyle(
+                                          color: Color(0xFF64748B),
+                                        ),
                                   ),
                                 )
                               else
                                 LayoutBuilder(
                                   builder: (context, c) {
                                     // 2 pares por fila en desktop: [compra|notas] [compra|notas]
-                                    const cols = 2; // HTML: grid-template-columns: repeat(2, 1fr)
+                                        const cols =
+                                            2; // HTML: grid-template-columns: repeat(2, 1fr)
                                     return GridView.builder(
                                       shrinkWrap: true,
                                       physics:
@@ -1336,7 +1342,7 @@ class ListaComprasPage extends ConsumerWidget {
                       : RegistrarCompraPage.routeName,
                 );
               },
-              backgroundColor: const Color(0xFF00796B),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Nueva Compra',

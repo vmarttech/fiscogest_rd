@@ -108,7 +108,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
       title: 'EMITIR NOTA DE CRÉDITO',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -126,7 +126,9 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
               docs: docs,
               fmt: _fmt,
               seleccionadoId: _sel?.id,
-              onTap: (d) => setState(() { _sel = d; }),
+              onTap: (d) => setState(() {
+                _sel = d;
+              }),
             );
             final panel = _sel == null
                 ? _NcPanelVacio(
@@ -247,7 +249,7 @@ class _ListaFacturasNc extends StatelessWidget {
           final sel = seleccionadoId == d.id;
           return Material(
             color: sel
-                ? AppColors.primary.withValues(alpha: 0.08)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
                 : Colors.transparent,
             child: InkWell(
               onTap: () => onTap(d),
@@ -261,7 +263,7 @@ class _ListaFacturasNc extends StatelessWidget {
                     Icon(
                       sel ? Icons.radio_button_checked : Icons.radio_button_off,
                       size: 20,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -315,7 +317,7 @@ class _NcPanelVacio extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.assignment_return_outlined,
                 size: 48,
                 color: AppColors.grey300,
@@ -364,7 +366,7 @@ class _NcPanelEmitir extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.assignment_return_outlined,
                   color: AppColors.warning,
                 ),
@@ -402,7 +404,7 @@ class _NcPanelEmitir extends StatelessWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.check, size: 20),
+                : Icon(Icons.check, size: 20),
             label: Text(busy ? 'Emitiendo…' : 'Emitir B04'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.warning,

@@ -50,7 +50,6 @@ Dirección del acreedor: {{DIRECCION_EMPRESA}} · Tel: {{TELEFONO_EMPRESA}}
 ''';
 }
 
-
 class ConfigCreditoPage extends ConsumerStatefulWidget {
   const ConfigCreditoPage({super.key});
 
@@ -104,7 +103,6 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
     _cargado = true;
   }
 
-
   void _cargarModeloSolicitud() {
     setState(() {
       _plantillaSolCtrl.text = CreditoPlantillasModelo.solicitud.trim();
@@ -145,7 +143,11 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
             cuotasDefault: int.tryParse(_cuotasCtrl.text) ?? 12,
             plazoMaxMeses: int.tryParse(_plazoCtrl.text) ?? 24,
             diasGracia: int.tryParse(_graciaCtrl.text) ?? 0,
-            capacidadPagoPorcentaje: ((double.tryParse(_capacidadCtrl.text.replaceAll(',', '.')) ?? 30) / 100).clamp(0.05, 1.0),
+            capacidadPagoPorcentaje:
+                ((double.tryParse(_capacidadCtrl.text.replaceAll(',', '.')) ??
+                            30) /
+                        100)
+                    .clamp(0.05, 1.0),
             moraPorcentaje: mora,
             plantillaSolicitud: _plantillaSolCtrl.text.trim(),
             plantillaContrato: _plantillaConCtrl.text.trim(),
@@ -170,7 +172,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -386,7 +391,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                         children: [
                           OutlinedButton.icon(
                             onPressed: _cargarModeloSolicitud,
-                            icon: const Icon(Icons.description_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.description_outlined,
+                              size: 18,
+                            ),
                             label: const Text('Cargar modelo'),
                           ),
                           TextButton(
@@ -435,7 +443,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                         children: [
                           OutlinedButton.icon(
                             onPressed: _cargarModeloContrato,
-                            icon: const Icon(Icons.description_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.description_outlined,
+                              size: 18,
+                            ),
                             label: const Text('Cargar modelo'),
                           ),
                           TextButton(

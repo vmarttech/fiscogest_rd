@@ -43,11 +43,7 @@ class HistorialApartados extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: AppColors.error,
-                    ),
+                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: AppSpacing.m),
                     Text(
                       'Error al cargar apartados: $e',
@@ -65,7 +61,7 @@ class HistorialApartados extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.inventory_2_outlined,
                           size: 64,
                           color: Color(0x409E9E9E),
@@ -144,12 +140,12 @@ class _TarjetaApartado extends StatelessWidget {
   final double saldoPendiente;
   final String estado;
 
-  Color _colorEstado() {
+  Color _colorEstado(BuildContext context) {
     final String e = estado.toUpperCase();
     if (e == 'PAGADO' || e == 'COMPLETADO') return Colors.green;
     if (e == 'VENCIDO') return AppColors.error;
     if (e == 'CANCELADO') return Colors.grey;
-    return AppColors.primary;
+    return Theme.of(context).colorScheme.primary;
   }
 
   @override
@@ -177,13 +173,13 @@ class _TarjetaApartado extends StatelessWidget {
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: _colorEstado().withValues(alpha: 0.1),
+                  color: _colorEstado(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   estado,
                   style: AppTypography.labelSmall.copyWith(
-                    color: _colorEstado(),
+                    color: _colorEstado(context),
                     fontSize: 10,
                   ),
                 ),
@@ -238,7 +234,7 @@ class _TarjetaApartado extends StatelessWidget {
                         value: porcentajePagado,
                         backgroundColor: Colors.grey.shade200,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          _colorEstado(),
+                          _colorEstado(context),
                         ),
                         minHeight: 6,
                       ),

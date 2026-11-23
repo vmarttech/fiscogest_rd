@@ -47,7 +47,10 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (fecha != null) setState(() { _fechaSeleccionada = fecha; });
+    if (fecha != null)
+      setState(() {
+        _fechaSeleccionada = fecha;
+      });
   }
 
   Future<void> _guardarSalida() async {
@@ -93,7 +96,9 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
           child: SingleChildScrollView(
             padding: AppLayout.pantallaPadding,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900,
+              ),
               child: AppCard(
                 padding: AppSpacing.allXl,
                 elevation: 2,

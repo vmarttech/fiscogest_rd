@@ -17,7 +17,8 @@ class RenovarToken {
     if (!forzar) {
       final jwt = await SesionNube.tokenVigente();
       final exp = await SesionNube.expiraEn();
-      final holgado = jwt != null &&
+      final holgado =
+          jwt != null &&
           jwt.isNotEmpty &&
           (exp == null ||
               exp.isAfter(DateTime.now().add(const Duration(minutes: 2))));

@@ -20,7 +20,7 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveColor = color ?? _colorForType(type);
+    final Color effectiveColor = color ?? _colorForType(type, context);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -42,13 +42,13 @@ class StatusChip extends StatelessWidget {
     );
   }
 
-  Color _colorForType(StatusChipType type) {
+  Color _colorForType(StatusChipType type, BuildContext context) {
     return switch (type) {
       StatusChipType.success => AppColors.success,
       StatusChipType.warning => AppColors.warning,
       StatusChipType.error => AppColors.error,
       StatusChipType.info => AppColors.info,
-      StatusChipType.primary => AppColors.primary,
+      StatusChipType.primary => Theme.of(context).colorScheme.primary,
       StatusChipType.neutral => AppColors.grey500,
     };
   }

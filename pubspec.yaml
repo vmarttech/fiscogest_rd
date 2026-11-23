@@ -92,3 +92,10 @@ flutter_launcher_icons:
   linux:
     generate: true
     image_path: "assets/branding/app_icon.png"
+
+flutter_native_splash:
+  image: assets/branding/app_icon.png
+  color: "#0F766E"
+  android: true
+  ios: true
+  web: true

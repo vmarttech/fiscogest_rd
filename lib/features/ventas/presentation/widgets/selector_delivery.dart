@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
@@ -93,7 +92,7 @@ class _SelectorDeliveryDialogState
         children: [
           Icon(
             Icons.delivery_dining,
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             size: tamanoIcono,
           ),
           SizedBox(width: espaciadoIconoTitulo),
@@ -128,7 +127,9 @@ class _SelectorDeliveryDialogState
                 title: Text(
                   nombre,
                   style: AppTypography.labelMedium.copyWith(
-                    color: seleccionada ? AppColors.primary : null,
+                    color: seleccionada
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
                     fontWeight: seleccionada ? FontWeight.w600 : null,
                   ),
                 ),
@@ -137,7 +138,9 @@ class _SelectorDeliveryDialogState
                   style: AppTypography.labelSmall,
                 ),
                 selected: seleccionada,
-                selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
+                selectedTileColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.08),
                 onTap: () => _seleccionarOpcion(nombre, monto),
               );
             }),

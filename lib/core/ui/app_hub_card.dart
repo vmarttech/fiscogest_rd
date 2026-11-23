@@ -30,8 +30,12 @@ class _AppHubCardState extends State<AppHubCard> {
   Widget build(BuildContext context) {
     final c = widget.color;
     return MouseRegion(
-      onEnter: (_) => setState(() { _hover = true; }),
-      onExit: (_) => setState(() { _hover = false; }),
+      onEnter: (_) => setState(() {
+        _hover = true;
+      }),
+      onExit: (_) => setState(() {
+        _hover = false;
+      }),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
@@ -55,7 +59,9 @@ class _AppHubCardState extends State<AppHubCard> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: c.withValues(alpha: _hover ? 0.18 : 0.08),
+                    color: AppColors.grey900.withValues(
+                      alpha: _hover ? 0.12 : 0.06,
+                    ),
                     blurRadius: _hover ? 22 : 14,
                     offset: Offset(0, _hover ? 10 : 6),
                   ),
@@ -128,7 +134,9 @@ class _AppHubCardState extends State<AppHubCard> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: c.withValues(alpha: 0.25),
+                                  color: AppColors.grey900.withValues(
+                                    alpha: 0.08,
+                                  ),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),

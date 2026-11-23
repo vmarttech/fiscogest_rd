@@ -156,8 +156,9 @@ class CajaRepositoryImpl implements ICajaRepository {
     final saldoAnterior =
         await cajaMovimientosDao.obtenerSaldoLedgerGlobal() ?? 0.0;
     final esIngreso = tipo == 'ingreso' || tipo == 'entrada';
-    final saldoNuevo =
-        esIngreso ? saldoAnterior + monto : saldoAnterior - monto;
+    final saldoNuevo = esIngreso
+        ? saldoAnterior + monto
+        : saldoAnterior - monto;
 
     final refTipo = _parseReferenciaTipo(referencia, descripcion);
     final refId =
@@ -304,5 +305,4 @@ class CajaRepositoryImpl implements ICajaRepository {
       montoContado: s.montoContado,
     );
   }
-
 }

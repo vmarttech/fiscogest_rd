@@ -40,7 +40,7 @@ class BotonesAccionVenta extends StatelessWidget {
     final movil = AppBreakpoints.isMobile(context);
     final limpiar = OutlinedButton.icon(
       onPressed: alLimpiar,
-      icon: const Icon(Icons.refresh),
+      icon: Icon(Icons.refresh),
       label: const Text('Limpiar'),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -77,4 +77,4 @@ class BotonesAccionVenta extends StatelessWidget {
   }
 }
 
-// design: AppColors.primary available
+// design: Theme.of(context).colorScheme.primary available

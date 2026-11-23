@@ -58,8 +58,8 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     _ => 'Borrador',
   };
 
-  Color _colorEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.cotizado => AppColors.primary,
+  Color _colorEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
+    EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
     EstadoDocumento.enCredito => const Color(0xFFE65100),
     EstadoDocumento.aprobado => AppColors.success,
     EstadoDocumento.anulado => AppColors.error,
@@ -67,8 +67,10 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     _ => AppColors.textSecondary,
   };
 
-  Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
-    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+  Color _colorFondoEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
+    EstadoDocumento.cotizado => Theme.of(
+      context,
+    ).colorScheme.primary.withValues(alpha: 0.12),
     EstadoDocumento.enCredito => const Color(
       0xFFE65100,
     ).withValues(alpha: 0.12),
@@ -333,7 +335,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
             ),
             child: const Text('Enviar'),
@@ -554,7 +556,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back,
                         color: AppColors.textSecondary,
                       ),
@@ -597,14 +599,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                                   vertical: 3,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _colorFondoEstado(estado),
+                                  color: _colorFondoEstado(estado, context),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   _etiquetaEstado(estado),
                                   style: TextStyle(
                                     fontSize: tamanoEtiqueta,
-                                    color: _colorEstado(estado),
+                                    color: _colorEstado(estado, context),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -630,13 +632,15 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.person_outline,
                           size: 20,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -665,7 +669,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                               Text(
                                 'NCF: $_ncf',
                                 style: AppTypography.labelSmall.copyWith(
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.w700,
                                   fontSize: tamanoEtiqueta,
                                 ),
@@ -830,7 +834,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                             style: AppTypography.h3.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: tamanoTotal,
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ],
@@ -854,6 +858,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                   children: [
                     if (esCotizacionActiva)
                       _chipAccion(
+                        context: context,
                         icon: Icons.print_outlined,
                         label: 'Imprimir',
                         onTap: () => _imprimir(context, ref),
@@ -863,6 +868,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                             _ncf.isNotEmpty) &&
                         !venta.comprobanteEntregaImpreso)
                       _chipAccion(
+                        context: context,
                         icon: Icons.local_shipping_outlined,
                         label: 'Entrega',
                         onTap: () => _imprimirEntrega(context, ref),
@@ -882,6 +888,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       ),
                     if (esCotizacionActiva)
                       _chipAccion(
+                        context: context,
                         icon: Icons.picture_as_pdf_outlined,
                         label: 'PDF',
                         onTap: () => _exportarPDF(context, ref),
@@ -889,6 +896,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       ),
                     if (esCotizacionActiva)
                       _chipAccion(
+                        context: context,
                         icon: Icons.chat_outlined,
                         label: 'Recibo digital',
                         onTap: () => _compartirReciboDigital(context, ref),
@@ -896,12 +904,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       ),
                     if (esCotizacionActiva)
                       _chipAccion(
+                        context: context,
                         icon: Icons.email_outlined,
                         label: 'Enviar',
                         onTap: () => _enviarPorCorreo(context, ref),
                         esPantallaPequena: esPantallaPequena,
                       ),
                     _chipAccion(
+                        context: context,
                       icon: Icons.receipt_long_outlined,
                       label: 'Devolución',
                       onTap: () {
@@ -954,6 +964,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
   }
 
   Widget _chipAccion({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -973,14 +984,18 @@ class _MostrarDetalleVenta extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: AppColors.primary),
+              Icon(
+                icon,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: esPantallaPequena ? 12 : 13,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],
@@ -1015,11 +1030,11 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     height: 48,
                     child: OutlinedButton.icon(
                       onPressed: () => _rechazarCredito(context, ref),
-                      icon: const Icon(Icons.cancel_outlined, size: 18),
+                      icon: Icon(Icons.cancel_outlined, size: 18),
                       label: const Text('Rechazar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
-                        side: const BorderSide(color: AppColors.error),
+                        side: BorderSide(color: AppColors.error),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1032,7 +1047,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     height: 48,
                     child: ElevatedButton.icon(
                       onPressed: () => _aprobarCredito(context, ref),
-                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      icon: Icon(Icons.check_circle_outline, size: 18),
                       label: const Text('APROBAR CRÉDITO'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.success,
@@ -1066,7 +1081,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: puedeIrACaja
                             ? AppColors.success
-                            : AppColors.primary,
+                            : Theme.of(context).colorScheme.primary,
                         foregroundColor: AppColors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -1115,7 +1130,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       height: altura,
                       child: OutlinedButton.icon(
                         onPressed: () => _rechazarCredito(context, ref),
-                        icon: const Icon(Icons.cancel_outlined, size: 18),
+                        icon: Icon(Icons.cancel_outlined, size: 18),
                         label: Text(
                           'Rechazar',
                           style: TextStyle(
@@ -1125,7 +1140,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.error,
-                          side: const BorderSide(color: AppColors.error),
+                          side: BorderSide(color: AppColors.error),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1140,7 +1155,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       height: altura,
                       child: ElevatedButton.icon(
                         onPressed: () => _aprobarCredito(context, ref),
-                        icon: const Icon(Icons.check_circle_outline, size: 18),
+                        icon: Icon(Icons.check_circle_outline, size: 18),
                         label: Text(
                           'APROBAR CRÉDITO',
                           style: TextStyle(
@@ -1188,7 +1203,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: puedeIrACaja
                         ? AppColors.success
-                        : AppColors.primary,
+                        : Theme.of(context).colorScheme.primary,
                     foregroundColor: AppColors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

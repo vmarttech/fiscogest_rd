@@ -54,13 +54,14 @@ class SyncPull {
       final username = (r['username'] as String?)?.trim() ?? '';
       if (username.isEmpty) continue;
 
-      final existing = await (_db.select(_db.usuariosTable)
-            ..where((t) => t.username.equals(username)))
-          .getSingleOrNull();
+      final existing = await (_db.select(
+        _db.usuariosTable,
+      )..where((t) => t.username.equals(username))).getSingleOrNull();
 
       final nombreRecibido = (r['nombre'] as String?)?.trim() ?? '';
       // Do not let malformed remote data replace a valid local name.
-      final nombreSeguro = nombreRecibido.isNotEmpty &&
+      final nombreSeguro =
+          nombreRecibido.isNotEmpty &&
               nombreRecibido.length <= _maxNombreUsuarioLength
           ? nombreRecibido
           : null;
@@ -69,7 +70,9 @@ class SyncPull {
       final hash = (r['password_hash'] as String?)?.trim() ?? '';
 
       if (existing == null) {
-        await _db.into(_db.usuariosTable).insert(
+        await _db
+            .into(_db.usuariosTable)
+            .insert(
               UsuariosTableCompanion.insert(
                 nombre: nombreSeguro ?? username,
                 username: username,
@@ -82,9 +85,9 @@ class SyncPull {
               ),
             );
       } else {
-        await (_db.update(_db.usuariosTable)
-              ..where((t) => t.id.equals(existing.id)))
-            .write(
+        await (_db.update(
+          _db.usuariosTable,
+        )..where((t) => t.id.equals(existing.id))).write(
           UsuariosTableCompanion(
             nombre: nombreSeguro == null
                 ? const Value.absent()
@@ -92,9 +95,7 @@ class SyncPull {
             rol: Value(rol),
             estado: Value(activo ? 'Activo' : 'Inactivo'),
             // Si la nube trae hash, SIEMPRE actualizar local
-            passwordHash: hash.isNotEmpty
-                ? Value(hash)
-                : const Value.absent(),
+            passwordHash: hash.isNotEmpty ? Value(hash) : const Value.absent(),
             requiereSetupInicial: const Value(false),
           ),
         );
@@ -116,14 +117,14 @@ class SyncPull {
 
       ProductoData? existing;
       if (idLocal is int) {
-        existing = await (_db.select(_db.productosTable)
-              ..where((t) => t.id.equals(idLocal)))
-            .getSingleOrNull();
+        existing = await (_db.select(
+          _db.productosTable,
+        )..where((t) => t.id.equals(idLocal))).getSingleOrNull();
       }
       if (existing == null && codigo.isNotEmpty) {
-        existing = await (_db.select(_db.productosTable)
-              ..where((t) => t.codigo.equals(codigo)))
-            .getSingleOrNull();
+        existing = await (_db.select(
+          _db.productosTable,
+        )..where((t) => t.codigo.equals(codigo))).getSingleOrNull();
       }
 
       final precioVenta = _toDouble(r['precio_venta']);
@@ -134,9 +135,13 @@ class SyncPull {
 
       if (existing == null) {
         if (activo == 0) continue;
-        await _db.into(_db.productosTable).insert(
+        await _db
+            .into(_db.productosTable)
+            .insert(
               ProductosTableCompanion.insert(
-                codigo: codigo.isEmpty ? 'P-${DateTime.now().millisecondsSinceEpoch}' : codigo,
+                codigo: codigo.isEmpty
+                    ? 'P-${DateTime.now().millisecondsSinceEpoch}'
+                    : codigo,
                 nombre: nombre.isEmpty ? codigo : nombre,
                 categoriaId: 0,
                 marcaId: 0,
@@ -151,9 +156,9 @@ class SyncPull {
         // Soft-delete local gana: no reactivar con activo=1 del remoto
         // (si el push aún no propagó activo=false).
         final activoFinal = existing.activo == 0 ? 0 : activo;
-        await (_db.update(_db.productosTable)
-              ..where((t) => t.id.equals(existing!.id)))
-            .write(
+        await (_db.update(
+          _db.productosTable,
+        )..where((t) => t.id.equals(existing!.id))).write(
           ProductosTableCompanion(
             codigo: Value(codigo.isEmpty ? existing.codigo : codigo),
             nombre: Value(nombre.isEmpty ? existing.nombre : nombre),
@@ -181,14 +186,14 @@ class SyncPull {
 
       dynamic existing;
       if (idLocal is int) {
-        existing = await (_db.select(_db.clientesTable)
-              ..where((t) => t.id.equals(idLocal)))
-            .getSingleOrNull();
+        existing = await (_db.select(
+          _db.clientesTable,
+        )..where((t) => t.id.equals(idLocal))).getSingleOrNull();
       }
       if (existing == null && codigo.isNotEmpty) {
-        existing = await (_db.select(_db.clientesTable)
-              ..where((t) => t.codigo.equals(codigo)))
-            .getSingleOrNull();
+        existing = await (_db.select(
+          _db.clientesTable,
+        )..where((t) => t.codigo.equals(codigo))).getSingleOrNull();
       }
 
       final telefono = (r['telefono'] as String?) ?? '';
@@ -199,7 +204,9 @@ class SyncPull {
         final cod = codigo.isEmpty
             ? 'CLI-${DateTime.now().millisecondsSinceEpoch}'
             : codigo;
-        await _db.into(_db.clientesTable).insert(
+        await _db
+            .into(_db.clientesTable)
+            .insert(
               ClientesTableCompanion.insert(
                 codigo: cod,
                 nombre: nombre,
@@ -211,9 +218,9 @@ class SyncPull {
               ),
             );
       } else {
-        await (_db.update(_db.clientesTable)
-              ..where((t) => t.id.equals(existing.id as int)))
-            .write(
+        await (_db.update(
+          _db.clientesTable,
+        )..where((t) => t.id.equals(existing.id as int))).write(
           ClientesTableCompanion(
             nombre: Value(nombre),
             telefono: Value(telefono),
@@ -235,19 +242,22 @@ class SyncPull {
       final ref = (r['referencia'] as String?) ?? '';
       if (ref.isEmpty) continue;
 
-      final existing = await (_db.select(_db.pedidosLicenciaTable)
-            ..where((t) => t.referencia.equals(ref)))
-          .getSingleOrNull();
+      final existing = await (_db.select(
+        _db.pedidosLicenciaTable,
+      )..where((t) => t.referencia.equals(ref))).getSingleOrNull();
 
       final plan = (r['plan'] as String?) ?? '';
       final vigencia = (r['vigencia_tipo'] as String?) ?? '';
       final monto = _toDouble(r['monto']);
       final estado = (r['estado'] as String?) ?? 'pendiente_pago';
-      final created = (r['created_at'] as String?) ?? DateTime.now().toIso8601String();
+      final created =
+          (r['created_at'] as String?) ?? DateTime.now().toIso8601String();
       final expires = (r['expires_at'] as String?) ?? '';
 
       if (existing == null) {
-        await _db.into(_db.pedidosLicenciaTable).insert(
+        await _db
+            .into(_db.pedidosLicenciaTable)
+            .insert(
               PedidosLicenciaTableCompanion.insert(
                 referencia: ref,
                 plan: plan,
@@ -259,9 +269,9 @@ class SyncPull {
               ),
             );
       } else {
-        await (_db.update(_db.pedidosLicenciaTable)
-              ..where((t) => t.id.equals(existing.id)))
-            .write(
+        await (_db.update(
+          _db.pedidosLicenciaTable,
+        )..where((t) => t.id.equals(existing.id))).write(
           PedidosLicenciaTableCompanion(
             plan: Value(plan),
             vigenciaTipo: Value(vigencia),
@@ -284,20 +294,23 @@ class SyncPull {
       final fp = (r['fingerprint'] as String?) ?? '';
       if (fp.isEmpty) continue;
 
-      final existing = await (_db.select(_db.dispositivosLicenciaTable)
-            ..where((t) => t.fingerprint.equals(fp)))
-          .getSingleOrNull();
+      final existing = await (_db.select(
+        _db.dispositivosLicenciaTable,
+      )..where((t) => t.fingerprint.equals(fp))).getSingleOrNull();
 
       final remoteId = r['id']?.toString();
       final alias = (r['alias'] as String?) ?? 'Equipo';
       final plataforma = (r['plataforma'] as String?) ?? 'android';
       final tipo = (r['tipo'] as String?) ?? 'movil';
       final activo = r['activo'] != false;
-      final reg = (r['registrado_en'] as String?) ?? DateTime.now().toIso8601String();
+      final reg =
+          (r['registrado_en'] as String?) ?? DateTime.now().toIso8601String();
       final uso = (r['ultimo_uso'] as String?) ?? reg;
 
       if (existing == null) {
-        await _db.into(_db.dispositivosLicenciaTable).insert(
+        await _db
+            .into(_db.dispositivosLicenciaTable)
+            .insert(
               DispositivosLicenciaTableCompanion.insert(
                 fingerprint: fp,
                 plataforma: plataforma,
@@ -312,9 +325,9 @@ class SyncPull {
               ),
             );
       } else {
-        await (_db.update(_db.dispositivosLicenciaTable)
-              ..where((t) => t.id.equals(existing.id)))
-            .write(
+        await (_db.update(
+          _db.dispositivosLicenciaTable,
+        )..where((t) => t.id.equals(existing.id))).write(
           DispositivosLicenciaTableCompanion(
             remoteId: Value(remoteId),
             negocioId: Value(negocioId),
@@ -331,8 +344,6 @@ class SyncPull {
     debugPrint('SyncPull: dispositivos ${rows.length}');
   }
 
-
-
   Future<void> _pullVentas(String negocioId) async {
     final ventas = await _client.select(
       table: 'ventas',
@@ -348,9 +359,9 @@ class SyncPull {
 
       dynamic existing;
       if (idLocalRemote is int) {
-        final byId = await (_db.select(_db.ventasTable)
-              ..where((t) => t.id.equals(idLocalRemote)))
-            .get();
+        final byId = await (_db.select(
+          _db.ventasTable,
+        )..where((t) => t.id.equals(idLocalRemote))).get();
         if (byId.length == 1) {
           existing = byId.first;
         } else if (byId.length > 1) {
@@ -361,9 +372,9 @@ class SyncPull {
       // Equipo nuevo: el autoincrement no coincide → buscar por documento
       // Nunca usar getSingleOrNull: puede haber duplicados locales.
       if (existing == null && numFactura.isNotEmpty) {
-        final candidatos = await (_db.select(_db.ventasTable)
-              ..where((t) => t.numeroFactura.equals(numFactura)))
-            .get();
+        final candidatos = await (_db.select(
+          _db.ventasTable,
+        )..where((t) => t.numeroFactura.equals(numFactura))).get();
         if (candidatos.length == 1) {
           existing = candidatos.first;
         } else if (candidatos.isNotEmpty) {
@@ -371,7 +382,8 @@ class SyncPull {
           final fecha = DateTime.tryParse('${r['fecha'] ?? ''}');
           for (final c in candidatos) {
             final sameMonto = (c.montoTotal - monto).abs() < 0.01;
-            final sameFecha = fecha == null ||
+            final sameFecha =
+                fecha == null ||
                 (c.fecha.year == fecha.year &&
                     c.fecha.month == fecha.month &&
                     c.fecha.day == fecha.day);
@@ -384,9 +396,9 @@ class SyncPull {
         }
       }
       if (existing == null && numCotiz.isNotEmpty) {
-        final candidatos = await (_db.select(_db.ventasTable)
-              ..where((t) => t.numeroCotizacion.equals(numCotiz)))
-            .get();
+        final candidatos = await (_db.select(
+          _db.ventasTable,
+        )..where((t) => t.numeroCotizacion.equals(numCotiz))).get();
         if (candidatos.length == 1) {
           existing = candidatos.first;
         } else if (candidatos.isNotEmpty) {
@@ -394,7 +406,8 @@ class SyncPull {
           final fecha = DateTime.tryParse('${r['fecha'] ?? ''}');
           for (final c in candidatos) {
             final sameMonto = (c.montoTotal - monto).abs() < 0.01;
-            final sameFecha = fecha == null ||
+            final sameFecha =
+                fecha == null ||
                 (c.fecha.year == fecha.year &&
                     c.fecha.month == fecha.month &&
                     c.fecha.day == fecha.day);
@@ -419,7 +432,9 @@ class SyncPull {
 
       int localId;
       if (existing == null) {
-        localId = await _db.into(_db.ventasTable).insert(
+        localId = await _db
+            .into(_db.ventasTable)
+            .insert(
               VentasTableCompanion.insert(
                 clienteId: (r['cliente_id_local'] as int?) ?? 0,
                 fecha: fecha,
@@ -447,21 +462,23 @@ class SyncPull {
                 descuentoId: Value(r['descuento_id'] as int?),
                 descuentoNombre: Value(r['descuento_nombre'] as String?),
                 montoDescuento: Value(_toDouble(r['monto_descuento'])),
-                comprobanteEntregaImpreso:
-                    Value(r['comprobante_entrega_impreso'] == true),
+                comprobanteEntregaImpreso: Value(
+                  r['comprobante_entrega_impreso'] == true,
+                ),
                 fechaComprobanteEntrega: Value(fComp),
               ),
             );
       } else {
         localId = existing.id as int;
-        await (_db.update(_db.ventasTable)
-              ..where((t) => t.id.equals(localId)))
-            .write(
+        await (_db.update(
+          _db.ventasTable,
+        )..where((t) => t.id.equals(localId))).write(
           VentasTableCompanion(
             nombreCliente: Value(r['nombre_cliente'] as String?),
             montoTotal: Value(_toDouble(r['monto_total'])),
-            formaPago:
-                Value((r['forma_pago'] as String?) ?? existing.formaPago as String),
+            formaPago: Value(
+              (r['forma_pago'] as String?) ?? existing.formaPago as String,
+            ),
             estadoDocumento: Value(
               (r['estado_documento'] as String?) ??
                   existing.estadoDocumento as String,
@@ -486,17 +503,19 @@ class SyncPull {
       final idLocal = r['id_local'];
       final ventaIdLocal = r['venta_id_local'];
       if (idLocal is! int || ventaIdLocal is! int) continue;
-      final existing = await (_db.select(_db.ventasDetalleTable)
-            ..where((t) => t.id.equals(idLocal)))
-          .getSingleOrNull();
+      final existing = await (_db.select(
+        _db.ventasDetalleTable,
+      )..where((t) => t.id.equals(idLocal))).getSingleOrNull();
       if (existing != null) continue;
       // Solo insert si la venta local existe
-      final venta = await (_db.select(_db.ventasTable)
-            ..where((t) => t.id.equals(ventaIdLocal)))
-          .getSingleOrNull();
+      final venta = await (_db.select(
+        _db.ventasTable,
+      )..where((t) => t.id.equals(ventaIdLocal))).getSingleOrNull();
       if (venta == null) continue;
       try {
-        await _db.into(_db.ventasDetalleTable).insert(
+        await _db
+            .into(_db.ventasDetalleTable)
+            .insert(
               VentasDetalleTableCompanion.insert(
                 ventaId: ventaIdLocal,
                 productoId: (r['producto_id_local'] as int?) ?? 0,
@@ -519,12 +538,16 @@ class SyncPull {
       table: 'caja_sesiones',
       filters: {'negocio_id': 'eq.$negocioId'},
     );
-    debugPrint('SyncPull: caja_sesiones ${sesiones.length} (push prioritario en v1)');
+    debugPrint(
+      'SyncPull: caja_sesiones ${sesiones.length} (push prioritario en v1)',
+    );
     final movs = await _client.select(
       table: 'caja_movimientos',
       filters: {'negocio_id': 'eq.$negocioId'},
     );
-    debugPrint('SyncPull: caja_movimientos ${movs.length} (push prioritario en v1)');
+    debugPrint(
+      'SyncPull: caja_movimientos ${movs.length} (push prioritario en v1)',
+    );
   }
 
   Future<void> _pullFios(String negocioId) async {
@@ -538,13 +561,15 @@ class SyncPull {
       if (nombre.isEmpty) continue;
       dynamic existing;
       if (idLocal is int) {
-        existing = await (_db.select(_db.fiosTable)
-              ..where((t) => t.id.equals(idLocal)))
-            .getSingleOrNull();
+        existing = await (_db.select(
+          _db.fiosTable,
+        )..where((t) => t.id.equals(idLocal))).getSingleOrNull();
       }
       final fecha = DateTime.tryParse('${r['fecha'] ?? ''}') ?? DateTime.now();
       if (existing == null) {
-        await _db.into(_db.fiosTable).insert(
+        await _db
+            .into(_db.fiosTable)
+            .insert(
               FiosTableCompanion.insert(
                 nombreCliente: nombre,
                 montoOriginal: _toDouble(r['monto_original']),
@@ -557,9 +582,9 @@ class SyncPull {
               ),
             );
       } else {
-        await (_db.update(_db.fiosTable)
-              ..where((t) => t.id.equals(existing.id as int)))
-            .write(
+        await (_db.update(
+          _db.fiosTable,
+        )..where((t) => t.id.equals(existing.id as int))).write(
           FiosTableCompanion(
             montoAbonado: Value(_toDouble(r['monto_abonado'])),
             saldoPendiente: Value(_toDouble(r['saldo_pendiente'])),

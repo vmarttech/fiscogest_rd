@@ -70,7 +70,6 @@ class UsuarioSync {
     );
   }
 
-
   /// Sube un solo usuario (p. ej. tras activar/desactivar).
   Future<void> pushUsuario(UsuarioData u) async {
     if (!SupabaseConfig.isConfigured) return;
@@ -92,7 +91,9 @@ class UsuarioSync {
       rows: [body],
       onConflict: 'negocio_id,username',
     );
-    debugPrint('UsuarioSync: pushUsuario ${u.username} activo=${body['activo']}');
+    debugPrint(
+      'UsuarioSync: pushUsuario ${u.username} activo=${body['activo']}',
+    );
   }
 
   /// Autoridad en nube: ¿este username está activo en el negocio actual?

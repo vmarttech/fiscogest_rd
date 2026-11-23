@@ -27,10 +27,8 @@ class ManifiestoTransferenciaPdf {
         ? 'PROD-${t.productoId}'
         : t.productoCodigo!.trim();
     final nombre = (t.productoNombre ?? 'Producto ${t.productoId}').trim();
-    final origen =
-        t.origenNombre ?? 'Almacén ${t.almacenOrigenId}';
-    final destino =
-        t.destinoNombre ?? 'Almacén ${t.almacenDestinoId}';
+    final origen = t.origenNombre ?? 'Almacén ${t.almacenOrigenId}';
+    final destino = t.destinoNombre ?? 'Almacén ${t.almacenDestinoId}';
     final cant = t.cantidad;
     final nota = (observaciones ?? t.nota ?? '').trim();
 
@@ -116,8 +114,11 @@ class ManifiestoTransferenciaPdf {
                       _kv('Nº Documento', nro, headerStyle),
                       _kv('Almacén Origen', origen, headerStyle),
                       _kv('Almacén Destino', destino, headerStyle),
-                      _kv('Tipo Movimiento', 'Transferencia de Producto',
-                          headerStyle),
+                      _kv(
+                        'Tipo Movimiento',
+                        'Transferencia de Producto',
+                        headerStyle,
+                      ),
                     ],
                   ),
                 ),
@@ -125,20 +126,22 @@ class ManifiestoTransferenciaPdf {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      _kv('Fecha Emisión', _fmtFecha.format(t.fecha),
-                          headerStyle),
-                      _kv('Fecha Envío', _fmtFecha.format(t.fecha),
-                          headerStyle),
                       _kv(
-                        'Transportista / Operador',
-                        () {
-                          final v = (transportista ??
-                                  cfg.transfTransportistaDefault)
-                              .trim();
-                          return v.isEmpty ? '—' : v;
-                        }(),
+                        'Fecha Emisión',
+                        _fmtFecha.format(t.fecha),
                         headerStyle,
                       ),
+                      _kv(
+                        'Fecha Envío',
+                        _fmtFecha.format(t.fecha),
+                        headerStyle,
+                      ),
+                      _kv('Transportista / Operador', () {
+                        final v =
+                            (transportista ?? cfg.transfTransportistaDefault)
+                              .trim();
+                          return v.isEmpty ? '—' : v;
+                      }(), headerStyle),
                       _kv('Nº Manifiesto Ruta', mnf, headerStyle),
                     ],
                   ),
@@ -160,7 +163,10 @@ class ManifiestoTransferenciaPdf {
 
           // Tabla
           pw.Table(
-            border: pw.TableBorder.all(color: PdfColors.blueGrey300, width: 0.5),
+            border: pw.TableBorder.all(
+              color: PdfColors.blueGrey300,
+              width: 0.5,
+            ),
             columnWidths: {
               0: const pw.FlexColumnWidth(1.3),
               1: const pw.FlexColumnWidth(2.4),
@@ -173,7 +179,9 @@ class ManifiestoTransferenciaPdf {
             },
             children: [
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFF1E3A5F)),
+                decoration: const pw.BoxDecoration(
+                  color: PdfColor.fromInt(0xFF1E3A5F),
+                ),
                 children: [
                   _th('Código / EAN'),
                   _th('Descripción Producto'),
@@ -191,7 +199,11 @@ class ManifiestoTransferenciaPdf {
                   _td(nombre, cellStyle),
                   _td('—', cellStyle),
                   _td('—', cellStyle),
-                  _td(_fmtNum.format(cant), cellStyle, align: pw.TextAlign.right),
+                  _td(
+                    _fmtNum.format(cant),
+                    cellStyle,
+                    align: pw.TextAlign.right,
+                  ),
                   _td('—', cellStyle),
                   _td('—', cellStyle, align: pw.TextAlign.right),
                   _td('—', cellStyle, align: pw.TextAlign.right),
@@ -199,14 +211,20 @@ class ManifiestoTransferenciaPdf {
               ),
               // Totales
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: PdfColors.blueGrey100),
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.blueGrey100,
+                ),
                 children: [
                   _td('TOTALES', cellStyle, bold: true),
                   _td('', cellStyle),
                   _td('', cellStyle),
                   _td('', cellStyle),
-                  _td(_fmtNum.format(cant), cellStyle,
-                      bold: true, align: pw.TextAlign.right),
+                  _td(
+                    _fmtNum.format(cant),
+                    cellStyle,
+                    bold: true,
+                    align: pw.TextAlign.right,
+                  ),
                   _td('—', cellStyle, bold: true),
                   _td('—', cellStyle, bold: true, align: pw.TextAlign.right),
                   _td('—', cellStyle, bold: true, align: pw.TextAlign.right),
@@ -287,10 +305,7 @@ class ManifiestoTransferenciaPdf {
     );
     final name =
         'Manifiesto_TR_${t.fecha.year}_${(t.id ?? 0).toString().padLeft(5, '0')}.pdf';
-    await Printing.layoutPdf(
-      onLayout: (_) async => bytes,
-      name: name,
-    );
+    await Printing.layoutPdf(onLayout: (_) async => bytes, name: name);
   }
 
   static pw.Widget _kv(String k, String v, pw.TextStyle style) {
@@ -300,10 +315,7 @@ class ManifiestoTransferenciaPdf {
         text: pw.TextSpan(
           children: [
             pw.TextSpan(text: '$k: ', style: style),
-            pw.TextSpan(
-              text: v,
-              style: const pw.TextStyle(fontSize: 9),
-            ),
+            pw.TextSpan(text: v, style: const pw.TextStyle(fontSize: 9)),
           ],
         ),
       ),
@@ -327,15 +339,12 @@ class ManifiestoTransferenciaPdf {
     pw.TextStyle style, {
     bool bold = false,
     pw.TextAlign align = pw.TextAlign.left,
-  }) =>
-      pw.Padding(
+  }) => pw.Padding(
         padding: const pw.EdgeInsets.all(4),
         child: pw.Text(
           t,
           textAlign: align,
-          style: bold
-              ? style.copyWith(fontWeight: pw.FontWeight.bold)
-              : style,
+      style: bold ? style.copyWith(fontWeight: pw.FontWeight.bold) : style,
         ),
       );
 
@@ -361,7 +370,10 @@ class ManifiestoTransferenciaPdf {
               pw.Text(
                 sub,
                 textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey600),
+                style: const pw.TextStyle(
+                  fontSize: 7,
+                  color: PdfColors.grey600,
+                ),
               ),
             ],
           ),

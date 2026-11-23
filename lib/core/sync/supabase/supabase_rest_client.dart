@@ -34,8 +34,9 @@ class SupabaseRestClient {
 
   Uri _uri(String table, [Map<String, String>? query]) {
     final t = table.toLowerCase();
-    return Uri.parse('${SupabaseConfig.url}/rest/v1/$t')
-        .replace(queryParameters: query);
+    return Uri.parse(
+      '${SupabaseConfig.url}/rest/v1/$t',
+    ).replace(queryParameters: query);
   }
 
   Future<Map<String, String>> _headers({
@@ -58,7 +59,11 @@ class SupabaseRestClient {
     };
   }
 
-  Future<http.Response> _post(Uri uri, String body, {required bool usarJwt}) async {
+  Future<http.Response> _post(
+    Uri uri,
+    String body, {
+    required bool usarJwt,
+  }) async {
     final h = await _headers(upsert: true, usarJwt: usarJwt);
     return _http.post(uri, headers: h, body: body).timeout(_timeout);
   }
@@ -94,17 +99,15 @@ class SupabaseRestClient {
         );
       }
     }
-    final uri = _uri(table).replace(
-      queryParameters: {'on_conflict': onConflict},
-    );
+    final uri = _uri(
+      table,
+    ).replace(queryParameters: {'on_conflict': onConflict});
     final body = jsonEncode(rows);
     // Solo JWT en tablas de negocio. Anon solo en tablas de plataforma
     // que no estén en _tablasConNegocio.
     final res = await _post(uri, body, usarJwt: true);
     if (res.statusCode >= 300) {
-      throw Exception(
-        'Supabase upsert $table: ${res.statusCode} ${res.body}',
-      );
+      throw Exception('Supabase upsert $table: ${res.statusCode} ${res.body}');
     }
   }
 
@@ -145,14 +148,10 @@ class SupabaseRestClient {
       res = await _get(uri, usarJwt: false);
     }
     if (res.statusCode >= 300) {
-      throw Exception(
-        'Supabase select $table: ${res.statusCode} ${res.body}',
-      );
+      throw Exception('Supabase select $table: ${res.statusCode} ${res.body}');
     }
     final decoded = jsonDecode(res.body);
     if (decoded is! List) return [];
-    return decoded
-        .map((e) => Map<String, dynamic>.from(e as Map))
-        .toList();
+    return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 }

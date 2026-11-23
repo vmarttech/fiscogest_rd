@@ -176,7 +176,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
       title: 'EMITIR FACTURA',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -207,7 +207,9 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
                     venta: _seleccion!,
                     tipoNcf: _tipoNcf,
                     emitiendo: _emitiendo,
-                    onTipo: (t) => setState(() { _tipoNcf = t; }),
+                    onTipo: (t) => setState(() {
+                      _tipoNcf = t;
+                    }),
                     onEmitir: _emitir,
                   );
 
@@ -323,7 +325,7 @@ class _ListaDocs extends StatelessWidget {
               : 'Cotizado';
           return Material(
             color: sel
-                ? AppColors.primary.withValues(alpha: 0.08)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
                 : Colors.transparent,
             child: InkWell(
               onTap: () => onTap(d),
@@ -337,7 +339,7 @@ class _ListaDocs extends StatelessWidget {
                     Icon(
                       sel ? Icons.radio_button_checked : Icons.radio_button_off,
                       size: 20,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -436,10 +438,15 @@ class _PanelEmitir extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.receipt_long, color: AppColors.primary),
+                child: Icon(
+                  Icons.receipt_long,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -510,10 +517,10 @@ class _PanelEmitir extends StatelessWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.check, size: 20),
+                : Icon(Icons.check, size: 20),
             label: Text(emitiendo ? 'Emitiendo…' : 'Emitir $tipoNcf'),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),

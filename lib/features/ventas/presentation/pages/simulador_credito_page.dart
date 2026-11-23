@@ -242,13 +242,15 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                           height: 48,
                           child: ElevatedButton.icon(
                             onPressed: _calcular,
-                            icon: const Icon(Icons.play_arrow_rounded),
+                            icon: Icon(Icons.play_arrow_rounded),
                             label: const Text(
                               'CALCULAR',
                               style: TextStyle(fontWeight: FontWeight.w800),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -273,9 +275,12 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                     const SizedBox(height: 18),
                     Container(
                       padding: const EdgeInsets.all(18),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppColors.primaryDark, AppColors.primary],
+                          colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(context).colorScheme.primary,
+                          ],
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),

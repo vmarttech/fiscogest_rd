@@ -199,10 +199,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: _irANuevoProducto,
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
               elevation: 4,
-              child: const Icon(Icons.add),
+              child: Icon(Icons.add),
             )
           : null,
       body: SafeArea(bottom: true, child: _construirVistaActual()),
@@ -243,7 +243,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       _filtroProductos = codigo.trim();
                     });
                   },
-                  onChanged: (v) => setState(() { _filtroProductos = v; }),
+                  onChanged: (v) => setState(() {
+                    _filtroProductos = v;
+                  }),
                 ),
                 const SizedBox(height: 12),
                 // Fila 1: estado de stock (scroll horizontal, sin amontonar)
@@ -297,15 +299,16 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => context.pushNamed(
-                        OfertasPromocionesPage.routeName,
-                      ),
-                      icon: const Icon(Icons.local_offer_outlined, size: 18),
+                      onPressed: () =>
+                          context.pushNamed(OfertasPromocionesPage.routeName),
+                      icon: Icon(Icons.local_offer_outlined, size: 18),
                       label: const Text('Ofertas y promociones'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
                         side: BorderSide(
-                          color: AppColors.primary.withValues(alpha: 0.45),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.45),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -323,11 +326,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 ref
                     .watch(productoControllerProvider)
                     .when(
-                      loading: () => const Padding(
+                      loading: () => Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
                         child: Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -347,7 +350,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                             padding: const EdgeInsets.only(top: 60),
                             child: Column(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.inventory_2_outlined,
                                   size: 48,
                                   color: AppColors.grey300,
@@ -400,8 +403,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
       child: ref
           .watch(productoControllerProvider)
           .when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             error: (e, _) => Center(
               child: Text(
@@ -420,7 +425,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               if (_productoSeleccionado != null &&
                   filtrados.every((p) => p.id != _productoSeleccionado!.id)) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) setState(() { _productoSeleccionado = null; });
+                  if (mounted)
+                    setState(() {
+                      _productoSeleccionado = null;
+                    });
                 });
               }
               return Row(
@@ -433,8 +441,12 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       filtroEstado: _filtroEstado,
                       vistaLista: _vistaLista,
                       productos: productos,
-                      onFiltro: (v) => setState(() { _filtroEstado = v; }),
-                      onVista: (v) => setState(() { _vistaLista = v; }),
+                      onFiltro: (v) => setState(() {
+                        _filtroEstado = v;
+                      }),
+                      onVista: (v) => setState(() {
+                        _vistaLista = v;
+                      }),
                       onNuevo: _irANuevoProducto,
                       mostrarOfertas: mostrarOfertas,
                       onOfertas: () =>
@@ -451,9 +463,12 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       vistaLista: _vistaLista,
                       puedeVerCostos: puedeVerCostos,
                       filtroTexto: _filtroProductos,
-                      onBuscar: (v) => setState(() { _filtroProductos = v; }),
-                      onSeleccionar: (p) =>
-                          setState(() { _productoSeleccionado = p; }),
+                      onBuscar: (v) => setState(() {
+                        _filtroProductos = v;
+                      }),
+                      onSeleccionar: (p) => setState(() {
+                        _productoSeleccionado = p;
+                      }),
                       onEditar: _editarProducto,
                       onEliminar: _confirmarEliminar,
                       getStatus: _getStatus,
@@ -520,7 +535,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.primary.withValues(alpha: 0.12)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.12)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -530,7 +547,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? AppColors.primary : AppColors.textSecondary,
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary
+                      : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -636,14 +655,16 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                                         ? FontWeight.w700
                                         : FontWeight.w500,
                                     color: e.key == _ordenProductos
-                                        ? AppColors.primary
+                                        ? Theme.of(context).colorScheme.primary
                                         : AppColors.textPrimary,
                                   ),
                                 ),
                                 trailing: e.key == _ordenProductos
-                                    ? const Icon(
+                                    ? Icon(
                                         Icons.check_rounded,
-                                        color: AppColors.primary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                         size: 20,
                                       )
                                     : null,
@@ -671,7 +692,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.sort_rounded,
                     size: 18,
                     color: AppColors.textSecondary,
@@ -687,7 +708,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       ),
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.keyboard_arrow_down_rounded,
                     size: 20,
                     color: AppColors.textSecondary,
@@ -806,8 +827,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => setState(() { _vistaActual = 0; }),
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => setState(() {
+                  _vistaActual = 0;
+                }),
               ),
               const SizedBox(width: 8),
               Text(
@@ -822,7 +845,9 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           const SizedBox(height: 16),
           AppTextField(
             hint: 'Buscar por ID de producto...',
-            onChanged: (v) => setState(() { _filtroKardex = v; }),
+            onChanged: (v) => setState(() {
+              _filtroKardex = v;
+            }),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -831,8 +856,10 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                   kardexPorProductoProvider(int.tryParse(_filtroKardex) ?? 0),
                 )
                 .when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                  loading: () => Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   error: (e, _) => Center(
                     child: Text(
@@ -1070,10 +1097,10 @@ class _PanelConfigInventario extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: onNuevo,
-              icon: const Icon(Icons.add_circle_outline, size: 18),
+              icon: Icon(Icons.add_circle_outline, size: 18),
               label: const Text('[F3] NUEVO PRODUCTO'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -1093,12 +1120,14 @@ class _PanelConfigInventario extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onOfertas,
-                icon: const Icon(Icons.local_offer_outlined, size: 18),
+                icon: Icon(Icons.local_offer_outlined, size: 18),
                 label: const Text('OFERTAS Y PROMOCIONES'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
+                  foregroundColor: Theme.of(context).colorScheme.primary,
                   side: BorderSide(
-                    color: AppColors.primary.withValues(alpha: 0.45),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.45),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -1133,7 +1162,7 @@ class _VistaToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected
-          ? AppColors.primary.withValues(alpha: 0.12)
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
           : AppColors.grey50,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
@@ -1146,7 +1175,9 @@ class _VistaToggle extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected
-                  ? AppColors.primary.withValues(alpha: 0.45)
+                  ? Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.45)
                   : AppColors.border,
             ),
           ),
@@ -1154,7 +1185,9 @@ class _VistaToggle extends StatelessWidget {
             label,
             style: AppTypography.labelMedium.copyWith(
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? AppColors.primary : AppColors.textSecondary,
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : AppColors.textSecondary,
             ),
           ),
         ),
@@ -1294,7 +1327,10 @@ class _PanelListadoProductos extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 4,
-                  child: _inventoryHeaderCell('PRODUCTO', AppColors.primary),
+                  child: _inventoryHeaderCell(
+                    'PRODUCTO',
+                    Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -1364,7 +1400,7 @@ class _PanelListadoProductos extends StatelessWidget {
                                 left: BorderSide(
                                   width: 4,
                                   color: sel
-                                      ? AppColors.primary
+                                      ? Theme.of(context).colorScheme.primary
                                       : Colors.transparent,
                                 ),
                               ),
@@ -1490,7 +1526,7 @@ class _PanelDetalleProducto extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.touch_app_outlined,
                     size: 40,
                     color: AppColors.grey300,
@@ -1506,11 +1542,11 @@ class _PanelDetalleProducto extends StatelessWidget {
                 ],
               ),
             )
-          : _buildDetalle(producto!),
+          : _buildDetalle(context, producto!),
     );
   }
 
-  Widget _buildDetalle(Producto p) {
+  Widget _buildDetalle(BuildContext context, Producto p) {
     final stock = p.stock ?? 0;
     final minimo = p.stockMinimo ?? 10;
     final (st, sc) = getStatus(stock, minimo);
@@ -1610,10 +1646,10 @@ class _PanelDetalleProducto extends StatelessWidget {
         const SizedBox(height: 10),
         ElevatedButton.icon(
           onPressed: onEditar,
-          icon: const Icon(Icons.edit_outlined, size: 18),
+          icon: Icon(Icons.edit_outlined, size: 18),
           label: const Text('Editar producto'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 12),
             shape: RoundedRectangleBorder(
@@ -1625,7 +1661,7 @@ class _PanelDetalleProducto extends StatelessWidget {
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: onEliminar,
-            icon: const Icon(Icons.delete_outline, size: 18),
+            icon: Icon(Icons.delete_outline, size: 18),
             label: const Text('Eliminar'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.error,
@@ -1694,7 +1730,7 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = color ?? AppColors.primary;
+    final activeColor = color ?? Theme.of(context).colorScheme.primary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -1761,10 +1797,14 @@ class _ProductoCardMobile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.06),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -1780,12 +1820,14 @@ class _ProductoCardMobile extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.inventory_2_outlined,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
               ),
@@ -1877,12 +1919,14 @@ class _ProductoCardMobile extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onEditar,
-                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  icon: Icon(Icons.edit_outlined, size: 18),
                   label: const Text('Editar'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
                     side: BorderSide(
-                      color: AppColors.primary.withValues(alpha: 0.35),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.35),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
@@ -1896,7 +1940,7 @@ class _ProductoCardMobile extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onEliminar,
-                    icon: const Icon(Icons.delete_outline, size: 18),
+                    icon: Icon(Icons.delete_outline, size: 18),
                     label: const Text('Eliminar'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,

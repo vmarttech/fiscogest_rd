@@ -43,12 +43,16 @@ class BarraNavegacionInferior extends ConsumerWidget {
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: activo ? AppColors.primary : Colors.transparent,
+                  color: activo
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
                   width: 2.5,
                 ),
               ),
               color: activo
-                  ? AppColors.primary.withValues(alpha: 0.08)
+                  ? Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08)
                   : Colors.transparent,
             ),
             child: Column(
@@ -56,7 +60,9 @@ class BarraNavegacionInferior extends ConsumerWidget {
               children: [
                 Icon(
                   icono,
-                  color: activo ? AppColors.primary : AppColors.textSecondary,
+                  color: activo
+                      ? Theme.of(context).colorScheme.primary
+                      : AppColors.textSecondary,
                   size: 22,
                 ),
                 const SizedBox(height: 4),
@@ -64,7 +70,9 @@ class BarraNavegacionInferior extends ConsumerWidget {
                   etiqueta,
                   style: TextStyle(
                     fontSize: 11,
-                    color: activo ? AppColors.primary : AppColors.textSecondary,
+                    color: activo
+                        ? Theme.of(context).colorScheme.primary
+                        : AppColors.textSecondary,
                     fontWeight: activo ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),

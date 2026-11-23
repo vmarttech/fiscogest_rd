@@ -62,7 +62,9 @@ class ImpuestoRepositoryImpl {
   }
 
   Future<void> _insertRaw(ImpuestoEntity impuesto) async {
-    await _db.into(_db.impuestosTable).insert(
+    await _db
+        .into(_db.impuestosTable)
+        .insert(
           ImpuestosTableCompanion.insert(
             codigo: Value(impuesto.codigo.trim()),
             nombre: impuesto.nombre.trim(),
@@ -76,7 +78,10 @@ class ImpuestoRepositoryImpl {
         );
   }
 
-  Future<void> _quitarOtrosDefault({int? exceptId, required String tipo}) async {
+  Future<void> _quitarOtrosDefault({
+    int? exceptId,
+    required String tipo,
+  }) async {
     final q = _db.update(_db.impuestosTable)
       ..where((t) {
         final cond = t.tipo.equals(tipo) & t.esDefault.equals(true);
@@ -93,8 +98,8 @@ class ImpuestoRepositoryImpl {
 
   Future<List<ImpuestoEntity>> obtenerImpuestos() async {
     await _seedSiVacio();
-    final rows = await (_db.select(_db.impuestosTable)
-          ..orderBy([
+    final rows =
+        await (_db.select(_db.impuestosTable)..orderBy([
             (t) => OrderingTerm.desc(t.esDefault),
             (t) => OrderingTerm.asc(t.tipo),
             (t) => OrderingTerm.asc(t.nombre),
@@ -105,8 +110,8 @@ class ImpuestoRepositoryImpl {
 
   Future<ImpuestoEntity?> obtenerDefaultItbis() async {
     await _seedSiVacio();
-    final rows = await (_db.select(_db.impuestosTable)
-          ..where(
+    final rows =
+        await (_db.select(_db.impuestosTable)..where(
             (t) =>
                 t.tipo.equals('ITBIS') &
                 t.esDefault.equals(true) &
@@ -114,8 +119,8 @@ class ImpuestoRepositoryImpl {
           ))
         .get();
     if (rows.isNotEmpty) return _map(rows.first);
-    final any = await (_db.select(_db.impuestosTable)
-          ..where(
+    final any =
+        await (_db.select(_db.impuestosTable)..where(
             (t) =>
                 t.tipo.equals('ITBIS') &
                 t.activo.equals(true) &
@@ -130,9 +135,9 @@ class ImpuestoRepositoryImpl {
       throw Exception('El porcentaje debe estar entre 0 y 100.');
     }
     final nombre = impuesto.nombre.trim();
-    final dup = await (_db.select(_db.impuestosTable)
-          ..where((t) => t.nombre.lower().equals(nombre.toLowerCase())))
-        .get();
+    final dup = await (_db.select(
+      _db.impuestosTable,
+    )..where((t) => t.nombre.lower().equals(nombre.toLowerCase()))).get();
     if (dup.isNotEmpty) {
       throw Exception('Ya existe un impuesto registrado con este nombre.');
     }
@@ -149,8 +154,8 @@ class ImpuestoRepositoryImpl {
       throw Exception('El porcentaje debe estar entre 0 y 100.');
     }
     final nombre = impuesto.nombre.trim();
-    final dup = await (_db.select(_db.impuestosTable)
-          ..where(
+    final dup =
+        await (_db.select(_db.impuestosTable)..where(
             (t) =>
                 t.nombre.lower().equals(nombre.toLowerCase()) &
                 t.id.isNotValue(impuesto.id!),
@@ -165,9 +170,9 @@ class ImpuestoRepositoryImpl {
     if (impuesto.esDefault && impuesto.tipo == 'ITBIS') {
       await _quitarOtrosDefault(exceptId: impuesto.id, tipo: 'ITBIS');
     }
-    await (_db.update(_db.impuestosTable)
-          ..where((t) => t.id.equals(impuesto.id!)))
-        .write(
+    await (_db.update(
+      _db.impuestosTable,
+    )..where((t) => t.id.equals(impuesto.id!))).write(
       ImpuestosTableCompanion(
         codigo: Value(impuesto.codigo.trim()),
         nombre: Value(nombre),
@@ -183,9 +188,9 @@ class ImpuestoRepositoryImpl {
   }
 
   Future<void> eliminarImpuesto(int id) async {
-    final actual = await (_db.select(_db.impuestosTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final actual = await (_db.select(
+      _db.impuestosTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     if (actual == null) return;
     if (actual.esDefault && actual.tipo == 'ITBIS') {
       throw Exception(

@@ -39,7 +39,6 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF1E293B);
   static const _textMuted = Color(0xFF64748B);
-  static const _teal = Color(0xFF00796B);
 
   @override
   void initState() {
@@ -157,11 +156,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         var ape = _dedupeWords(u.apellido ?? '');
         // Si el apellido ya está contenido en el nombre, no lo concatenamos.
         if (ape.isNotEmpty &&
-            nom.toLowerCase().split(RegExp(r'\s+')).contains(ape.toLowerCase())) {
+            nom
+                .toLowerCase()
+                .split(RegExp(r'\s+'))
+                .contains(ape.toLowerCase())) {
           ape = '';
         }
-        if (ape.isNotEmpty &&
-            nom.toLowerCase().endsWith(ape.toLowerCase())) {
+        if (ape.isNotEmpty && nom.toLowerCase().endsWith(ape.toLowerCase())) {
           ape = '';
         }
         String full;
@@ -241,8 +242,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               Row(
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                     decoration: BoxDecoration(
                       color: entrada
                           ? const Color(0xFFF0FDF4)
@@ -305,14 +308,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               if (_puedeAbrirDocumento(doc))
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () async {
                     Navigator.of(ctx).pop();
                     await _abrirDocumentoRelacionado(doc);
                   },
-                  icon: const Icon(Icons.open_in_new, size: 18),
+                      icon: Icon(Icons.open_in_new, size: 18),
                   label: const Text(
                     'Abrir documento relacionado',
                     style: TextStyle(fontWeight: FontWeight.w700),
@@ -415,10 +418,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       return (tipo: 'ajuste', ref: d);
     }
 
-    final conteo = RegExp(
-      r'CONTEO-(\d+)',
-      caseSensitive: false,
-    ).firstMatch(d);
+    final conteo = RegExp(r'CONTEO-(\d+)', caseSensitive: false).firstMatch(d);
     if (conteo != null) {
       return (tipo: 'conteo', ref: conteo.group(1)!);
     }
@@ -445,9 +445,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         if (venta?.id == null) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('No se encontró la factura ${parsed.ref}'),
-            ),
+            SnackBar(content: Text('No se encontró la factura ${parsed.ref}')),
           );
           return;
         }
@@ -468,9 +466,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         if (venta?.id == null) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('No se encontró la venta ${parsed.ref}'),
-            ),
+            SnackBar(content: Text('No se encontró la venta ${parsed.ref}')),
           );
           return;
         }
@@ -524,9 +520,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al abrir documento: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al abrir documento: $e')));
     }
   }
 
@@ -561,9 +557,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       useAppPage: false,
       backgroundColor: _bgMain,
       body: movimientosAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: _teal),
-        ),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
         error: (e, _) => Center(
           child: Text(
             'Error al cargar movimientos: $e',
@@ -587,8 +582,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
             future: usuariosFuture,
             builder: (context, snap) {
               final usuarios = snap.data ?? {};
-              final filtrados =
-                  _filtrar(movimientos, productos: productos);
+              final filtrados = _filtrar(movimientos, productos: productos);
               final ahora = DateTime.now();
               final delMes = movimientos.where((m) {
                 final f = m.fechaMovimiento;
@@ -600,8 +594,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               for (final m in movimientos) {
                 saldosPorProducto[m.productoId] = m.saldoNuevo;
               }
-              final stockTotal = saldosPorProducto.values
-                  .fold<double>(0, (a, b) => a + b);
+              final stockTotal = saldosPorProducto.values.fold<double>(
+                0,
+                (a, b) => a + b,
+              );
               final entradasMes = delMes
                   .where((m) => m.tipoMovimiento == TipoMovimiento.entrada)
                   .fold<double>(0, (a, m) => a + m.cantidad);
@@ -617,13 +613,16 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   : ((filtrados.length + _porPagina - 1) ~/ _porPagina);
               final paginaActual = _pagina.clamp(1, totalPaginas);
               final inicio = (paginaActual - 1) * _porPagina;
-              final paginaItems =
-                  filtrados.skip(inicio).take(_porPagina).toList();
+              final paginaItems = filtrados
+                  .skip(inicio)
+                  .take(_porPagina)
+                  .toList();
 
               final isMobile = AppBreakpoints.isMobile(context);
 
               if (isMobile) {
                 return _buildMobile(
+                  context: context,
                   stockTotal: stockTotal,
                   entradasMes: entradasMes,
                   salidasMes: salidasMes,
@@ -656,8 +655,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                           children: [
                             const Row(
                               children: [
-                                Icon(Icons.inventory_2_outlined,
-                                    color: _textMuted, size: 26),
+                                Icon(
+                                  Icons.inventory_2_outlined,
+                                  color: _textMuted,
+                                  size: 26,
+                                ),
                                 SizedBox(width: 10),
                                 Text(
                                   'Kárdex de inventario',
@@ -679,12 +681,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                             ),
                             const SizedBox(height: 24),
                             _buildFiltros(
-                              listaCategorias: categoriasAsync
-                                      .valueOrNull ??
+                              context: context,
+                              listaCategorias:
+                                  categoriasAsync.valueOrNull ??
                                   const <Categoria>[],
                             ),
                             const SizedBox(height: 16),
                             _buildTabla(
+                              context,
                               paginaItems,
                               productos: productos,
                               usuarios: usuarios,
@@ -692,6 +696,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                             ),
                             const SizedBox(height: 12),
                             _buildPaginacion(
+                              context: context,
                               paginaActual: paginaActual,
                               totalPaginas: totalPaginas,
                             ),
@@ -711,6 +716,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
 
   // ─── MÓVIL ───────────────────────────────────────────────────────────
   Widget _buildMobile({
+    required BuildContext context,
     required double stockTotal,
     required double entradasMes,
     required double salidasMes,
@@ -746,8 +752,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 Icons.inventory_2_outlined,
                 'Stock',
                 _fmtNum(stockTotal),
-                const Color(0xFF0F766E),
-                const Color(0xFFCCFBF1),
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primaryContainer,
               ),
             ),
             const SizedBox(width: 10),
@@ -794,20 +800,21 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           }),
           decoration: InputDecoration(
             hintText: 'Producto o documento',
-            prefixIcon:
-                const Icon(Icons.search, size: 20, color: _textMuted),
+            prefixIcon: Icon(Icons.search, size: 20, color: _textMuted),
             filled: true,
             fillColor: Colors.white,
             isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _border, width: 1.5),
+              borderSide: BorderSide(color: _border, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _border, width: 1.5),
+              borderSide: BorderSide(color: _border, width: 1.5),
             ),
           ),
         ),
@@ -816,13 +823,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _chipTipo(null, 'Todos'),
+              _chipTipo(context, null, 'Todos'),
               const SizedBox(width: 8),
-              _chipTipo(TipoMovimiento.entrada, 'Entrada'),
+              _chipTipo(context, TipoMovimiento.entrada, 'Entrada'),
               const SizedBox(width: 8),
-              _chipTipo(TipoMovimiento.salida, 'Salida'),
+              _chipTipo(context, TipoMovimiento.salida, 'Salida'),
               const SizedBox(width: 8),
-              _chipTipo(TipoMovimiento.ajuste, 'Ajuste'),
+              _chipTipo(context, TipoMovimiento.ajuste, 'Ajuste'),
               const SizedBox(width: 8),
               ...listaCategorias.where((c) => c.id != null).take(6).map((c) {
                 final sel = _filtroCategoriaId == c.id;
@@ -838,9 +845,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     ),
                     selected: sel,
                     selectedColor: const Color(0xFFE0F2F1),
-                    checkmarkColor: _teal,
+                    checkmarkColor: Theme.of(context).colorScheme.primary,
                     backgroundColor: Colors.white,
-                    side: BorderSide(color: sel ? _teal : _border, width: 1.5),
+                    side: BorderSide(color: sel ? Theme.of(context).colorScheme.primary : _border, width: 1.5),
                     onSelected: (_) => setState(() {
                       _filtroCategoriaId = sel ? null : c.id;
                       _pagina = 1;
@@ -882,9 +889,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
             children: [
               IconButton(
                 onPressed: paginaActual > 1
-                    ? () => setState(() { _pagina = paginaActual - 1; })
+                    ? () => setState(() {
+                        _pagina = paginaActual - 1;
+                      })
                     : null,
-                icon: const Icon(Icons.chevron_left),
+                icon: Icon(Icons.chevron_left),
               ),
               Text(
                 '$paginaActual / $totalPaginas',
@@ -895,9 +904,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               ),
               IconButton(
                 onPressed: paginaActual < totalPaginas
-                    ? () => setState(() { _pagina = paginaActual + 1; })
+                    ? () => setState(() {
+                        _pagina = paginaActual + 1;
+                      })
                     : null,
-                icon: const Icon(Icons.chevron_right),
+                icon: Icon(Icons.chevron_right),
               ),
             ],
           ),
@@ -969,7 +980,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
     );
   }
 
-  Widget _chipTipo(TipoMovimiento? tipo, String label) {
+  Widget _chipTipo(BuildContext context, TipoMovimiento? tipo, String label) {
     final selected = _filtroTipo == tipo;
     return FilterChip(
       label: Text(
@@ -978,9 +989,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       ),
       selected: selected,
       selectedColor: const Color(0xFFE0F2F1),
-      checkmarkColor: _teal,
+      checkmarkColor: Theme.of(context).colorScheme.primary,
       backgroundColor: Colors.white,
-      side: BorderSide(color: selected ? _teal : _border, width: 1.5),
+      side: BorderSide(color: selected ? Theme.of(context).colorScheme.primary : _border, width: 1.5),
       onSelected: (_) => setState(() {
         _filtroTipo = tipo;
         _pagina = 1;
@@ -995,10 +1006,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
     required Map<int, String> categorias,
   }) {
     final entrada = _esEntrada(mov.tipoMovimiento);
-    final colorTipo =
-        entrada ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
-    final bgTipo =
-        entrada ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
+    final colorTipo = entrada
+        ? const Color(0xFF22C55E)
+        : const Color(0xFFEF4444);
+    final bgTipo = entrada ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
     final doc = (mov.documentoReferencia ?? '').trim().isEmpty
         ? 'Sin documento'
         : mov.documentoReferencia!.trim();
@@ -1046,7 +1057,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: bgTipo,
                                 borderRadius: BorderRadius.circular(4),
@@ -1099,12 +1112,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                           children: [
                             _miniStat('Cant.', _fmtNum(mov.cantidad)),
                             const SizedBox(width: 12),
-                            _miniStat(
-                                'Valor', _fmtMoney(mov.totalMovimiento)),
+                            _miniStat('Valor', _fmtMoney(mov.totalMovimiento)),
                             const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: bgTipo,
                                 borderRadius: BorderRadius.circular(6),
@@ -1170,9 +1184,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         icon: Icons.inventory_2_outlined,
         titulo: 'Stock Actual Total',
         valor: _fmtNum(stockTotal),
-        accent: const Color(0xFF0F766E),
-        soft: const Color(0xFFCCFBF1),
-        chartColor: const Color(0xFF14B8A6),
+        accent: Theme.of(context).colorScheme.primary,
+        soft: Theme.of(context).colorScheme.primaryContainer,
+        chartColor: Theme.of(context).colorScheme.tertiary,
       ),
       _kpiCard(
         icon: Icons.login_rounded,
@@ -1299,9 +1313,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           SizedBox(
             width: 72,
             height: 40,
-            child: CustomPaint(
-              painter: _MiniSparkPainter(color: chartColor),
-            ),
+            child: CustomPaint(painter: _MiniSparkPainter(color: chartColor)),
           ),
         ],
       ),
@@ -1309,22 +1321,21 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   }
 
   // ─── FILTROS DESKTOP ─────────────────────────────────────────────────
-  Widget _buildFiltros({required List<Categoria> listaCategorias}) {
+  Widget _buildFiltros({required BuildContext context, required List<Categoria> listaCategorias}) {
     InputDecoration deco(String label) => InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(fontWeight: FontWeight.w700),
           filled: true,
           fillColor: Colors.white,
           isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: _border, width: 1.5),
+        borderSide: BorderSide(color: _border, width: 1.5),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: _border, width: 1.5),
+        borderSide: BorderSide(color: _border, width: 1.5),
           ),
         );
 
@@ -1349,8 +1360,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               }),
               style: const TextStyle(fontWeight: FontWeight.w700),
               decoration: deco('Buscar producto o documento').copyWith(
-                prefixIcon:
-                    const Icon(Icons.search, color: _textMuted, size: 20),
+                prefixIcon: Icon(Icons.search, color: _textMuted, size: 20),
                 labelText: null,
                 hintText: 'Buscar producto o documento',
                 hintStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -1375,9 +1385,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 }
               },
               child: InputDecorator(
-                decoration: deco('Fecha').copyWith(
-                  suffixIcon: const Icon(Icons.calendar_today, size: 16),
-                ),
+                decoration: deco(
+                  'Fecha',
+                ).copyWith(suffixIcon: Icon(Icons.calendar_today, size: 16)),
                 child: Text(
                   _filtroFecha == null ? '—' : _fmtFecha(_filtroFecha),
                   style: const TextStyle(
@@ -1404,16 +1414,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   ),
                   hint: const Text(
                     'Todos',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Todos'),
-                    ),
+                    const DropdownMenuItem(value: null, child: Text('Todos')),
                     ...TipoMovimiento.values.map(
                       (t) => DropdownMenuItem(
                         value: t,
@@ -1445,16 +1449,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   ),
                   hint: const Text(
                     'Todas',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Todas'),
-                    ),
+                    const DropdownMenuItem(value: null, child: Text('Todas')),
                     ...listaCategorias
                         .where((c) => c.id != null)
                         .map(
@@ -1493,6 +1491,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
 
   // ─── TABLA DESKTOP ───────────────────────────────────────────────────
   Widget _buildTabla(
+    BuildContext context,
     List<Kardex> items, {
     required Map<int, Producto> productos,
     required Map<int, String> usuarios,
@@ -1511,9 +1510,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           child: Column(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                decoration: const BoxDecoration(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
                   color: Color(0xFFF1F5F9),
                   border: Border(
                     bottom: BorderSide(color: _border, width: 1.5),
@@ -1523,12 +1524,17 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   children: [
                     SizedBox(
                       width: 110,
-                      child: _headerChip('TIPO', const Color(0xFF14B8A6)),
+                      child: _headerChip(
+                        'TIPO',
+                        Theme.of(context).colorScheme.tertiary,
+                      ),
                     ),
                     SizedBox(
                       width: 280,
-                      child:
-                          _headerChip('DOC / PRODUCTO', const Color(0xFF818CF8)),
+                      child: _headerChip(
+                        'DOC / PRODUCTO',
+                        const Color(0xFF818CF8),
+                      ),
                     ),
                     SizedBox(
                       width: 140,
@@ -1540,13 +1546,17 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     ),
                     SizedBox(
                       width: 100,
-                      child:
-                          _headerChip('VALOR TOTAL', const Color(0xFF64748B)),
+                      child: _headerChip(
+                        'VALOR TOTAL',
+                        const Color(0xFF64748B),
+                      ),
                     ),
                     SizedBox(
                       width: 120,
-                      child:
-                          _headerChip('SALDO (UNIT)', const Color(0xFF22C55E)),
+                      child: _headerChip(
+                        'SALDO (UNIT)',
+                        const Color(0xFF22C55E),
+                      ),
                     ),
                     SizedBox(
                       width: 95,
@@ -1589,10 +1599,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
     required Map<int, String> categorias,
   }) {
     final entrada = _esEntrada(mov.tipoMovimiento);
-    final colorTipo =
-        entrada ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
-    final bgTipo =
-        entrada ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
+    final colorTipo = entrada
+        ? const Color(0xFF22C55E)
+        : const Color(0xFFEF4444);
+    final bgTipo = entrada ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
     final doc = (mov.documentoReferencia ?? '').trim().isEmpty
         ? 'Sin documento'
         : mov.documentoReferencia!.trim();
@@ -1611,7 +1621,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: _border)),
           ),
           child: Row(
@@ -1631,7 +1641,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: bgTipo,
                         borderRadius: BorderRadius.circular(4),
@@ -1739,8 +1751,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: bgTipo,
                       borderRadius: BorderRadius.circular(6),
@@ -1773,11 +1787,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 child: IconButton(
                   tooltip: 'Ver documento',
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(
-                    Icons.visibility_outlined,
-                    size: 20,
-                    color: _teal,
-                  ),
+                  icon: Icon(Icons.visibility_outlined, size: 20, color: Theme.of(context).colorScheme.primary),
                   onPressed: () => _verDocumento(
                     mov,
                     productos: productos,
@@ -1815,6 +1825,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   }
 
   Widget _buildPaginacion({
+    required BuildContext context,
     required int paginaActual,
     required int totalPaginas,
   }) {
@@ -1830,34 +1841,43 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         ),
         const Spacer(),
         IconButton(
-          onPressed:
-              paginaActual > 1 ? () => setState(() { _pagina = 1; }) : null,
-          icon: const Icon(Icons.keyboard_double_arrow_left),
+          onPressed: paginaActual > 1
+              ? () => setState(() {
+                  _pagina = 1;
+                })
+              : null,
+          icon: Icon(Icons.keyboard_double_arrow_left),
           iconSize: 20,
         ),
         IconButton(
           onPressed: paginaActual > 1
-              ? () => setState(() { _pagina = paginaActual - 1; })
+              ? () => setState(() {
+                  _pagina = paginaActual - 1;
+                })
               : null,
-          icon: const Icon(Icons.chevron_left),
+          icon: Icon(Icons.chevron_left),
           iconSize: 20,
         ),
         for (var n = 1; n <= totalPaginas && n <= 5; n++)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Material(
-              color: n == paginaActual ? _teal : Colors.white,
+              color: n == paginaActual ? Theme.of(context).colorScheme.primary : Colors.white,
               borderRadius: BorderRadius.circular(6),
               child: InkWell(
-                onTap: () => setState(() { _pagina = n; }),
+                onTap: () => setState(() {
+                  _pagina = n;
+                }),
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: n == paginaActual ? _teal : _border,
+                      color: n == paginaActual ? Theme.of(context).colorScheme.primary : _border,
                       width: 1.5,
                     ),
                   ),
@@ -1875,7 +1895,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           ),
         if (totalPaginas > 5)
           TextButton(
-            onPressed: () => setState(() { _pagina = totalPaginas; }),
+            onPressed: () => setState(() {
+              _pagina = totalPaginas;
+            }),
             child: Text(
               '$totalPaginas',
               style: const TextStyle(fontWeight: FontWeight.w800),
@@ -1883,16 +1905,20 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           ),
         IconButton(
           onPressed: paginaActual < totalPaginas
-              ? () => setState(() { _pagina = paginaActual + 1; })
+              ? () => setState(() {
+                  _pagina = paginaActual + 1;
+                })
               : null,
-          icon: const Icon(Icons.chevron_right),
+          icon: Icon(Icons.chevron_right),
           iconSize: 20,
         ),
         IconButton(
           onPressed: paginaActual < totalPaginas
-              ? () => setState(() { _pagina = totalPaginas; })
+              ? () => setState(() {
+                  _pagina = totalPaginas;
+                })
               : null,
-          icon: const Icon(Icons.keyboard_double_arrow_right),
+          icon: Icon(Icons.keyboard_double_arrow_right),
           iconSize: 20,
         ),
         const SizedBox(width: 12),

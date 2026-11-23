@@ -1,14 +1,10 @@
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
 
 class PaypalOrderResult {
-  const PaypalOrderResult({
-    required this.orderId,
-    required this.approveUrl,
-  });
+  const PaypalOrderResult({required this.orderId, required this.approveUrl});
   final String orderId;
   final String approveUrl;
 }
@@ -65,16 +61,13 @@ class PaypalService {
           'reference_id': reference,
           'description': description,
           'custom_id': reference,
-          'amount': {
-            'currency_code': 'USD',
-            'value': value,
+          'amount': {'currency_code': 'USD', 'value': value},
           },
-        }
       ],
       'payment_source': {
         'paypal': {
           'experience_context': {
-            'brand_name': 'FiscoGest',
+            'brand_name': 'VendiFlux',
             'locale': 'es-DO',
             'landing_page': 'GUEST_CHECKOUT',
             'payment_method_preference': 'UNRESTRICTED',
@@ -119,9 +112,7 @@ class PaypalService {
   Future<Map<String, dynamic>> captureOrder(String orderId) async {
     final token = await _accessToken();
     final res = await http.post(
-      Uri.parse(
-        '${PaypalConfig.baseUrl}/v2/checkout/orders/$orderId/capture',
-      ),
+      Uri.parse('${PaypalConfig.baseUrl}/v2/checkout/orders/$orderId/capture'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',

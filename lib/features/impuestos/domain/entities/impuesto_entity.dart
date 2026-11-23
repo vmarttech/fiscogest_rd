@@ -15,6 +15,7 @@ class ImpuestoEntity {
   final String codigo;
   final String nombre;
   final double porcentaje;
+
   /// ITBIS | Exento | Adicional | Selectivo
   final String tipo;
   final bool esExento;

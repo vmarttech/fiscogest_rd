@@ -13,8 +13,9 @@ import 'package:fiscogest_rd/core/presentation/pages/dashboard_desktop_proto.dar
 final alertasRefreshTickProvider = StateProvider<int>((ref) => 0);
 
 /// Todas las alertas activas (sin filtrar leídas).
-final alertasActivasProvider =
-    FutureProvider.autoDispose<List<AlertaOperativa>>((ref) async {
+final alertasActivasProvider = FutureProvider.autoDispose<List<AlertaOperativa>>((
+  ref,
+) async {
   ref.watch(alertasRefreshTickProvider);
   final alertas = <AlertaOperativa>[];
 
@@ -41,8 +42,9 @@ final alertasActivasProvider =
   try {
     final productosAsync = ref.watch(productoControllerProvider);
     final productos = productosAsync.valueOrNull ?? const [];
-    final agotados =
-        productos.where((p) => (p.stock ?? 0) <= 0).toList(growable: false);
+    final agotados = productos
+        .where((p) => (p.stock ?? 0) <= 0)
+        .toList(growable: false);
     if (agotados.isNotEmpty) {
       final nombres = agotados
           .take(3)
@@ -97,7 +99,9 @@ final alertasOperativasProvider =
     FutureProvider.autoDispose<List<AlertaOperativa>>((ref) async {
   final activas = await ref.watch(alertasActivasProvider.future);
   final leidas = await alertasLeidasStore.obtenerLeidas();
-  return activas.where((a) => !leidas.contains(a.id)).toList(growable: false);
+      return activas
+          .where((a) => !leidas.contains(a.id))
+          .toList(growable: false);
 });
 
 Future<void> marcarAlertaLeida(WidgetRef ref, String id) async {

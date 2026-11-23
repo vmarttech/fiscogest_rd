@@ -60,9 +60,9 @@ class _LicenciaAdminPedidosPageState
       for (final r in remotos) {
         final refCode = (r['referencia'] as String?) ?? '';
         if (refCode.isEmpty) continue;
-        final existing = await (db.select(db.pedidosLicenciaTable)
-              ..where((t) => t.referencia.equals(refCode)))
-            .getSingleOrNull();
+        final existing = await (db.select(
+          db.pedidosLicenciaTable,
+        )..where((t) => t.referencia.equals(refCode))).getSingleOrNull();
         final plan = (r['plan'] as String?) ?? '';
         final vigencia = (r['vigencia_tipo'] as String?) ?? '';
         final monto = (r['monto'] is num)
@@ -73,7 +73,9 @@ class _LicenciaAdminPedidosPageState
             (r['created_at'] as String?) ?? DateTime.now().toIso8601String();
         final expires = (r['expires_at'] as String?) ?? '';
         if (existing == null) {
-          await db.into(db.pedidosLicenciaTable).insert(
+          await db
+              .into(db.pedidosLicenciaTable)
+              .insert(
                 PedidosLicenciaTableCompanion.insert(
                   referencia: refCode,
                   plan: plan,
@@ -85,9 +87,9 @@ class _LicenciaAdminPedidosPageState
                 ),
               );
         } else {
-          await (db.update(db.pedidosLicenciaTable)
-                ..where((t) => t.id.equals(existing.id)))
-              .write(
+          await (db.update(
+            db.pedidosLicenciaTable,
+          )..where((t) => t.id.equals(existing.id))).write(
             PedidosLicenciaTableCompanion(
               plan: Value(plan),
               vigenciaTipo: Value(vigencia),
@@ -98,12 +100,18 @@ class _LicenciaAdminPedidosPageState
           );
         }
       }
-      if (mounted) setState(() { _tick++; });
+      if (mounted)
+        setState(() {
+          _tick++;
+        });
     } catch (e, st) {
       debugPrint('Admin pedidos pull nube: $e');
       debugPrint('$st');
     } finally {
-      if (mounted) setState(() { _sincronizandoNube = false; });
+      if (mounted)
+        setState(() {
+          _sincronizandoNube = false;
+        });
     }
   }
 
@@ -115,9 +123,9 @@ class _LicenciaAdminPedidosPageState
       title: 'Pedidos de licencia',
       body: FutureBuilder(
         key: ValueKey(_tick),
-        future: (db.select(db.pedidosLicenciaTable)
-              ..orderBy([(t) => OrderingTerm.desc(t.id)]))
-            .get(),
+        future: (db.select(
+          db.pedidosLicenciaTable,
+        )..orderBy([(t) => OrderingTerm.desc(t.id)])).get(),
         builder: (context, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -128,16 +136,24 @@ class _LicenciaAdminPedidosPageState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.inbox_outlined, size: 56, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 56,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Sin pedidos aún',
-                    style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Cuando un cliente genere FG-XXXXX, aparecerá aquí.',
-                    style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -145,7 +161,12 @@ class _LicenciaAdminPedidosPageState
           }
 
           return ListView.builder(
-            padding: EdgeInsets.fromLTRB(esMovil ? 16 : 24, 16, esMovil ? 16 : 24, 32),
+            padding: EdgeInsets.fromLTRB(
+              esMovil ? 16 : 24,
+              16,
+              esMovil ? 16 : 24,
+              32,
+            ),
             itemCount: rows.length + 1,
             itemBuilder: (context, i) {
               if (i == 0) {
@@ -155,18 +176,24 @@ class _LicenciaAdminPedidosPageState
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0F766E), Color(0xFF14B8A6)],
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.tertiary,
+                        ],
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.receipt_long_outlined, color: Colors.white),
+                        Icon(Icons.receipt_long_outlined, color: Colors.white),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             '${rows.length} pedido(s) · PayPal auto emite licencia; revisión manual solo si hace falta',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -208,7 +235,8 @@ class _LicenciaAdminPedidosPageState
                           const SizedBox(height: 4),
                           Text(
                             '${p.plan} · ${p.vigenciaTipo}\n'
-                            '${_adminMontoLabel(p)} · ${p.estado}' '${p.medioPagoPreferido == null ? '' : ' · ${p.medioPagoPreferido}'}'
+                            '${_adminMontoLabel(p)} · ${p.estado}'
+                            '${p.medioPagoPreferido == null ? '' : ' · ${p.medioPagoPreferido}'}'
                             '${p.medioPagoPreferido != null ? ' · ${p.medioPagoPreferido}' : ''}',
                             style: AppTypography.bodySmall.copyWith(
                               color: AppColors.textSecondary,
@@ -226,14 +254,19 @@ class _LicenciaAdminPedidosPageState
                                 .read(licenciaServiceProvider)
                                 .marcarPagadoYEmitirLicencia(p.referencia);
                             try {
-                              await PedidoSync(ref.read(databaseProvider))
-                                  .pushTodos();
+                              await PedidoSync(
+                                ref.read(databaseProvider),
+                              ).pushTodos();
                             } catch (e) {
                               debugPrint('Push pedido tras emitir: $e');
                             }
                             ref.invalidate(licenciaActualProvider);
                             FiscoGestNotifications.show(
-                              SnackBar(content: Text('Licencia emitida: ${p.referencia}')),
+                              SnackBar(
+                                content: Text(
+                                  'Licencia emitida: ${p.referencia}',
+                                ),
+                              ),
                             );
                             setState(() {
                               _tick++;
@@ -248,7 +281,9 @@ class _LicenciaAdminPedidosPageState
                           }
                         },
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F766E),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

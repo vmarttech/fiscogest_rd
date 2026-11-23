@@ -39,8 +39,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     const cWhite = Color(0xFFFFFFFF);
     const cMuted = Color(0xFF1E293B);
     const cInk = Color(0xFF0F172A);
-    const cTealDark = Color(0xFF114E54);
-    const cMint = Color(0xFF114E54);
+    final cTealDark = Theme.of(context).colorScheme.primary;
+    final cMint = Theme.of(context).colorScheme.primaryContainer;
     const cAvatarBg = Color(0xFFE5F2F3);
     const cBorder = Color(0xFFE2E8F0);
     const cHeaderBg = Color(0xFFFAFAFA);
@@ -104,20 +104,16 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             child: TextField(
                               controller: _searchController,
                               onChanged: (value) => setState(
-                                () =>
-                                    _filtroBusqueda = value.toLowerCase(),
+                                () => _filtroBusqueda = value.toLowerCase(),
                               ),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: cInk,
-                              ),
+                              style: const TextStyle(fontSize: 13, color: cInk),
                               decoration: InputDecoration(
                                 hintText: 'Buscar proveedor...',
                                 hintStyle: const TextStyle(
                                   color: Color(0xFF1E293B),
                                   fontSize: 13,
                                 ),
-                                prefixIcon: const Icon(
+                                prefixIcon: Icon(
                                   Icons.search_rounded,
                                   size: 20,
                                   color: cMuted,
@@ -131,17 +127,15 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide:
-                                      const BorderSide(color: cBorder),
+                                  borderSide: BorderSide(color: cBorder),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide:
-                                      const BorderSide(color: cBorder),
+                                  borderSide: BorderSide(color: cBorder),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: cMint,
                                     width: 1.5,
                                   ),
@@ -151,8 +145,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           ),
                           const SizedBox(width: 12),
                           FilledButton.icon(
-                            onPressed: () =>
-                                _mostrarModalRegistro(context),
+                            onPressed: () => _mostrarModalRegistro(context),
                             style: FilledButton.styleFrom(
                               backgroundColor: cMint,
                               foregroundColor: Colors.white,
@@ -165,7 +158,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.add_rounded, size: 20),
+                            icon: Icon(Icons.add_rounded, size: 20),
                             label: const Text(
                               'Nuevo Proveedor',
                               style: TextStyle(
@@ -193,7 +186,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             ),
                             elevation: 0,
                           ),
-                          icon: const Icon(Icons.add_rounded, size: 20),
+                          icon: Icon(Icons.add_rounded, size: 20),
                           label: const Text(
                             'Nuevo Proveedor',
                             style: TextStyle(fontWeight: FontWeight.w700),
@@ -203,9 +196,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     ),
                     TextField(
                       controller: _searchController,
-                      onChanged: (value) => setState(
-                        () => _filtroBusqueda = value.toLowerCase(),
-                      ),
+                      onChanged: (value) =>
+                          setState(() => _filtroBusqueda = value.toLowerCase()),
                       style: const TextStyle(fontSize: 14, color: cInk),
                       decoration: InputDecoration(
                         hintText: 'Buscar por nombre, RNC o correo...',
@@ -213,10 +205,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           color: Color(0xFF1E293B),
                           fontSize: 13,
                         ),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          color: cMuted,
-                        ),
+                        prefixIcon: Icon(Icons.search_rounded, color: cMuted),
                         filled: true,
                         fillColor: cWhite,
                         contentPadding: const EdgeInsets.symmetric(
@@ -225,16 +214,15 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: cBorder),
+                          borderSide: BorderSide(color: cBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: cBorder),
+                          borderSide: BorderSide(color: cBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: cMint, width: 1.5),
+                          borderSide: BorderSide(color: cMint, width: 1.5),
                         ),
                       ),
                     ),
@@ -243,7 +231,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                   if (!isMobile) const SizedBox(height: 16),
                   Expanded(
                     child: proveedoresAsync.when(
-                      loading: () => const Center(
+                      loading: () => Center(
                         child: CircularProgressIndicator(color: cMint),
                       ),
                       error: (e, _) => Center(
@@ -256,8 +244,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         final filtrados = proveedores.where((p) {
                           final nombre = p.nombreEmpresa.toLowerCase();
                           final rnc = (p.rnc ?? '').toLowerCase();
-                          final contacto =
-                              (p.nombreContacto ?? '').toLowerCase();
+                          final contacto = (p.nombreContacto ?? '')
+                              .toLowerCase();
                           final correo = (p.email ?? '').toLowerCase();
                           return nombre.contains(_filtroBusqueda) ||
                               rnc.contains(_filtroBusqueda) ||
@@ -279,7 +267,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                       color: cAvatarBg,
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.store_mall_directory_outlined,
                                       size: 32,
                                       color: cTealDark,
@@ -331,8 +319,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   context,
                                   proveedor,
                                 ),
-                                onSettings: () =>
-                                    _abrirConfiguracionProveedor(
+                                onSettings: () => _abrirConfiguracionProveedor(
                                   context,
                                   proveedor,
                                 ),
@@ -427,10 +414,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                               Expanded(
                                 child: ListView.separated(
                                   itemCount: filtrados.length,
-                                  separatorBuilder: (_, __) => const Divider(
-                                    height: 1,
-                                    color: cBorder,
-                                  ),
+                                  separatorBuilder: (_, __) =>
+                                      const Divider(height: 1, color: cBorder),
                                   itemBuilder: (_, i) {
                                     final proveedor = filtrados[i];
                                     return Material(
@@ -451,7 +436,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.business_rounded,
                                                 color: cTealDark,
                                                 size: 18,
@@ -494,7 +479,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                             Expanded(
                                               flex: 2,
                                               child: Text(
-                                                proveedor.nombreContacto
+                                                proveedor
+                                                            .nombreContacto
                                                             ?.isNotEmpty ==
                                                         true
                                                     ? proveedor.nombreContacto!
@@ -516,7 +502,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    proveedor.email
+                                                    proveedor
+                                                                .email
                                                                 ?.isNotEmpty ==
                                                             true
                                                         ? proveedor.email!
@@ -533,11 +520,13 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                   ),
                                                   const SizedBox(height: 2),
                                                   Text(
-                                                    proveedor.telefono
+                                                    proveedor
+                                                                .telefono
                                                                 ?.isNotEmpty ==
                                                             true
                                                         ? proveedor.telefono!
-                                                        : (proveedor.celular
+                                                        : (proveedor
+                                                                      .celular
                                                                     ?.isNotEmpty ==
                                                                 true
                                                             ? proveedor
@@ -563,8 +552,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                   _ProvActionIcon(
                                                     Icons.edit_outlined,
                                                     cMuted,
-                                                    () =>
-                                                        _mostrarModalRegistro(
+                                                    () => _mostrarModalRegistro(
                                                       context,
                                                       proveedorToEdit:
                                                           proveedor,
@@ -641,11 +629,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     );
   }
 
-
-  void _abrirConfiguracionProveedor(
-    BuildContext context,
-    Proveedor proveedor,
-  ) {
+  void _abrirConfiguracionProveedor(BuildContext context, Proveedor proveedor) {
     final limiteCtrl = TextEditingController(
       text: proveedor.limiteCredito > 0
           ? proveedor.limiteCredito.toStringAsFixed(2)
@@ -703,10 +687,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     const SizedBox(height: 4),
                     const Text(
                       'Límite de crédito, días y condiciones',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF1E293B),
-                      ),
+                      style: TextStyle(fontSize: 12, color: Color(0xFF1E293B)),
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -745,8 +726,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      initialValue:
-                          estado == 'Inactivo' ? 'Inactivo' : 'Activo',
+                      initialValue: estado == 'Inactivo'
+                          ? 'Inactivo'
+                          : 'Activo',
                       decoration: InputDecoration(
                         labelText: 'Estado',
                         border: OutlineInputBorder(
@@ -773,8 +755,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         final actualizado = proveedor.copyWith(
                           limiteCredito:
                               double.tryParse(limiteCtrl.text.trim()) ?? 0,
-                          diasCredito:
-                              int.tryParse(diasCtrl.text.trim()) ?? 0,
+                          diasCredito: int.tryParse(diasCtrl.text.trim()) ?? 0,
                           condicionesNota: condicionesCtrl.text.trim().isEmpty
                               ? null
                               : condicionesCtrl.text.trim(),
@@ -794,7 +775,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         );
                       },
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF114E54),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
@@ -1037,12 +1018,14 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.storefront_outlined,
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -1070,7 +1053,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             ),
                             IconButton(
                               onPressed: () => Navigator.pop(ctx),
-                              icon: const Icon(Icons.close),
+                              icon: Icon(Icons.close),
                             ),
                           ],
                         ),
@@ -1141,12 +1124,14 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.storefront_outlined,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -1174,7 +1159,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.close),
+                        icon: Icon(Icons.close),
                       ),
                     ],
                   ),
@@ -1213,7 +1198,6 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
     );
   }
 }
-
 
 class _ProvActionIcon extends StatelessWidget {
   const _ProvActionIcon(this.icon, this.color, this.onTap);
@@ -1256,7 +1240,7 @@ class _ProveedorCardMobile extends StatelessWidget {
     const cWhite = Color(0xFFFFFFFF);
     const cMuted = Color(0xFF1E293B);
     const cInk = Color(0xFF0F172A);
-    const cTealDark = Color(0xFF114E54);
+    final cTealDark = Theme.of(context).colorScheme.primary;
     const cAvatarBg = Color(0xFFE5F2F3);
     const cBorder = Color(0xFFE2E8F0);
 
@@ -1286,11 +1270,7 @@ class _ProveedorCardMobile extends StatelessWidget {
                   color: cAvatarBg,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
-                  Icons.business_rounded,
-                  color: cTealDark,
-                  size: 22,
-                ),
+                child: Icon(Icons.business_rounded, color: cTealDark, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1324,13 +1304,19 @@ class _ProveedorCardMobile extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(height: 1, color: cBorder),
           const SizedBox(height: 12),
-          _mRow(Icons.person_outline, 'Contacto',
+          _mRow(
+            Icons.person_outline,
+            'Contacto',
               proveedor.nombreContacto?.isNotEmpty == true
                   ? proveedor.nombreContacto!
-                  : '—'),
+                : '—',
+          ),
           const SizedBox(height: 8),
-          _mRow(Icons.email_outlined, 'Correo',
-              proveedor.email?.isNotEmpty == true ? proveedor.email! : '—'),
+          _mRow(
+            Icons.email_outlined,
+            'Correo',
+            proveedor.email?.isNotEmpty == true ? proveedor.email! : '—',
+          ),
           const SizedBox(height: 8),
           _mRow(
             Icons.phone_outlined,
@@ -1347,11 +1333,11 @@ class _ProveedorCardMobile extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  icon: Icon(Icons.edit_outlined, size: 16),
                   label: const Text('Editar'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: cTealDark,
-                    side: const BorderSide(color: cBorder),
+                    side: BorderSide(color: cBorder),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -1366,13 +1352,13 @@ class _ProveedorCardMobile extends StatelessWidget {
                   onPressed: onSettings,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: cMuted,
-                    side: const BorderSide(color: cBorder),
+                    side: BorderSide(color: cBorder),
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Icon(Icons.settings_outlined, size: 18),
+                  child: Icon(Icons.settings_outlined, size: 18),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1383,13 +1369,13 @@ class _ProveedorCardMobile extends StatelessWidget {
                   onPressed: onDelete,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
-                    side: const BorderSide(color: cBorder),
+                    side: BorderSide(color: cBorder),
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Icon(Icons.delete_outline, size: 18),
+                  child: Icon(Icons.delete_outline, size: 18),
                 ),
               ),
             ],

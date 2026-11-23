@@ -71,10 +71,7 @@ class ProntoPagoService {
     final line = observaciones
         .split('\n')
         .map((e) => e.trim())
-        .firstWhere(
-          (e) => e.startsWith(markerPrefix),
-          orElse: () => '',
-        );
+        .firstWhere((e) => e.startsWith(markerPrefix), orElse: () => '');
     if (line.isEmpty) return null;
     final p = line.substring(markerPrefix.length).split('|');
     if (p.length < 4) return null;

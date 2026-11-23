@@ -72,6 +72,7 @@ class LimitesPlan {
 
   final int? maxProductos;
   final int? maxClientes;
+
   /// null = sin tope práctico.
   final int? maxVentasMes;
   final int? maxCuentasFiaoAbiertas;
@@ -220,7 +221,10 @@ bool esPlanSimplificado(String plan) => plan.toLowerCase() == 'simplificado';
 bool esPlanGratis(String plan) => plan.toLowerCase() == 'gratis';
 bool esPlanPro(String plan) {
   final p = plan.toLowerCase();
-  return p == 'pro' || p == 'profesional' || p == 'empresa' || p == 'desarrollador';
+  return p == 'pro' ||
+      p == 'profesional' ||
+      p == 'empresa' ||
+      p == 'desarrollador';
 }
 
 bool planIncluyeEcf(String plan) => limitesDe(plan).permiteEcf;
@@ -254,8 +258,7 @@ double? precioPlanVigenciaUsd(String plan, String vigencia) {
   return kPreciosLicenciaUsd[p]?[vigencia];
 }
 
-double? precioMensualUsd(String plan) =>
-    precioPlanVigenciaUsd(plan, 'mensual');
+double? precioMensualUsd(String plan) => precioPlanVigenciaUsd(plan, 'mensual');
 
 /// Planes de pago automático en móvil (PayPal → activación inmediata).
 const kPlanesPagoMovil = <String>['basico', 'simplificado', 'pro'];

@@ -21,6 +21,7 @@ class EcfeConfig {
   final String razonSocialEmisor;
   final String rutaCertificado;
   final String aliasCertificado;
+
   /// Password del .p12/.pfx. No debe loguearse.
   final String claveCertificado;
   final String xsdVersion;

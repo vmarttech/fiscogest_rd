@@ -25,15 +25,18 @@ class FacturacionInicioPage extends ConsumerWidget {
 
     final kpisAsync = ref.watch(facturacionKpisProvider);
     final kpis = kpisAsync.valueOrNull;
-    final facturasHoyStr =
-        kpisAsync.isLoading && kpis == null ? '…' : '${kpis?.facturasHoy ?? 0}';
-    final ncHoyStr =
-        kpisAsync.isLoading && kpis == null ? '…' : '${kpis?.ncHoy ?? 0}';
+    final facturasHoyStr = kpisAsync.isLoading && kpis == null
+        ? '…'
+        : '${kpis?.facturasHoy ?? 0}';
+    final ncHoyStr = kpisAsync.isLoading && kpis == null
+        ? '…'
+        : '${kpis?.ncHoy ?? 0}';
     final ncfDisponiblesStr = kpisAsync.isLoading && kpis == null
         ? '…'
         : '${kpis?.ncfDisponibles ?? 0}';
-    final alertasStr =
-        kpisAsync.isLoading && kpis == null ? '…' : '${kpis?.alertasNcf ?? 0}';
+    final alertasStr = kpisAsync.isLoading && kpis == null
+        ? '…'
+        : '${kpis?.alertasNcf ?? 0}';
 
     return AppScaffold(
       title: simple ? 'VENTAS / COMPROBANTES' : 'FACTURACIÓN Y NC',
@@ -62,7 +65,9 @@ class FacturacionInicioPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                simple ? 'Ventas / Comprobantes' : 'Facturación y NC',
+                                simple
+                                    ? 'Ventas / Comprobantes'
+                                    : 'Facturación y NC',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w900,
@@ -95,7 +100,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         child: FilledButton.icon(
                           onPressed: () =>
                               context.push('/sales/emitir-factura'),
-                          icon: const Icon(Icons.receipt_long_rounded, size: 20),
+                          icon: Icon(Icons.receipt_long_rounded, size: 20),
                           label: const Text(
                             'Emitir factura',
                             style: TextStyle(
@@ -104,7 +109,9 @@ class FacturacionInicioPage extends ConsumerWidget {
                             ),
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF0D9488),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -119,7 +126,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: () => context.push('/sales/emitir-nc'),
-                          icon: const Icon(Icons.note_alt_outlined, size: 20),
+                          icon: Icon(Icons.note_alt_outlined, size: 20),
                           label: const Text(
                             'Emitir nota de crédito',
                             style: TextStyle(
@@ -129,7 +136,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF4F46E5),
-                            side: const BorderSide(color: Color(0xFFC7D2FE)),
+                            side: BorderSide(color: Color(0xFFC7D2FE)),
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -142,7 +149,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: () => context.push('/sales/historial'),
-                          icon: const Icon(Icons.history_rounded, size: 20),
+                          icon: Icon(Icons.history_rounded, size: 20),
                           label: const Text(
                             'Ver historial',
                             style: TextStyle(
@@ -151,7 +158,9 @@ class FacturacionInicioPage extends ConsumerWidget {
                             ),
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF0D9488),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -310,7 +319,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                               title: 'Emitir factura',
                               subtitle:
                                   'Crea una factura con NCF de consumo o crédito fiscal',
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               onTap: () =>
                                   context.push('/sales/emitir-factura'),
                             ),
@@ -363,7 +372,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                               icon: Icons.history_outlined,
                               title: 'Historial',
                               subtitle: 'Consulta facturas y NC emitidas',
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               onTap: () => context.push('/sales/historial'),
                             ),
                           ),
@@ -376,6 +385,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _quickLink(
+                            context: context,
                             icon: Icons.history_rounded,
                             label: 'Historial',
                             onTap: () => context.push('/sales/historial'),
@@ -385,6 +395,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: _quickLink(
+                            context: context,
                               icon: Icons.qr_code_2_rounded,
                               label: 'Secuencias',
                               onTap: () =>
@@ -405,14 +416,16 @@ class FacturacionInicioPage extends ConsumerWidget {
                             title: 'Últimos comprobantes',
                             footerLabel: 'Ver historial completo →',
                             onFooter: () => context.push('/sales/historial'),
-                            children: const [
+                            children: [
                               _ListaItem(
                                 nombre: 'Factura B01',
                                 detalle:
                                     'Consulta el historial para el detalle',
                                 valor: '—',
                                 chip: 'Factura',
-                                chipColor: AppColors.primary,
+                                chipColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                               ),
                               _ListaItem(
                                 nombre: 'Nota de crédito',
@@ -470,13 +483,13 @@ class FacturacionInicioPage extends ConsumerWidget {
                       title: 'Últimos comprobantes',
                       footerLabel: 'Ver historial completo →',
                       onFooter: () => context.push('/sales/historial'),
-                      children: const [
+                      children: [
                         _ListaItem(
                           nombre: 'Historial de facturas y NC',
                           detalle: 'Consulta comprobantes emitidos',
                           valor: '—',
                           chip: 'Ver',
-                          chipColor: AppColors.primary,
+                          chipColor: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ),
@@ -507,8 +520,8 @@ class FacturacionInicioPage extends ConsumerWidget {
   }
 }
 
-
 Widget _quickLink({
+  required BuildContext context,
   required IconData icon,
   required String label,
   required VoidCallback onTap,
@@ -528,7 +541,7 @@ Widget _quickLink({
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF0D9488)),
+            Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               label,
@@ -544,6 +557,7 @@ Widget _quickLink({
     ),
   );
 }
+
 class _KpiPill extends StatelessWidget {
   const _KpiPill({
     required this.icon,
@@ -641,7 +655,6 @@ class _KpiPill extends StatelessWidget {
   }
 }
 
-
 class _OpCard extends StatelessWidget {
   const _OpCard({
     required this.icon,
@@ -723,7 +736,6 @@ class _OpCard extends StatelessWidget {
   }
 }
 
-
 class _ListaPanel extends StatelessWidget {
   const _ListaPanel({
     required this.title,
@@ -770,7 +782,7 @@ class _ListaPanel extends StatelessWidget {
               child: Text(
                 footerLabel,
                 style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -806,11 +818,11 @@ class _ListaItem extends StatelessWidget {
           Container(
             width: 34,
             height: 34,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.grey100,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.receipt_outlined,
               size: 18,
               color: AppColors.grey600,
@@ -844,13 +856,14 @@ class _ListaItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: (chipColor ?? AppColors.primary).withValues(alpha: 0.12),
+                color: (chipColor ?? Theme.of(context).colorScheme.primary)
+                    .withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 chip!,
                 style: AppTypography.labelSmall.copyWith(
-                  color: chipColor ?? AppColors.primary,
+                  color: chipColor ?? Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

@@ -17,9 +17,9 @@ class GastosRepository {
       conditions.add('fecha < ?');
       vars.add(Variable.withString(hasta.toIso8601String()));
     }
-    final where =
-        conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}';
-    final rows = await _db.customSelect(
+    final where = conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}';
+    final rows = await _db
+        .customSelect(
       '''
       SELECT id, fecha, categoria, descripcion, monto, forma_pago, notas,
              creado_en, actualizado_en
@@ -29,7 +29,8 @@ class GastosRepository {
       ''',
       variables: vars,
       readsFrom: {_db.gastosTable},
-    ).get();
+        )
+        .get();
 
     DateTime parseDt(dynamic v) {
       if (v is DateTime) return v;
@@ -55,7 +56,9 @@ class GastosRepository {
 
   Future<int> guardar(Gasto g) async {
     if (g.id == null) {
-      final row = await _db.into(_db.gastosTable).insertReturning(
+      final row = await _db
+          .into(_db.gastosTable)
+          .insertReturning(
             GastosTableCompanion.insert(
               fecha: g.fecha,
               categoria: Value(g.categoria),
@@ -69,8 +72,7 @@ class GastosRepository {
           );
       return row.id;
     }
-    await (_db.update(_db.gastosTable)..where((t) => t.id.equals(g.id!)))
-        .write(
+    await (_db.update(_db.gastosTable)..where((t) => t.id.equals(g.id!))).write(
       GastosTableCompanion(
         fecha: Value(g.fecha),
         categoria: Value(g.categoria),

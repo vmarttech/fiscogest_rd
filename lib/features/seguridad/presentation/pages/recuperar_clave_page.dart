@@ -65,7 +65,10 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         _error = '$e';
       });
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -106,7 +109,10 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         _error = '$e';
       });
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -120,7 +126,7 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         foregroundColor: Colors.white,
         title: const Text('Recuperar contraseña'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
         ),
       ),
@@ -176,7 +182,9 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
                         FilledButton(
                           onPressed: _cargando ? null : _buscar,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF14B8A6),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.tertiary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -214,7 +222,9 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
                         FilledButton(
                           onPressed: _cargando ? null : _recuperar,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF14B8A6),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.tertiary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -253,7 +263,7 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
+        borderSide: BorderSide(color: Color(0xFF2DD4BF)),
       ),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );

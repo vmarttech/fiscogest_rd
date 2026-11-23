@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 enum IdiomaApp { es, en }
 
-final idiomaProvider = StateProvider<IdiomaApp>((ref) => ServicioIdioma.inicial);
+final idiomaProvider = StateProvider<IdiomaApp>(
+  (ref) => ServicioIdioma.inicial,
+);
 
 class _IdiomaHeredado extends InheritedWidget {
   const _IdiomaHeredado({required this.idioma, required super.child});
@@ -36,11 +39,15 @@ class ServicioIdioma {
 
   static IdiomaApp actual(BuildContext context) {
     try {
-      final heredado = context.dependOnInheritedWidgetOfExactType<_IdiomaHeredado>();
+      final heredado = context
+          .dependOnInheritedWidgetOfExactType<_IdiomaHeredado>();
       if (heredado != null) return heredado.idioma;
     } catch (_) {}
     try {
-      return ProviderScope.containerOf(context, listen: false).read(idiomaProvider);
+      return ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(idiomaProvider);
     } catch (_) {
       return IdiomaApp.es;
     }
@@ -66,7 +73,9 @@ class ServicioIdioma {
 
   static Future<void> alternar(BuildContext context) async {
     final caja = ProviderScope.containerOf(context);
-    final next = caja.read(idiomaProvider) == IdiomaApp.es ? IdiomaApp.en : IdiomaApp.es;
+    final next = caja.read(idiomaProvider) == IdiomaApp.es
+        ? IdiomaApp.en
+        : IdiomaApp.es;
     caja.read(idiomaProvider.notifier).state = next;
 
     final p = await SharedPreferences.getInstance();
@@ -88,7 +97,10 @@ class ServicioIdioma {
               onTap: () => alternar(context),
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white, width: 1.4),
@@ -124,9 +136,11 @@ class ServicioIdioma {
     'Cotizaciones': 'Quotes',
     'Clientes': 'Customers',
     'Cartera de clientes': 'Customer portfolio',
-    'Administración de datos personales, fiscales y contacto.': 'Personal, tax and contact details.',
+    'Administración de datos personales, fiscales y contacto.':
+        'Personal, tax and contact details.',
     'Nuevo cliente': 'New customer',
-    'Buscar por nombre, RNC, teléfono o correo...': 'Search by name, tax ID, phone or email...',
+    'Buscar por nombre, RNC, teléfono o correo...':
+        'Search by name, tax ID, phone or email...',
     'No hay clientes': 'No customers',
     'Inventario': 'Inventory',
     'Gestión de productos y existencias': 'Products and stock',
@@ -135,7 +149,8 @@ class ServicioIdioma {
     'Kárdex': 'Kardex',
     'KÁRDEX': 'KARDEX',
     'Kárdex de inventario': 'Inventory kardex',
-    'Entradas, salidas y saldos por producto y documento.': 'Receipts, issues and balances by product and document.',
+    'Entradas, salidas y saldos por producto y documento.':
+        'Receipts, issues and balances by product and document.',
     'Producto o documento': 'Product or document',
     'Tipo de Movimiento': 'Movement type',
     'Inventario Físico': 'Physical inventory',
@@ -174,7 +189,8 @@ class ServicioIdioma {
     'Buscar por código, nombre...': 'Search by code or name...',
     'e-CF · DGII': 'e-CF · DGII',
     'Especificación e-CF': 'e-CF specification',
-    'Esta área es solo de consulta. Para generar, firmar, enviar o anular comprobantes electrónicos descarga FiscoGest versión PC.': 'This area is view-only. To issue, sign, send or void electronic invoices, download the FiscoGest desktop version.',
+    'Esta área es solo de consulta. Para generar, firmar, enviar o anular comprobantes electrónicos descarga FiscoGest versión PC.':
+        'This area is view-only. To issue, sign, send or void electronic invoices, download the FiscoGest desktop version.',
     'e-CF · versión PC': 'e-CF · desktop version',
     'Menú': 'Menu',
     'Atrás': 'Back',
@@ -191,7 +207,8 @@ class ServicioIdioma {
     'Crear y seleccionar': 'Create and select',
     'Ninguna (raíz)': 'None (root)',
     'Predeterminado para ventas': 'Default for sales',
-    'Solo un ITBIS puede ser el de la caja': 'Only one VAT rate can be used at checkout',
+    'Solo un ITBIS puede ser el de la caja':
+        'Only one VAT rate can be used at checkout',
     'Guardar cambios': 'Save changes',
     'Actualizar': 'Update',
     'Agregar': 'Add',
@@ -266,7 +283,8 @@ class ServicioIdioma {
     'Sin productos': 'No products',
     'Sin clientes': 'No customers',
     'Sin proveedores': 'No suppliers',
-    'La operación se completó correctamente': 'The operation completed successfully',
+    'La operación se completó correctamente':
+        'The operation completed successfully',
     'Cambios guardados correctamente': 'Changes saved successfully',
     'Registro guardado correctamente': 'Record saved successfully',
     'Error al guardar': 'Error saving',
@@ -338,11 +356,15 @@ class ServicioIdioma {
     'Seleccione una categoría': 'Select a category',
     'Seleccione unidad de medida': 'Select a unit of measure',
     'Las cantidades no pueden ser negativas': 'Quantities cannot be negative',
-    'Ingrese una cantidad válida mayor a cero': 'Enter a valid quantity greater than zero',
-    'Descripción y monto válidos son requeridos': 'A valid description and amount are required',
-    'Ingrese RNC (9) o cédula (11 dígitos)': 'Enter a tax ID (9 digits) or national ID (11 digits)',
+    'Ingrese una cantidad válida mayor a cero':
+        'Enter a valid quantity greater than zero',
+    'Descripción y monto válidos son requeridos':
+        'A valid description and amount are required',
+    'Ingrese RNC (9) o cédula (11 dígitos)':
+        'Enter a tax ID (9 digits) or national ID (11 digits)',
     'Seleccione una cotización': 'Select a quote',
-    'Agregue productos antes de generar la cotización': 'Add products before creating the quote',
+    'Agregue productos antes de generar la cotización':
+        'Add products before creating the quote',
     'Ya realicé el pago': 'I have made the payment',
     'Activar con código (opcional)': 'Activate with code (optional)',
     'Operaciones': 'Operations',
@@ -420,18 +442,21 @@ class ServicioIdioma {
     'Abono inicial (RD\$)': 'Initial payment (DOP)',
     'Cargar modelo': 'Load template',
     'Usar default del PDF': 'Use PDF default',
-    'Configuración · Plazos, tasas y políticas →': 'Settings · Terms, rates and policies →',
+    'Configuración · Plazos, tasas y políticas →':
+        'Settings · Terms, rates and policies →',
     'POR COBRAR': 'RECEIVABLE',
     'AL DÍA': 'CURRENT',
     'SOLICITUDES': 'APPLICATIONS',
     'Solicitudes': 'Applications',
     'Próximos vencimientos': 'Upcoming due dates',
     'Solicitudes recientes': 'Recent applications',
-    'No hay clientes que coincidan con la búsqueda.': 'No customers match the search.',
+    'No hay clientes que coincidan con la búsqueda.':
+        'No customers match the search.',
     'Saldo pendiente': 'Outstanding balance',
     'Buscar nombre, RNC o cédula': 'Search name or tax ID',
     'Limpiar búsqueda': 'Clear search',
-    'Gestión unificada para comercios locales y contribuyentes con control fiscal.': 'Unified management for local businesses and taxpayers with fiscal controls.',
+    'Gestión unificada para comercios locales y contribuyentes con control fiscal.':
+        'Unified management for local businesses and taxpayers with fiscal controls.',
     'Modo Unificado Activo': 'Unified mode active',
     'Información comercial y de contacto': 'Business and contact information',
     'USUARIOS': 'USERS',
@@ -470,7 +495,8 @@ class ServicioIdioma {
     'Usuario no autenticado': 'User is not authenticated',
     'Registrar Ajuste': 'Record adjustment',
     'Buscar Producto': 'Search product',
-    'Pago reportado. Cuando confirmemos el depósito, tu licencia quedará activa.': 'Payment reported. Your license will be activated once the deposit is confirmed.',
+    'Pago reportado. Cuando confirmemos el depósito, tu licencia quedará activa.':
+        'Payment reported. Your license will be activated once the deposit is confirmed.',
     'Pago de licencia': 'License payment',
     'Comprar licencia': 'Purchase license',
     'Sin licencia': 'No license',
@@ -525,7 +551,8 @@ class ServicioIdioma {
     'Fecha de Recepción': 'Receipt date',
     'Gastos por unidad': 'Expenses per unit',
     'No hay cuentas por pagar registradas.': 'No accounts payable recorded.',
-    'Al confirmar una compra a crédito, aparecerá aquí.': 'Credit purchases will appear here once confirmed.',
+    'Al confirmar una compra a crédito, aparecerá aquí.':
+        'Credit purchases will appear here once confirmed.',
     'Historial de Abonos': 'Payment history',
     'Sin abonos registrados.': 'No payments recorded.',
     'Detalle de Cuenta': 'Account details',
@@ -545,17 +572,22 @@ class ServicioIdioma {
     'Tasas, tipos y exenciones': 'Rates, types and exemptions',
     'NUEVO IMPUESTO': 'NEW TAX',
     'Configuración tributaria e ITBIS': 'Tax settings and VAT',
-    'Administración de tasas, tipos globales y exenciones.': 'Manage rates, global types and exemptions.',
+    'Administración de tasas, tipos globales y exenciones.':
+        'Manage rates, global types and exemptions.',
     'Nuevo impuesto': 'New tax',
     'Sin impuestos': 'No taxes',
     'Eliminar impuesto': 'Delete tax',
     'En análisis': 'Under review',
-    'Cotizaciones en crédito pendientes de aprobación.': 'Credit quotes awaiting approval.',
-    'No hay cotizaciones en crédito pendientes': 'There are no credit quotes awaiting approval',
+    'Cotizaciones en crédito pendientes de aprobación.':
+        'Credit quotes awaiting approval.',
+    'No hay cotizaciones en crédito pendientes':
+        'There are no credit quotes awaiting approval',
     '¿Quieres salir de la app?': 'Do you want to exit the app?',
     'No hay fiao pendiente': 'There are no outstanding credit sales',
-    'Cuando anotes un fiao desde Generar venta, aparecerá aquí.': 'Credit sales recorded from New sale will appear here.',
-    'El abono no puede ser mayor al saldo': 'The payment cannot exceed the balance',
+    'Cuando anotes un fiao desde Generar venta, aparecerá aquí.':
+        'Credit sales recorded from New sale will appear here.',
+    'El abono no puede ser mayor al saldo':
+        'The payment cannot exceed the balance',
     'Por cobrar:': 'Receivable:',
     'Saldo:': 'Balance:',
     'Precio:': 'Price:',
@@ -573,14 +605,19 @@ class ServicioIdioma {
     'Saldo Pendiente:': 'Outstanding balance:',
     'Variación:': 'Change:',
     'No hay ajustes registrados': 'No adjustments recorded',
-    'No hay ajustes que coincidan con la búsqueda.': 'No adjustments match the search.',
+    'No hay ajustes que coincidan con la búsqueda.':
+        'No adjustments match the search.',
     'Buscar producto, tipo o motivo...': 'Search product, type or reason...',
-    'Seleccione un producto usando la lupa': 'Select a product using the search icon',
+    'Seleccione un producto usando la lupa':
+        'Select a product using the search icon',
     'Stock insuficiente. Disponible:': 'Insufficient stock. Available:',
-    '✅ Ajuste guardado — stock actualizado': '✅ Adjustment saved — stock updated',
+    '✅ Ajuste guardado — stock actualizado':
+        '✅ Adjustment saved — stock updated',
     'Comentarios adicionales (opcional)': 'Additional comments (optional)',
-    'Compra, listado y cuentas por pagar': 'Purchases, listings and accounts payable',
-    'Registra compras, revisa actividad y controla cuentas por pagar.': 'Record purchases, review activity and manage accounts payable.',
+    'Compra, listado y cuentas por pagar':
+        'Purchases, listings and accounts payable',
+    'Registra compras, revisa actividad y controla cuentas por pagar.':
+        'Record purchases, review activity and manage accounts payable.',
     'ESTE MES': 'THIS MONTH',
     'A CRÉDITO': 'ON CREDIT',
     'POR PAGAR': 'PAYABLE',
@@ -601,8 +638,10 @@ class ServicioIdioma {
     'Monto exacto:': 'Exact amount:',
     'Monto:': 'Amount:',
     'Licencia': 'License',
-    'Cuando un cliente genere FG-XXXXX, aparecerá aquí.': 'When a customer creates FG-XXXXX, it will appear here.',
-    'No hay compras registradas para este producto.': 'There are no purchases recorded for this product.',
+    'Cuando un cliente genere FG-XXXXX, aparecerá aquí.':
+        'When a customer creates FG-XXXXX, it will appear here.',
+    'No hay compras registradas para este producto.':
+        'There are no purchases recorded for this product.',
     'Lista de Ajustes': 'Adjustments list',
     'Sin movimientos en el período': 'No transactions during this period',
     'Dispositivos en este negocio': 'Devices in this business',
@@ -622,10 +661,14 @@ class ServicioIdioma {
     'Carrito': 'Cart',
     'NUEVA VENTA': 'NEW SALE',
     'Copiado': 'Copied',
-    'Incluye esta referencia en el concepto. Vence en 7 días si no se confirma.': 'Include this reference in the payment note. It expires in 7 days if not confirmed.',
-    'Toke o transferencia. Genera FG-XXXXX e inclúyelo en el concepto.': 'Toke or bank transfer. An FG-XXXXX reference is generated; include it in the payment note.',
-    'Usa la referencia FG-XXXXX del pedido pagado.': 'Use the FG-XXXXX reference from the paid order.',
-    'Solo si te confirmamos una referencia FG- ya pagada.': 'Use this only after we confirm that the FG reference has been paid.',
+    'Incluye esta referencia en el concepto. Vence en 7 días si no se confirma.':
+        'Include this reference in the payment note. It expires in 7 days if not confirmed.',
+    'Toke o transferencia. Genera FG-XXXXX e inclúyelo en el concepto.':
+        'Toke or bank transfer. An FG-XXXXX reference is generated; include it in the payment note.',
+    'Usa la referencia FG-XXXXX del pedido pagado.':
+        'Use the FG-XXXXX reference from the paid order.',
+    'Solo si te confirmamos una referencia FG- ya pagada.':
+        'Use this only after we confirm that the FG reference has been paid.',
     '01 - Factura': '01 - Invoice',
     '04 - Nota de entrega': '04 - Delivery note',
     'Error al cargar compras': 'Error loading purchases',
@@ -634,30 +677,38 @@ class ServicioIdioma {
     'Error al cargar cuentas': 'Error loading accounts',
     'Abono registrado ✅': 'Payment recorded ✅',
     'Cheque': 'Check',
-    'No hay productos. Presione "Agregar" para iniciar.': 'There are no products. Press "Add" to get started.',
+    'No hay productos. Presione "Agregar" para iniciar.':
+        'There are no products. Press "Add" to get started.',
     'Exento de impuesto': 'Tax exempt',
     'CATEGORÍA': 'CATEGORY',
     'Resumen operativo en tiempo real': 'Real-time business overview',
     '¡Bienvenido de nuevo! 👋': 'Welcome back! 👋',
-    'Esto es lo que está pasando en tu negocio hoy.': 'Here is what is happening in your business today.',
+    'Esto es lo que está pasando en tu negocio hoy.':
+        'Here is what is happening in your business today.',
     'Excepciones de Inventario': 'Inventory exceptions',
     'Alertas Prioritarias': 'Priority alerts',
     'Factura emitida': 'Invoice issued',
-    'Factura emitida pero sin líneas de producto en BD.': 'Invoice issued, but no product lines were found in the database.',
+    'Factura emitida pero sin líneas de producto en BD.':
+        'Invoice issued, but no product lines were found in the database.',
     'Documentos listos': 'Documents ready',
-    'Cotizado (contado) o aprobado (crédito), sin NCF.  B01 · B02': 'Quoted (cash) or approved (credit), without an NCF. B01 · B02',
+    'Cotizado (contado) o aprobado (crédito), sin NCF.  B01 · B02':
+        'Quoted (cash) or approved (credit), without an NCF. B01 · B02',
     'Sin pendientes': 'No pending items',
     'Emitir NCF': 'Issue NCF',
     'Facturas con NCF': 'Invoices with NCF',
-    'Se asigna secuencia B04. Inventario y CxC se ajustan según reglas.': 'B04 sequence is assigned. Inventory and receivables are adjusted according to the rules.',
+    'Se asigna secuencia B04. Inventario y CxC se ajustan según reglas.':
+        'B04 sequence is assigned. Inventory and receivables are adjusted according to the rules.',
     'Sin facturas disponibles': 'No invoices available',
     'Emitir B04': 'Issue B04',
-    'Módulo en construcción (F0)\nDisponible en la siguiente fase.': 'Module under development (F0)\nAvailable in the next phase.',
+    'Módulo en construcción (F0)\nDisponible en la siguiente fase.':
+        'Module under development (F0)\nAvailable in the next phase.',
     'Rangos autorizados DGII': 'DGII-authorized ranges',
     'Aún no hay facturas emitidas.': 'No invoices have been issued yet.',
     'Notas de crédito': 'Credit notes',
-    'Sin notas de crédito para este comprobante.': 'There are no credit notes for this receipt.',
-    'Esta factura no tiene líneas de producto en BD.': 'This invoice has no product lines in the database.',
+    'Sin notas de crédito para este comprobante.':
+        'There are no credit notes for this receipt.',
+    'Esta factura no tiene líneas de producto en BD.':
+        'This invoice has no product lines in the database.',
     'Imprimir comprobante': 'Print receipt',
     'Facturas emitidas': 'Invoices issued',
     'Módulo de planes superiores': 'Higher-tier plan module',
@@ -665,7 +716,8 @@ class ServicioIdioma {
     'Marcar como principal': 'Set as primary',
     'Comprobantes fiscales y secuencias NCF': 'Tax receipts and NCF sequences',
     'Facturación y NC': 'Billing and credit notes',
-    'Emisión de facturas, notas de crédito, NCF e historial de comprobantes.': 'Issue invoices, credit notes and NCFs, and view receipt history.',
+    'Emisión de facturas, notas de crédito, NCF e historial de comprobantes.':
+        'Issue invoices, credit notes and NCFs, and view receipt history.',
     'Formulario de Crédito': 'Credit form',
     'Cuota': 'Installment',
     'Resumen del financiamiento': 'Financing summary',
@@ -679,20 +731,25 @@ class ServicioIdioma {
     'Plan de cuotas': 'Installment plan',
     'Aún no hay abonos registrados': 'No payments have been recorded yet',
     'Registrar pago': 'Record payment',
-    'Puedes pagar más de una cuota, hasta cubrir el saldo pendiente.': 'You can pay multiple installments up to the outstanding balance.',
+    'Puedes pagar más de una cuota, hasta cubrir el saldo pendiente.':
+        'You can pay multiple installments up to the outstanding balance.',
     'Otro': 'Other',
     'Registrar': 'Record',
     'Parámetros de crédito': 'Credit settings',
     'Valores por defecto y plantillas PDF': 'Defaults and PDF templates',
     'Valores por defecto del área de crédito': 'Credit area defaults',
-    'Política interna; se refleja en textos': 'Internal policy; shown in generated text',
+    'Política interna; se refleja en textos':
+        'Internal policy; shown in generated text',
     'Plantilla solicitud': 'Application template',
     'Plantilla contrato': 'Contract template',
     'Gestión de crédito': 'Credit management',
-    'Solicitudes, aprobación y cuentas por cobrar. Flujo: cotización → crédito → caja.': 'Applications, approval and receivables. Flow: quote → credit → checkout.',
+    'Solicitudes, aprobación y cuentas por cobrar. Flujo: cotización → crédito → caja.':
+        'Applications, approval and receivables. Flow: quote → credit → checkout.',
     'Condiciones guardadas': 'Terms saved',
-    'Defina condiciones (abono/cuotas) antes del contrato': 'Set payment and installment terms before creating the contract',
-    'Defina condiciones antes de enviar el contrato': 'Set the terms before sending the contract',
+    'Defina condiciones (abono/cuotas) antes del contrato':
+        'Set payment and installment terms before creating the contract',
+    'Defina condiciones antes de enviar el contrato':
+        'Set the terms before sending the contract',
     'Expediente guardado': 'Application saved',
     'EDITAR ABONO, PLAZO Y CUOTAS': 'EDIT DOWN PAYMENT, TERM AND INSTALLMENTS',
     'SOLICITUD': 'APPLICATION',
@@ -701,9 +758,11 @@ class ServicioIdioma {
     'ENVIAR CONTRATO': 'SEND CONTRACT',
     'RECHAZAR': 'REJECT',
     'Cartera': 'Portfolio',
-    'Seleccione una cuenta para ver cuotas y registrar cobros.': 'Select an account to view installments and record payments.',
+    'Seleccione una cuenta para ver cuotas y registrar cobros.':
+        'Select an account to view installments and record payments.',
     'No hay cuentas por cobrar registradas': 'No receivables recorded',
-    'Cliente registrado correctamente en el sistema': 'Customer successfully registered',
+    'Cliente registrado correctamente en el sistema':
+        'Customer successfully registered',
     'Información Fiscal y Tributaria (DGII)': 'Tax information (DGII)',
     'Datos, contacto e historial': 'Details, contact and history',
     'NUEVO CLIENTE': 'NEW CUSTOMER',
@@ -718,7 +777,8 @@ class ServicioIdioma {
     'Top productos': 'Top products',
     'Salud del negocio': 'Business health',
     'Periodo seleccionado': 'Selected period',
-    'No hay datos para exportar (lista vacía o no cargada)': 'No data to export (list is empty or has not loaded)',
+    'No hay datos para exportar (lista vacía o no cargada)':
+        'No data to export (list is empty or has not loaded)',
     'Respaldo y catálogos CSV': 'Backup and CSV catalogs',
     'Respaldo completo': 'Full backup',
     'Importar productos': 'Import products',
@@ -726,7 +786,8 @@ class ServicioIdioma {
     'Archivo CSV de productos': 'Product CSV file',
     'Elegir archivo CSV': 'Choose CSV file',
     'Sin errores en el último proceso.': 'No errors in the last process.',
-    'Solo el administrador puede gestionar usuarios.': 'Only the administrator can manage users.',
+    'Solo el administrador puede gestionar usuarios.':
+        'Only the administrator can manage users.',
     'No hay usuarios': 'No users',
     'Inactivo': 'Inactive',
     'Configure su cuenta': 'Set up your account',
@@ -736,14 +797,17 @@ class ServicioIdioma {
     'Entrar con huella / PIN': 'Sign in with fingerprint / PIN',
     '¿Olvidaste tu clave?': 'Forgot your password?',
     'Reportes operativos': 'Operational reports',
-    'Consulta movimientos reales de tu negocio por período.': 'Review actual business transactions by period.',
+    'Consulta movimientos reales de tu negocio por período.':
+        'Review actual business transactions by period.',
     'Declaraciones DGII': 'DGII filings',
     'Seleccione producto': 'Select a product',
     'Transferencia registrada': 'Transfer completed',
     'PANEL e-CF': 'e-CF PANEL',
     'Comprobantes electrónicos DGII': 'DGII electronic receipts',
-    'Renueva el certificado del PSC antes de firmar/enviar.': 'Renew the PSC certificate before signing or sending.',
-    'Desactivado por defecto. No encola ni envía nada.': 'Disabled by default. Nothing is queued or sent.',
+    'Renueva el certificado del PSC antes de firmar/enviar.':
+        'Renew the PSC certificate before signing or sending.',
+    'Desactivado por defecto. No encola ni envía nada.':
+        'Disabled by default. Nothing is queued or sent.',
     'Secuencias e-NCF': 'e-NCF sequences',
     'Agregar / otro tipo': 'Add / other type',
     'Secuencia e-NCF guardada': 'e-NCF sequence saved',
@@ -782,8 +846,10 @@ class ServicioIdioma {
     'Seleccione un producto': 'Select a product',
     'Ver diferencias': 'View differences',
     'Líneas registradas': 'Recorded lines',
-    'Aún no hay líneas en este conteo.': 'There are no lines in this count yet.',
-    'No hay conteos registrados. Cree el primero.': 'No counts recorded. Create the first one.',
+    'Aún no hay líneas en este conteo.':
+        'There are no lines in this count yet.',
+    'No hay conteos registrados. Cree el primero.':
+        'No counts recorded. Create the first one.',
     'CONTEO': 'COUNT',
     'FECHA': 'DATE',
   };

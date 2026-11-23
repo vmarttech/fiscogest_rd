@@ -20,7 +20,7 @@ class SecuenciasNcfPage extends ConsumerWidget {
       title: 'SECUENCIAS NCF',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -231,7 +231,10 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -254,7 +257,9 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
               ),
               Switch.adaptive(
                 value: _activo,
-                onChanged: (v) => setState(() { _activo = v; }),
+                onChanged: (v) => setState(() {
+                  _activo = v;
+                }),
               ),
               Text(
                 _activo ? 'Activo' : 'Inactivo',
@@ -266,7 +271,7 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
           Text(
             'Próximo NCF: $_preview',
             style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
           ),

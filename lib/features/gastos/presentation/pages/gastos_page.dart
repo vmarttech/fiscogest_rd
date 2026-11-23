@@ -81,7 +81,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
         return const Color(0xFF2563EB);
       case 'nómina':
       case 'nomina':
-        return const Color(0xFF0F766E);
+        return Theme.of(context).colorScheme.primary;
       case 'impuestos':
         return const Color(0xFFDC2626);
       case 'marketing':
@@ -221,7 +221,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 );
                 if (d != null) setLocal(() => fecha = d);
               },
-              icon: const Icon(Icons.calendar_today, size: 16),
+              icon: Icon(Icons.calendar_today, size: 16),
               label: Text('Fecha: ${_fmtCorto.format(fecha)}'),
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
@@ -296,10 +296,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.receipt_long_rounded,
-                  color: Color(0xFF2563EB),
-                ),
+            child: Icon(Icons.receipt_long_rounded, color: Color(0xFF2563EB)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -316,17 +313,14 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                     ),
                     const Text(
                       'Egreso operativo del negocio',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: Color(0xFF6B7280),
-                      ),
+                  style: TextStyle(fontSize: 12.5, color: Color(0xFF6B7280)),
                     ),
                   ],
                 ),
               ),
               IconButton(
                 onPressed: () => Navigator.pop(ctx),
-                icon: const Icon(Icons.close),
+            icon: Icon(Icons.close),
               ),
             ],
           ),
@@ -345,7 +339,8 @@ class _GastosPageState extends ConsumerState<GastosPage> {
           return StatefulBuilder(
             builder: (ctx, setLocal) {
               final media = MediaQuery.of(ctx);
-              final h = media.size.height -
+              final h =
+                  media.size.height -
                   media.viewInsets.bottom -
                   media.padding.top;
               final bottomSafe = media.padding.bottom;
@@ -428,7 +423,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                             const Spacer(),
                             FilledButton.icon(
                               onPressed: () => guardar(ctx),
-                              icon: const Icon(Icons.check, size: 18),
+                              icon: Icon(Icons.check, size: 18),
                               label: const Text('Guardar'),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF2563EB),
@@ -552,10 +547,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       floatingActionButton: mobile
           ? FloatingActionButton.extended(
               onPressed: () => _abrirForm(),
-              backgroundColor: const Color(0xFF00796B),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               elevation: 4,
-              icon: const Icon(Icons.add_rounded),
+              icon: Icon(Icons.add_rounded),
               label: const Text(
                 'Registrar',
                 style: TextStyle(fontWeight: FontWeight.w800),
@@ -563,15 +558,11 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             )
           : null,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE0F2F1),
-              Color(0xFFF8FAFC),
-              Color(0xFFF1F5F9),
-            ],
+            colors: [Color(0xFFE0F2F1), Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
             stops: [0.0, 0.2, 1.0],
           ),
         ),
@@ -581,8 +572,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             error: (e, _) => Center(child: Text('Error: $e')),
             data: (lista) {
               final filtrados = _aplicarFiltros(lista);
-              final totalFiltrado =
-                  filtrados.fold<double>(0, (s, g) => s + g.monto);
+              final totalFiltrado = filtrados.fold<double>(
+                0,
+                (s, g) => s + g.monto,
+              );
               final resumen = _resumenMes(lista);
               final top = _categoriaTop(filtrados, totalFiltrado);
 
@@ -639,7 +632,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                             ),
                             FilledButton.icon(
                               onPressed: () => _abrirForm(),
-                              icon: const Icon(Icons.add, size: 18),
+                              icon: Icon(Icons.add, size: 18),
                               label: const Text('Registrar Gasto'),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF2563EB),
@@ -669,7 +662,8 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                               label: 'RESUMEN MES',
                               title: formatRd(resumen.mesActual),
                               subtitle: 'Total Gastado (Este Mes)',
-                              badge: resumen.mesAnterior == 0 &&
+                              badge:
+                                  resumen.mesAnterior == 0 &&
                                       resumen.mesActual == 0
                                   ? null
                                   : '${resumen.pct >= 0 ? '+' : ''}${resumen.pct.toStringAsFixed(0)}% vs Mes Anterior',
@@ -748,7 +742,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                   fontSize: 13,
                                   color: Color(0xFF9CA3AF),
                                 ),
-                                prefixIcon: const Icon(
+                                prefixIcon: Icon(
                                   Icons.search,
                                   size: 20,
                                   color: Color(0xFF9CA3AF),
@@ -761,20 +755,21 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE5E7EB),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE5E7EB),
                                   ),
                                 ),
                                 isDense: true,
                               ),
-                              onChanged: (v) =>
-                                  setState(() { _filtro = v.toLowerCase(); }),
+                              onChanged: (v) => setState(() {
+                                _filtro = v.toLowerCase();
+                              }),
                             );
                             final chips = Wrap(
                               spacing: 8,
@@ -782,41 +777,36 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                               children: [
                                 _FilterChipBtn(
                                   label: 'Últimos 7 días',
-                                  selected:
-                                      _periodo == _PeriodoFiltro.ultimos7,
+                                  selected: _periodo == _PeriodoFiltro.ultimos7,
                                   onTap: () => setState(
                                     () => _periodo = _PeriodoFiltro.ultimos7,
                                   ),
                                 ),
                                 _FilterChipBtn(
                                   label: 'Este Mes',
-                                  selected:
-                                      _periodo == _PeriodoFiltro.esteMes,
+                                  selected: _periodo == _PeriodoFiltro.esteMes,
                                   onTap: () => setState(
                                     () => _periodo = _PeriodoFiltro.esteMes,
                                   ),
                                 ),
                                 _FilterChipBtn(
                                   label: 'Todos',
-                                  selected:
-                                      _periodo == _PeriodoFiltro.todos,
+                                  selected: _periodo == _PeriodoFiltro.todos,
                                   onTap: () => setState(
                                     () => _periodo = _PeriodoFiltro.todos,
                                   ),
                                 ),
                                 PopupMenuButton<String?>(
-                                  onSelected: (v) =>
-                                      setState(() { _categoriaFiltro = v; }),
+                                  onSelected: (v) => setState(() {
+                                    _categoriaFiltro = v;
+                                  }),
                                   itemBuilder: (_) => [
                                     const PopupMenuItem(
                                       value: null,
                                       child: Text('Todas las categorías'),
                                     ),
                                     for (final c in _cats)
-                                      PopupMenuItem(
-                                        value: c,
-                                        child: Text(c),
-                                      ),
+                                      PopupMenuItem(value: c, child: Text(c)),
                                   ],
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -844,7 +834,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-                                        const Icon(
+                                        Icon(
                                           Icons.keyboard_arrow_down,
                                           size: 16,
                                           color: Color(0xFF6B7280),
@@ -940,22 +930,13 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                     columnSpacing: 24,
                                     columns: const [
                                       DataColumn(
-                                        label: Text(
-                                          'ICONO',
-                                          style: _th,
-                                        ),
+                                        label: Text('ICONO', style: _th),
                                       ),
                                       DataColumn(
-                                        label: Text(
-                                          'DESCRIPCIÓN',
-                                          style: _th,
-                                        ),
+                                        label: Text('DESCRIPCIÓN', style: _th),
                                       ),
                                       DataColumn(
-                                        label: Text(
-                                          'CATEGORÍA',
-                                          style: _th,
-                                        ),
+                                        label: Text('CATEGORÍA', style: _th),
                                       ),
                                       DataColumn(
                                         label: Text('FECHA', style: _th),
@@ -971,10 +952,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                         numeric: true,
                                       ),
                                       DataColumn(
-                                        label: Text(
-                                          'ACCIONES',
-                                          style: _th,
-                                        ),
+                                        label: Text('ACCIONES', style: _th),
                                         numeric: true,
                                       ),
                                     ],
@@ -988,8 +966,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                   width: 36,
                                                   height: 36,
                                                   decoration: BoxDecoration(
-                                                    color: _colorCat(g.categoria)
-                                                        .withValues(alpha: 0.12),
+                                                    color: _colorCat(
+                                                      g.categoria,
+                                                    ).withValues(alpha: 0.12),
                                                     shape: BoxShape.circle,
                                                   ),
                                                   child: Icon(
@@ -1020,8 +999,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                   vertical: 4,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFFF3F4F6),
+                                                  color: const Color(
+                                                    0xFFF3F4F6,
+                                                  ),
                                                   borderRadius:
                                                       BorderRadius.circular(6),
                                                 ),
@@ -1071,7 +1051,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                 children: [
                                                   IconButton(
                                                     tooltip: 'Editar',
-                                                    icon: const Icon(
+                                                    icon: Icon(
                                                       Icons.edit_outlined,
                                                       size: 18,
                                                       color: Color(0xFF9CA3AF),
@@ -1081,7 +1061,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                   ),
                                                   IconButton(
                                                     tooltip: 'Eliminar',
-                                                    icon: const Icon(
+                                                    icon: Icon(
                                                       Icons.delete_outline,
                                                       size: 18,
                                                       color: Color(0xFF9CA3AF),
@@ -1091,7 +1071,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                   ),
                                                   IconButton(
                                                     tooltip: 'Ver',
-                                                    icon: const Icon(
+                                                    icon: Icon(
                                                       Icons.visibility_outlined,
                                                       size: 18,
                                                       color: Color(0xFF9CA3AF),
@@ -1163,8 +1143,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
           value: top.nombre,
           icon: _iconCat(top.nombre == '—' ? 'General' : top.nombre),
           accent: _colorCat(top.nombre == '—' ? 'General' : top.nombre),
-          bg: _colorCat(top.nombre == '—' ? 'General' : top.nombre)
-              .withValues(alpha: 0.12),
+          bg: _colorCat(
+            top.nombre == '—' ? 'General' : top.nombre,
+          ).withValues(alpha: 0.12),
           footer: top.nombre == '—'
               ? null
               : '${formatRd(top.monto)} · ${top.pct.toStringAsFixed(0)}%',
@@ -1172,7 +1153,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
         ),
         const SizedBox(height: 16),
         TextField(
-          onChanged: (v) => setState(() { _filtro = v.toLowerCase(); }),
+          onChanged: (v) => setState(() {
+            _filtro = v.toLowerCase();
+          }),
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             hintText: 'Buscar gasto…',
@@ -1180,24 +1163,28 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               color: Color(0xFF94A3B8),
               fontWeight: FontWeight.w500,
             ),
-            prefixIcon: const Icon(Icons.search_rounded,
-                color: Color(0xFF94A3B8), size: 20),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: Color(0xFF94A3B8),
+              size: 20,
+            ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: Color(0xFFE2E8F0)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: Color(0xFFE2E8F0)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFF00796B), width: 1.4),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4),
             ),
           ),
         ),
@@ -1209,25 +1196,31 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               _FilterChipBtn(
                 label: 'Este mes',
                 selected: _periodo == _PeriodoFiltro.esteMes,
-                onTap: () =>
-                    setState(() { _periodo = _PeriodoFiltro.esteMes; }),
+                onTap: () => setState(() {
+                  _periodo = _PeriodoFiltro.esteMes;
+                }),
               ),
               const SizedBox(width: 6),
               _FilterChipBtn(
                 label: '7 días',
                 selected: _periodo == _PeriodoFiltro.ultimos7,
-                onTap: () =>
-                    setState(() { _periodo = _PeriodoFiltro.ultimos7; }),
+                onTap: () => setState(() {
+                  _periodo = _PeriodoFiltro.ultimos7;
+                }),
               ),
               const SizedBox(width: 6),
               _FilterChipBtn(
                 label: 'Todos',
                 selected: _periodo == _PeriodoFiltro.todos,
-                onTap: () => setState(() { _periodo = _PeriodoFiltro.todos; }),
+                onTap: () => setState(() {
+                  _periodo = _PeriodoFiltro.todos;
+                }),
               ),
               const SizedBox(width: 6),
               PopupMenuButton<String?>(
-                onSelected: (v) => setState(() { _categoriaFiltro = v; }),
+                onSelected: (v) => setState(() {
+                  _categoriaFiltro = v;
+                }),
                 itemBuilder: (_) => [
                   const PopupMenuItem(
                     value: null,
@@ -1237,8 +1230,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                     PopupMenuItem(value: c, child: Text(c)),
                 ],
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: _categoriaFiltro != null
                         ? const Color(0xFF0F172A)
@@ -1292,10 +1287,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             const Spacer(),
             Text(
               formatRd(totalFiltrado),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF00796B),
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
@@ -1312,8 +1307,11 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             ),
             child: const Column(
               children: [
-                Icon(Icons.money_off_csred_outlined,
-                    size: 36, color: Color(0xFFCBD5E1)),
+                Icon(
+                  Icons.money_off_csred_outlined,
+                  size: 36,
+                  color: Color(0xFFCBD5E1),
+                ),
                 SizedBox(height: 8),
                 Text(
                   'Sin gastos con estos filtros',
@@ -1453,7 +1451,11 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                       color: catColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(11),
                     ),
-                    child: Icon(_iconCat(g.categoria), color: catColor, size: 20),
+                    child: Icon(
+                      _iconCat(g.categoria),
+                      color: catColor,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -1519,7 +1521,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   IconButton(
                     tooltip: 'Eliminar',
                     onPressed: () => _eliminar(g),
-                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    icon: Icon(Icons.delete_outline_rounded, size: 18),
                     color: const Color(0xFFEF4444),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
@@ -1534,7 +1536,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               // Monto en fila propia: 4+ cifras no compiten ni se recortan.
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(10),
@@ -1577,7 +1582,6 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       ),
     );
   }
-
 }
 
 const _th = TextStyle(
@@ -1615,7 +1619,7 @@ class _KpiCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Colors.white, Color(0xFFF0FDFA)],

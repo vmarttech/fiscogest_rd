@@ -12,6 +12,7 @@ class EcfeTestecfPaso {
   final int orden;
   final String titulo;
   final String detalle;
+
   /// precert | cert | prod
   final String fase;
 }

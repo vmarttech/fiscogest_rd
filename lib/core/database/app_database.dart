@@ -1059,8 +1059,7 @@ CREATE TABLE IF NOT EXISTS pronto_pago_acuerdos (
         final colsCompras = await m.database
             .customSelect('PRAGMA table_info(compras_table)')
             .get();
-        if (!colsCompras
-            .any((r) => r.read<String>('name') == 'almacen_id')) {
+        if (!colsCompras.any((r) => r.read<String>('name') == 'almacen_id')) {
           await m.database.customStatement(
             'ALTER TABLE compras_table ADD COLUMN almacen_id INTEGER NULL',
           );

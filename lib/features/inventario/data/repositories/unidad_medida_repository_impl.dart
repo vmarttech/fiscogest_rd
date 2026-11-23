@@ -28,15 +28,17 @@ class UnidadMedidaRepositoryImpl implements UnidadMedidaRepository {
 
   @override
   Future<UnidadMedida?> obtenerPorId(int id) async {
-    final d = await (_db.select(_db.unidadesMedida)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final d = await (_db.select(
+      _db.unidadesMedida,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return d == null ? null : _map(d);
   }
 
   @override
   Future<void> guardar(UnidadMedida unidad) async {
-    await _db.into(_db.unidadesMedida).insert(
+    await _db
+        .into(_db.unidadesMedida)
+        .insert(
           UnidadesMedidaCompanion(
             nombre: Value(unidad.nombre),
             abreviatura: Value(unidad.abreviatura),
@@ -52,9 +54,9 @@ class UnidadMedidaRepositoryImpl implements UnidadMedidaRepository {
 
   @override
   Future<void> actualizar(UnidadMedida unidad) async {
-    await (_db.update(_db.unidadesMedida)
-          ..where((t) => t.id.equals(unidad.id!)))
-        .write(
+    await (_db.update(
+      _db.unidadesMedida,
+    )..where((t) => t.id.equals(unidad.id!))).write(
       UnidadesMedidaCompanion(
         nombre: Value(unidad.nombre),
         abreviatura: Value(unidad.abreviatura),

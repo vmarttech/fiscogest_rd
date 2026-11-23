@@ -222,8 +222,7 @@ class ImportExportPage extends ConsumerWidget {
     String tituloArchivo,
     String contenido,
   ) async {
-    if (contenido.trim().isEmpty ||
-        contenido.trim().split('\n').length <= 1) {
+    if (contenido.trim().isEmpty || contenido.trim().split('\n').length <= 1) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -263,13 +262,11 @@ class ImportExportPage extends ConsumerWidget {
     final tmpDir = await getTemporaryDirectory();
     final tmp = File(p.join(tmpDir.path, tituloArchivo));
     await tmp.writeAsBytes(bytes, flush: true);
-    await Share.shareXFiles(
-      [XFile(tmp.path, mimeType: 'text/csv', name: tituloArchivo)],
-      subject: tituloArchivo,
-    );
+    await Share.shareXFiles([
+      XFile(tmp.path, mimeType: 'text/csv', name: tituloArchivo),
+    ], subject: tituloArchivo);
   }
 }
-
 
 class _HubHero extends StatelessWidget {
   const _HubHero({
@@ -292,14 +289,16 @@ class _HubHero extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryDark,
-            AppColors.primary,
-            AppColors.primaryLight.withValues(alpha: 0.88),
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.88),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.22),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -387,8 +386,8 @@ class _ExportCard extends StatelessWidget {
               ),
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primary.withValues(alpha: 0.08),
-                  AppColors.primary.withValues(alpha: 0.02),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.02),
                 ],
               ),
             ),
@@ -398,12 +397,14 @@ class _ExportCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.cloud_download_outlined,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 22,
                   ),
                 ),
@@ -446,7 +447,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: onRespaldar,
-                  icon: const Icon(Icons.backup_outlined, size: 18),
+                  icon: Icon(Icons.backup_outlined, size: 18),
                   label: const Text('Respaldo completo'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -458,10 +459,10 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: onProductos,
-                  icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                  icon: Icon(Icons.inventory_2_outlined, size: 18),
                   label: const Text('Productos'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -472,7 +473,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: onClientes,
-                  icon: const Icon(Icons.people_outline, size: 18),
+                  icon: Icon(Icons.people_outline, size: 18),
                   label: const Text('Clientes'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -484,7 +485,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: onProveedores,
-                  icon: const Icon(Icons.business_outlined, size: 18),
+                  icon: Icon(Icons.business_outlined, size: 18),
                   label: const Text('Proveedores'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -548,7 +549,7 @@ class _ImportCard extends StatelessWidget {
                     color: AppColors.info.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.cloud_upload_outlined,
                     color: AppColors.info,
                     size: 22,
@@ -624,7 +625,7 @@ class _ImportCard extends StatelessWidget {
                       const SizedBox(height: 14),
                       FilledButton.icon(
                         onPressed: onSimular,
-                        icon: const Icon(Icons.folder_open, size: 18),
+                        icon: Icon(Icons.folder_open, size: 18),
                         label: const Text('Elegir archivo CSV'),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.info,
@@ -654,7 +655,7 @@ class _ImportCard extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.check_circle_outline,
                           size: 18,
                           color: AppColors.success,
@@ -672,8 +673,8 @@ class _ImportCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  loading: () => const LinearProgressIndicator(
-                    color: AppColors.primary,
+                  loading: () => LinearProgressIndicator(
+                    color: Theme.of(context).colorScheme.primary,
                     minHeight: 3,
                   ),
                   error: (e, _) => Text(
@@ -706,7 +707,7 @@ class _ErroresPanel extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle_outline,
                     size: 40,
                     color: AppColors.grey300,
@@ -732,7 +733,7 @@ class _ErroresPanel extends StatelessWidget {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: AppColors.error.withValues(alpha: 0.12),
-                    child: const Icon(
+                    child: Icon(
                       Icons.error_outline,
                       color: AppColors.error,
                       size: 18,

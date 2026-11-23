@@ -77,8 +77,7 @@ class UsbBarcodeScannerService {
     if (ch == null || ch.isEmpty || ch.length > 1) {
       // Teclas especiales (Shift, Ctrl, F-keys…) → no forman parte del código
       // Si hay un gap grande, limpiamos por si acaso.
-      if (_lastKeyAt != null &&
-          now.difference(_lastKeyAt!) > timeoutBuffer) {
+      if (_lastKeyAt != null && now.difference(_lastKeyAt!) > timeoutBuffer) {
         _buffer.clear();
         _lastKeyAt = null;
       }

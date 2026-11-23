@@ -37,7 +37,8 @@ class LicenciaLimitesGuard {
     );
   }
 
-  Future<LicenciaGates> _gates() async => LicenciaGates(await _licenciaActual());
+  Future<LicenciaGates> _gates() async =>
+      LicenciaGates(await _licenciaActual());
 
   Future<void> assertPuedeCrearProducto() async {
     final g = await _gates();
@@ -61,7 +62,9 @@ class LicenciaLimitesGuard {
 
   /// Solo ventas del mes calendario actual (por columna [fecha]).
   /// No aplica a borradores/cotizaciones si [soloConfirmadas] y el estado no es venta.
-  Future<void> assertPuedeRegistrarVenta({bool contarBorradores = false}) async {
+  Future<void> assertPuedeRegistrarVenta({
+    bool contarBorradores = false,
+  }) async {
     final g = await _gates();
     final max = g.maxVentasMes;
     if (max == null) return;
@@ -77,16 +80,14 @@ class LicenciaLimitesGuard {
     final rows = await q.get();
     int count = rows.length;
     if (!contarBorradores) {
-      count = rows
-          .where((v) {
+      count = rows.where((v) {
             final e = v.estadoDocumento.toLowerCase();
             // Cotización / borrador no consumen cupo de "venta del mes"
             return e != 'borrador' &&
                 e != 'cotizacion' &&
                 e != 'cotización' &&
                 e != 'draft';
-          })
-          .length;
+      }).length;
     }
     if (count >= max) {
       throw LimitePlanException(g.mensajeTope('ventas del mes (máx. $max)'));

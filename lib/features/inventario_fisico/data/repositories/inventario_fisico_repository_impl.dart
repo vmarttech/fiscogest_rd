@@ -256,10 +256,7 @@ class InventarioFisicoRepositoryImpl
         build: (ctx) => [
           pw.Text(
             'REPORTE CONTEO FÍSICO #$conteoId',
-            style: pw.TextStyle(
-              fontSize: 16,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           if (cab != null) ...[

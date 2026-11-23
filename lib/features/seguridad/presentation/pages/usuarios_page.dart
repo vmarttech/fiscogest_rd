@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
@@ -67,10 +69,10 @@ class UsuariosPage extends ConsumerWidget {
                 const SizedBox(width: 12),
                 FilledButton.icon(
                   onPressed: () => _abrirFormulario(context, ref, null),
-                  icon: const Icon(Icons.person_add_outlined, size: 20),
+                  icon: Icon(Icons.person_add_outlined, size: 20),
                   label: Text(mobile ? 'Nuevo' : 'Nuevo usuario'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -115,12 +117,12 @@ class UsuariosPage extends ConsumerWidget {
                           child: Row(
                             children: [
                               CircleAvatar(
-                                backgroundColor: AppColors.primary.withValues(
-                                  alpha: 0.12,
-                                ),
-                                child: const Icon(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.12),
+                                child: Icon(
                                   Icons.person_outline,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -182,18 +184,21 @@ class UsuariosPage extends ConsumerWidget {
                                   );
                                   // AUTHZ comercial: Supabase es la fuente de verdad
                                   try {
-                                    final actualizado = await dao.obtenerPorId(u.id);
+                                    final actualizado = await dao.obtenerPorId(
+                                      u.id,
+                                    );
                                     if (actualizado != null) {
-                                      await UsuarioSync(ref.read(databaseProvider))
-                                          .pushUsuario(actualizado);
+                                      await UsuarioSync(
+                                        ref.read(databaseProvider),
+                                      ).pushUsuario(actualizado);
                                     }
                                   } catch (_) {}
                                   // Si desactivamos al usuario de ESTA sesión → expulsar
                                   final ses = ref.read(sesionProvider);
-                                  if (activo &&
-                                      ses != null &&
-                                      ses.id == u.id) {
-                                    ref.read(sesionProvider.notifier).state = null;
+                                  if (activo && ses != null && ses.id == u.id) {
+                                    unawaited(SesionPersistente.limpiar());
+                                    ref.read(sesionProvider.notifier).state =
+                                        null;
                                     if (context.mounted) {
                                       context.go('/login');
                                     }
@@ -330,7 +335,8 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
       final db = ref.read(databaseProvider);
       // Freno comercial: Admin = acceso total al negocio. Confirmar siempre.
       if (_rol == 'Admin') {
-        final ok = await showDialog<bool>(
+        final ok =
+            await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text('¿Asignar rol Admin?'),
@@ -418,7 +424,10 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
         _error = 'Error: $e';
       });
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -477,13 +486,17 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
-                    onPressed: () => setState(() { _ocultar = !_ocultar; }),
+                    onPressed: () => setState(() {
+                      _ocultar = !_ocultar;
+                    }),
                   ),
                 ),
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                initialValue: rolesPermitidos.contains(_rol) ? _rol : 'Vendedor',
+                initialValue: rolesPermitidos.contains(_rol)
+                    ? _rol
+                    : 'Vendedor',
                 decoration: const InputDecoration(
                   labelText: 'Rol *',
                   border: OutlineInputBorder(),
@@ -492,7 +505,10 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                     .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                     .toList(),
                 onChanged: (v) {
-                  if (v != null) setState(() { _rol = v; });
+                  if (v != null)
+                    setState(() {
+                      _rol = v;
+                    });
                 },
               ),
               const SizedBox(height: 10),
@@ -507,7 +523,10 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                   DropdownMenuItem(value: 'Inactivo', child: Text('Inactivo')),
                 ],
                 onChanged: (v) {
-                  if (v != null) setState(() { _estado = v; });
+                  if (v != null)
+                    setState(() {
+                      _estado = v;
+                    });
                 },
               ),
               if (_error != null) ...[
@@ -518,7 +537,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
               FilledButton(
                 onPressed: _guardando ? null : _guardar,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(48),
                 ),

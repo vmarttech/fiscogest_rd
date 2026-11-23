@@ -8,6 +8,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:drift/drift.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:fiscogest_rd/core/navigation/app_router.dart';
+import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
 import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
@@ -26,6 +29,8 @@ import 'package:fiscogest_rd/features/ajustes_inventario/domain/repositories/aju
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart'
     as ajuste_prov;
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_theme.dart';
+import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
@@ -181,7 +186,9 @@ void main() async {
       unawaited(() async {
         try {
           final ok = await SupabaseConfig.hayRed();
-          debugPrint('Wake Supabase: ${ok ? "OK / despierto" : "sin respuesta"}');
+          debugPrint(
+            'Wake Supabase: ${ok ? "OK / despierto" : "sin respuesta"}',
+          );
         } catch (e) {
           debugPrint('Wake Supabase: $e');
         }
@@ -230,6 +237,10 @@ void main() async {
       ventasRepositoryProvider.overrideWithValue(ventasRepo),
     ],
   );
+  final prefs = await SharedPreferences.getInstance();
+  container.read(appThemeProvider.notifier).state = AppThemeOption.fromName(
+    prefs.getString('app_theme'),
+  );
   runApp(
     UncontrolledProviderScope(
       container: container,
@@ -256,11 +267,28 @@ class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = ref.watch(appThemeProvider);
+    final baseTheme = ThemeData(
+      useMaterial3: true,
+      colorSchemeSeed: appTheme.seedColor,
+    );
+    final appColorScheme = baseTheme.colorScheme.copyWith(
+      primary: appTheme == AppThemeOption.teal
+          ? baseTheme.colorScheme.primary
+          : appTheme.seedColor,
+      onPrimary: Colors.white,
+      primaryContainer: Color.lerp(
+        const Color(0xFFF8FAFC),
+        appTheme.seedColor,
+        0.08,
+      ),
+      onPrimaryContainer: const Color(0xFF1E293B),
+    );
     return MaterialApp.router(
-      title: 'FiscoGest',
+      title: 'VendiFlux',
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(appRouterProvider),
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
+      theme: baseTheme.copyWith(colorScheme: appColorScheme),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -270,12 +298,21 @@ class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
       locale: const Locale('es', 'DO'),
       builder: (context, child) {
         // context AQUÍ sí tiene Navigator → diálogos de update OK
+        final media = MediaQuery.of(context);
+        final desktop = AppBreakpoints.useWideChrome(context);
+        final systemScale = media.textScaler.scale(1.0);
+        final desktopScale = (systemScale * 1.12).clamp(1.0, 1.4);
         return _UpdateGate(
-          child: Stack(
-            children: [
-              if (child != null) child,
-              const FiscoGestNotificationOverlay(),
-            ],
+          child: MediaQuery(
+            data: desktop
+                ? media.copyWith(textScaler: TextScaler.linear(desktopScale))
+                : media,
+            child: Stack(
+              children: [
+                if (child != null) child,
+                const FiscoGestNotificationOverlay(),
+              ],
+            ),
           ),
         );
       },
@@ -284,22 +321,29 @@ class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
 }
 
 /// Revisa update.json una sola vez, con un context bajo MaterialApp.
-class _UpdateGate extends StatefulWidget {
+class _UpdateGate extends ConsumerStatefulWidget {
   const _UpdateGate({required this.child});
   final Widget child;
 
   @override
-  State<_UpdateGate> createState() => _UpdateGateState();
+  ConsumerState<_UpdateGate> createState() => _UpdateGateState();
 }
 
-class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
+class _UpdateGateState extends ConsumerState<_UpdateGate>
+    with WidgetsBindingObserver {
   bool _busy = false;
+  bool _checkingInactivity = false;
   DateTime? _lastCheck;
+  Timer? _inactivityTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _inactivityTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => unawaited(_enforceInactivityTimeout()),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future<void>.delayed(const Duration(seconds: 2), _runCheck);
     });
@@ -307,6 +351,7 @@ class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _inactivityTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -314,7 +359,34 @@ class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      unawaited(_enforceInactivityTimeout());
       _runCheck();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      unawaited(SesionPersistente.guardarActividadActual());
+    }
+  }
+
+  void _recordUserActivity() {
+    final sesion = ref.read(sesionProvider);
+    if (sesion != null && sesion.id > 0) {
+      unawaited(SesionPersistente.registrarActividad());
+    }
+  }
+
+  Future<void> _enforceInactivityTimeout() async {
+    final sesion = ref.read(sesionProvider);
+    if (_checkingInactivity || sesion == null || sesion.id <= 0) return;
+    _checkingInactivity = true;
+    try {
+      if (!await SesionPersistente.expirada()) return;
+      await SesionPersistente.limpiar();
+      await SesionNube.clear();
+      if (!mounted) return;
+      ref.read(sesionProvider.notifier).state = null;
+      ref.read(appRouterProvider).go('/login');
+    } finally {
+      _checkingInactivity = false;
     }
   }
 
@@ -347,9 +419,18 @@ class _UpdateGateState extends State<_UpdateGate> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => _recordUserActivity(),
+    onPointerSignal: (_) => _recordUserActivity(),
+    child: Focus(
+      onKeyEvent: (_, __) {
+        _recordUserActivity();
+        return KeyEventResult.ignored;
+      },
+      child: widget.child,
+    ),
+  );
 }
-
 
 /// Siembra one-time (flag en SharedPreferences): productos.stock ->
 /// stock_almacen del principal en filas inexistentes. No usar tool `dart run`

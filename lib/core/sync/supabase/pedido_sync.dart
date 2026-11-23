@@ -40,8 +40,7 @@ class PedidoSync {
         'vigencia_tipo': p.vigenciaTipo,
         'monto': p.monto,
         'estado': p.estado,
-        'created_at':
-            (creado ?? DateTime.now()).toUtc().toIso8601String(),
+        'created_at': (creado ?? DateTime.now()).toUtc().toIso8601String(),
         if (expira != null) 'expires_at': expira.toUtc().toIso8601String(),
       });
     }

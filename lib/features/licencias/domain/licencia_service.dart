@@ -42,7 +42,9 @@ class LicenciaService {
 
     final ahora = DateTime.now();
     final fin = ahora.add(const Duration(days: kDiasPrueba));
-    final id = await _db.into(_db.licenciasTable).insert(
+    final id = await _db
+        .into(_db.licenciasTable)
+        .insert(
           LicenciasTableCompanion.insert(
             plan: 'demo',
             vigenciaTipo: 'prueba',
@@ -56,9 +58,9 @@ class LicenciaService {
             actualizadoEn: ahora.toIso8601String(),
           ),
         );
-    final row = await (_db.select(_db.licenciasTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingle();
+    final row = await (_db.select(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(id))).getSingle();
     return _mapYActualizarEstado(row);
   }
 
@@ -78,8 +80,9 @@ class LicenciaService {
     final existentes = await _db.select(_db.licenciasTable).get();
     for (final r in existentes) {
       if (r.plan == 'desarrollador' || r.vitalicia) {
-        await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(r.id)))
-            .write(
+        await (_db.update(
+          _db.licenciasTable,
+        )..where((t) => t.id.equals(r.id))).write(
           LicenciasTableCompanion(
             estado: const Value('activa'),
             vitalicia: const Value(true),
@@ -96,7 +99,9 @@ class LicenciaService {
       }
     }
 
-    await _db.into(_db.licenciasTable).insert(
+    await _db
+        .into(_db.licenciasTable)
+        .insert(
           LicenciasTableCompanion.insert(
             plan: 'desarrollador',
             vigenciaTipo: 'vitalicia',
@@ -120,15 +125,17 @@ class LicenciaService {
     // Demo o plan de pago vencido (tras gracia) → gratis automático
     // (cancelar solo evita renovar; al llegar fechaFin también cae aquí)
     final planLow = row.plan.toLowerCase();
-    final esPagoVencido = planLow == 'basico' ||
+    final esPagoVencido =
+        planLow == 'basico' ||
         planLow == 'simplificado' ||
         planLow == 'pro' ||
         planLow == 'profesional' ||
         planLow == 'empresa';
     if ((planLow == 'demo' || esPagoVencido) && nuevoEstado == 'vencida') {
       final ahora = DateTime.now();
-      await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(row.id)))
-          .write(
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
         LicenciasTableCompanion(
           plan: const Value('gratis'),
           vigenciaTipo: const Value('permanente_limitada'),
@@ -141,15 +148,16 @@ class LicenciaService {
           actualizadoEn: Value(ahora.toIso8601String()),
         ),
       );
-      final updated = await (_db.select(_db.licenciasTable)
-            ..where((t) => t.id.equals(row.id)))
-          .getSingle();
+      final updated = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).getSingle();
       return _fromRow(updated);
     }
 
     if (nuevoEstado != row.estado) {
-      await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(row.id)))
-          .write(
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
         LicenciasTableCompanion(
           estado: Value(nuevoEstado),
           actualizadoEn: Value(DateTime.now().toIso8601String()),
@@ -193,14 +201,13 @@ class LicenciaService {
     for (var i = 0; i < 40; i++) {
       final n = 10000 + _rng.nextInt(90000);
       final ref = 'FG-$n';
-      final existe = await (_db.select(_db.pedidosLicenciaTable)
-            ..where((t) => t.referencia.equals(ref)))
-          .get();
+      final existe = await (_db.select(
+        _db.pedidosLicenciaTable,
+      )..where((t) => t.referencia.equals(ref))).get();
       if (existe.isEmpty) return ref;
     }
     return 'FG-${DateTime.now().millisecondsSinceEpoch % 100000}';
   }
-
 
   /// Crea el pedido ya como licencia_emitida y emite la licencia.
   /// Solo debe llamarse DESPUÉS de que PayPal confirme el capture (COMPLETED).
@@ -210,15 +217,17 @@ class LicenciaService {
     required String vigenciaTipo,
     String? medioPreferido,
   }) async {
-    final monto = precioMensualUsd(plan) ??
-        precioPlanVigencia(plan, vigenciaTipo);
+    final monto =
+        precioMensualUsd(plan) ?? precioPlanVigencia(plan, vigenciaTipo);
     if (monto == null) {
       throw ArgumentError('Plan/vigencia no tarifados: $plan / $vigenciaTipo');
     }
 
     final ahora = DateTime.now();
 
-    await _db.into(_db.pedidosLicenciaTable).insert(
+    await _db
+        .into(_db.pedidosLicenciaTable)
+        .insert(
           PedidosLicenciaTableCompanion.insert(
             referencia: referencia,
             plan: plan,
@@ -244,14 +253,16 @@ class LicenciaService {
     String? medioPreferido,
   }) async {
     // Móvil automático: USD; si no, tarifa DOP legacy.
-    final monto = precioMensualUsd(plan) ??
-        precioPlanVigencia(plan, vigenciaTipo);
+    final monto =
+        precioMensualUsd(plan) ?? precioPlanVigencia(plan, vigenciaTipo);
     if (monto == null) {
       throw ArgumentError('Plan/vigencia no tarifados: $plan / $vigenciaTipo');
     }
     final ahora = DateTime.now();
     final ref = await generarReferenciaUnica();
-    await _db.into(_db.pedidosLicenciaTable).insert(
+    await _db
+        .into(_db.pedidosLicenciaTable)
+        .insert(
           PedidosLicenciaTableCompanion.insert(
             referencia: ref,
             plan: plan,
@@ -261,8 +272,9 @@ class LicenciaService {
             negocioNombre: Value(negocioNombre),
             rnc: Value(rnc),
             fechaCreacion: ahora.toIso8601String(),
-            fechaExpiracionPedido:
-                ahora.add(const Duration(days: kDiasExpiracionPedido)).toIso8601String(),
+            fechaExpiracionPedido: ahora
+                .add(const Duration(days: kDiasExpiracionPedido))
+                .toIso8601String(),
             medioPagoPreferido: Value(medioPreferido),
           ),
         );
@@ -270,12 +282,10 @@ class LicenciaService {
   }
 
   Future<void> marcarPagoReportado(String referencia) async {
-    await (_db.update(_db.pedidosLicenciaTable)
-          ..where((t) => t.referencia.equals(referencia)))
-        .write(
-      const PedidosLicenciaTableCompanion(
-        estado: Value('pago_reportado'),
-      ),
+    await (_db.update(
+      _db.pedidosLicenciaTable,
+    )..where((t) => t.referencia.equals(referencia))).write(
+      const PedidosLicenciaTableCompanion(estado: Value('pago_reportado')),
     );
   }
 
@@ -285,9 +295,9 @@ class LicenciaService {
   /// (aprobado por la plataforma). No cambia el estado del pedido.
   Future<LicenciaInfo> aplicarLicenciaSiYaEmitida(String referencia) async {
     final refCode = referencia.trim().toUpperCase();
-    final rows = await (_db.select(_db.pedidosLicenciaTable)
-          ..where((t) => t.referencia.equals(refCode)))
-        .get();
+    final rows = await (_db.select(
+      _db.pedidosLicenciaTable,
+    )..where((t) => t.referencia.equals(refCode))).get();
     if (rows.isEmpty) {
       throw Exception(
         'Referencia no encontrada. Sincronice o verifique el código FG-.',
@@ -302,9 +312,9 @@ class LicenciaService {
     }
 
     // Ya aplicada con este código → devolver actual
-    final existentes = await (_db.select(_db.licenciasTable)
-          ..where((t) => t.codigoActivacion.equals(refCode)))
-        .get();
+    final existentes = await (_db.select(
+      _db.licenciasTable,
+    )..where((t) => t.codigoActivacion.equals(refCode))).get();
     if (existentes.isNotEmpty) {
       return _mapYActualizarEstado(existentes.first);
     }
@@ -312,7 +322,9 @@ class LicenciaService {
     final ahora = DateTime.now();
     final dias = _diasVigencia(p.vigenciaTipo);
     final fin = ahora.add(Duration(days: dias));
-    final id = await _db.into(_db.licenciasTable).insert(
+    final id = await _db
+        .into(_db.licenciasTable)
+        .insert(
           LicenciasTableCompanion.insert(
             plan: p.plan,
             vigenciaTipo: p.vigenciaTipo,
@@ -327,16 +339,16 @@ class LicenciaService {
             actualizadoEn: ahora.toIso8601String(),
           ),
         );
-    final row = await (_db.select(_db.licenciasTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingle();
+    final row = await (_db.select(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(id))).getSingle();
     return _mapYActualizarEstado(row);
   }
 
   Future<LicenciaInfo> marcarPagadoYEmitirLicencia(String referencia) async {
-    final pedidos = await (_db.select(_db.pedidosLicenciaTable)
-          ..where((t) => t.referencia.equals(referencia)))
-        .get();
+    final pedidos = await (_db.select(
+      _db.pedidosLicenciaTable,
+    )..where((t) => t.referencia.equals(referencia))).get();
     if (pedidos.isEmpty) {
       throw StateError('Pedido no encontrado: $referencia');
     }
@@ -345,15 +357,15 @@ class LicenciaService {
     final dias = _diasVigencia(p.vigenciaTipo);
     final fin = ahora.add(Duration(days: dias));
 
-    await (_db.update(_db.pedidosLicenciaTable)
-          ..where((t) => t.id.equals(p.id)))
-        .write(
-      const PedidosLicenciaTableCompanion(
-        estado: Value('licencia_emitida'),
-      ),
+    await (_db.update(
+      _db.pedidosLicenciaTable,
+    )..where((t) => t.id.equals(p.id))).write(
+      const PedidosLicenciaTableCompanion(estado: Value('licencia_emitida')),
     );
 
-    final id = await _db.into(_db.licenciasTable).insert(
+    final id = await _db
+        .into(_db.licenciasTable)
+        .insert(
           LicenciasTableCompanion.insert(
             plan: p.plan,
             vigenciaTipo: p.vigenciaTipo,
@@ -369,12 +381,11 @@ class LicenciaService {
           ),
         );
 
-    final row = await (_db.select(_db.licenciasTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingle();
+    final row = await (_db.select(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(id))).getSingle();
     return _mapYActualizarEstado(row);
   }
-
 
   /// Cancela la renovación: el plan de pago sigue hasta fechaFin.
   /// Al vencer (tras gracia), [ _mapYActualizarEstado ] debe pasar a gratis.
@@ -393,18 +404,18 @@ class LicenciaService {
     }
     // Marca en notas/estado: no renovar. Mantiene fechaFin y plan actual.
     final ahora = DateTime.now().toIso8601String();
-    await (_db.update(_db.licenciasTable)
-          ..where((t) => t.id.equals(actual.id)))
-        .write(
+    await (_db.update(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(actual.id))).write(
       LicenciasTableCompanion(
         // vigenciaTipo especial para saber que no debe renovarse
         vigenciaTipo: const Value('mensual_cancelada'),
         actualizadoEn: Value(ahora),
       ),
     );
-    final row = await (_db.select(_db.licenciasTable)
-          ..where((t) => t.id.equals(actual.id)))
-        .getSingle();
+    final row = await (_db.select(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(actual.id))).getSingle();
     return _mapYActualizarEstado(row);
   }
 
@@ -427,8 +438,8 @@ class LicenciaService {
 
   Future<int> expirarPedidosVencidos() async {
     final ahora = DateTime.now();
-    final pendientes = await (_db.select(_db.pedidosLicenciaTable)
-          ..where(
+    final pendientes =
+        await (_db.select(_db.pedidosLicenciaTable)..where(
             (t) =>
                 t.estado.equals('pendiente_pago') |
                 t.estado.equals('pago_reportado'),
@@ -438,9 +449,9 @@ class LicenciaService {
     for (final p in pendientes) {
       final exp = DateTime.tryParse(p.fechaExpiracionPedido);
       if (exp != null && ahora.isAfter(exp)) {
-        await (_db.update(_db.pedidosLicenciaTable)
-              ..where((t) => t.id.equals(p.id)))
-            .write(
+        await (_db.update(
+          _db.pedidosLicenciaTable,
+        )..where((t) => t.id.equals(p.id))).write(
           const PedidosLicenciaTableCompanion(estado: Value('expirado')),
         );
         n++;

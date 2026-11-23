@@ -19,7 +19,8 @@ class CajaSync {
     final sesiones = await _db.select(_db.cajaSesionesTable).get();
     if (sesiones.isNotEmpty) {
       final payload = sesiones
-          .map((s) => <String, dynamic>{
+          .map(
+            (s) => <String, dynamic>{
                 'negocio_id': negocioId,
                 'id_local': s.id,
                 'fecha_apertura': s.fechaApertura.toUtc().toIso8601String(),
@@ -32,7 +33,8 @@ class CajaSync {
                 'diferencia': s.diferencia,
                 'observacion': s.observacion,
                 'updated_at': DateTime.now().toUtc().toIso8601String(),
-              })
+            },
+          )
           .toList();
       await SupabaseRestClient().upsert(
         table: 'caja_sesiones',
@@ -48,20 +50,23 @@ class CajaSync {
       return;
     }
     final mPayload = movs
-        .map((m) => <String, dynamic>{
+        .map(
+          (m) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': m.id,
               'tipo': m.tipo.name,
               'referencia_tipo': m.referenciaTipo.name,
-              'referencia_id':
-                  (m.referenciaId.abs() > 2147483647) ? 0 : m.referenciaId,
+            'referencia_id': (m.referenciaId.abs() > 2147483647)
+                ? 0
+                : m.referenciaId,
               'monto': m.monto,
               'forma_pago': m.formaPago.name,
               'saldo_anterior': m.saldoAnterior,
               'saldo_nuevo': m.saldoNuevo,
               'fecha': m.fecha.toUtc().toIso8601String(),
               'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
+          },
+        )
         .toList();
     await SupabaseRestClient().upsert(
       table: 'caja_movimientos',

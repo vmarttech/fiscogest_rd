@@ -97,12 +97,16 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                       const SizedBox(height: 16),
                       Text(
                         'No hay cuentas por pagar registradas.',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Al confirmar una compra a crédito, aparecerá aquí.',
-                        style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),

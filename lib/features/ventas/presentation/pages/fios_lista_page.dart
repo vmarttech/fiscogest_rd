@@ -45,7 +45,7 @@ class FiosListaPage extends ConsumerWidget {
           return FloatingActionButton.extended(
             onPressed: () =>
                 AvisarAtrasadosButton.avisar(context, ref, atrasados),
-            icon: const Icon(Icons.chat_bubble_outline),
+            icon: Icon(Icons.chat_bubble_outline),
             label: const Text('Avisar atrasados'),
           );
         },
@@ -63,7 +63,7 @@ class FiosListaPage extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.edit_note_rounded,
                       size: 48,
                       color: AppColors.grey300,
@@ -109,7 +109,7 @@ class FiosListaPage extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.account_balance_wallet_outlined,
                       color: AppColors.warning,
                     ),
@@ -226,8 +226,18 @@ class FiosListaPage extends ConsumerWidget {
     final ok = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _SheetAbonarFiao(fio: fio),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.82,
+        minChildSize: 0.48,
+        maxChildSize: 0.96,
+        builder: (context, scrollController) => _SheetAbonarFiao(
+          fio: fio,
+          scrollController: scrollController,
+        ),
+      ),
     );
     if (ok == true && context.mounted) {
       FiscoGestNotifications.show(
@@ -277,7 +287,7 @@ class _FioTile extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_outline,
                   color: AppColors.warning,
                   size: 22,
@@ -319,11 +329,7 @@ class _FioTile extends StatelessWidget {
               IconButton(
                 tooltip: 'Recordatorio WhatsApp',
                 onPressed: onRecordatorio,
-                icon: const Icon(
-                  Icons.chat,
-                  color: Color(0xFF059669),
-                  size: 22,
-                ),
+                icon: Icon(Icons.chat, color: Color(0xFF059669), size: 22),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -338,7 +344,7 @@ class _FioTile extends StatelessWidget {
                   Text(
                     'Abonar',
                     style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -353,8 +359,12 @@ class _FioTile extends StatelessWidget {
 }
 
 class _SheetAbonarFiao extends ConsumerStatefulWidget {
-  const _SheetAbonarFiao({required this.fio});
+  const _SheetAbonarFiao({
+    required this.fio,
+    required this.scrollController,
+  });
   final FioData fio;
+  final ScrollController scrollController;
 
   @override
   ConsumerState<_SheetAbonarFiao> createState() => _SheetAbonarFiaoState();
@@ -456,7 +466,9 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    final keyboardBottom = MediaQuery.viewInsetsOf(context).bottom;
+    final safeBottom = MediaQuery.viewPaddingOf(context).bottom;
+    final bottom = keyboardBottom > 0 ? keyboardBottom : safeBottom;
     final saldo = widget.fio.saldoPendiente;
 
     return Padding(
@@ -469,6 +481,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: SingleChildScrollView(
+          controller: widget.scrollController,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -522,7 +535,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
                       : () => setState(() {
                           _monto.text = saldo.toStringAsFixed(2);
                         }),
-                  icon: const Icon(Icons.check_circle_outline, size: 20),
+                  icon: Icon(Icons.check_circle_outline, size: 20),
                   label: const Text(
                     'SALDAR TODO',
                     style: TextStyle(fontWeight: FontWeight.w800),
@@ -574,7 +587,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
                 child: ElevatedButton(
                   onPressed: _guardando ? null : _confirmar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -678,7 +691,7 @@ class _RecordatorioWhatsAppDialogState
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _telefonoCtrl.text.trim()),
-          icon: const Icon(Icons.chat, size: 18),
+          icon: Icon(Icons.chat, size: 18),
           label: const Text('Enviar'),
         ),
       ],

@@ -46,7 +46,9 @@ class EcfePreflight {
     } else {
       final f = File(cfg.rutaCertificado.trim());
       if (!await f.exists()) {
-        errores.add('No existe el archivo de certificado: ${cfg.rutaCertificado}');
+        errores.add(
+          'No existe el archivo de certificado: ${cfg.rutaCertificado}',
+        );
       } else {
         final subjectOk = await _certificadoCoincideConRnc(
           ruta: cfg.rutaCertificado.trim(),
@@ -68,9 +70,7 @@ class EcfePreflight {
     }
 
     // OpenSSL en escritorio (firma real)
-    if (exigirOpensslEnEscritorio &&
-        !Platform.isAndroid &&
-        !Platform.isIOS) {
+    if (exigirOpensslEnEscritorio && !Platform.isAndroid && !Platform.isIOS) {
       final openssl = await _which('openssl');
       if (openssl == null) {
         errores.add(
@@ -142,11 +142,9 @@ class EcfePreflight {
 
   static Future<String?> _which(String cmd) async {
     try {
-      final r = await Process.run(
-        Platform.isWindows ? 'where' : 'which',
-        [cmd],
-        runInShell: false,
-      );
+      final r = await Process.run(Platform.isWindows ? 'where' : 'which', [
+        cmd,
+      ], runInShell: false);
       if (r.exitCode != 0) return null;
       final out = (r.stdout ?? '').toString().trim();
       if (out.isEmpty) return null;
@@ -172,9 +170,7 @@ class EcfePreflight {
       try {
         final pass = File('${tmp.path}/p.pass');
         await pass.writeAsString(clave, flush: true);
-        final r = await Process.run(
-          openssl,
-          [
+        final r = await Process.run(openssl, [
             'pkcs12',
             '-in',
             ruta,
@@ -184,13 +180,9 @@ class EcfePreflight {
             'file:${pass.path}',
             '-out',
             '${tmp.path}/c.pem',
-          ],
-          runInShell: false,
-        );
+        ], runInShell: false);
         if (r.exitCode != 0) return null;
-        final sub = await Process.run(
-          openssl,
-          [
+        final sub = await Process.run(openssl, [
             'x509',
             '-in',
             '${tmp.path}/c.pem',
@@ -198,9 +190,7 @@ class EcfePreflight {
             '-subject',
             '-nameopt',
             'multiline',
-          ],
-          runInShell: false,
-        );
+        ], runInShell: false);
         if (sub.exitCode != 0) return null;
 
         final subject = '${sub.stdout}';
@@ -215,9 +205,7 @@ class EcfePreflight {
 
         if (serialMatch == null) return false;
 
-        final serial = serialMatch
-            .group(1)!
-            .replaceAll(RegExp(r'\D'), '');
+        final serial = serialMatch.group(1)!.replaceAll(RegExp(r'\D'), '');
 
         return serial.isNotEmpty && serial == rnc;
       } finally {
@@ -229,5 +217,4 @@ class EcfePreflight {
       return null;
     }
   }
-
 }

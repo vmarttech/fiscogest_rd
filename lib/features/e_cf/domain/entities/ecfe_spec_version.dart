@@ -16,9 +16,11 @@ class EcfeSpecVersion {
   });
 
   final int? id;
+
   /// Ej: "1.0", "1.1-rfce"
   final String codigo;
   final String nombre;
+
   /// Referencia a circular o documento DGII
   final String? circularDgii;
   final String xsdVersion;
@@ -26,11 +28,11 @@ class EcfeSpecVersion {
   final bool activaPrecert;
   final bool activaCert;
   final bool activaProduccion;
+
   /// JSON array de {id, label, done, doneAt?}
   final String checklistJson;
   final DateTime creadoEn;
   final DateTime? activadoEn;
 
-  bool get enUso =>
-      activaPrecert || activaCert || activaProduccion;
+  bool get enUso => activaPrecert || activaCert || activaProduccion;
 }

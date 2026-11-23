@@ -17,9 +17,10 @@ final periodoDashProvider = StateProvider.autoDispose<PeriodoDash>(
   (ref) => PeriodoDash.hoy,
 );
 
-
 /// Rango visible en la barra de filtros (inclusive).
-final rangoDashProvider = StateProvider.autoDispose<(DateTime, DateTime)>((ref) {
+final rangoDashProvider = StateProvider.autoDispose<(DateTime, DateTime)>((
+  ref,
+) {
   final n = DateTime.now();
   final hoy = DateTime(n.year, n.month, n.day);
   return (hoy, hoy);

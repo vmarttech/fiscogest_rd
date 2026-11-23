@@ -7,7 +7,9 @@ class TransferenciasDao {
   final AppDatabase _db;
 
   Future<int> insertar(Transferencia t) {
-    return _db.into(_db.transferenciasTable).insert(
+    return _db
+        .into(_db.transferenciasTable)
+        .insert(
           TransferenciasTableCompanion.insert(
             almacenOrigenId: t.almacenOrigenId,
             almacenDestinoId: t.almacenDestinoId,
@@ -26,11 +28,12 @@ class TransferenciasDao {
       ..limit(limit);
     final rows = await q.get();
     final almacenes = {
-      for (final a in await _db.select(_db.almacenesTable).get()) a.id: a.nombre
+      for (final a in await _db.select(_db.almacenesTable).get())
+        a.id: a.nombre,
     };
     final productos = {
       for (final p in await _db.select(_db.productosTable).get())
-        p.id: (p.codigo, p.nombre)
+        p.id: (p.codigo, p.nombre),
     };
     return [
       for (final r in rows)

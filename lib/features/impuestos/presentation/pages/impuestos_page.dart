@@ -159,17 +159,16 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                   onPressed: () =>
                                       _mostrarSheetRegistro(context),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
-                                  icon: const Icon(
-                                    Icons.add_rounded,
-                                    size: 20,
-                                  ),
+                                  icon: Icon(Icons.add_rounded, size: 20),
                                   label: const Text(
                                     'NUEVO IMPUESTO',
                                     style: TextStyle(
@@ -184,8 +183,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                             children: [
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Configuración tributaria e ITBIS',
@@ -210,7 +208,9 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                   onPressed: () =>
                                       _mostrarSheetRegistro(context),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     padding: const EdgeInsets.symmetric(
@@ -220,10 +220,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  icon: const Icon(
-                                    Icons.add_rounded,
-                                    size: 18,
-                                  ),
+                                  icon: Icon(Icons.add_rounded, size: 18),
                                   label: const Text(
                                     'Nuevo impuesto',
                                     style: TextStyle(
@@ -248,12 +245,11 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                       ),
                       style: AppTypography.bodyMedium,
                       decoration: InputDecoration(
-                        hintText:
-                            'Buscar por nombre, tipo o descripción…',
+                        hintText: 'Buscar por nombre, tipo o descripción…',
                         hintStyle: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
-                        prefixIcon: const Icon(Icons.search, size: 20),
+                        prefixIcon: Icon(Icons.search, size: 20),
                         isDense: true,
                         filled: true,
                         fillColor: AppColors.white,
@@ -263,19 +259,18 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: AppColors.border),
+                          borderSide: BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide:
-                              const BorderSide(color: AppColors.border),
+                          borderSide: BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
-                            color:
-                                AppColors.primary.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -293,7 +288,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.calculate_outlined,
                               size: 48,
                               color: AppColors.grey300,
@@ -325,8 +320,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                     padding: EdgeInsets.fromLTRB(hPad, 4, hPad, 24),
                     sliver: SliverList.separated(
                       itemCount: filtrados.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 10),
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
                         final impuesto = filtrados[i];
                         return _ImpuestoCard(
@@ -385,7 +379,9 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
       ),
     );
     if (ok == true && impuesto.id != null && mounted) {
-      await ref.read(impuestoControllerProvider.notifier).eliminar(impuesto.id!);
+      await ref
+          .read(impuestoControllerProvider.notifier)
+          .eliminar(impuesto.id!);
     }
   }
 
@@ -525,7 +521,9 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                             ),
                           ),
                           value: esExento,
-                          activeThumbColor: AppColors.primary,
+                          activeThumbColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           onChanged: (val) {
                             setModal(() {
                               esExento = val;
@@ -537,7 +535,9 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Predeterminado para ventas'),
-                          subtitle: const Text('Solo un ITBIS puede ser el de la caja'),
+                          subtitle: const Text(
+                            'Solo un ITBIS puede ser el de la caja',
+                          ),
                           value: esDefault,
                           onChanged: tipoSeleccionado == 'ITBIS'
                               ? (v) => setModal(() => esDefault = v)
@@ -565,7 +565,9 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                           height: 48,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
@@ -579,7 +581,8 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                   id: impuestoToEdit?.id,
                                   codigo: codigoController.text.trim(),
                                   nombre: nombreController.text.trim(),
-                                  esDefault: tipoSeleccionado == 'ITBIS' && esDefault,
+                                  esDefault:
+                                      tipoSeleccionado == 'ITBIS' && esDefault,
                                   activo: activo,
                                   porcentaje: double.parse(
                                     porcentajeController.text.trim(),
@@ -649,7 +652,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
     );
   }
@@ -671,7 +674,9 @@ class _ImpuestoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final exento = impuesto.esExento;
-    final pctColor = exento ? AppColors.error : AppColors.primary;
+    final pctColor = exento
+        ? AppColors.error
+        : Theme.of(context).colorScheme.primary;
     final badgeBg = exento
         ? AppColors.error.withValues(alpha: 0.12)
         : AppColors.info.withValues(alpha: 0.12);
@@ -769,17 +774,17 @@ class _ImpuestoCard extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Editar',
                 onPressed: onEdit,
-                icon: const Icon(
+                icon: Icon(
                   Icons.edit_outlined,
                   size: 20,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Eliminar',
                 onPressed: onDelete,
-                icon: const Icon(
+                icon: Icon(
                   Icons.delete_outline,
                   size: 20,
                   color: AppColors.error,
@@ -826,10 +831,13 @@ class _DgiiCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCCFBF1),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.receipt_long_outlined, color: Color(0xFF0F766E)),
+                child: Icon(
+                  Icons.receipt_long_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -849,17 +857,22 @@ class _DgiiCard extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFCCFBF1),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             codigo,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 12,
-                              color: Color(0xFF0F766E),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
@@ -868,15 +881,18 @@ class _DgiiCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitulo,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                      ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    Text(
                       'Abrir →',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
-                        color: Color(0xFF0F766E),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],

@@ -14,7 +14,10 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 
-final inventoryFilterProvider = StateProvider.autoDispose<String>((ref) => 'all');
+final inventoryFilterProvider = StateProvider.autoDispose<String>(
+  (ref) => 'all',
+);
+
 /// '7' | '30'
 final chartRangeProvider = StateProvider.autoDispose<String>((ref) => '7');
 
@@ -29,8 +32,7 @@ class DashboardDesktopProto extends ConsumerWidget {
     final snapshot = ref.watch(dashboardSnapshotProvider).valueOrNull;
     final creditoTot = ref.watch(creditoTotalesProvider).valueOrNull;
     final cajaDash = ref.watch(dashCajaProvider).valueOrNull;
-    final ventasLista =
-        ref.watch(listaVentasProvider).valueOrNull ?? <Venta>[];
+    final ventasLista = ref.watch(listaVentasProvider).valueOrNull ?? <Venta>[];
     final productos =
         ref.watch(productoControllerProvider).valueOrNull ?? <Producto>[];
     final sesion = ref.watch(sesionProvider);
@@ -52,14 +54,12 @@ class DashboardDesktopProto extends ConsumerWidget {
     final ventasRango = kpiRango?.ventas ?? 0.0;
     final facturasRango = kpiRango?.numFacturas ?? 0;
     final ticketRango = kpiRango?.ticketPromedio ?? 0.0;
-    final topActividad = ([...ventasLista]
-          ..sort((a, b) => b.fecha.compareTo(a.fecha)))
-        .take(5)
-        .toList();
-    final productosInv = ([...productos]
-          ..sort((a, b) => (a.stock ?? 0).compareTo(b.stock ?? 0)))
-        .take(6)
-        .toList();
+    final topActividad = ([
+      ...ventasLista,
+    ]..sort((a, b) => b.fecha.compareTo(a.fecha))).take(5).toList();
+    final productosInv = ([
+      ...productos,
+    ]..sort((a, b) => (a.stock ?? 0).compareTo(b.stock ?? 0))).take(6).toList();
 
     final invFilter = ref.watch(inventoryFilterProvider);
     final productosFiltrados = productosInv.where((pr) {
@@ -80,8 +80,10 @@ class DashboardDesktopProto extends ConsumerWidget {
     final nombre = sesion?.nombre.isNotEmpty == true
         ? sesion!.nombre.split(' ').first
         : 'Administrador';
-    final fecha =
-        DateFormat("EEEE, d 'de' MMMM yyyy", 'es').format(DateTime.now());
+    final fecha = DateFormat(
+      "EEEE, d 'de' MMMM yyyy",
+      'es',
+    ).format(DateTime.now());
 
     return ColoredBox(
       color: const Color(0xFFF1F5F9), // slate-100
@@ -120,8 +122,11 @@ class DashboardDesktopProto extends ConsumerWidget {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.ssid_chart,
-                                size: 14, color: Color(0xFF93C5FD)),
+                            Icon(
+                              Icons.ssid_chart,
+                              size: 14,
+                              color: Color(0xFF93C5FD),
+                            ),
                             SizedBox(width: 6),
                             Text(
                               'CENTRO DE CONTROL FISCAL Y FINANCIERO',
@@ -158,13 +163,18 @@ class DashboardDesktopProto extends ConsumerWidget {
                         const SizedBox(height: 10),
                         Row(
                           children: [
-                            const Icon(Icons.calendar_today_outlined,
-                                size: 13, color: Color(0xFF94A3B8)),
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              size: 13,
+                              color: Color(0xFF94A3B8),
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               fecha,
                               style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF94A3B8)),
+                                fontSize: 12,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Container(
@@ -175,8 +185,9 @@ class DashboardDesktopProto extends ConsumerWidget {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF10B981)
-                                        .withValues(alpha: 0.4),
+                                    color: const Color(
+                                      0xFF10B981,
+                                    ).withValues(alpha: 0.4),
                                     blurRadius: 0,
                                     spreadRadius: 3,
                                   ),
@@ -209,9 +220,12 @@ class DashboardDesktopProto extends ConsumerWidget {
                           backgroundColor: Colors.white,
                           foregroundColor: const Color(0xFF0F172A),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -222,11 +236,15 @@ class DashboardDesktopProto extends ConsumerWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.35)),
+                            color: Colors.white.withValues(alpha: 0.35),
+                          ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ],
@@ -334,8 +352,11 @@ class DashboardDesktopProto extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.bar_chart_rounded,
-                                  size: 18, color: Color(0xFF2563EB)),
+                              const Icon(
+                                Icons.bar_chart_rounded,
+                                size: 18,
+                                color: Color(0xFF2563EB),
+                              ),
                               const SizedBox(width: 8),
                               const Expanded(
                                 child: Column(
@@ -353,7 +374,8 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       'Comportamiento de ingresos y facturación e-CF',
                                       style: TextStyle(
                                           fontSize: 11,
-                                          color: Color(0xFF64748B)),
+                                        color: Color(0xFF64748B),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -375,13 +397,20 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       elevation: chartRange == '7' ? 1 : 0,
                                       shadowColor: const Color(0x14000000),
                                       child: InkWell(
-                                        onTap: () => ref
-                                            .read(chartRangeProvider.notifier)
-                                            .state = '7',
+                                        onTap: () =>
+                                            ref
+                                                    .read(
+                                                      chartRangeProvider
+                                                          .notifier,
+                                                    )
+                                                    .state =
+                                                '7',
                                         borderRadius: BorderRadius.circular(8),
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 6),
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
                                           child: Text(
                                             'Últimos 7 días',
                                             style: TextStyle(
@@ -403,13 +432,20 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       elevation: chartRange == '30' ? 1 : 0,
                                       shadowColor: const Color(0x14000000),
                                       child: InkWell(
-                                        onTap: () => ref
-                                            .read(chartRangeProvider.notifier)
-                                            .state = '30',
+                                        onTap: () =>
+                                            ref
+                                                    .read(
+                                                      chartRangeProvider
+                                                          .notifier,
+                                                    )
+                                                    .state =
+                                                '30',
                                         borderRadius: BorderRadius.circular(8),
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 6),
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
                                           child: Text(
                                             '30 días',
                                             style: TextStyle(
@@ -476,8 +512,11 @@ class DashboardDesktopProto extends ConsumerWidget {
                             children: [
                               const Row(
                                 children: [
-                                  Icon(Icons.bolt,
-                                      size: 16, color: Color(0xFFF59E0B)),
+                                  Icon(
+                                    Icons.bolt,
+                                    size: 16,
+                                    color: Color(0xFFF59E0B),
+                                  ),
                                   SizedBox(width: 6),
                                   Text(
                                     'Acciones Rápidas',
@@ -499,8 +538,10 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       fg: const Color(0xFF2563EB),
                                       title: 'Nueva venta',
                                       sub: 'Punto de venta',
-                                      onTap: () => _go(context,
-                                          '/ventas/cotizaciones/nueva'),
+                                      onTap: () => _go(
+                                        context,
+                                        '/ventas/cotizaciones/nueva',
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -526,8 +567,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       fg: const Color(0xFFD97706),
                                       title: 'Nuevo crédito',
                                       sub: 'Crédito a cliente',
-                                      onTap: () =>
-                                          _go(context, '/creditos'),
+                                      onTap: () => _go(context, '/creditos'),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -538,8 +578,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       fg: const Color(0xFF059669),
                                       title: 'Nuevo cliente',
                                       sub: 'Registrar RNC',
-                                      onTap: () =>
-                                          _go(context, '/clientes'),
+                                      onTap: () => _go(context, '/clientes'),
                                     ),
                                   ),
                                 ],
@@ -555,9 +594,11 @@ class DashboardDesktopProto extends ConsumerWidget {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.history,
+                                    const Icon(
+                                      Icons.history,
                                         size: 16,
-                                        color: Color(0xFF2563EB)),
+                                      color: Color(0xFF2563EB),
+                                    ),
                                     const SizedBox(width: 6),
                                     const Expanded(
                                       child: Text(
@@ -570,8 +611,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       ),
                                     ),
                                     InkWell(
-                                      onTap: () =>
-                                          _go(context, '/ventas'),
+                                      onTap: () => _go(context, '/ventas'),
                                       child: const Text(
                                         'Ver todas →',
                                         style: TextStyle(
@@ -585,15 +625,18 @@ class DashboardDesktopProto extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 10),
                                 if (topActividad.isEmpty)
-                                  const Text('Sin actividad reciente',
+                                  const Text(
+                                    'Sin actividad reciente',
                                       style: TextStyle(
                                           fontSize: 12,
-                                          color: Color(0xFF94A3B8)))
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  )
                                 else
                                   ...topActividad.map((v) {
-                                    final forma =
-                                        v.formaPago.toLowerCase();
-                                    final esCredito = v.esCredito ||
+                                    final forma = v.formaPago.toLowerCase();
+                                    final esCredito =
+                                        v.esCredito ||
                                         forma.contains('credito') ||
                                         forma.contains('crédito');
                                     final icon = esCredito
@@ -608,8 +651,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                     final hora =
                                         '${v.fecha.hour.toString().padLeft(2, '0')}:${v.fecha.minute.toString().padLeft(2, '0')}';
                                     return Padding(
-                                      padding: const EdgeInsets.only(
-                                          bottom: 8),
+                                      padding: const EdgeInsets.only(bottom: 8),
                                       child: Row(
                                         children: [
                                           Container(
@@ -619,15 +661,17 @@ class DashboardDesktopProto extends ConsumerWidget {
                                               color: bg,
                                               shape: BoxShape.circle,
                                             ),
-                                            child: Icon(icon,
-                                                size: 14, color: fg),
+                                            child: Icon(
+                                              icon,
+                                              size: 14,
+                                              color: fg,
+                                            ),
                                           ),
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment
-                                                      .start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   esCredito
@@ -635,21 +679,18 @@ class DashboardDesktopProto extends ConsumerWidget {
                                                       : 'Venta realizada',
                                                   style: const TextStyle(
                                                     fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.w700,
-                                                    color: Color(
-                                                        0xFF0F172A),
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Color(0xFF0F172A),
                                                   ),
                                                 ),
                                                 Text(
                                                   '${v.numeroFactura ?? v.numero} · ${v.nombreCliente ?? "Cliente"}',
                                                   maxLines: 1,
-                                                  overflow: TextOverflow
-                                                      .ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   style: const TextStyle(
                                                     fontSize: 10,
-                                                    color: Color(
-                                                        0xFF94A3B8),
+                                                    color: Color(0xFF94A3B8),
                                                   ),
                                                 ),
                                               ],
@@ -663,18 +704,15 @@ class DashboardDesktopProto extends ConsumerWidget {
                                                 formatRd(v.montoTotal),
                                                 style: const TextStyle(
                                                   fontSize: 12,
-                                                  fontWeight:
-                                                      FontWeight.w800,
-                                                  color:
-                                                      Color(0xFF0F172A),
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Color(0xFF0F172A),
                                                 ),
                                               ),
                                               Text(
                                                 hora,
                                                 style: const TextStyle(
                                                   fontSize: 10,
-                                                  color: Color(
-                                                      0xFF94A3B8),
+                                                  color: Color(0xFF94A3B8),
                                                 ),
                                               ),
                                             ],
@@ -708,13 +746,15 @@ class DashboardDesktopProto extends ConsumerWidget {
                         children: [
                           const Row(
                             children: [
-                              Icon(Icons.inventory_2_outlined,
-                                  size: 18, color: Color(0xFF2563EB)),
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                size: 18,
+                                color: Color(0xFF2563EB),
+                              ),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Estado del Inventario y Movimientos',
@@ -728,7 +768,8 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       'Artículos en almacén y estatus comercial',
                                       style: TextStyle(
                                           fontSize: 11,
-                                          color: Color(0xFF64748B)),
+                                        color: Color(0xFF64748B),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -742,52 +783,144 @@ class DashboardDesktopProto extends ConsumerWidget {
                               _FilterChip(
                                 label: 'Todos',
                                 selected: invFilter == 'all',
-                                onTap: () => ref.read(inventoryFilterProvider.notifier).state = 'all',
+                                onTap: () =>
+                                    ref
+                                            .read(
+                                              inventoryFilterProvider.notifier,
+                                            )
+                                            .state =
+                                        'all',
                               ),
                               const SizedBox(width: 8),
                               _FilterChip(
                                 label: 'Pagados',
                                 selected: invFilter == 'Pagado',
-                                onTap: () => ref.read(inventoryFilterProvider.notifier).state = 'Pagado',
+                                onTap: () =>
+                                    ref
+                                            .read(
+                                              inventoryFilterProvider.notifier,
+                                            )
+                                            .state =
+                                        'Pagado',
                               ),
                               const SizedBox(width: 8),
                               _FilterChip(
                                 label: 'Pendientes',
                                 selected: invFilter == 'Pendiente',
-                                onTap: () => ref.read(inventoryFilterProvider.notifier).state = 'Pendiente',
+                                onTap: () =>
+                                    ref
+                                            .read(
+                                              inventoryFilterProvider.notifier,
+                                            )
+                                            .state =
+                                        'Pendiente',
                               ),
                               const SizedBox(width: 8),
                               _FilterChip(
                                 label: 'Agotados',
                                 selected: invFilter == 'Agotado',
-                                onTap: () => ref.read(inventoryFilterProvider.notifier).state = 'Agotado',
+                                onTap: () =>
+                                    ref
+                                            .read(
+                                              inventoryFilterProvider.notifier,
+                                            )
+                                            .state =
+                                        'Agotado',
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
                           // Header 6 columnas HTML
                           Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 4,
+                            ),
                             decoration: const BoxDecoration(
-                              border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+                              border: Border(
+                                bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
                             ),
                             child: const Row(
                               children: [
-                                Expanded(flex: 4, child: Text('CLIENTE / PRODUCTO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8), letterSpacing: 0.4))),
-                                Expanded(flex: 2, child: Text('NIF / REFERENCIA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8)))),
-                                Expanded(flex: 2, child: Text('MONTO / VALOR', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8)))),
-                                Expanded(flex: 2, child: Text('ESTADO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8)))),
-                                Expanded(flex: 2, child: Text('STOCK', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8)))),
-                                SizedBox(width: 64, child: Text('ACCIÓN', textAlign: TextAlign.right, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8)))),
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    'CLIENTE / PRODUCTO',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'NIF / REFERENCIA',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'MONTO / VALOR',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'ESTADO',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'STOCK',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 64,
+                                  child: Text(
+                                    'ACCIÓN',
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           if (productosFiltrados.isEmpty)
                             const Padding(
                               padding: EdgeInsets.all(16),
-                              child: Text('Sin productos',
-                                  style: TextStyle(
-                                      color: Color(0xFF94A3B8))),
+                              child: Text(
+                                'Sin productos',
+                                style: TextStyle(color: Color(0xFF94A3B8)),
+                              ),
                             )
                           else
                             ...productosFiltrados.map((pr) {
@@ -814,54 +947,33 @@ class DashboardDesktopProto extends ConsumerWidget {
                               }
                               final precio = pr.precioVenta;
                               return Container(
-                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 4,
+                                ),
                                 decoration: const BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: Color(0xFFF1F5F9),
+                                    ),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
                                     Expanded(
                                       flex: 4,
                                       child: Padding(
-                                        padding: const EdgeInsets.only(right: 12),
+                                        padding: const EdgeInsets.only(
+                                          right: 12,
+                                        ),
                                         child: Text(
                                           pr.nombre,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(right: 12),
-                                        child: Text(
-                                          pr.codigo,
-                                          style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Color(0xFF64748B)),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(right: 12),
-                                        child: Text(
-                                          formatRd(precio),
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(right: 12),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                            decoration: BoxDecoration(color: bb, borderRadius: BorderRadius.circular(20)),
-                                            child: Text(badge, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: bc)),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF0F172A),
                                           ),
                                         ),
                                       ),
@@ -869,17 +981,87 @@ class DashboardDesktopProto extends ConsumerWidget {
                                     Expanded(
                                       flex: 2,
                                       child: Padding(
-                                        padding: const EdgeInsets.only(right: 8),
+                                        padding: const EdgeInsets.only(
+                                          right: 12,
+                                        ),
+                                        child: Text(
+                                          pr.codigo,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontFamily: 'monospace',
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 12,
+                                        ),
+                                        child: Text(
+                                          formatRd(precio),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 12,
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: bb,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              badge,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                                color: bc,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8,
+                                        ),
                                         child: Text(
                                           s <= 0
                                               ? '0 unidades'
-                                              : (s <= min ? '${s.toStringAsFixed(0)} u (bajo)' : '${s.toStringAsFixed(0)} unidades'),
+                                              : (s <= min
+                                                    ? '${s.toStringAsFixed(0)} u (bajo)'
+                                                    : '${s.toStringAsFixed(0)} unidades'),
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
                                             color: s <= 0
                                                 ? const Color(0xFFDC2626)
-                                                : (s <= min ? const Color(0xFFD97706) : const Color(0xFF059669)),
+                                                : (s <= min
+                                                      ? const Color(0xFFD97706)
+                                                      : const Color(
+                                                          0xFF059669,
+                                                        )),
                                           ),
                                         ),
                                       ),
@@ -889,13 +1071,22 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       child: Align(
                                         alignment: Alignment.centerRight,
                                         child: TextButton(
-                                          onPressed: () => _go(context, '/inventario'),
+                                          onPressed: () =>
+                                              _go(context, '/inventario'),
                                           style: TextButton.styleFrom(
                                             padding: EdgeInsets.zero,
                                             minimumSize: Size.zero,
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
                                           ),
-                                          child: Text(accion, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF2563EB))),
+                                          child: Text(
+                                            accion,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF2563EB),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -906,8 +1097,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () =>
-                                  _go(context, '/inventario'),
+                              onPressed: () => _go(context, '/inventario'),
                               child: const Text('Ver inventario →'),
                             ),
                           ),
@@ -924,8 +1114,11 @@ class DashboardDesktopProto extends ConsumerWidget {
                         children: [
                           const Row(
                             children: [
-                              Icon(Icons.pie_chart_outline,
-                                  size: 18, color: Color(0xFF9333EA)),
+                              Icon(
+                                Icons.pie_chart_outline,
+                                size: 18,
+                                color: Color(0xFF9333EA),
+                              ),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -949,18 +1142,23 @@ class DashboardDesktopProto extends ConsumerWidget {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          _FinRow('Ventas brutas', formatRd(ventasHoy),
-                              const Color(0xFF0F172A)),
+                          _FinRow(
+                            'Ventas brutas',
+                            formatRd(ventasHoy),
+                            const Color(0xFF0F172A),
+                          ),
                           const SizedBox(height: 8),
                           _FinRow(
                               'Créditos diferidos',
                               formatRd(porCobrar),
-                              const Color(0xFFD97706)),
+                            const Color(0xFFD97706),
+                          ),
                           const SizedBox(height: 8),
                           _FinRow(
                               'Gastos operacionales',
                               formatRd(snapshot?.hoy.gastos ?? 0),
-                              const Color(0xFFDC2626)),
+                            const Color(0xFFDC2626),
+                          ),
                           const Spacer(),
                           const SizedBox(height: 16),
                           Container(
@@ -973,10 +1171,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFF0F172A),
-                                  Color(0xFF1E293B),
-                                ],
+                                colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
                               ),
                             ),
                             child: Column(
@@ -1022,8 +1217,9 @@ class DashboardDesktopProto extends ConsumerWidget {
 // ─── Providers ───────────────────────────────────────────────────────────
 
 /// Estado de caja del dashboard (invalidar al abrir/cerrar turno).
-final dashCajaProvider = FutureProvider.autoDispose<
-    ({bool abierta, double efectivo, String label})>((ref) async {
+final dashCajaProvider =
+    FutureProvider.autoDispose<({bool abierta, double efectivo, String label})>(
+      (ref) async {
   final repo = ref.watch(cajaRepositoryProvider);
   final sesion = await repo.obtenerSesionAbierta();
   if (sesion == null || !sesion.estaAbierta) {
@@ -1043,8 +1239,8 @@ final dashCajaProvider = FutureProvider.autoDispose<
       label: 'Sesión #${sesion.id} • Abierta',
     );
   }
-});
-
+      },
+    );
 
 // ─── UI atoms ────────────────────────────────────────────────────────────
 
@@ -1125,13 +1321,11 @@ class _KpiGlass extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: badgeBg,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                      color: badgeColor.withValues(alpha: 0.2)),
+                  border: Border.all(color: badgeColor.withValues(alpha: 0.2)),
                 ),
                 child: Text(
                   badge,
@@ -1225,10 +1419,7 @@ class _QuickTile extends StatelessWidget {
               Text(
                 sub,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF94A3B8),
-                ),
+                style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
               ),
             ],
           ),
@@ -1283,14 +1474,18 @@ class _FinRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 12, color: Color(0xFF64748B))),
-          Text(value,
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          ),
+          Text(
+            value,
               style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: valueColor)),
+              color: valueColor,
+            ),
+          ),
         ],
       ),
     );
@@ -1315,8 +1510,7 @@ class _EnterpriseChart extends StatelessWidget {
     final maxLabels = n <= 8 ? n : 6;
     if (n <= maxLabels) {
       return [
-        for (var i = 0; i < n; i++)
-          (index: i, label: _corto(puntos[i].label)),
+        for (var i = 0; i < n; i++) (index: i, label: _corto(puntos[i].label)),
       ];
     }
     final out = <({int index, String label})>[];
@@ -1347,10 +1541,12 @@ class _EnterpriseChart extends StatelessWidget {
         child: Text('Sin datos', style: TextStyle(color: Color(0xFF94A3B8))),
       );
     }
-    final maxV =
-        puntos.map((p) => p.valor).fold<double>(0, (a, b) => b > a ? b : a);
-    final scaleMax =
-        maxV <= 0 ? 1000.0 : (maxV * 1.15).clamp(100.0, double.infinity);
+    final maxV = puntos
+        .map((p) => p.valor)
+        .fold<double>(0, (a, b) => b > a ? b : a);
+    final scaleMax = maxV <= 0
+        ? 1000.0
+        : (maxV * 1.15).clamp(100.0, double.infinity);
     final labelsX = _labelsX();
 
     return LayoutBuilder(
@@ -1522,7 +1718,11 @@ class _EntChartPainter extends CustomPainter {
 }
 
 class _FilterChip extends StatelessWidget {
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -1544,7 +1744,9 @@ class _FilterChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: selected ? const Color(0xFF1D4ED8) : const Color(0xFF64748B),
+              color: selected
+                  ? const Color(0xFF1D4ED8)
+                  : const Color(0xFF64748B),
             ),
           ),
         ),

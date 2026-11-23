@@ -26,12 +26,21 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  static const _teal = Color(0xFF0D9488);
 
   String _fmtFecha(DateTime d) {
     const m = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
     ];
     return '${d.day.toString().padLeft(2, '0')} ${m[d.month - 1]} ${d.year}';
   }
@@ -54,7 +63,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
 
   void _abrirConteo(ConteoFisico c) {
     final id = c.id ?? 0;
-    final cerrado = c.estado == EstadoConteo.aprobado ||
+    final cerrado =
+        c.estado == EstadoConteo.aprobado ||
         c.estado == EstadoConteo.conciliado;
     if (cerrado) {
       context.push('/diferencias-conteo-fisico/$id');
@@ -78,9 +88,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
       floatingActionButton: isMobile
           ? FloatingActionButton.extended(
               onPressed: () => context.push('/inventario-fisico'),
-              backgroundColor: _teal,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.add_rounded),
+              icon: Icon(Icons.add_rounded),
               label: const Text(
                 'Nuevo',
                 style: TextStyle(fontWeight: FontWeight.w900),
@@ -88,8 +98,10 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
             )
           : null,
       body: conteosAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: _teal),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         error: (e, _) => Center(
           child: Text(
@@ -103,10 +115,12 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
         data: (lista) {
           final total = lista.length;
           final abiertos = lista
-              .where((c) =>
+              .where(
+                (c) =>
                   c.estado == EstadoConteo.pendiente ||
                   c.estado == EstadoConteo.abierto ||
-                  c.estado == EstadoConteo.enProceso)
+                    c.estado == EstadoConteo.enProceso,
+              )
               .length;
           final enProceso = lista
               .where((c) => c.estado == EstadoConteo.enProceso)
@@ -117,8 +131,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
 
           var filtrados = lista;
           if (_estadoFiltro != null) {
-            filtrados =
-                filtrados.where((c) => c.estado == _estadoFiltro).toList();
+            filtrados = filtrados
+                .where((c) => c.estado == _estadoFiltro)
+                .toList();
           }
           if (_filtro.isNotEmpty) {
             final q = _filtro.toLowerCase();
@@ -149,13 +164,19 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                              gradient: LinearGradient(
+                                colors: [
+                                  Theme.of(context).colorScheme.primary,
+                                  Theme.of(context).colorScheme.tertiary,
+                                ],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.inventory_2_outlined,
-                                color: Colors.white, size: 24),
+                            child: Icon(
+                              Icons.inventory_2_outlined,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           const Expanded(
@@ -182,15 +203,16 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                             ),
                           ),
                           FilledButton.icon(
-                            onPressed: () =>
-                                context.push('/inventario-fisico'),
-                            icon: const Icon(Icons.add_rounded, size: 20),
+                            onPressed: () => context.push('/inventario-fisico'),
+                            icon: Icon(Icons.add_rounded, size: 20),
                             label: const Text(
                               'Nuevo conteo',
                               style: TextStyle(fontWeight: FontWeight.w900),
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor: _teal,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
@@ -209,9 +231,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
-                          onPressed: () =>
-                              context.push('/inventario-fisico'),
-                          icon: const Icon(Icons.add_rounded),
+                          onPressed: () => context.push('/inventario-fisico'),
+                          icon: Icon(Icons.add_rounded),
                           label: const Text(
                             'Nuevo conteo',
                             style: TextStyle(
@@ -220,7 +241,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                             ),
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: _teal,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -273,8 +296,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                                   Icons.hourglass_top_rounded,
                                   const Color(0xFFD97706),
                                   () => setState(() {
-                                    _estadoFiltro = _estadoFiltro ==
-                                            EstadoConteo.enProceso
+                                    _estadoFiltro =
+                                        _estadoFiltro == EstadoConteo.enProceso
                                         ? null
                                         : EstadoConteo.enProceso;
                                   }),
@@ -308,7 +331,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               '$total',
                               Icons.list_alt_rounded,
                               const Color(0xFF64748B),
-                              () => setState(() { _estadoFiltro = null; }),
+                              () => setState(() {
+                                _estadoFiltro = null;
+                              }),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -361,8 +386,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                     const SizedBox(height: 16),
                     // Buscar + chips
                     TextField(
-                      onChanged: (v) =>
-                          setState(() { _filtro = v.trim().toLowerCase(); }),
+                      onChanged: (v) => setState(() {
+                        _filtro = v.trim().toLowerCase();
+                      }),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: 'Buscar conteo…',
@@ -370,8 +396,10 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF94A3B8),
                         ),
-                        prefixIcon: const Icon(Icons.search_rounded,
-                            color: Color(0xFF94A3B8)),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFF94A3B8),
+                        ),
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(
@@ -380,16 +408,18 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: _border),
+                          borderSide: BorderSide(color: _border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: _border),
+                          borderSide: BorderSide(color: _border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: _teal, width: 1.5),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -415,8 +445,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               e.etiqueta,
                               _estadoFiltro == e,
                               () => setState(() {
-                                _estadoFiltro =
-                                    _estadoFiltro == e ? null : e;
+                                _estadoFiltro = _estadoFiltro == e ? null : e;
                               }),
                             ),
                             const SizedBox(width: 6),
@@ -438,9 +467,9 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                         const Spacer(),
                         Text(
                           '${filtrados.length}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w900,
-                            color: _teal,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ],
@@ -456,8 +485,11 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                         ),
                         child: const Column(
                           children: [
-                            Icon(Icons.inventory_2_outlined,
-                                size: 40, color: Color(0xFFCBD5E1)),
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              size: 40,
+                              color: Color(0xFFCBD5E1),
+                            ),
                             SizedBox(height: 10),
                             Text(
                               'No hay conteos con estos filtros',
@@ -657,8 +689,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded,
-                  color: Color(0xFF94A3B8)),
+              Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
             ],
           ),
         ),

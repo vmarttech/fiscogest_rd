@@ -1,4 +1,3 @@
-
 /// Credenciales PayPal (Sandbox). En producción: solo backend.
 ///
 /// Ejecutar:
@@ -25,13 +24,11 @@ class PaypalConfig {
     defaultValue: true,
   );
 
-  static String get baseUrl => sandbox
-      ? 'https://api-m.sandbox.paypal.com'
-      : 'https://api-m.paypal.com';
+  static String get baseUrl =>
+      sandbox ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 
   static const returnUrl = 'https://fiscogest.local/paypal/return';
   static const cancelUrl = 'https://fiscogest.local/paypal/cancel';
 
-  static bool get configurado =>
-      clientId.isNotEmpty && secret.isNotEmpty;
+  static bool get configurado => clientId.isNotEmpty && secret.isNotEmpty;
 }

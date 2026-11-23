@@ -33,9 +33,15 @@ class TasaUsdDop {
     final rev = intPart.split('').reversed.toList();
     final chunks = <String>[];
     for (var i = 0; i < rev.length; i += 3) {
-      chunks.add(rev.sublist(i, i + 3 > rev.length ? rev.length : i + 3).join());
+      chunks.add(
+        rev.sublist(i, i + 3 > rev.length ? rev.length : i + 3).join(),
+      );
     }
-    intPart = chunks.map((c) => c.split('').reversed.join()).toList().reversed.join(',');
+    intPart = chunks
+        .map((c) => c.split('').reversed.join())
+        .toList()
+        .reversed
+        .join(',');
     return '${neg ? '-' : ''}RD\$$intPart.$dec';
   }
 }
@@ -49,12 +55,10 @@ class TasaCambioService {
   static const _prefFuente = 'fx_usd_dop_fuente';
 
   /// open.er-api.com — sin API key, incluye DOP, actualiza con frecuencia.
-  static const _urlPrimary =
-      'https://open.er-api.com/v6/latest/USD';
+  static const _urlPrimary = 'https://open.er-api.com/v6/latest/USD';
 
   /// Respaldo (también incluye DOP).
-  static const _urlBackup =
-      'https://api.exchangerate-api.com/v4/latest/USD';
+  static const _urlBackup = 'https://api.exchangerate-api.com/v4/latest/USD';
 
   TasaUsdDop? _memoria;
 
@@ -98,7 +102,9 @@ class TasaCambioService {
         return TasaUsdDop(
           tasa: tasa,
           actualizadoEn: DateTime.now(),
-          fuente: url.contains('open.er-api') ? 'open.er-api.com' : 'exchangerate-api.com',
+          fuente: url.contains('open.er-api')
+              ? 'open.er-api.com'
+              : 'exchangerate-api.com',
           desdeCache: false,
         );
       } catch (_) {

@@ -49,19 +49,14 @@ class CabeceraCompraWidget extends StatefulWidget {
 class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
   String _sucursal = 'Principal (Santo Domingo)';
 
-  static const _sucursales = [
-    'Principal (Santo Domingo)',
-    'Sucursal Santiago',
-  ];
+  static const _sucursales = ['Principal (Santo Domingo)', 'Sucursal Santiago'];
 
   Widget _titulo(String t) => Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.only(bottom: 8),
         decoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Color(0xFFF0F4F8), width: 2),
-          ),
+      border: Border(bottom: BorderSide(color: Color(0xFFF0F4F8), width: 2)),
         ),
         child: Text(
           t,
@@ -85,7 +80,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
           color: sel ? const Color(0xFFE6F4F2) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: sel ? const Color(0xFF127369) : const Color(0xFFCBD5E0),
+            color: sel ? Theme.of(context).colorScheme.primary : const Color(0xFFCBD5E0),
           ),
         ),
         child: Text(
@@ -93,7 +88,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: sel ? const Color(0xFF127369) : const Color(0xFF666666),
+            color: sel ? Theme.of(context).colorScheme.primary : const Color(0xFF666666),
           ),
         ),
       ),
@@ -121,7 +116,10 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                 onTap: () => widget.onFormaPagoChanged(o.$1),
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: widget.formaPago == o.$1
                         ? Colors.white
@@ -147,7 +145,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: widget.formaPago == o.$1
-                            ? const Color(0xFF127369)
+                            ? Theme.of(context).colorScheme.primary
                             : const Color(0xFF666666),
                       ),
                     ),
@@ -178,7 +176,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF127369)),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -332,7 +330,8 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                       onTap: widget.onSeleccionarProveedor,
                       child: AbsorbPointer(
                         child: TextField(
-                          controller: widget.proveedorNombreController.text
+                          controller:
+                              widget.proveedorNombreController.text
                                   .trim()
                                   .isNotEmpty
                               ? widget.proveedorNombreController
@@ -366,7 +365,10 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                           ),
                       ],
                       onChanged: (v) {
-                        if (v != null) setState(() { _sucursal = v; });
+                        if (v != null)
+                          setState(() {
+                            _sucursal = v;
+                          });
                       },
                     ),
                   ),
@@ -479,7 +481,8 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                 const SizedBox(height: 6),
                 _segment(),
               ],
-              if (!widget.modoSimplificado && widget.formaPago == 'credito') ...[
+              if (!widget.modoSimplificado &&
+                  widget.formaPago == 'credito') ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [

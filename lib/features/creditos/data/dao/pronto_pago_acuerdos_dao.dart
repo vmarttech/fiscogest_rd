@@ -11,7 +11,9 @@ class ProntoPagoAcuerdosDao extends DatabaseAccessor<AppDatabase>
 
   Future<ProntoPagoAcuerdoData?> activoPorCuenta(int cuentaId) {
     return (select(prontoPagoAcuerdosTable)
-          ..where((t) => t.cuentaId.equals(cuentaId) & t.estado.equals('activo'))
+          ..where(
+            (t) => t.cuentaId.equals(cuentaId) & t.estado.equals('activo'),
+          )
           ..orderBy([(t) => OrderingTerm.desc(t.id)])
           ..limit(1))
         .getSingleOrNull();
@@ -38,11 +40,12 @@ class ProntoPagoAcuerdosDao extends DatabaseAccessor<AppDatabase>
     int? usuarioId,
   }) async {
     return transaction(() async {
-      await (update(prontoPagoAcuerdosTable)
-            ..where(
+      await (update(prontoPagoAcuerdosTable)..where(
               (t) => t.cuentaId.equals(cuentaId) & t.estado.equals('activo'),
             ))
-          .write(const ProntoPagoAcuerdosTableCompanion(estado: Value('cancelado')));
+          .write(
+            const ProntoPagoAcuerdosTableCompanion(estado: Value('cancelado')),
+          );
 
       return into(prontoPagoAcuerdosTable).insert(
         ProntoPagoAcuerdosTableCompanion.insert(
@@ -63,17 +66,18 @@ class ProntoPagoAcuerdosDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> cancelarActivo(int cuentaId) async {
-    await (update(prontoPagoAcuerdosTable)
-          ..where(
+    await (update(prontoPagoAcuerdosTable)..where(
             (t) => t.cuentaId.equals(cuentaId) & t.estado.equals('activo'),
           ))
-        .write(const ProntoPagoAcuerdosTableCompanion(estado: Value('cancelado')));
+        .write(
+          const ProntoPagoAcuerdosTableCompanion(estado: Value('cancelado')),
+        );
   }
 
   Future<void> marcarAplicado(int acuerdoId) async {
-    await (update(prontoPagoAcuerdosTable)
-          ..where((t) => t.id.equals(acuerdoId)))
-        .write(
+    await (update(
+      prontoPagoAcuerdosTable,
+    )..where((t) => t.id.equals(acuerdoId))).write(
       ProntoPagoAcuerdosTableCompanion(
         estado: const Value('aplicado'),
         aplicadoEn: Value(DateTime.now()),

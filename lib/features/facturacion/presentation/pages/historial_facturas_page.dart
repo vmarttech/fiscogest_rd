@@ -51,7 +51,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
       title: 'HISTORIAL',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -86,10 +86,14 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         final ncf = (d.numeroFactura ?? '').trim();
                         return Material(
                           color: sel
-                              ? AppColors.primary.withValues(alpha: 0.08)
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.08)
                               : Colors.transparent,
                           child: InkWell(
-                            onTap: () => setState(() { _sel = d; }),
+                            onTap: () => setState(() {
+                              _sel = d;
+                            }),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -147,7 +151,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.history,
                               size: 48,
                               color: AppColors.grey300,
@@ -203,7 +207,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                           formatRd(_sel!.montoTotal),
                           style: AppTypography.h3.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -254,9 +258,10 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                         ),
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primary.withValues(
-                                            alpha: 0.04,
-                                          ),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.04),
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
@@ -374,10 +379,12 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                               }
                             }
                           },
-                          icon: const Icon(Icons.print, size: 20),
+                          icon: Icon(Icons.print, size: 20),
                           label: const Text('Imprimir comprobante'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),

@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:fiscogest_rd/core/legal/legal_texts.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 
 enum LegalDocumento { privacidad, terminos, eliminarCuenta }
 
@@ -68,10 +68,16 @@ class _LegalPageState extends State<LegalPage> {
         ..setNavigationDelegate(
           NavigationDelegate(
             onPageStarted: (_) {
-              if (mounted) setState(() { _isLoading = true; });
+              if (mounted)
+                setState(() {
+                  _isLoading = true;
+                });
             },
             onPageFinished: (_) {
-              if (mounted) setState(() { _isLoading = false; });
+              if (mounted)
+                setState(() {
+                  _isLoading = false;
+                });
             },
           ),
         )
@@ -102,7 +108,10 @@ class _LegalPageState extends State<LegalPage> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                launchUrl(Uri.parse(_url), mode: LaunchMode.externalApplication);
+                launchUrl(
+                  Uri.parse(_url),
+                  mode: LaunchMode.externalApplication,
+                );
               },
               icon: const Icon(Icons.open_in_browser),
               label: const Text('Abrir en el navegador'),
@@ -115,49 +124,38 @@ class _LegalPageState extends State<LegalPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      title: _titulo,
-      body: Stack(
-        children: [
-          _controller != null
-              ? WebViewWidget(controller: _controller!)
-              : _buildUnsupportedFallback(),
-          if (_isLoading && _controller != null)
-            const Center(child: CircularProgressIndicator()),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              child: Container(
-                color: AppColors.surface.withValues(alpha: 0.95),
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/login');
-                          }
-                        },
-                        child: const Text('Volver'),
-                      ),
-                    ),
-                    if (_controller != null)
-                      IconButton(
-                        tooltip: 'Recargar',
-                        onPressed: () => _controller?.reload(),
-                        icon: const Icon(Icons.refresh),
-                      ),
-                  ],
-                ),
-              ),
+    final canPop = context.canPop();
+    return PopScope<void>(
+      canPop: canPop,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) ShellDrawerScope.open(context);
+      },
+      child: AppScaffold(
+        title: _titulo,
+        leading: context.canPop()
+            ? IconButton(
+                tooltip: 'Volver',
+                onPressed: () => context.pop(),
+                icon: const Icon(Icons.arrow_back),
+              )
+            : null,
+        actions: [
+          if (_controller != null)
+            IconButton(
+              tooltip: 'Recargar',
+              onPressed: () => _controller?.reload(),
+              icon: const Icon(Icons.refresh),
             ),
-          ),
         ],
+        body: Stack(
+          children: [
+            _controller != null
+                ? WebViewWidget(controller: _controller!)
+                : _buildUnsupportedFallback(),
+            if (_isLoading && _controller != null)
+              const Center(child: CircularProgressIndicator()),
+          ],
+        ),
       ),
     );
   }

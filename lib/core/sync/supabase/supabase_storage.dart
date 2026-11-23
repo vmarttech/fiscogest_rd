@@ -24,17 +24,20 @@ class SupabaseStorage {
     required List<int> bytes,
   }) async {
     final clave = claveFotoProducto(negocioId, productoId);
-    final uri =
-        Uri.parse('${SupabaseConfig.url}/storage/v1/object/$bucket/$clave');
+    final uri = Uri.parse(
+      '${SupabaseConfig.url}/storage/v1/object/$bucket/$clave',
+    );
     final resp = await _http
-        .put(uri,
+        .put(
+          uri,
             headers: {
               'apikey': SupabaseConfig.anonKey,
               'Authorization': 'Bearer ${SupabaseConfig.anonKey}',
               'Content-Type': 'image/jpeg',
               'x-upsert': 'true',
             },
-            body: bytes)
+          body: bytes,
+        )
         .timeout(const Duration(seconds: 25));
     if (resp.statusCode < 200 || resp.statusCode >= 300) {
       throw Exception('Storage upload ${resp.statusCode}: ${resp.body}');

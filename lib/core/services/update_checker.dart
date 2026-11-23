@@ -15,7 +15,6 @@ const String kUpdateJsonUrl =
     'https://raw.githubusercontent.com/vmarttech/fiscogest_rd/main/update.json';
 
 class UpdateInfo {
-
   UpdateInfo({
     required this.versionName,
     required this.versionCode,
@@ -50,7 +49,9 @@ class UpdateChecker {
       final info = await PackageInfo.fromPlatform();
       final currentCode = int.tryParse(info.buildNumber) ?? 0;
       // ignore: avoid_print
-      print('[UpdateChecker] local version=${info.version} build=${info.buildNumber} code=$currentCode');
+      print(
+        '[UpdateChecker] local version=${info.version} build=${info.buildNumber} code=$currentCode',
+      );
       final uri = Uri.parse(kUpdateJsonUrl).replace(
         queryParameters: {
           't': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -59,13 +60,15 @@ class UpdateChecker {
       // ignore: avoid_print
       print('[UpdateChecker] GET $uri');
       final res = await http
-          .get(uri, headers: const {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-          })
+          .get(
+            uri,
+            headers: const {'Cache-Control': 'no-cache', 'Pragma': 'no-cache'},
+          )
           .timeout(const Duration(seconds: 12));
       // ignore: avoid_print
-      print('[UpdateChecker] status=${res.statusCode} bodyLen=${res.body.length}');
+      print(
+        '[UpdateChecker] status=${res.statusCode} bodyLen=${res.body.length}',
+      );
       if (res.statusCode != 200) {
         // ignore: avoid_print
         print('[UpdateChecker] abort: bad status');
@@ -74,7 +77,9 @@ class UpdateChecker {
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       final remote = UpdateInfo.fromJson(data);
       // ignore: avoid_print
-      print('[UpdateChecker] remote name=${remote.versionName} code=${remote.versionCode}');
+      print(
+        '[UpdateChecker] remote name=${remote.versionName} code=${remote.versionCode}',
+      );
       if (remote.versionCode > currentCode && remote.apkUrl.isNotEmpty) {
         // ignore: avoid_print
         print('[UpdateChecker] UPDATE AVAILABLE');
@@ -164,7 +169,8 @@ class UpdateChecker {
     final progress = ValueNotifier<double?>(null);
     var dialogOpen = true;
 
-    unawaited(showDialog<void>(
+    unawaited(
+      showDialog<void>(
       context: context,
       barrierDismissible: false,
       useRootNavigator: true,
@@ -195,7 +201,8 @@ class UpdateChecker {
           ),
         ),
       ),
-    ));
+      ),
+    );
 
     void closeProgress() {
       if (dialogOpen && context.mounted) {

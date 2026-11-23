@@ -2,13 +2,16 @@ import 'package:http/http.dart' as http;
 import 'package:fiscogest_rd/core/sync/supabase/supabase_secrets.dart';
 
 class SupabaseConfig {
-  static const _urlEnv =
-      String.fromEnvironment('SUPABASE_URL', defaultValue: '');
-  static const _keyEnv =
-      String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
+  static const _urlEnv = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: '',
+  );
+  static const _keyEnv = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: '',
+  );
 
-  static String get url =>
-      _urlEnv.isNotEmpty ? _urlEnv : SupabaseSecrets.url;
+  static String get url => _urlEnv.isNotEmpty ? _urlEnv : SupabaseSecrets.url;
 
   static String get anonKey =>
       _keyEnv.isNotEmpty ? _keyEnv : SupabaseSecrets.anonKey;
@@ -28,10 +31,7 @@ class SupabaseConfig {
       await http
           .get(
             uri,
-            headers: {
-              'apikey': anonKey,
-              'Authorization': 'Bearer $anonKey',
-            },
+            headers: {'apikey': anonKey, 'Authorization': 'Bearer $anonKey'},
           )
           .timeout(const Duration(seconds: 3));
       return true;

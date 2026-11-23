@@ -76,7 +76,9 @@ class _SeleccionarClienteDialogState
               label: 'Buscar cliente',
               hint: 'Nombre, RNC o Teléfono',
               controller: _busqueda,
-              onChanged: (valor) => setState(() { _termino = valor; }),
+              onChanged: (valor) => setState(() {
+                _termino = valor;
+              }),
             ),
             AppLayout.vM,
             SizedBox(
@@ -220,7 +222,9 @@ class _NuevoClienteFormDialogState
         }
       }
       if (!mounted) return;
-      Navigator.of(context).pop(encontrado ?? (lista.isNotEmpty ? lista.first : cli));
+      Navigator.of(
+        context,
+      ).pop(encontrado ?? (lista.isNotEmpty ? lista.first : cli));
     } catch (e) {
       if (mounted) {
         FiscoGestNotifications.show(
@@ -231,7 +235,10 @@ class _NuevoClienteFormDialogState
         );
       }
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 

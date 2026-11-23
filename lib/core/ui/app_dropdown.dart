@@ -38,7 +38,10 @@ class AppDropdown<T> extends StatelessWidget {
       initialValue: safe,
       decoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
         labelText: label,
         labelStyle: AppTypography.labelMedium,
         hintText: hint,
@@ -47,15 +50,18 @@ class AppDropdown<T> extends StatelessWidget {
         enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.grey300),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.5,
+          ),
         ),
         disabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.grey300),
         ),
       ),
       isExpanded: isExpanded,
-      icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
+      icon: Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
       style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
       items: items,
       onChanged: enabled ? onChanged : null,

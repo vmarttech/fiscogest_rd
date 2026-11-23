@@ -32,9 +32,7 @@ class EmitirToken {
         body['negocio_id'] = negocioHint;
       }
 
-      final uri = Uri.parse(
-        '${SupabaseConfig.url}/functions/v1/emitir-token',
-      );
+      final uri = Uri.parse('${SupabaseConfig.url}/functions/v1/emitir-token');
       final res = await http
           .post(
             uri,
@@ -77,8 +75,7 @@ class EmitirToken {
         expiresInSec: exp,
         refreshToken: map['refresh_token']?.toString(),
       );
-      final refreshOk =
-          (map['refresh_token']?.toString() ?? '').isNotEmpty;
+      final refreshOk = (map['refresh_token']?.toString() ?? '').isNotEmpty;
       debugPrint(
         'EmitirToken: JWT guardado${refreshOk ? '' : ' SIN refresh'} (${exp}s)',
       );

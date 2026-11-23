@@ -83,7 +83,9 @@ class RolesAccesoSync {
         rutasRuntime = r.map((k, v) => MapEntry(k, v.toString()));
         cargado = permisosRuntime.isNotEmpty;
         if (cargado) {
-          debugPrint('RolesAccesoSync: caché local ${permisosRuntime.length} roles');
+          debugPrint(
+            'RolesAccesoSync: caché local ${permisosRuntime.length} roles',
+          );
           return;
         }
       }

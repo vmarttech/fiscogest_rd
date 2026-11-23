@@ -149,7 +149,9 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
           id: q.id,
           numeroCuota: q.numero,
           fechaVencimiento: q.fechaVencimiento,
-          montoCapital: q.montoCapital > 0.0001 ? q.montoCapital : (q.monto - q.montoInteres),
+          montoCapital: q.montoCapital > 0.0001
+              ? q.montoCapital
+              : (q.monto - q.montoInteres),
           montoInteres: q.montoInteres,
           montoTotal: q.monto,
           saldoDespues: (q.monto - q.montoPagado).clamp(0.0, double.infinity),
@@ -199,12 +201,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       montoMaximo: montoMaximo,
     );
     return Future.wait(
-      rows.map(
-        (row) async => _mapear(
-          row,
-          abonos: await listarAbonos(row.id),
-        ),
-      ),
+      rows.map((row) async => _mapear(row, abonos: await listarAbonos(row.id))),
     );
   }
 
@@ -295,12 +292,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
   Future<List<CuentaPorCobrar>> listarVencidas({int? limite}) async {
     final rows = await _dao.listarVencidas(limite: limite);
     return Future.wait(
-      rows.map(
-        (row) async => _mapear(
-          row,
-          abonos: await listarAbonos(row.id),
-        ),
-      ),
+      rows.map((row) async => _mapear(row, abonos: await listarAbonos(row.id))),
     );
   }
 
@@ -314,12 +306,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       limite: limite,
     );
     return Future.wait(
-      rows.map(
-        (row) async => _mapear(
-          row,
-          abonos: await listarAbonos(row.id),
-        ),
-      ),
+      rows.map((row) async => _mapear(row, abonos: await listarAbonos(row.id))),
     );
   }
 

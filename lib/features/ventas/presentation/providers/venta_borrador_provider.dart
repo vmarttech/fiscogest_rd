@@ -328,7 +328,10 @@ class VentaBorradorNotifier extends StateNotifier<VentaBorradorState> {
   }
 
   /// null = ok; String = mensaje de error (sin stock).
-  Future<String?> validarStockParaAgregar(Producto producto, double cantidadExtra) async {
+  Future<String?> validarStockParaAgregar(
+    Producto producto,
+    double cantidadExtra,
+  ) async {
     final stockGlobal = producto.stock;
     if (stockGlobal == null) return null;
 

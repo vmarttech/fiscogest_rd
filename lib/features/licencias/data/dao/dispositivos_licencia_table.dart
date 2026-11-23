@@ -35,6 +35,5 @@ class DispositivosLicenciaTable extends Table {
   /// ISO última sync exitosa a Supabase (null = pendiente).
   TextColumn get sincronizadoEn => text().nullable()();
 
-  BoolColumn get pendienteSync =>
-      boolean().withDefault(const Constant(true))();
+  BoolColumn get pendienteSync => boolean().withDefault(const Constant(true))();
 }

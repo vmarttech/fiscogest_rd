@@ -31,7 +31,6 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  static const _teal = Color(0xFF0D9488);
 
   Future<void> _aprobar() async {
     final ok = await showDialog<bool>(
@@ -55,7 +54,9 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: _teal),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
             child: const Text(
               'Aprobar',
               style: TextStyle(fontWeight: FontWeight.w900),
@@ -159,10 +160,12 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.go('/inventario-fisico');
       });
-      return const AppScaffold(
+      return AppScaffold(
         title: 'Diferencias',
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF0D9488)),
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       );
     }
@@ -178,14 +181,17 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
           ? [
               IconButton(
                 tooltip: 'PDF',
-                icon: const Icon(Icons.picture_as_pdf_outlined),
+                icon: Icon(Icons.picture_as_pdf_outlined),
                 onPressed: _exportarReporte,
               ),
             ]
           : const [],
       body: async.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: _teal)),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         error: (e, _) => Center(
           child: Text(
             'Error: $e',
@@ -230,22 +236,22 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                       context.go('/inventario-fisico');
                                     }
                                   },
-                                  icon: const Icon(Icons.arrow_back_rounded),
+                                  icon: Icon(Icons.arrow_back_rounded),
                                   tooltip: 'Atrás',
                                 ),
 
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
+                                    gradient: LinearGradient(
                                       colors: [
-                                        Color(0xFF0D9488),
-                                        Color(0xFF14B8A6),
+                                        Theme.of(context).colorScheme.primary,
+                                        Theme.of(context).colorScheme.tertiary,
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(11),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.balance_rounded,
                                     color: Colors.white,
                                     size: 22,
@@ -278,7 +284,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                 ),
                                 OutlinedButton.icon(
                                   onPressed: _exportarReporte,
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.picture_as_pdf_outlined,
                                     size: 18,
                                   ),
@@ -289,8 +295,14 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                     ),
                                   ),
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: _teal,
-                                    side: const BorderSide(color: _teal),
+                                    foregroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    side: BorderSide(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -305,10 +317,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : const Icon(
-                                          Icons.check_rounded,
-                                          size: 18,
-                                        ),
+                                      : Icon(Icons.check_rounded, size: 18),
                                   label: Text(
                                     _aprobando
                                         ? 'Aplicando…'
@@ -318,7 +327,9 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                     ),
                                   ),
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: _teal,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -518,7 +529,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Icon(Icons.check_rounded),
+                            : Icon(Icons.check_rounded),
                         label: Text(
                           _aprobando ? 'Aplicando…' : 'Aprobar ajustes',
                           style: const TextStyle(
@@ -527,7 +538,9 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                           ),
                         ),
                         style: FilledButton.styleFrom(
-                          backgroundColor: _teal,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(

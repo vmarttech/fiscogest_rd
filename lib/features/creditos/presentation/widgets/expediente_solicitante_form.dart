@@ -113,8 +113,9 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
     _tiempoRes.text = e.tiempoResidencia;
     _empresa.text = e.empresa;
     _cargo.text = e.cargo;
-    _ingreso.text =
-        e.ingresoMensual > 0 ? e.ingresoMensual.toStringAsFixed(2) : '';
+    _ingreso.text = e.ingresoMensual > 0
+        ? e.ingresoMensual.toStringAsFixed(2)
+        : '';
     _tiempoLab.text = e.tiempoLaborando;
     _notas.text = e.notasAnalista;
     _dependientes.text = '${e.dependientes}';
@@ -239,7 +240,10 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
     try {
       await widget.onGuardar(_leer());
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -261,11 +265,17 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
             enabled: enabled,
             maxLines: maxLines,
             keyboardType: keyboard,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+            ),
             decoration: InputDecoration(
               isDense: true,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -278,7 +288,10 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF2563EB),
+                  width: 1.5,
+                ),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
@@ -357,7 +370,8 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
   }
 
   Widget _refCard(int i) {
-    final ok = _refNombre[i].text.trim().isNotEmpty &&
+    final ok =
+        _refNombre[i].text.trim().isNotEmpty &&
         _refTelefono[i].text.trim().isNotEmpty;
     return Container(
       padding: const EdgeInsets.all(10),
@@ -382,8 +396,10 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
               const Spacer(),
               if (ok)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFD1FAE5),
                     borderRadius: BorderRadius.circular(4),
@@ -391,7 +407,11 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.check_circle, size: 12, color: Color(0xFF047857)),
+                      Icon(
+                        Icons.check_circle,
+                        size: 12,
+                        color: Color(0xFF047857),
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Verificado',
@@ -424,8 +444,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
   }
 
   double get _dtiPct {
-    final ing =
-        double.tryParse(_ingreso.text.trim().replaceAll(',', '.')) ?? 0;
+    final ing = double.tryParse(_ingreso.text.trim().replaceAll(',', '.')) ?? 0;
     if (ing <= 0) return 0;
     // Aprox: si hay monto alquiler + sin otros compromisos documentados
     final alq =
@@ -499,7 +518,9 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   groupValue: _sexo,
                                   // ignore: deprecated_member_use
                                   onChanged: widget.editable
-                                      ? (v) => setState(() { _sexo = v!; })
+                                      ? (v) => setState(() {
+                                          _sexo = v!;
+                                        })
                                       : null,
                                   visualDensity: VisualDensity.compact,
                                 ),
@@ -511,7 +532,9 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   groupValue: _sexo,
                                   // ignore: deprecated_member_use
                                   onChanged: widget.editable
-                                      ? (v) => setState(() { _sexo = v!; })
+                                      ? (v) => setState(() {
+                                          _sexo = v!;
+                                        })
                                       : null,
                                   visualDensity: VisualDensity.compact,
                                 ),
@@ -534,8 +557,11 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                     const SizedBox(height: 8),
                     _field('Nacionalidad', _nacionalidad),
                     const SizedBox(height: 8),
-                    _field('Número de Dependientes', _dependientes,
-                        keyboard: TextInputType.number),
+                    _field(
+                      'Número de Dependientes',
+                      _dependientes,
+                      keyboard: TextInputType.number,
+                    ),
                     const SizedBox(height: 8),
                     _field('Teléfono', _telefono),
                     const SizedBox(height: 8),
@@ -565,7 +591,8 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                     Row(
                       children: [
                         Expanded(
-                            child: _field('Tiempo residiendo', _tiempoRes)),
+                          child: _field('Tiempo residiendo', _tiempoRes),
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: _field(
@@ -582,27 +609,38 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                               initialValue: _tipoVivienda,
                               decoration: InputDecoration(
                                 isDense: true,
-                                labelText: 'Confirmar vivienda propia/alquilada',
-                                labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                                labelText:
+                                    'Confirmar vivienda propia/alquilada',
+                                labelStyle: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
                                 contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
                               items: const [
                                 DropdownMenuItem(
-                                    value: 'Propia', child: Text('Propia')),
+                                  value: 'Propia',
+                                  child: Text('Propia'),
+                                ),
                                 DropdownMenuItem(
                                     value: 'Alquilada',
-                                    child: Text('Alquilada')),
+                                  child: Text('Alquilada'),
+                                ),
                                 DropdownMenuItem(
                                     value: 'Familiar',
-                                    child: Text('Familiar')),
+                                  child: Text('Familiar'),
+                                ),
                               ],
                               onChanged: widget.editable
-                                  ? (v) =>
-                                      setState(() { _tipoVivienda = v ?? 'Alquilada'; })
+                                  ? (v) => setState(() {
+                                      _tipoVivienda = v ?? 'Alquilada';
+                                    })
                                   : null,
                             ),
                           ),
@@ -650,8 +688,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Expanded(
-                            child: _field('Tiempo laborando', _tiempoLab)),
+                        Expanded(child: _field('Tiempo laborando', _tiempoLab)),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Padding(
@@ -661,21 +698,31 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                               decoration: InputDecoration(
                                 isDense: true,
                                 labelText: 'Frecuencia de pago',
-                                labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                                labelStyle: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
                                 contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
                               items: const [
                                 DropdownMenuItem(
-                                    value: 'Semanal', child: Text('Semanal')),
+                                  value: 'Semanal',
+                                  child: Text('Semanal'),
+                                ),
                                 DropdownMenuItem(
                                     value: 'Quincenal',
-                                    child: Text('Quincenal')),
+                                  child: Text('Quincenal'),
+                                ),
                                 DropdownMenuItem(
-                                    value: 'Mensual', child: Text('Mensual')),
+                                  value: 'Mensual',
+                                  child: Text('Mensual'),
+                                ),
                               ],
                               onChanged: widget.editable
                                   ? (v) => setState(
@@ -702,8 +749,11 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                     const SizedBox(height: 8),
                     _field('Cargo', _cargo),
                     const SizedBox(height: 8),
-                    _field('Ingreso mensual', _ingreso,
-                        keyboard: TextInputType.number),
+                    _field(
+                      'Ingreso mensual',
+                      _ingreso,
+                      keyboard: TextInputType.number,
+                    ),
                     const SizedBox(height: 8),
                     _field('Tiempo laborando', _tiempoLab),
                     const SizedBox(height: 8),
@@ -799,13 +849,19 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        '${_dtiPct.toStringAsFixed(0)}% · ${_dtiPct >= 70 ? 'ALTO' : _dtiPct >= 40 ? 'MEDIO' : 'BAJO'}',
+                        '${_dtiPct.toStringAsFixed(0)}% · ${_dtiPct >= 70
+                            ? 'ALTO'
+                            : _dtiPct >= 40
+                            ? 'MEDIO'
+                            : 'BAJO'}',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,

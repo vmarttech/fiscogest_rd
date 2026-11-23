@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_page.dart';
 import 'package:fiscogest_rd/core/ui/app_atmosphere.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
@@ -77,6 +76,22 @@ class AppScaffold extends StatelessWidget {
     '/lista-ajustes',
     '/inventario-fisico',
     '/inventario-fisico/listar',
+    '/almacenes',
+    '/compras/rapida',
+    '/ecfe',
+    '/gastos',
+    '/legal/eliminar-cuenta',
+    '/legal/privacidad',
+    '/legal/terminos',
+    '/licencia',
+    '/licencia/admin',
+    '/licencia/comprar',
+    '/login',
+    '/setup-cuenta',
+    '/transferencias/registrar',
+    '/usuarios',
+    '/ventas/cotizaciones/nueva',
+    '/ventas/fios',
   };
 
   static bool esRutaPrincipal(String path) => rutasPrincipales.contains(path);
@@ -118,7 +133,7 @@ class AppScaffold extends StatelessWidget {
       if (principal && underShell && !isDesktop) {
         // Solo mostrar hamburguesa en móvil/tablet
         resolvedLeading = IconButton(
-          icon: const Icon(Icons.menu),
+          icon: Icon(Icons.menu),
           tooltip: 'Menú',
           onPressed: () => ShellDrawerScope.open(context),
           style: IconButton.styleFrom(
@@ -132,7 +147,7 @@ class AppScaffold extends StatelessWidget {
         );
       } else if (!principal) {
         resolvedLeading = IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           tooltip: 'Atrás',
           onPressed: () => safeBack(context),
           style: IconButton.styleFrom(
@@ -167,13 +182,16 @@ class AppScaffold extends StatelessWidget {
       toolbarHeight: subtitle != null ? 56 : 48,
       automaticallyImplyLeading: false,
       leading: leadingWidget,
-      backgroundColor: AppColors.primary,
-      flexibleSpace: const DecoratedBox(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      flexibleSpace: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [AppColors.primaryDark, AppColors.primary],
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primary,
+            ],
           ),
         ),
       ),
@@ -267,7 +285,9 @@ class AppScaffold extends StatelessWidget {
                           filledButtonTheme: FilledButtonThemeData(
                             style: FilledButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primaryDark,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -280,7 +300,9 @@ class AppScaffold extends StatelessWidget {
                           elevatedButtonTheme: ElevatedButtonThemeData(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primaryDark,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

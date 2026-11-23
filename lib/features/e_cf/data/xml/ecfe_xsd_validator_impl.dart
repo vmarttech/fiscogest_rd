@@ -38,16 +38,14 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
 
     _validarEstructura(doc, errores);
     final rootName = doc.rootElement.name.local;
-    final tipo = doc.rootElement
+    final tipo =
+        doc.rootElement
             .findAllElements('TipoeCF')
             .map((e) => e.innerText.trim())
             .where((t) => t.isNotEmpty)
             .firstOrNull ??
         '';
-    final xsdFile = await _resolverArchivoXsd(
-      raiz: rootName,
-      tipoEcf: tipo,
-    );
+    final xsdFile = await _resolverArchivoXsd(raiz: rootName, tipoEcf: tipo);
     if (xsdFile == null) {
       if (exigirXsd) {
         errores.add(
@@ -70,9 +68,7 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
     final raiz = root.name.local;
 
     if (raiz != 'ECF' && raiz != 'RFCE') {
-      errores.add(
-        'Raíz debe ser <ECF> o <RFCE>, encontrado <$raiz>',
-      );
+      errores.add('Raíz debe ser <ECF> o <RFCE>, encontrado <$raiz>');
       return;
     }
 
@@ -107,7 +103,8 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
         if (!esRfce && tipo != '34') {
           _req(idDoc, 'FechaVencimientoSecuencia', errores);
         }
-        final fvs = idDoc
+        final fvs =
+            idDoc
                 .findElements('FechaVencimientoSecuencia')
                 .firstOrNull
                 ?.innerText
@@ -234,11 +231,7 @@ class EcfeXsdValidatorImpl implements EcfeXsdValidator {
       }
 
       // Genéricos conocidos del proyecto / paquete DGII.
-      const genericos = [
-        'ecf_v1.0.xsd',
-        'ecf.xsd',
-        'ecf_v1.xsd',
-      ];
+      const genericos = ['ecf_v1.0.xsd', 'ecf.xsd', 'ecf_v1.xsd'];
       for (final g in genericos) {
         for (final f in xsds) {
           if (nombre(f) == g) return f;

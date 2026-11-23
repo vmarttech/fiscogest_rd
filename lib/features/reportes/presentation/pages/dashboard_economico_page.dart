@@ -15,8 +15,6 @@ import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 class DashboardEconomicoPage extends ConsumerWidget {
   const DashboardEconomicoPage({super.key});
 
-
-
   KpiPeriodo _kpiDe(DashboardSnapshot s, PeriodoDash p) {
     switch (p) {
       case PeriodoDash.hoy:
@@ -29,7 +27,6 @@ class DashboardEconomicoPage extends ConsumerWidget {
         return s.anio;
     }
   }
-
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +42,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
       showBackButton: false,
       leading: mobile
           ? IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(Icons.menu),
               tooltip: 'Menú',
               onPressed: () => ShellDrawerScope.open(context),
             )
@@ -54,7 +51,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
           ? [
               IconButton(
                 tooltip: 'Reportes operativos',
-                icon: const Icon(Icons.folder_open_outlined),
+                icon: Icon(Icons.folder_open_outlined),
                 onPressed: () => context.push('/reports/hub'),
               ),
             ]
@@ -128,9 +125,11 @@ class DashboardEconomicoPage extends ConsumerWidget {
                             Expanded(
                               child: _PeriodoChips(
                                 selected: periodo,
-                                onChanged: (p) => ref
+                                onChanged: (p) =>
+                                    ref
                                     .read(periodoDashProvider.notifier)
-                                    .state = p,
+                                            .state =
+                                        p,
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -141,12 +140,12 @@ class DashboardEconomicoPage extends ConsumerWidget {
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(10),
                                 onTap: () => context.push('/reports/hub'),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(10),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
                                   child: Icon(
                                     Icons.folder_open_outlined,
                                     size: 22,
-                                    color: Color(0xFF00796B),
+                                    color: Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                               ),
@@ -154,10 +153,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
                           ],
                         ),
                       const SizedBox(height: 16),
-                      _KpiGrid(
-                        kpi: kpi,
-                        mobile: mobile,
-                      ),
+                      _KpiGrid(kpi: kpi, mobile: mobile),
                       const SizedBox(height: 20),
                       _ChartCard(serie: snap.serie30Dias, kpi: kpi),
                       const SizedBox(height: 16),
@@ -172,9 +168,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: _MixPagoCard(
-                                data: snap.porFormaPago,
-                                      ),
+                              child: _MixPagoCard(data: snap.porFormaPago),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -198,10 +192,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
   }
 }
 
-
-
 // ─── Design tokens (réplica mock reportes) ─────────────
-const _kTealBright = Color(0xFF00A896);
 const _kInk = Color(0xFF0F172A);
 const _kMuted = Color(0xFF334155);
 const _kMuted2 = Color(0xFF64748B);
@@ -310,7 +301,7 @@ class _PeriodoChips extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (on) ...[
-                    const Icon(Icons.check, size: 14, color: _kInk),
+                    Icon(Icons.check, size: 14, color: _kInk),
                     const SizedBox(width: 4),
                   ],
                   Text(
@@ -387,16 +378,21 @@ class _PeriodoChips extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(6),
                   child: Container(
                     width: narrow ? double.infinity : null,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: const Color(0xFFCBD5E1)),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
-                      mainAxisSize: narrow ? MainAxisSize.max : MainAxisSize.min,
+                      mainAxisSize: narrow
+                          ? MainAxisSize.max
+                          : MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.calendar_today_outlined,
                           size: 14,
                           color: Color(0xFF0F172A),
@@ -464,7 +460,7 @@ class _PeriodoChips extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.expand_more, size: 18, color: Color(0xFF0F172A)),
+                  Icon(Icons.expand_more, size: 18, color: Color(0xFF0F172A)),
                 ],
               ),
             ),
@@ -474,7 +470,6 @@ class _PeriodoChips extends ConsumerWidget {
     );
   }
 }
-
 
 class _KpiGrid extends StatelessWidget {
   const _KpiGrid({required this.kpi, required this.mobile});
@@ -560,14 +555,14 @@ class _KpiCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
               Color(0xFF0A1628),
               Color(0xFF0D1E34),
               Color(0xFF0F4C4A),
-              Color(0xFF0F766E),
+              Theme.of(context).colorScheme.primary,
             ],
             stops: [0.0, 0.35, 0.7, 1.0],
           ),
@@ -587,7 +582,7 @@ class _KpiCard extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 height: 40,
-                child: CustomPaint(painter: _SparklinePainter()),
+                child: CustomPaint(painter: _SparklinePainter(Theme.of(context).colorScheme.tertiary)),
               ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,7 +600,10 @@ class _KpiCard extends StatelessWidget {
                     const Spacer(),
                     if (delta != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: up
                               ? const Color(0xFFDCFCE7).withValues(alpha: 0.25)
@@ -617,7 +615,9 @@ class _KpiCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: up ? const Color(0xFF86EFAC) : const Color(0xFFFCA5A5),
+                            color: up
+                                ? const Color(0xFF86EFAC)
+                                : const Color(0xFFFCA5A5),
                           ),
                         ),
                       ),
@@ -683,9 +683,14 @@ class _KpiCard extends StatelessWidget {
               const Spacer(),
               if (delta != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: up ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                    color: up
+                        ? const Color(0xFFDCFCE7)
+                        : const Color(0xFFFEE2E2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -693,7 +698,9 @@ class _KpiCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: up ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                      color: up
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFFB91C1C),
                     ),
                   ),
                 ),
@@ -712,7 +719,10 @@ class _KpiCard extends StatelessWidget {
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 2),
-            Text(subtitle!, style: const TextStyle(fontSize: 11, color: _kMuted2)),
+            Text(
+              subtitle!,
+              style: const TextStyle(fontSize: 11, color: _kMuted2),
+            ),
           ],
         ],
       ),
@@ -721,6 +731,9 @@ class _KpiCard extends StatelessWidget {
 }
 
 class _SparklinePainter extends CustomPainter {
+  _SparklinePainter(this.color);
+
+  final Color color;
   @override
   void paint(Canvas canvas, Size size) {
     final path = Path();
@@ -737,7 +750,7 @@ class _SparklinePainter extends CustomPainter {
       }
     }
     final paint = Paint()
-      ..color = const Color(0xFF00A896).withValues(alpha: 0.7)
+      ..color = color.withValues(alpha: 0.7)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
@@ -753,8 +766,8 @@ class _SparklinePainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color(0xFF00A896).withValues(alpha: 0.25),
-            const Color(0xFF00A896).withValues(alpha: 0.0),
+            color.withValues(alpha: 0.25),
+            color.withValues(alpha: 0.0),
           ],
         ).createShader(Rect.fromLTWH(0, 0, w, h)),
     );
@@ -776,7 +789,8 @@ class _ChartCard extends StatelessWidget {
         ? 1.0
         : serie.map((e) => e.valor).fold<double>(0, (a, b) => a > b ? a : b);
     final spotsV = <FlSpot>[
-      for (var i = 0; i < serie.length; i++) FlSpot(i.toDouble(), serie[i].valor),
+      for (var i = 0; i < serie.length; i++)
+        FlSpot(i.toDouble(), serie[i].valor),
     ];
     // Margen como 2ª serie en eje derecho (escala 0–40% mapeada a maxY visual vía right axis)
     final margenBase = kpi.margenPct.clamp(0, 40);
@@ -794,7 +808,12 @@ class _ChartCard extends StatelessWidget {
     final chart = SizedBox(
       height: 260,
       child: serie.isEmpty || serie.every((e) => e.valor == 0)
-          ? const Center(child: Text('Sin ventas en el período', style: TextStyle(color: _kMuted)))
+          ? const Center(
+              child: Text(
+                'Sin ventas en el período',
+                style: TextStyle(color: _kMuted),
+              ),
+            )
           : LineChart(
               LineChartData(
                 minY: 0,
@@ -807,7 +826,9 @@ class _ChartCard extends StatelessWidget {
                 ),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -828,7 +849,9 @@ class _ChartCard extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 42,
                       getTitlesWidget: (v, _) => Text(
-                        v >= 1000 ? '${(v / 1000).toStringAsFixed(0)}k' : v.toStringAsFixed(0),
+                        v >= 1000
+                            ? '${(v / 1000).toStringAsFixed(0)}k'
+                            : v.toStringAsFixed(0),
                         style: const TextStyle(color: _kMuted2, fontSize: 11),
                       ),
                     ),
@@ -839,10 +862,17 @@ class _ChartCard extends StatelessWidget {
                       interval: (serie.length / 5).clamp(1, 10).toDouble(),
                       getTitlesWidget: (v, _) {
                         final i = v.toInt();
-                        if (i < 0 || i >= serie.length) return const SizedBox.shrink();
+                        if (i < 0 || i >= serie.length)
+                          return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(top: 6),
-                          child: Text(serie[i].label, style: const TextStyle(color: _kMuted2, fontSize: 11)),
+                          child: Text(
+                            serie[i].label,
+                            style: const TextStyle(
+                              color: _kMuted2,
+                              fontSize: 11,
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -855,12 +885,20 @@ class _ChartCard extends StatelessWidget {
                       if (s.barIndex == 1) {
                         return LineTooltipItem(
                           'Margen: ${s.y.toStringAsFixed(0)}%',
-                          const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                          const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         );
                       }
                       return LineTooltipItem(
                         'Ventas: ${formatRd(s.y)}',
-                        const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                        const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -869,7 +907,7 @@ class _ChartCard extends StatelessWidget {
                   LineChartBarData(
                     spots: spotsV,
                     isCurved: true,
-                    color: _kTealBright,
+                    color: Theme.of(context).colorScheme.tertiary,
                     barWidth: 5.0,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
@@ -877,8 +915,8 @@ class _ChartCard extends StatelessWidget {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          _kTealBright.withValues(alpha: 0.3),
-                          _kTealBright.withValues(alpha: 0.02),
+                          Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.3),
+                          Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.02),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -935,7 +973,7 @@ class _ChartCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (mobile)
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -949,7 +987,7 @@ class _ChartCard extends StatelessWidget {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    _LegendDot(color: _kTealBright, label: 'Ventas'),
+                    _LegendDot(color: Theme.of(context).colorScheme.tertiary, label: 'Ventas'),
                     SizedBox(width: 14),
                     _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
@@ -962,7 +1000,7 @@ class _ChartCard extends StatelessWidget {
               ],
             )
           else
-            const Row(
+            Row(
               children: [
                 Expanded(
                   child: Column(
@@ -986,7 +1024,7 @@ class _ChartCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    _LegendDot(color: _kTealBright, label: 'Ventas'),
+                    _LegendDot(color: Theme.of(context).colorScheme.tertiary, label: 'Ventas'),
                     SizedBox(width: 14),
                     _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
@@ -1017,14 +1055,33 @@ class _PrevisionPanel extends StatelessWidget {
   const _PrevisionPanel({required this.serie});
   final List<SeriePunto> serie;
 
-
   static const _meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
   static const _mesesCorto = [
-    'Ene.', 'Feb.', 'Mar.', 'Abr.', 'May.', 'Jun.',
-    'Jul.', 'Ago.', 'Sep.', 'Oct.', 'Nov.', 'Dic.',
+    'Ene.',
+    'Feb.',
+    'Mar.',
+    'Abr.',
+    'May.',
+    'Jun.',
+    'Jul.',
+    'Ago.',
+    'Sep.',
+    'Oct.',
+    'Nov.',
+    'Dic.',
   ];
 
   /// Siempre el mes calendario siguiente al actual.
@@ -1046,7 +1103,10 @@ class _PrevisionPanel extends StatelessWidget {
     final vals = serie.isEmpty
         ? [20.0, 25.0, 28.0, 32.0, 35.0]
         : List<double>.generate(5, (i) {
-            final idx = (serie.length * (i + 1) / 6).floor().clamp(0, serie.length - 1);
+            final idx = (serie.length * (i + 1) / 6).floor().clamp(
+              0,
+              serie.length - 1,
+            );
             return serie[idx].valor;
           });
     final maxV = vals.fold<double>(0, (a, b) => a > b ? a : b) + 1;
@@ -1056,7 +1116,11 @@ class _PrevisionPanel extends StatelessWidget {
       children: [
         Text(
           'Previsión para $_mesSiguiente',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: _kInk),
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: _kInk,
+          ),
         ),
         const SizedBox(height: 2),
         const Text(
@@ -1084,16 +1148,23 @@ class _PrevisionPanel extends StatelessWidget {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: i == vals.length - 1
-                                    ? _kTealBright
-                                    : const Color(0xFF94A3B8).withValues(alpha: 0.45),
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                    ? Theme.of(context).colorScheme.tertiary
+                                    : const Color(
+                                        0xFF94A3B8,
+                                      ).withValues(alpha: 0.45),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(4),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(_mesCorto, style: const TextStyle(fontSize: 9, color: _kMuted2)),
+                      Text(
+                        _mesCorto,
+                        style: const TextStyle(fontSize: 9, color: _kMuted2),
+                      ),
                     ],
                   ),
                 ),
@@ -1119,10 +1190,20 @@ class _LegendDot extends StatelessWidget {
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _kInk)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: _kInk,
+          ),
+        ),
       ],
     );
   }
@@ -1144,14 +1225,28 @@ class _MixPagoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kBorder),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Formas de pago', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: _kInk)),
-          const Text('Mes en curso', style: TextStyle(fontSize: 11, color: _kMuted2)),
+          const Text(
+            'Formas de pago',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: _kInk,
+            ),
+          ),
+          const Text(
+            'Mes en curso',
+            style: TextStyle(fontSize: 11, color: _kMuted2),
+          ),
           const SizedBox(height: 16),
           if (entries.isEmpty)
             const Text('Sin datos', style: TextStyle(color: _kMuted))
@@ -1164,10 +1259,21 @@ class _MixPagoCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(e.key, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF334155))),
+                        Text(
+                          e.key,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF334155),
+                          ),
+                        ),
                         Text(
                           '${total <= 0 ? 0 : ((e.value / total) * 100).toStringAsFixed(0)}%',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF334155),
+                          ),
                         ),
                       ],
                     ),
@@ -1175,7 +1281,9 @@ class _MixPagoCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(3),
                       child: LinearProgressIndicator(
-                        value: total <= 0 ? 0 : (e.value / total).clamp(0.0, 1.0),
+                        value: total <= 0
+                            ? 0
+                            : (e.value / total).clamp(0.0, 1.0),
                         minHeight: 6,
                         backgroundColor: _kBorder,
                         color: _kBlueBar,
@@ -1204,14 +1312,28 @@ class _TopProductosCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kBorder),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Top productos', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: _kInk)),
-          const Text('Mes en curso', style: TextStyle(fontSize: 11, color: _kMuted2)),
+          const Text(
+            'Top productos',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: _kInk,
+            ),
+          ),
+          const Text(
+            'Mes en curso',
+            style: TextStyle(fontSize: 11, color: _kMuted2),
+          ),
           const SizedBox(height: 16),
           if (items.isEmpty)
             const Text('Sin datos', style: TextStyle(color: _kMuted))
@@ -1235,7 +1357,14 @@ class _TopProductosCard extends StatelessWidget {
                         color: const Color(0xFF7DD3FC),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text('${i + 1}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Color(0xFF0369A1))),
+                      child: Text(
+                        '${i + 1}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: Color(0xFF0369A1),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -1244,13 +1373,20 @@ class _TopProductosCard extends StatelessWidget {
                         children: [
                           Text(
                             items[i].nombre,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E293B),
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             'Cantidad Vendida: ${items[i].cantidad.toStringAsFixed(0)} uds',
-                            style: const TextStyle(fontSize: 11, color: _kMuted),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: _kMuted,
+                            ),
                           ),
                         ],
                       ),
@@ -1258,8 +1394,18 @@ class _TopProductosCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(formatRd(items[i].monto), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: _kInk)),
-                        const Text('VENTAS', style: TextStyle(fontSize: 10, color: _kMuted2)),
+                        Text(
+                          formatRd(items[i].monto),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: _kInk,
+                          ),
+                        ),
+                        const Text(
+                          'VENTAS',
+                          style: TextStyle(fontSize: 10, color: _kMuted2),
+                        ),
                       ],
                     ),
                   ],
@@ -1290,20 +1436,56 @@ class _SaludCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kBorder),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Salud del negocio', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: _kInk)),
-          const Text('Periodo seleccionado', style: TextStyle(fontSize: 11, color: _kMuted2)),
+          const Text(
+            'Salud del negocio',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: _kInk,
+            ),
+          ),
+          const Text(
+            'Periodo seleccionado',
+            style: TextStyle(fontSize: 11, color: _kMuted2),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _GaugeBox(valueLabel: '${margen.toStringAsFixed(1)}%', desc: 'Margen bruto', progress: (margen / 40).clamp(0.0, 1.0), color: const Color(0xFFF59E0B))),
-              Expanded(child: _GaugeBox(valueLabel: '${crec >= 0 ? '+' : ''}${crec.toStringAsFixed(1)}%', desc: 'Crecimiento de Ventas', progress: ((crec + 20) / 40).clamp(0.0, 1.0), color: const Color(0xFF10B981))),
-              Expanded(child: _GaugeBox(valueLabel: ok ? 'Saludable' : 'Atención', desc: 'Cash Flow Index', progress: ok ? 0.85 : 0.4, color: ok ? const Color(0xFFF59E0B) : const Color(0xFFEF4444))),
+              Expanded(
+                child: _GaugeBox(
+                  valueLabel: '${margen.toStringAsFixed(1)}%',
+                  desc: 'Margen bruto',
+                  progress: (margen / 40).clamp(0.0, 1.0),
+                  color: const Color(0xFFF59E0B),
+                ),
+              ),
+              Expanded(
+                child: _GaugeBox(
+                  valueLabel:
+                      '${crec >= 0 ? '+' : ''}${crec.toStringAsFixed(1)}%',
+                  desc: 'Crecimiento de Ventas',
+                  progress: ((crec + 20) / 40).clamp(0.0, 1.0),
+                  color: const Color(0xFF10B981),
+                ),
+              ),
+              Expanded(
+                child: _GaugeBox(
+                  valueLabel: ok ? 'Saludable' : 'Atención',
+                  desc: 'Cash Flow Index',
+                  progress: ok ? 0.85 : 0.4,
+                  color: ok ? const Color(0xFFF59E0B) : const Color(0xFFEF4444),
+                ),
+              ),
             ],
           ),
         ],
@@ -1313,7 +1495,12 @@ class _SaludCard extends StatelessWidget {
 }
 
 class _GaugeBox extends StatelessWidget {
-  const _GaugeBox({required this.valueLabel, required this.desc, required this.progress, required this.color});
+  const _GaugeBox({
+    required this.valueLabel,
+    required this.desc,
+    required this.progress,
+    required this.color,
+  });
   final String valueLabel;
   final String desc;
   final double progress;
@@ -1331,8 +1518,20 @@ class _GaugeBox extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(valueLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: _kInk), textAlign: TextAlign.center),
-        Text(desc, style: const TextStyle(fontSize: 10, color: _kMuted), textAlign: TextAlign.center),
+        Text(
+          valueLabel,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: _kInk,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          desc,
+          style: const TextStyle(fontSize: 10, color: _kMuted),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
@@ -1356,7 +1555,13 @@ class _ArcGaugePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 9
       ..strokeCap = StrokeCap.round;
-    canvas.drawArc(Rect.fromCircle(center: c, radius: r), start, sweep, false, bg);
+    canvas.drawArc(
+      Rect.fromCircle(center: c, radius: r),
+      start,
+      sweep,
+      false,
+      bg,
+    );
 
     final fg = Paint()
       ..color = color

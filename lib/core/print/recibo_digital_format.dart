@@ -49,7 +49,9 @@ String generarReciboDigital({
   buffer.writeln('----------------------------------');
 
   if (venta.montoDescuento > 0.009) {
-    buffer.writeln('Descuento: -RD\$ ${venta.montoDescuento.toStringAsFixed(2)}');
+    buffer.writeln(
+      'Descuento: -RD\$ ${venta.montoDescuento.toStringAsFixed(2)}',
+    );
   }
   if (venta.itbis > 0.009) {
     buffer.writeln('ITBIS: RD\$ ${venta.itbis.toStringAsFixed(2)}');

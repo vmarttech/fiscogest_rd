@@ -325,7 +325,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
         _AccionChip(
           icon: Icons.print_outlined,
           label: 'Imprimir',
-          color: const Color(0xFF0F766E),
+          color: Theme.of(context).colorScheme.primary,
           onTap: () => _imprimir(context, ref),
         ),
         _AccionChip(
@@ -600,7 +600,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                 fontSize: total ? 20 : 14,
                 fontWeight: FontWeight.w900,
                 color: total
-                    ? const Color(0xFF0F766E)
+                    ? Theme.of(context).colorScheme.primary
                     : const Color(0xFF0F172A),
               ),
             ),
@@ -613,10 +613,10 @@ class MostrarDetalleVenta extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F766E).withValues(alpha: 0.07),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFF0F766E).withValues(alpha: 0.22),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.22),
         ),
       ),
       child: Column(
@@ -658,7 +658,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: 'Volver al historial',
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back_rounded,
                           color: Color(0xFF0F172A),
                         ),
@@ -697,10 +697,10 @@ class MostrarDetalleVenta extends ConsumerWidget {
                               const SizedBox(height: 6),
                               Text(
                                 'NCF: $ncf',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF0F766E),
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -716,7 +716,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: 'Volver',
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: Icon(Icons.arrow_back_rounded),
                         onPressed: () {
                           if (context.canPop()) {
                             context.pop();
@@ -749,10 +749,10 @@ class MostrarDetalleVenta extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       'NCF: $ncf',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F766E),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
@@ -823,7 +823,7 @@ class FilaDetalle extends StatelessWidget {
             valor,
             style: AppTypography.bodyMedium.copyWith(
               fontWeight: esResaltado ? FontWeight.bold : FontWeight.normal,
-              color: esResaltado ? AppColors.primary : null,
+              color: esResaltado ? Theme.of(context).colorScheme.primary : null,
               fontSize: esResaltado ? 16 : null,
             ),
           ),

@@ -10,8 +10,7 @@ class NegocioRemote {
 
   final http.Client _http;
 
-  Uri get _uri =>
-      Uri.parse('${SupabaseConfig.url}/rest/v1/negocios');
+  Uri get _uri => Uri.parse('${SupabaseConfig.url}/rest/v1/negocios');
 
   Map<String, String> get _headers => {
         'apikey': SupabaseConfig.anonKey,
@@ -44,9 +43,7 @@ class NegocioRemote {
       body: jsonEncode(body),
     );
     if (res.statusCode >= 300) {
-      throw Exception(
-        'NegocioRemote.crear: ${res.statusCode} ${res.body}',
-      );
+      throw Exception('NegocioRemote.crear: ${res.statusCode} ${res.body}');
     }
     final decoded = jsonDecode(res.body);
     if (decoded is! List || decoded.isEmpty) {
@@ -70,17 +67,20 @@ class NegocioRemote {
     if (!SupabaseConfig.isConfigured) return null;
     final u = username.trim();
     if (u.isEmpty) return null;
-    final uri = Uri.parse(
-      '${SupabaseConfig.url}/rest/v1/usuarios',
-    ).replace(queryParameters: {
+    final uri = Uri.parse('${SupabaseConfig.url}/rest/v1/usuarios').replace(
+      queryParameters: {
       'username': 'eq.$u',
       'select': 'negocio_id,username,activo',
       'limit': '1',
-    });
-    final res = await _http.get(uri, headers: {
+      },
+    );
+    final res = await _http.get(
+      uri,
+      headers: {
       'apikey': SupabaseConfig.anonKey,
       'Authorization': 'Bearer ${SupabaseConfig.anonKey}',
-    });
+      },
+    );
     if (res.statusCode >= 300) {
       debugPrint('NegocioRemote.negocioIdDeUsername: ${res.statusCode}');
       return null;

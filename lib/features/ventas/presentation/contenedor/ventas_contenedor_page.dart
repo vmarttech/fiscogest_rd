@@ -102,7 +102,7 @@ class _VentasContenedorPageState extends ConsumerState<VentasContenedorPage> {
             center: const Alignment(-0.6, -0.85),
             radius: 1.15,
             colors: [
-              AppColors.primary.withValues(alpha: 0.07),
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.07),
               AppColors.background,
             ],
           ),

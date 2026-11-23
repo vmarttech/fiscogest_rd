@@ -11,8 +11,7 @@ class SupabaseSession {
     required String token,
     required int expiresIn,
   }) async {
-    final exp =
-        DateTime.now().millisecondsSinceEpoch ~/ 1000 + expiresIn - 60;
+    final exp = DateTime.now().millisecondsSinceEpoch ~/ 1000 + expiresIn - 60;
     await _secure.write(key: _kToken, value: token);
     await _secure.write(key: _kExp, value: '$exp');
   }

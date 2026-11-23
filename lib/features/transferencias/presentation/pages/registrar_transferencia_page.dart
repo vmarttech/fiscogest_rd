@@ -39,7 +39,6 @@ class _RegistrarTransferenciaPageState
   static const _border = Color(0xFFD1D5DB);
   static const _textDark = Color(0xFF1F2937);
   static const _textMuted = Color(0xFF4B5563);
-  static const _accent = Color(0xFF00BDCC);
   static const _header = Color(0xFF009AA6);
   static const _sidebar = Color(0xFF0E1E38);
   static const _danger = Color(0xFFDC2626);
@@ -120,8 +119,7 @@ class _RegistrarTransferenciaPageState
           : Icon(prefix, size: 18, color: _header),
       filled: true,
       fillColor: const Color(0xFFFAFBFC),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: _border, width: 1.5),
@@ -132,14 +130,13 @@ class _RegistrarTransferenciaPageState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: focus ?? _accent, width: 2),
+        borderSide: BorderSide(color: focus ?? Theme.of(context).colorScheme.primary, width: 2),
       ),
     );
   }
 
   Future<void> _procesar() async {
-    final creada =
-        await ref.read(transferenciaFormProvider.notifier).enviar();
+    final creada = await ref.read(transferenciaFormProvider.notifier).enviar();
     if (creada != null && mounted) {
       _cantCtrl.clear();
       _notaCtrl.clear();
@@ -192,11 +189,14 @@ class _RegistrarTransferenciaPageState
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _accent.withValues(alpha: 0.15),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.swap_horiz_rounded,
-                      color: _header, size: 22),
+                  child: const Icon(
+                    Icons.swap_horiz_rounded,
+                    color: _header,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -213,12 +213,18 @@ class _RegistrarTransferenciaPageState
               ],
             ),
             const SizedBox(height: 16),
-            _detailRow('Producto',
-                '${t.productoCodigo ?? ''} ${t.productoNombre ?? '#${t.productoId}'}'),
             _detailRow(
-                'Origen', t.origenNombre ?? 'Almacén ${t.almacenOrigenId}'),
+              'Producto',
+              '${t.productoCodigo ?? ''} ${t.productoNombre ?? '#${t.productoId}'}',
+            ),
             _detailRow(
-                'Destino', t.destinoNombre ?? 'Almacén ${t.almacenDestinoId}'),
+              'Origen',
+              t.origenNombre ?? 'Almacén ${t.almacenOrigenId}',
+            ),
+            _detailRow(
+              'Destino',
+              t.destinoNombre ?? 'Almacén ${t.almacenDestinoId}',
+            ),
             _detailRow('Cantidad', t.cantidad.toStringAsFixed(2)),
             _detailRow('Fecha', fmt.format(t.fecha)),
             if ((t.nota ?? '').isNotEmpty) _detailRow('Nota', t.nota!),
@@ -229,7 +235,7 @@ class _RegistrarTransferenciaPageState
                 onPressed: () => Navigator.pop(ctx),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: _header,
-                  side: const BorderSide(color: _accent, width: 1.5),
+                  side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -307,7 +313,8 @@ class _RegistrarTransferenciaPageState
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(almacenesHabilitadosProvider)) {
-      final plan = ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
+      final plan =
+          ref.watch(licenciaActualProvider).valueOrNull?.plan ?? 'gratis';
       return PlanRequeridoAlmacenes(
         titulo: 'Transferencias',
         planActual: plan,
@@ -396,7 +403,11 @@ class _RegistrarTransferenciaPageState
                             child: Column(
                               children: [
                                 _resumenCard(
-                                    stats, historial, fmt, compact: false),
+                                  stats,
+                                  historial,
+                                  fmt,
+                                  compact: false,
+                                ),
                                 const SizedBox(height: 16),
                                 _historialPanel(historial, fmt),
                               ],
@@ -421,7 +432,7 @@ class _RegistrarTransferenciaPageState
   }) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 20),
-      decoration: _cardDec(accentBorder: _accent.withValues(alpha: 0.35)),
+      decoration: _cardDec(accentBorder: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -431,7 +442,7 @@ class _RegistrarTransferenciaPageState
                 width: 4,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: _accent,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -455,11 +466,14 @@ class _RegistrarTransferenciaPageState
               gradient: LinearGradient(
                 colors: [
                   _header.withValues(alpha: 0.08),
-                  _accent.withValues(alpha: 0.06),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _accent.withValues(alpha: 0.35), width: 1.5),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
+                width: 1.5,
+              ),
             ),
             child: Row(
               children: [
@@ -467,17 +481,20 @@ class _RegistrarTransferenciaPageState
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _accent,
+                    color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: _accent.withValues(alpha: 0.4),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                         blurRadius: 8,
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.arrow_forward_rounded,
-                      size: 18, color: Colors.white),
+                  child: const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
                 ),
                 Expanded(child: _flowNode('Destino', Icons.inbox_rounded)),
               ],
@@ -585,16 +602,14 @@ class _RegistrarTransferenciaPageState
 
           // Stock badges vivos + táctiles
           stockOrigen.when(
-            loading: () => const LinearProgressIndicator(
-              color: _accent,
-              minHeight: 3,
-            ),
+            loading: () =>
+                LinearProgressIndicator(color: Theme.of(context).colorScheme.primary, minHeight: 3),
             error: (_, __) => const SizedBox.shrink(),
             data: (s) {
               // Sin producto u origen: no mostrar falso 'crítico'
               final formNow = ref.read(transferenciaFormProvider);
-              final sinContexto = formNow.productoId == null ||
-                  formNow.almacenOrigen == null;
+              final sinContexto =
+                  formNow.productoId == null || formNow.almacenOrigen == null;
               if (sinContexto) {
                 return Row(
                   children: [
@@ -674,8 +689,9 @@ class _RegistrarTransferenciaPageState
                                   ? 'No podrá transferir hasta reponer stock'
                                   : 'Stock suficiente para transferir',
                             ),
-                            backgroundColor:
-                                critico ? _danger : const Color(0xFF059669),
+                            backgroundColor: critico
+                                ? _danger
+                                : const Color(0xFF059669),
                           ),
                         );
                       },
@@ -689,8 +705,7 @@ class _RegistrarTransferenciaPageState
 
           TextField(
             controller: _cantCtrl,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: _bold.copyWith(fontSize: 14),
             decoration: _fieldDec(hint: 'Cantidad', prefix: Icons.numbers),
             onChanged: (v) =>
@@ -701,8 +716,10 @@ class _RegistrarTransferenciaPageState
           TextField(
             controller: _notaCtrl,
             style: _bold.copyWith(fontSize: 14),
-            decoration:
-                _fieldDec(hint: 'Nota (opcional)', prefix: Icons.notes_rounded),
+            decoration: _fieldDec(
+              hint: 'Nota (opcional)',
+              prefix: Icons.notes_rounded,
+            ),
             onChanged: (v) =>
                 ref.read(transferenciaFormProvider.notifier).asignarNota(v),
           ),
@@ -734,19 +751,17 @@ class _RegistrarTransferenciaPageState
             child: FilledButton(
               onPressed: form.esValido && !form.enviando ? _procesar : null,
               style: FilledButton.styleFrom(
-                backgroundColor: _accent,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: _accent.withValues(alpha: 0.4),
+                disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                 elevation: 2,
-                shadowColor: _accent.withValues(alpha: 0.45),
+                shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: Text(
-                form.enviando
-                    ? 'PROCESANDO…'
-                    : 'PROCESAR TRANSFERENCIA',
+                form.enviando ? 'PROCESANDO…' : 'PROCESAR TRANSFERENCIA',
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 15,
@@ -925,10 +940,7 @@ class _RegistrarTransferenciaPageState
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            _ok.withValues(alpha: 0.04),
-          ],
+          colors: [Colors.white, _ok.withValues(alpha: 0.04)],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _border, width: 1.5),
@@ -952,10 +964,7 @@ class _RegistrarTransferenciaPageState
                 width: 64,
                 height: 64,
                 child: CustomPaint(
-                  painter: _PiePainter(
-                    healthy: pH,
-                    low: pL,
-                  ),
+                  painter: _PiePainter(healthy: pH, low: pL),
                   child: Center(
                     child: Text(
                       '${stats.total}',
@@ -972,11 +981,7 @@ class _RegistrarTransferenciaPageState
               Expanded(
                 child: Column(
                   children: [
-                    _legendTap(
-                      _ok,
-                      'Healthy',
-                      stats.healthy,
-                      () {
+                    _legendTap(_ok, 'Healthy', stats.healthy, () {
                         FiscoGestNotifications.show(
                           SnackBar(
                             content: Text(
@@ -984,28 +989,16 @@ class _RegistrarTransferenciaPageState
                             ),
                           ),
                         );
-                      },
-                    ),
-                    _legendTap(
-                      _warn,
-                      'Low',
-                      stats.low,
-                      () {
+                    }),
+                    _legendTap(_warn, 'Low', stats.low, () {
                         FiscoGestNotifications.show(
                           SnackBar(
-                            content: Text(
-                              '${stats.low} producto(s) bajo mínimo',
-                            ),
+                          content: Text('${stats.low} producto(s) bajo mínimo'),
                             backgroundColor: _warn,
                           ),
                         );
-                      },
-                    ),
-                    _legendTap(
-                      _danger,
-                      'Critical',
-                      stats.critical,
-                      () {
+                    }),
+                    _legendTap(_danger, 'Critical', stats.critical, () {
                         FiscoGestNotifications.show(
                           SnackBar(
                             content: Text(
@@ -1014,8 +1007,7 @@ class _RegistrarTransferenciaPageState
                             backgroundColor: _danger,
                           ),
                         );
-                      },
-                    ),
+                    }),
                   ],
                 ),
               ),
@@ -1065,14 +1057,12 @@ class _RegistrarTransferenciaPageState
     );
   }
 
-  Widget _ultimosMovimientosCard(
-    AsyncValue<List<Transferencia>> historial,
-  ) {
+  Widget _ultimosMovimientosCard(AsyncValue<List<Transferencia>> historial) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.white, _accent.withValues(alpha: 0.04)],
+          colors: [Colors.white, Theme.of(context).colorScheme.primary.withValues(alpha: 0.04)],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _border, width: 1.5),
@@ -1090,10 +1080,8 @@ class _RegistrarTransferenciaPageState
           ),
           const SizedBox(height: 10),
           historial.when(
-            loading: () => const LinearProgressIndicator(
-              color: _accent,
-              minHeight: 3,
-            ),
+            loading: () =>
+                LinearProgressIndicator(color: Theme.of(context).colorScheme.primary, minHeight: 3),
             error: (_, __) => const Text(
               'Sin datos',
               style: TextStyle(fontWeight: FontWeight.w800),
@@ -1156,8 +1144,11 @@ class _RegistrarTransferenciaPageState
                                   color: _ok,
                                 ),
                               ),
-                              const Icon(Icons.chevron_right,
-                                  size: 16, color: Color(0xFF94A3B8)),
+                              const Icon(
+                                Icons.chevron_right,
+                                size: 16,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ],
                           ),
                         ),
@@ -1229,9 +1220,9 @@ class _RegistrarTransferenciaPageState
           ),
           const SizedBox(height: 12),
           historial.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator(color: _accent)),
+            loading: () => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
             ),
             error: (e, _) => Text(
               'Error: $e',
@@ -1244,29 +1235,33 @@ class _RegistrarTransferenciaPageState
               var list = rows;
               if (_filtroEstado != null) {
                 list = rows
-                    .where((t) =>
-                        t.estado.toLowerCase().contains(_filtroEstado!))
+                    .where(
+                      (t) => t.estado.toLowerCase().contains(_filtroEstado!),
+                    )
                     .toList();
                 // "completa" / "registrada" ≈ completa
                 if (_filtroEstado == 'completa') {
-                  list = rows
-                      .where((t) {
+                  list = rows.where((t) {
                         final e = t.estado.toLowerCase();
                         return e.contains('completa') ||
                             e.contains('registrad') ||
                             e == 'ok';
-                      })
-                      .toList();
+                  }).toList();
                 }
               }
               if (list.isEmpty) {
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 36, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 36,
+                    horizontal: 12,
+                  ),
                   child: Column(
                     children: [
-                      Icon(Icons.local_shipping_outlined,
-                          size: 48, color: Colors.grey.shade300),
+                      Icon(
+                        Icons.local_shipping_outlined,
+                        size: 48,
+                        color: Colors.grey.shade300,
+                      ),
                       const SizedBox(height: 12),
                       const Text(
                         'Aún no hay transferencias registradas',
@@ -1312,11 +1307,14 @@ class _RegistrarTransferenciaPageState
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: _accent.withValues(alpha: 0.12),
+                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.swap_horiz,
-                                    size: 18, color: _header),
+                                child: const Icon(
+                                  Icons.swap_horiz,
+                                  size: 18,
+                                  color: _header,
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -1371,7 +1369,9 @@ class _RegistrarTransferenciaPageState
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => setState(() { _filtroEstado = key; }),
+        onTap: () => setState(() {
+          _filtroEstado = key;
+        }),
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),

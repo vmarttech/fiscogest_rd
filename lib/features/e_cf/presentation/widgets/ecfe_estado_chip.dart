@@ -9,7 +9,7 @@ class EcfeEstadoChip extends ConsumerWidget {
   const EcfeEstadoChip({super.key, required this.ventaId});
   final int ventaId;
 
-  Color _color(EstadoEcfInterno e) {
+  Color _color(EstadoEcfInterno e, BuildContext context) {
     if (e.esTerminalExito) return AppColors.success;
     if (e == EstadoEcfInterno.rechazado ||
         e == EstadoEcfInterno.errorTecnico ||
@@ -19,7 +19,7 @@ class EcfeEstadoChip extends ConsumerWidget {
     if (e == EstadoEcfInterno.enviado || e == EstadoEcfInterno.enProceso) {
       return const Color(0xFFE65100);
     }
-    return AppColors.primary;
+    return Theme.of(context).colorScheme.primary;
   }
 
   @override
@@ -30,7 +30,7 @@ class EcfeEstadoChip extends ConsumerWidget {
       error: (_, __) => const SizedBox.shrink(),
       data: (doc) {
         if (doc == null) return const SizedBox.shrink();
-        final c = _color(doc.estado);
+        final c = _color(doc.estado, context);
         return ActionChip(
           avatar: Icon(Icons.qr_code_2, size: 18, color: c),
           label: Text(

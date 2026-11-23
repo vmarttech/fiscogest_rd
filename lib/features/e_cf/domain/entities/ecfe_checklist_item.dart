@@ -14,10 +14,7 @@ class EcfeChecklistItem {
   final DateTime? doneAt;
   final String categoria;
 
-  EcfeChecklistItem copyWith({
-    bool? done,
-    DateTime? doneAt,
-  }) {
+  EcfeChecklistItem copyWith({bool? done, DateTime? doneAt}) {
     return EcfeChecklistItem(
       id: id,
       label: label,
@@ -40,9 +37,7 @@ class EcfeChecklistItem {
       id: '${m['id']}',
       label: '${m['label'] ?? ''}',
       done: m['done'] == true,
-      doneAt: m['doneAt'] != null
-          ? DateTime.tryParse('${m['doneAt']}')
-          : null,
+      doneAt: m['doneAt'] != null ? DateTime.tryParse('${m['doneAt']}') : null,
       categoria: '${m['categoria'] ?? 'general'}',
     );
   }

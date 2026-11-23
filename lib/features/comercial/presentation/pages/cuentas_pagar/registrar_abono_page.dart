@@ -141,11 +141,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.check_circle,
-                        size: 48,
-                        color: Colors.green,
-                      ),
+                      Icon(Icons.check_circle, size: 48, color: Colors.green),
                       const SizedBox(height: 16),
                       const Text(
                         'Esta cuenta ya está pagada.',
@@ -153,7 +149,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                       ),
                       const SizedBox(height: 24),
                       TextButton.icon(
-                        icon: const Icon(Icons.arrow_back),
+                        icon: Icon(Icons.arrow_back),
                         label: const Text('Volver'),
                         onPressed: () => context.pop(),
                       ),
@@ -171,7 +167,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Card(
-                      color: AppColors.primary.withValues(alpha: 0.06),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.06),
                       child: Padding(
                         padding: AppSpacing.allM,
                         child: Column(
@@ -189,7 +187,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                             Text(
                               formatRd(saldoPendiente),
                               style: AppTypography.h4Bold.copyWith(
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ],
@@ -213,7 +211,10 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                             const Duration(days: 365),
                           ),
                         );
-                        if (picked != null) setState(() { _fecha = picked; });
+                        if (picked != null)
+                          setState(() {
+                            _fecha = picked;
+                          });
                       },
                     ),
                     const SizedBox(height: 16),
@@ -263,8 +264,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                           child: Text('Tarjeta'),
                         ),
                       ],
-                      onChanged: (String? v) =>
-                          setState(() { _formaPago = v ?? 'efectivo'; }),
+                      onChanged: (String? v) => setState(() {
+                        _formaPago = v ?? 'efectivo';
+                      }),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -291,7 +293,9 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                         ElevatedButton(
                           onPressed: _cargando ? null : _guardar,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                               vertical: 14,

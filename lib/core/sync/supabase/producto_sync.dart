@@ -24,7 +24,8 @@ class ProductoSync {
     }
 
     final payload = rows
-        .map((p) => <String, dynamic>{
+        .map(
+          (p) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': p.id,
               'codigo': p.codigo,
@@ -34,7 +35,8 @@ class ProductoSync {
               'stock': p.stock ?? 0,
               'activo': (p.activo) == 1,
               'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
+          },
+        )
         .toList();
 
     await SupabaseRestClient().upsert(

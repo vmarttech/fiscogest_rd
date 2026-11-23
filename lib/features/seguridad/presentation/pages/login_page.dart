@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/sync/supabase/roles_acceso_sync.dart';
 import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
 import 'package:fiscogest_rd/core/auth/login_prefs.dart';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
 import 'package:fiscogest_rd/core/auth/biometric_auth.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -76,7 +77,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-
   Widget _pieLegal(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
@@ -98,7 +98,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  
   /// Dueño plataforma: licencia vitalicia local + aviso de pedidos pendientes en nube.
   Future<void> _postLoginPlataforma(AppDatabase db, String username) async {
     if (esDuenoPlataforma(username)) {
@@ -148,7 +147,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-
   /// Nube en segundo plano: nunca retrasa la entrada a la caja.
   Future<void> _nubeTrasEntrar(
     AppDatabase db, {
@@ -164,8 +162,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       debugPrint('Login: hayRed=false → igual se intenta EmitirToken');
     }
     try {
-      await EmitirToken.trasLogin(username: username, password: password)
-          .timeout(const Duration(seconds: 15));
+      await EmitirToken.trasLogin(
+        username: username,
+        password: password,
+      ).timeout(const Duration(seconds: 15));
     } catch (e, st) {
       debugPrint('Login: EmitirToken (nube) falló, app sigue offline: $e');
       debugPrint('$st');
@@ -242,7 +242,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 );
               }
             } else {
-              debugPrint('Login: nube no devolvió negocio_id (credenciales o sin fila)');
+              debugPrint(
+                'Login: nube no devolvió negocio_id (credenciales o sin fila)',
+              );
             }
           } catch (e, st) {
             debugPrint('Login: recuperar nube: $e');
@@ -300,7 +302,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
           if (ok) {
             await LoginPrefs.enableBiometric(username: user, password: pass);
-            if (mounted) setState(() { _bioEnabled = true; });
+            if (mounted)
+              setState(() {
+                _bioEnabled = true;
+              });
           }
         }
       } else if (await LoginPrefs.isBiometricEnabled()) {
@@ -317,21 +322,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         }
       }
       await RolesAccesoSync.pullYCachear();
-      ref.read(sesionProvider.notifier).state = UsuarioSesion(
+      final sesionActiva = UsuarioSesion(
         id: res.usuarioId,
         username: res.username,
         nombre: res.nombre,
         rol: res.rol,
         requiereSetupInicial: res.requiereSetupInicial,
       );
+      await SesionPersistente.guardar(sesionActiva);
+      ref.read(sesionProvider.notifier).state = sesionActiva;
       if (!mounted) return;
-      unawaited(_nubeTrasEntrar(
-        db,
-        username: user,
-        password: pass,
-        requiereSetup: res.requiereSetupInicial,
-        usernameSesion: res.username,
-      ));
+      unawaited(
+        _nubeTrasEntrar(
+          db,
+          username: user,
+          password: pass,
+          requiereSetup: res.requiereSetupInicial,
+          usernameSesion: res.username,
+        ),
+      );
       if (!mounted) return;
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
@@ -345,7 +354,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
         } else {
           UpdateChecker.promptsEnabled = true;
-      context.go(sesion?.rutaInicio ?? '/');
+          context.go(sesion?.rutaInicio ?? '/');
         }
       }
     } catch (e) {
@@ -353,7 +362,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _error = 'Error: $e';
       });
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -391,21 +403,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _userCtrl.text = cred.user;
       await LoginPrefs.setRememberMe(true, cred.user);
       await RolesAccesoSync.pullYCachear();
-      ref.read(sesionProvider.notifier).state = UsuarioSesion(
+      final sesionActiva = UsuarioSesion(
         id: res.usuarioId,
         username: res.username,
         nombre: res.nombre,
         rol: res.rol,
         requiereSetupInicial: res.requiereSetupInicial,
       );
+      await SesionPersistente.guardar(sesionActiva);
+      ref.read(sesionProvider.notifier).state = sesionActiva;
       if (!mounted) return;
-      unawaited(_nubeTrasEntrar(
-        db,
-        username: cred.user,
-        password: cred.pass,
-        requiereSetup: res.requiereSetupInicial,
-        usernameSesion: res.username,
-      ));
+      unawaited(
+        _nubeTrasEntrar(
+          db,
+          username: cred.user,
+          password: cred.pass,
+          requiereSetup: res.requiereSetupInicial,
+          usernameSesion: res.username,
+        ),
+      );
       if (!mounted) return;
       if (res.requiereSetupInicial) {
         context.go('/setup-cuenta');
@@ -419,7 +435,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
         } else {
           UpdateChecker.promptsEnabled = true;
-      context.go(sesion?.rutaInicio ?? '/');
+          context.go(sesion?.rutaInicio ?? '/');
         }
       }
     } catch (e) {
@@ -427,7 +443,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _error = 'Error: $e';
       });
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -502,7 +521,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'FiscoGest',
+                          'VendiFlux',
                           textAlign: TextAlign.center,
                           style: AppTypography.h3.copyWith(
                             fontWeight: FontWeight.w800,
@@ -512,7 +531,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Tu negocio, en orden',
+                          'Gestiona. Vende. Crece.',
                           textAlign: TextAlign.center,
                           style: AppTypography.bodySmall.copyWith(
                             color: const Color(
@@ -545,8 +564,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           suffixIcon: _ocultar
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          onSuffixTap: () =>
-                              setState(() { _ocultar = !_ocultar; }),
+                          onSuffixTap: () => setState(() {
+                            _ocultar = !_ocultar;
+                          }),
                           obscureText: _ocultar,
                         ),
                         const SizedBox(height: 8),
@@ -561,16 +581,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 onChanged: _cargando
                                     ? null
                                     : (v) => setState(
-                                          () => _rememberMe = v ?? false,
-                                        ),
+                                        () => _rememberMe = v ?? false,
+                                      ),
                                 controlAffinity:
                                     ListTileControlAffinity.leading,
                                 activeColor: const Color(0xFF2DD4BF),
                                 title: Text(
                                   'Recordar usuario',
                                   style: TextStyle(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.85),
+                                    color: Colors.white.withValues(alpha: 0.85),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -579,13 +598,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             if (_bioEnabled && _bioAvailable)
                               IconButton(
                                 tooltip: 'Entrar con huella / PIN',
-                                onPressed:
-                                    _cargando ? null : _entrarConBiometria,
+                                onPressed: _cargando
+                                    ? null
+                                    : _entrarConBiometria,
                                 icon: Icon(
                                   Icons.fingerprint,
                                   size: 28,
-                                  color: const Color(0xFF5EEAD4)
-                                      .withValues(alpha: _cargando ? 0.4 : 1),
+                                  color: const Color(
+                                    0xFF5EEAD4,
+                                  ).withValues(alpha: _cargando ? 0.4 : 1),
                                 ),
                               ),
                           ],

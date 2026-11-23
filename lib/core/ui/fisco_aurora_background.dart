@@ -2,11 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class FiscoAuroraBackground extends StatefulWidget {
-  const FiscoAuroraBackground({
-    super.key,
-    this.child,
-    this.intensity = 1.0,
-  });
+  const FiscoAuroraBackground({super.key, this.child, this.intensity = 1.0});
 
   final Widget? child;
   final double intensity;
@@ -22,10 +18,8 @@ class _FiscoAuroraBackgroundState extends State<FiscoAuroraBackground>
   @override
   void initState() {
     super.initState();
-    _c = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 18),
-    )..repeat();
+    _c = AnimationController(vsync: this, duration: const Duration(seconds: 18))
+      ..repeat();
   }
 
   @override
@@ -103,17 +97,26 @@ class _AuroraPainter extends CustomPainter {
     }
 
     blob(
-      Offset(w * (0.22 + 0.08 * math.sin(t)), h * (0.28 + 0.06 * math.cos(t * 0.9))),
+      Offset(
+        w * (0.22 + 0.08 * math.sin(t)),
+        h * (0.28 + 0.06 * math.cos(t * 0.9)),
+      ),
       w * 0.42 * i,
       [const Color(0x6622D3C5), const Color(0x221A9E8F), Colors.transparent],
     );
     blob(
-      Offset(w * (0.78 + 0.06 * math.cos(t * 1.1)), h * (0.35 + 0.08 * math.sin(t * 0.8))),
+      Offset(
+        w * (0.78 + 0.06 * math.cos(t * 1.1)),
+        h * (0.35 + 0.08 * math.sin(t * 0.8)),
+      ),
       w * 0.38 * i,
       [const Color(0x553B6CFF), const Color(0x221A2A6C), Colors.transparent],
     );
     blob(
-      Offset(w * (0.50 + 0.10 * math.sin(t * 0.7)), h * (0.78 + 0.05 * math.cos(t * 1.2))),
+      Offset(
+        w * (0.50 + 0.10 * math.sin(t * 0.7)),
+        h * (0.78 + 0.05 * math.cos(t * 1.2)),
+      ),
       w * 0.48 * i,
       [const Color(0x4400C48A), const Color(0x1800A070), Colors.transparent],
     );

@@ -157,9 +157,9 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
         title: const Text('Pagar con PayPal'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(
-            const PaypalCheckoutResult(success: false, cancelled: true),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop(const PaypalCheckoutResult(success: false, cancelled: true)),
         ),
       ),
       body: Stack(

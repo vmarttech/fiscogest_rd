@@ -22,12 +22,12 @@ class ReportsPage extends StatelessWidget {
     final mobile = AppBreakpoints.isMobile(context);
 
     final operativos = <_ItemReporte>[
-      const _ItemReporte(
+      _ItemReporte(
         codigo: 'VEN',
         titulo: 'Ventas',
         subtitulo: 'Facturas y cobros del período',
         icon: Icons.point_of_sale_outlined,
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         tipo: 'ventas',
       ),
       const _ItemReporte(
@@ -54,12 +54,12 @@ class ReportsPage extends StatelessWidget {
         color: AppColors.warning,
         tipo: 'productos',
       ),
-      const _ItemReporte(
+      _ItemReporte(
         codigo: 'CLI',
         titulo: 'Clientes',
         subtitulo: 'Ventas agrupadas por cliente',
         icon: Icons.people_outline,
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         tipo: 'clientes',
       ),
       const _ItemReporte(
@@ -98,7 +98,7 @@ class ReportsPage extends StatelessWidget {
                           tooltip: 'Atrás',
                           onPressed: () =>
                               safeBack(context, fallback: '/reports'),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.arrow_back,
                             color: Color(0xFF0F172A),
                           ),

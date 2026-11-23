@@ -36,7 +36,9 @@ class AppCard extends StatelessWidget {
           color:
               borderColor ??
               (accent
-                  ? AppColors.primary.withValues(alpha: 0.35)
+                  ? Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.35)
                   : AppColors.border),
           width: accent ? 1.2 : 1,
         ),
@@ -48,7 +50,7 @@ class AppCard extends StatelessWidget {
           ),
           if (accent)
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: AppColors.grey900.withValues(alpha: 0.10),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),

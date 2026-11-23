@@ -31,7 +31,6 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
   final String plantillaSolicitudExtra;
   final String plantillaContratoExtra;
 
-
   String get _nombreEmpresa {
     final e = empresa;
     if (e == null) return 'Establecimiento';
@@ -67,8 +66,10 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
         ),
       if (tel.isNotEmpty || mail.isNotEmpty)
         pw.Text(
-          [if (tel.isNotEmpty) 'Tel: $tel', if (mail.isNotEmpty) mail]
-              .join(' · '),
+          [
+            if (tel.isNotEmpty) 'Tel: $tel',
+            if (mail.isNotEmpty) mail,
+          ].join(' · '),
           style: const pw.TextStyle(fontSize: 8),
           textAlign: pw.TextAlign.center,
         ),
@@ -104,7 +105,6 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
       ],
     );
   }
-
 
   Map<String, String> _vars({
     required Venta venta,
@@ -269,10 +269,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           width: 140,
           child: pw.Text(
             k,
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 10,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
           ),
         ),
         pw.Expanded(child: pw.Text(v, style: const pw.TextStyle(fontSize: 10))),
@@ -371,10 +368,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
               _m(d.subtotalLinea ?? d.subtotal),
             ],
         ],
-        headerStyle: pw.TextStyle(
-          fontWeight: pw.FontWeight.bold,
-          fontSize: 9,
-        ),
+        headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
         cellStyle: const pw.TextStyle(fontSize: 8),
         headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
       ),
@@ -425,8 +419,9 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
       ),
       pw.SizedBox(height: 6),
     ];
-    final refs =
-        e.referencias.where((r) => r.nombre.trim().isNotEmpty).toList();
+    final refs = e.referencias
+        .where((r) => r.nombre.trim().isNotEmpty)
+        .toList();
     if (refs.isEmpty) {
       out.add(_fila('Referencias', 'Sin datos'));
     } else {
@@ -453,40 +448,28 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           ..._encabezadoEmpresaA4(tituloDoc: 'SOLICITUD DE CRÉDITO'),
           pw.Text(
             'Datos del solicitante / operación',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 6),
           ..._bloqueCliente(venta),
           pw.SizedBox(height: 12),
           pw.Text(
             'Condiciones propuestas',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 6),
           ..._bloqueCondiciones(condiciones, venta),
           pw.SizedBox(height: 12),
           pw.Text(
             'Detalle de la cotización',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 6),
           ..._detalleProductos(venta),
           pw.SizedBox(height: 16),
           pw.Text(
             'Declaración del solicitante',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 6),
           ..._cuerpoSolicitud(venta: venta, condiciones: condiciones),
@@ -542,10 +525,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 12),
           pw.Text(
             '1. Identificación de las partes',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 4),
           _bloqueAcreedor(),
@@ -561,10 +541,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '2. Objeto y monto',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
@@ -579,10 +556,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '3. Condiciones de pago',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 4),
           ..._bloqueCondiciones(condiciones, venta),
@@ -598,10 +572,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '4. Obligaciones del DEUDOR',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
@@ -615,10 +586,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             '5. Incumplimiento',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 4),
           pw.Text(
@@ -632,10 +600,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.SizedBox(height: 10),
           pw.Text(
             'Cláusulas contractuales',
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
           pw.SizedBox(height: 4),
           ..._cuerpoContratoLegal(venta: venta, condiciones: condiciones),
@@ -792,10 +757,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
         build: (ctx) => [
           pw.Text(
             'CRONOGRAMA DE PAGOS',
-            style: pw.TextStyle(
-              fontSize: 14,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 6),
           pw.Text(
@@ -826,10 +788,7 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
                   children: [
                     _celda('${q.numeroCuota}'),
                     _celda(fmtFecha.format(q.fechaVencimiento)),
-                    _celda(
-                      formatRd(q.montoTotal),
-                      align: pw.TextAlign.right,
-                    ),
+                    _celda(formatRd(q.montoTotal), align: pw.TextAlign.right),
                     _celda(q.pagada ? 'Pagada' : 'Pendiente'),
                   ],
                 ),
@@ -892,27 +851,47 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
           pw.Table(
             border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
             children: [
-              pw.TableRow(children: [
+              pw.TableRow(
+                children: [
                 _celda('Monto financiado', bold: true),
-                _celda(formatRd(cuenta.totalOriginal), align: pw.TextAlign.right),
-              ]),
-              pw.TableRow(children: [
+                  _celda(
+                    formatRd(cuenta.totalOriginal),
+                    align: pw.TextAlign.right,
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
                 _celda('Total abonado', bold: true),
-                _celda(formatRd(cuenta.totalAbonado), align: pw.TextAlign.right),
-              ]),
-              pw.TableRow(children: [
+                  _celda(
+                    formatRd(cuenta.totalAbonado),
+                    align: pw.TextAlign.right,
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
                 _celda('Saldo pendiente', bold: true),
-                _celda(formatRd(cuenta.saldoPendiente), align: pw.TextAlign.right),
-              ]),
-              pw.TableRow(children: [
+                  _celda(
+                    formatRd(cuenta.saldoPendiente),
+                    align: pw.TextAlign.right,
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
                 _celda('Vencimiento', bold: true),
                 _celda(fmtFecha.format(cuenta.fechaVencimiento)),
-              ]),
+                ],
+              ),
             ],
           ),
           if (cuotas.isNotEmpty) ...[
             pw.SizedBox(height: 18),
-            pw.Text('Detalle de cuotas', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              'Detalle de cuotas',
+              style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+            ),
             pw.SizedBox(height: 6),
             pw.Table(
               border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
@@ -928,18 +907,29 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
                   ],
                 ),
                 for (final cuota in cuotas)
-                  pw.TableRow(children: [
+                  pw.TableRow(
+                    children: [
                     _celda('${cuota.numeroCuota}'),
                     _celda(fmtFecha.format(cuota.fechaVencimiento)),
-                    _celda(formatRd(cuota.montoTotal), align: pw.TextAlign.right),
-                    _celda(formatRd(cuota.saldoDespues), align: pw.TextAlign.right),
+                      _celda(
+                        formatRd(cuota.montoTotal),
+                        align: pw.TextAlign.right,
+                      ),
+                      _celda(
+                        formatRd(cuota.saldoDespues),
+                        align: pw.TextAlign.right,
+                      ),
                     _celda(cuota.pagada ? 'Pagada' : 'Pendiente'),
-                  ]),
+                    ],
+                  ),
               ],
             ),
           ],
           pw.SizedBox(height: 18),
-          pw.Text('Historial de pagos', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+          pw.Text(
+            'Historial de pagos',
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+          ),
           pw.SizedBox(height: 6),
           if (cuenta.abonos.isEmpty)
             _celda('No hay pagos registrados')
@@ -956,11 +946,13 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
                   ],
                 ),
                 for (final abono in cuenta.abonos)
-                  pw.TableRow(children: [
+                  pw.TableRow(
+                    children: [
                     _celda(fmtFecha.format(abono.fecha)),
                     _celda(abono.metodoPago),
                     _celda(formatRd(abono.monto), align: pw.TextAlign.right),
-                  ]),
+                    ],
+                  ),
               ],
             ),
         ],
@@ -1111,6 +1103,4 @@ class CreditoDocumentoServiceImpl implements ICreditoDocumentoService {
       subject: 'Abono CXC — FiscoGest RD',
     );
   }
-
-
 }

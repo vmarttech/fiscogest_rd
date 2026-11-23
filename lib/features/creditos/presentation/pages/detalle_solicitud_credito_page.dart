@@ -203,7 +203,10 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -253,9 +256,7 @@ class _DetalleSolicitudCreditoPageState
             if (!mounted) return;
             FiscoGestNotifications.show(
               SnackBar(
-                content: Text(
-                  'Expediente incompleto: ${faltan.join(', ')}',
-                ),
+                content: Text('Expediente incompleto: ${faltan.join(', ')}'),
                 backgroundColor: AppColors.warning,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -444,7 +445,10 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -505,12 +509,16 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
-
-  Future<bool> _exigirListoParaDocumento({required bool exigeCondiciones}) async {
+  Future<bool> _exigirListoParaDocumento({
+    required bool exigeCondiciones,
+  }) async {
     final v = _venta;
     if (v == null || v.id == null) return false;
     if (exigeCondiciones) {
@@ -601,11 +609,7 @@ class _DetalleSolicitudCreditoPageState
       } catch (_) {}
       await (await ref.read(
         creditoDocumentoServiceProvider.future,
-      )).imprimirContrato(
-        venta: v,
-        condiciones: cond,
-        expediente: expC,
-      );
+      )).imprimirContrato(venta: v, condiciones: cond, expediente: expC);
     } catch (e) {
       if (!mounted) return;
       FiscoGestNotifications.show(
@@ -616,7 +620,10 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -642,7 +649,10 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -677,7 +687,10 @@ class _DetalleSolicitudCreditoPageState
         ),
       );
     } finally {
-      if (mounted) setState(() { _procesando = false; });
+      if (mounted)
+        setState(() {
+          _procesando = false;
+        });
     }
   }
 
@@ -889,7 +902,11 @@ class _DetalleSolicitudCreditoPageState
         ? formatRd(saldoR / _numeroCuotas)
         : formatRd(saldoR);
 
-    Widget panelCard({required String title, Widget? trailing, required Widget child}) {
+    Widget panelCard({
+      required String title,
+      Widget? trailing,
+      required Widget child,
+    }) {
       return Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 12),
@@ -931,7 +948,12 @@ class _DetalleSolicitudCreditoPageState
       );
     }
 
-    Widget filaCond(String k, String v, {bool bold = false, Color? valueColor}) {
+    Widget filaCond(
+      String k,
+      String v, {
+      bool bold = false,
+      Color? valueColor,
+    }) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 3),
         child: Row(
@@ -964,7 +986,11 @@ class _DetalleSolicitudCreditoPageState
       children: [
         panelCard(
           title: 'Resumen de Condiciones',
-          trailing: const Icon(Icons.calculate_outlined, size: 16, color: Color(0xFF94A3B8)),
+          trailing: const Icon(
+            Icons.calculate_outlined,
+            size: 16,
+            color: Color(0xFF94A3B8),
+          ),
           child: Column(
             children: [
               filaCond('Abono inicial', formatRd(abonoMostrarR)),
@@ -976,7 +1002,12 @@ class _DetalleSolicitudCreditoPageState
                     ? '${(_tasaMensual * 100).toStringAsFixed(2)}%'
                     : '—',
               ),
-              filaCond('Cuota mensual', cuotaTxt, bold: true, valueColor: const Color(0xFF1D4ED8)),
+              filaCond(
+                'Cuota mensual',
+                cuotaTxt,
+                bold: true,
+                valueColor: const Color(0xFF1D4ED8),
+              ),
               filaCond(
                 'Vencimiento',
                 _primerVencimiento != null
@@ -1032,16 +1063,30 @@ class _DetalleSolicitudCreditoPageState
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _procesando ? null : _imprimirSolicitud,
-                      icon: const Icon(Icons.picture_as_pdf, size: 16, color: Color(0xFFDC2626)),
-                      label: const Text('SOLICITUD', style: TextStyle(fontSize: 11)),
+                      icon: const Icon(
+                        Icons.picture_as_pdf,
+                        size: 16,
+                        color: Color(0xFFDC2626),
+                      ),
+                      label: const Text(
+                        'SOLICITUD',
+                        style: TextStyle(fontSize: 11),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _procesando ? null : _imprimirContrato,
-                      icon: const Icon(Icons.description_outlined, size: 16, color: Color(0xFF2563EB)),
-                      label: const Text('CONTRATO', style: TextStyle(fontSize: 11)),
+                      icon: const Icon(
+                        Icons.description_outlined,
+                        size: 16,
+                        color: Color(0xFF2563EB),
+                      ),
+                      label: const Text(
+                        'CONTRATO',
+                        style: TextStyle(fontSize: 11),
+                      ),
                     ),
                   ),
                 ],
@@ -1053,7 +1098,10 @@ class _DetalleSolicitudCreditoPageState
                     child: OutlinedButton.icon(
                       onPressed: _procesando ? null : _enviarSolicitud,
                       icon: const Icon(Icons.send_outlined, size: 16),
-                      label: const Text('ENVIAR SOLICITUD', style: TextStyle(fontSize: 10)),
+                      label: const Text(
+                        'ENVIAR SOLICITUD',
+                        style: TextStyle(fontSize: 10),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1061,7 +1109,10 @@ class _DetalleSolicitudCreditoPageState
                     child: OutlinedButton.icon(
                       onPressed: _procesando ? null : _enviarContrato,
                       icon: const Icon(Icons.mail_outline, size: 16),
-                      label: const Text('ENVIAR CONTRATO', style: TextStyle(fontSize: 10)),
+                      label: const Text(
+                        'ENVIAR CONTRATO',
+                        style: TextStyle(fontSize: 10),
+                      ),
                     ),
                   ),
                 ],

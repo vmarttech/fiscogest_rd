@@ -20,11 +20,11 @@ class CompraSync {
     if (compras.isEmpty) {
       debugPrint('CompraSync: no hay compras locales');
     } else {
-      final payload = compras
-          .map((c) {
+      final payload = compras.map((c) {
             final estado = c.estado;
-            final estadoStr =
-                estado is String ? estado : estado.toString().split('.').last;
+        final estadoStr = estado is String
+            ? estado
+            : estado.toString().split('.').last;
             return <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': c.id,
@@ -37,10 +37,8 @@ class CompraSync {
               'condicion_pago': c.condicionPago,
               'dias_credito': c.diasCredito,
               'fecha_emision': c.fechaEmision.toUtc().toIso8601String(),
-              'fecha_confirmacion':
-                  c.fechaConfirmacion?.toUtc().toIso8601String(),
-              'fecha_vencimiento':
-                  c.fechaVencimiento?.toUtc().toIso8601String(),
+          'fecha_confirmacion': c.fechaConfirmacion?.toUtc().toIso8601String(),
+          'fecha_vencimiento': c.fechaVencimiento?.toUtc().toIso8601String(),
               'fecha_recepcion': c.fechaRecepcion?.toUtc().toIso8601String(),
               'fecha_pago': c.fechaPago?.toUtc().toIso8601String(),
               'subtotal_sin_impuestos': c.subtotalSinImpuestos,
@@ -54,8 +52,7 @@ class CompraSync {
               'actualizado_en': c.actualizadoEn?.toUtc().toIso8601String(),
               'updated_at': DateTime.now().toUtc().toIso8601String(),
             };
-          })
-          .toList();
+      }).toList();
       await SupabaseRestClient().upsert(
         table: 'compras',
         rows: payload,
@@ -70,7 +67,8 @@ class CompraSync {
       return;
     }
     final detPayload = dets
-        .map((d) => <String, dynamic>{
+        .map(
+          (d) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': d.id,
               'compra_id': d.compraId,
@@ -90,7 +88,8 @@ class CompraSync {
               'total_linea': d.totalLinea ?? 0,
               'costo_adquisicion': d.costoAdquisicion ?? 0,
               'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
+          },
+        )
         .toList();
     await SupabaseRestClient().upsert(
       table: 'compras_detalle',

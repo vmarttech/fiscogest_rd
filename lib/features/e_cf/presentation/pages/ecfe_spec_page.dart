@@ -56,7 +56,7 @@ class EcfeSpecPage extends ConsumerWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.fact_check_outlined,
                               color: Color(0xFF008F83),
                               size: 25,
@@ -153,7 +153,10 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _busy = false; });
+      if (mounted)
+        setState(() {
+          _busy = false;
+        });
     }
   }
 
@@ -183,7 +186,10 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
         SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted) setState(() { _busy = false; });
+      if (mounted)
+        setState(() {
+          _busy = false;
+        });
     }
   }
 
@@ -258,7 +264,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFE1E7EF)),
+        side: BorderSide(color: Color(0xFFE1E7EF)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -278,7 +284,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
                 IconButton(
                   tooltip: 'Nueva versión (circular)',
                   onPressed: _busy ? null : _nuevaVersion,
-                  icon: const Icon(Icons.add_circle_outline),
+                  icon: Icon(Icons.add_circle_outline),
                 ),
               ],
             ),
@@ -297,12 +303,16 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
                 if (s.activaPrecert)
                   Chip(
                     label: const Text('TesteCF'),
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.15),
                   ),
                 if (s.activaCert)
                   Chip(
                     label: const Text('CerteCF'),
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.15),
                   ),
                 if (s.activaProduccion)
                   Chip(

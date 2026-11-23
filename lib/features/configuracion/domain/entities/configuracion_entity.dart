@@ -32,8 +32,7 @@ class ConfiguracionEntity {
     this.cajaExigirSesion = false,
     this.modoSimplificado = true,
     this.transfImprimirManifiesto = true,
-    this.transfTituloManifiesto =
-        'MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN',
+    this.transfTituloManifiesto = 'MANIFIESTO DE TRANSFERENCIA INTER-ALMACÉN',
     this.transfSubtituloManifiesto =
         'PACKING LIST / BATCH LIST (LISTA DE LOTES)',
     this.transfTransportistaDefault = '',

@@ -13,10 +13,7 @@ class FiscoGestNotifications {
   static int _nextId = 0;
 
   static void show(SnackBar snackBar) {
-    final entry = FiscoGestNotificationEntry(
-      id: _nextId++,
-      snackBar: snackBar,
-    );
+    final entry = FiscoGestNotificationEntry(id: _nextId++, snackBar: snackBar);
 
     final current = List<FiscoGestNotificationEntry>.from(notifications.value);
     current.add(entry);

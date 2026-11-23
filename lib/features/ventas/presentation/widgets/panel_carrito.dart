@@ -138,15 +138,18 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
           hintText: '0,00',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: AppColors.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: AppColors.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 1.5,
+            ),
           ),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
@@ -159,7 +162,7 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
             constraints: const BoxConstraints(minWidth: 48, maxWidth: 52),
             position: PopupMenuPosition.under,
             itemBuilder: (ctx) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: false,
                 height: 36,
                 child: Row(
@@ -168,20 +171,24 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
                     Icon(
                       Icons.attach_money,
                       size: 16,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     SizedBox(width: 4),
                     Text('RD\$', style: AppTypography.labelMedium),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: true,
                 height: 36,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.percent, size: 16, color: AppColors.primary),
+                    Icon(
+                      Icons.percent,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     SizedBox(width: 4),
                     Text('%', style: AppTypography.labelMedium),
                   ],
@@ -195,7 +202,7 @@ class _CampoDescuentoState extends State<_CampoDescuento> {
                 _esPorcentaje ? '%' : 'RD\$',
                 style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
@@ -298,13 +305,15 @@ class PanelCarrito extends ConsumerWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.shopping_bag_outlined,
                     size: 18,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -323,13 +332,15 @@ class PanelCarrito extends ConsumerWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '${estado.detalles.length} art.',
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

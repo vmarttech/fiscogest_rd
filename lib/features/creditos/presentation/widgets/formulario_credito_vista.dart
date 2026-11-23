@@ -59,6 +59,7 @@ class _FormularioCreditoVistaState
   late final TextEditingController _abonoInicialController;
   late final TextEditingController _tasaInteresController;
   late final TextEditingController _observacionesController;
+
   /// Un solo control: meses = cuotas mensuales (1..24).
   int _meses = 1;
   late DateTime _fechaPrimerVencimiento;
@@ -83,8 +84,10 @@ class _FormularioCreditoVistaState
     try {
       final p = await ref.read(parametrosCreditoProvider.future);
       if (!mounted) return;
-      final plazoMax =
-          (p.plazoMaxMeses < 1 ? 24 : p.plazoMaxMeses).clamp(1, 24);
+      final plazoMax = (p.plazoMaxMeses < 1 ? 24 : p.plazoMaxMeses).clamp(
+        1,
+        24,
+      );
       const baseMeses = [1, 3, 6, 9, 12, 15, 18, 24];
       final opciones = baseMeses.where((m) => m <= plazoMax).toList();
       if (opciones.isEmpty) {
@@ -92,8 +95,7 @@ class _FormularioCreditoVistaState
       }
 
       final abonoInit = widget.abonoInicialInicial;
-      final mesesInit =
-          widget.numeroCuotasInicial ?? widget.plazoMesesInicial;
+      final mesesInit = widget.numeroCuotasInicial ?? widget.plazoMesesInicial;
       final tasaInit = widget.tasaMensualInicial;
       final vencInit = widget.primerVencimientoInicial;
 
@@ -118,22 +120,18 @@ class _FormularioCreditoVistaState
               : a.toStringAsFixed(2);
         }
         _tasaInteresController.text =
-            (tasaInit != null && tasaInit > 0
-                    ? tasaInit
-                    : p.tasaMensualDefault)
+            (tasaInit != null && tasaInit > 0 ? tasaInit : p.tasaMensualDefault)
                 .toString();
-        _fechaPrimerVencimiento = vencInit ??
-            DateTime.now().add(
-              Duration(days: gracia > 0 ? gracia : 30),
-            );
+        _fechaPrimerVencimiento =
+            vencInit ??
+            DateTime.now().add(Duration(days: gracia > 0 ? gracia : 30));
         _paramsAplicados = true;
       });
     } catch (e, st) {
       debugPrint('FormularioCreditoVista params: $e');
       debugPrint('$st');
       final abonoInit = widget.abonoInicialInicial;
-      final mesesInit =
-          widget.numeroCuotasInicial ?? widget.plazoMesesInicial;
+      final mesesInit = widget.numeroCuotasInicial ?? widget.plazoMesesInicial;
       final tasaInit = widget.tasaMensualInicial;
       final vencInit = widget.primerVencimientoInicial;
       setState(() {
@@ -216,9 +214,7 @@ class _FormularioCreditoVistaState
       final ahora = DateTime.now();
       final fechaVencimientoFinal = _meses <= 1
           ? _fechaPrimerVencimiento
-          : _fechaPrimerVencimiento.add(
-              Duration(days: 30 * (_meses - 1)),
-            );
+          : _fechaPrimerVencimiento.add(Duration(days: 30 * (_meses - 1)));
       PlanPago? planPago;
       if (_meses > 1) {
         planPago = CalculadoraCreditoService.generarPlanPago(
@@ -275,7 +271,10 @@ class _FormularioCreditoVistaState
         );
       }
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -320,7 +319,8 @@ class _FormularioCreditoVistaState
               style: destacado
                   ? AppTypography.labelMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: colorTexto ?? AppColors.primary,
+                      color:
+                          colorTexto ?? Theme.of(context).colorScheme.primary,
                     )
                   : AppTypography.labelMedium.copyWith(
                       color: colorTexto ?? AppColors.textPrimary,
@@ -361,10 +361,10 @@ class _FormularioCreditoVistaState
             vertical: AppSpacing.xs,
           ),
           backgroundColor: colorScheme.surface,
-          selectedColor: AppColors.primary,
+          selectedColor: Theme.of(context).colorScheme.primary,
           side: BorderSide(
             color: activo
-                ? AppColors.primary
+                ? Theme.of(context).colorScheme.primary
                 : colorScheme.outline.withValues(alpha: 0.35),
           ),
           shape: RoundedRectangleBorder(
@@ -390,9 +390,9 @@ class _FormularioCreditoVistaState
               color: colorScheme.outline.withValues(alpha: 0.45),
             ),
           ),
-          suffixIcon: const Icon(
+          suffixIcon: Icon(
             Icons.calendar_today_outlined,
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         child: Text(
@@ -478,7 +478,9 @@ class _FormularioCreditoVistaState
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -544,7 +546,7 @@ class _FormularioCreditoVistaState
                   textAlign: TextAlign.right,
                   softWrap: false,
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -559,10 +561,14 @@ class _FormularioCreditoVistaState
               vertical: AppSpacing.m,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.07),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.07),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.10),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.10),
               ),
             ),
             child: Column(
@@ -572,7 +578,7 @@ class _FormularioCreditoVistaState
                   textAlign: TextAlign.center,
                   softWrap: false,
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -654,7 +660,7 @@ class _FormularioCreditoVistaState
                   '${c.saldoPendiente > 0 ? '\nSaldo cartera: ${_formatearMonto(c.saldoPendiente)}' : ''}',
                   style: AppTypography.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF0F766E),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               );
@@ -695,7 +701,9 @@ class _FormularioCreditoVistaState
           _opcionesMeses,
           _meses,
           (m) => m == 1 ? '1 mes' : '$m meses',
-          (m) => setState(() { _meses = m; }),
+          (m) => setState(() {
+            _meses = m;
+          }),
         ),
         _buildSelectorEtiqueta('Primer vencimiento'),
         _buildCampoFecha(),
@@ -726,7 +734,9 @@ class _FormularioCreditoVistaState
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -771,14 +781,14 @@ class _FormularioCreditoVistaState
                   ),
                   icon: Icon(
                     _mostrarTablaCuotas ? Icons.expand_less : Icons.expand_more,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   label: Text(
                     _mostrarTablaCuotas
                         ? 'Ocultar tabla de cuotas'
                         : 'Ver tabla completa de cuotas',
                     style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

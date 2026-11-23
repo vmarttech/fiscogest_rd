@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/lista_precios.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/lista_precios_provider.dart';
@@ -116,8 +115,10 @@ class _EditarPreciosProductoPageState
         child: SingleChildScrollView(
           padding: AppLayout.pantallaPadding,
           child: datosPrecios.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             error: (error, _) => Center(child: Text('Error: $error')),
             data: (datos) {
@@ -152,7 +153,7 @@ class _EditarPreciosProductoPageState
                       labelText: 'Margen de ganancia %',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.calculate),
+                        icon: Icon(Icons.calculate),
                         onPressed: _calcularPrecioDesdeMargen,
                       ),
                     ),
@@ -166,7 +167,7 @@ class _EditarPreciosProductoPageState
                       labelText: 'Precio de Venta',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.sync),
+                        icon: Icon(Icons.sync),
                         onPressed: _calcularMargenDesdePrecio,
                       ),
                     ),

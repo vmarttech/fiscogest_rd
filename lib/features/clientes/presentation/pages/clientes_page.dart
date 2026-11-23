@@ -101,10 +101,12 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.shield_outlined,
                                     size: 18,
-                                    color: AppColors.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                   AppLayout.hS,
                                   Text(
@@ -141,10 +143,12 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.shield_outlined,
                                     size: 18,
-                                    color: AppColors.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                   AppLayout.hS,
                                   Text(
@@ -164,11 +168,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             Icon(
                               Icons.person_outline,
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               size: 22,
                             ),
                             AppLayout.hS,
@@ -230,11 +234,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           AppLayout.vL,
                           const Divider(height: 1, color: AppColors.grey200),
                           AppLayout.vM,
-                          const Row(
+                          Row(
                             children: [
                               Icon(
                                 Icons.receipt_long_outlined,
-                                color: AppColors.primary,
+                                color: Theme.of(context).colorScheme.primary,
                                 size: 22,
                               ),
                               AppLayout.hS,

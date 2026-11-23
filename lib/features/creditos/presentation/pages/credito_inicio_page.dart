@@ -7,7 +7,10 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/cuenta_por_cobrar.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart'
-    show cuentasCobrarListaProvider, creditoTotalesProvider, CuentaPorCobrarBusqueda;
+    show
+        cuentasCobrarListaProvider,
+        creditoTotalesProvider,
+        CuentaPorCobrarBusqueda;
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart'
     show solicitudesCreditoProvider;
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
@@ -30,7 +33,9 @@ class CreditoInicioPage extends ConsumerWidget {
       if (!ok && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No se pudo abrir TransUnion. Verifique la conexión.'),
+            content: Text(
+              'No se pudo abrir TransUnion. Verifique la conexión.',
+            ),
           ),
         );
       }
@@ -56,7 +61,6 @@ class CreditoInicioPage extends ConsumerWidget {
     final n = c.numeroCuotas <= 0 ? 1 : c.numeroCuotas;
     return c.totalAPagar / n;
   }
-
 
   double _usoCredito(CuentaPorCobrar c) {
     final total = c.totalAPagar;
@@ -224,8 +228,7 @@ class CreditoInicioPage extends ConsumerWidget {
                             fmtFecha: _fmtFecha,
                             cuotaOf: _cuotaAprox,
                             usoOf: _usoCredito,
-                            onVerTodos: () =>
-                                context.push('/creditos/cuentas'),
+                            onVerTodos: () => context.push('/creditos/cuentas'),
                             onTapCuenta: (id) {
                               if (id != null) {
                                 context.push('/creditos/cuentas/$id');
@@ -243,9 +246,8 @@ class CreditoInicioPage extends ConsumerWidget {
                                 async: solsAsync,
                                 onVerTodas: () =>
                                     context.push('/creditos/solicitudes'),
-                                onTapSol: (id) => context.push(
-                                  '/creditos/solicitudes/$id',
-                                ),
+                                onTapSol: (id) =>
+                                    context.push('/creditos/solicitudes/$id'),
                               ),
                               const SizedBox(height: 14),
                               _AccionesRapidas(
@@ -280,8 +282,7 @@ class CreditoInicioPage extends ConsumerWidget {
                     const SizedBox(height: 14),
                     _SolicitudesPanel(
                       async: solsAsync,
-                      onVerTodas: () =>
-                          context.push('/creditos/solicitudes'),
+                      onVerTodas: () => context.push('/creditos/solicitudes'),
                       onTapSol: (id) =>
                           context.push('/creditos/solicitudes/$id'),
                     ),
@@ -389,9 +390,7 @@ class _KpiCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.3,
                     height: 1.1,
-                    color: solid
-                        ? Colors.white.withValues(alpha: 0.85)
-                        : fg,
+                    color: solid ? Colors.white.withValues(alpha: 0.85) : fg,
                   ),
                 ),
               ],
@@ -461,49 +460,64 @@ class _CxcPanel extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 4,
-                    child: Text('Cliente',
+                    child: Text(
+                      'Cliente',
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B))),
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 8),
                   Expanded(
                     flex: 2,
-                    child: Text('RNC',
+                    child: Text(
+                      'RNC',
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B))),
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 8),
                   Expanded(
                     flex: 2,
-                    child: Text('Vence',
+                    child: Text(
+                      'Vence',
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B))),
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 12),
                   Expanded(
                     flex: 2,
-                    child: Text('Cuota',
+                    child: Text(
+                      'Cuota',
                         textAlign: TextAlign.right,
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B))),
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
                     flex: 3,
-                    child: Text('Límite / Uso',
+                    child: Text(
+                      'Límite / Uso',
                         textAlign: TextAlign.right,
                         style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B))),
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -515,16 +529,21 @@ class _CxcPanel extends StatelessWidget {
             ),
             error: (e, _) => Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('$e',
-                  style:
-                      const TextStyle(color: Color(0xFFBE123C), fontSize: 12)),
+              child: Text(
+                '$e',
+                style: const TextStyle(color: Color(0xFFBE123C), fontSize: 12),
+              ),
             ),
             data: (lista) {
-              final activas = lista
+              final activas =
+                  lista
                   .where((x) => x.cuenta.estado != EstadoCredito.pagado)
                   .toList()
-                ..sort((a, b) => a.cuenta.fechaVencimiento
-                    .compareTo(b.cuenta.fechaVencimiento));
+                    ..sort(
+                      (a, b) => a.cuenta.fechaVencimiento.compareTo(
+                        b.cuenta.fechaVencimiento,
+                      ),
+                    );
               final top = activas.take(5).toList();
               if (top.isEmpty) {
                 return const Padding(
@@ -541,7 +560,8 @@ class _CxcPanel extends StatelessWidget {
                   children: [
                     for (final item in top)
                       _CxcCardMobile(
-                        nombre: item.cuenta.clienteNombre ??
+                        nombre:
+                            item.cuenta.clienteNombre ??
                             'Cliente #${item.cuenta.clienteId}',
                         rnc: item.documentoCliente.isEmpty
                             ? '—'
@@ -559,7 +579,8 @@ class _CxcPanel extends StatelessWidget {
                 children: [
                   for (final item in top)
                     _CxcRow(
-                      nombre: item.cuenta.clienteNombre ??
+                      nombre:
+                          item.cuenta.clienteNombre ??
                           'Cliente #${item.cuenta.clienteId}',
                       rnc: item.documentoCliente.isEmpty
                           ? '—'
@@ -624,8 +645,9 @@ class _CxcCardMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (uso * 100).round();
-    final barColor =
-        uso >= 0.85 ? const Color(0xFFF59E0B) : const Color(0xFF2563EB);
+    final barColor = uso >= 0.85
+        ? const Color(0xFFF59E0B)
+        : const Color(0xFF2563EB);
 
     return Material(
       color: Colors.transparent,
@@ -656,8 +678,11 @@ class _CxcCardMobile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Icon(Icons.chevron_right,
-                      size: 18, color: Color(0xFF94A3B8)),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: Color(0xFF94A3B8),
+                  ),
                 ],
               ),
               if (rnc != '—') ...[
@@ -748,8 +773,9 @@ class _CxcRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (uso * 100).round();
-    final barColor =
-        uso >= 0.85 ? const Color(0xFFF59E0B) : const Color(0xFF2563EB);
+    final barColor = uso >= 0.85
+        ? const Color(0xFFF59E0B)
+        : const Color(0xFF2563EB);
 
     return Material(
       color: Colors.transparent,
@@ -926,8 +952,10 @@ class _SolicitudesPanel extends StatelessWidget {
               padding: EdgeInsets.all(16),
               child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
             ),
-            error: (e, _) => Text('$e',
-                style: const TextStyle(color: Color(0xFFBE123C), fontSize: 12)),
+            error: (e, _) => Text(
+              '$e',
+              style: const TextStyle(color: Color(0xFFBE123C), fontSize: 12),
+            ),
             data: (lista) {
               final top = lista.take(4).toList();
               if (top.isEmpty) {
@@ -1003,8 +1031,11 @@ class _SolItem extends StatelessWidget {
                   color: Color(0xFFE2E8F0),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.business_outlined,
-                    size: 16, color: Color(0xFF64748B)),
+                child: const Icon(
+                  Icons.business_outlined,
+                  size: 16,
+                  color: Color(0xFF64748B),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1034,8 +1065,7 @@ class _SolItem extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: chipBg,
                   borderRadius: BorderRadius.circular(20),

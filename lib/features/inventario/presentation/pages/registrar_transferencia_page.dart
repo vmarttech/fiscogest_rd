@@ -53,17 +53,18 @@ class _RegistrarTransferenciaPageState
 
   @override
   Widget build(BuildContext context) {
-    
     return AppScaffold(
       backgroundColor: AppColors.pageBackground,
-      // design system
 
+      // design system
       title: 'Transferencia de Inventario',
       body: SafeArea(
         bottom: true,
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width < 768 ? 560 : 760),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width < 768 ? 560 : 760,
+            ),
             child: Form(
               key: _formKey,
               child: ListView(

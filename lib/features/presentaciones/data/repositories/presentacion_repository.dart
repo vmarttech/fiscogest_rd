@@ -20,10 +20,30 @@ class PresentacionRepository {
     final rows = await _db.select(_db.presentacionesTable).get();
     if (rows.isNotEmpty) return;
     for (final p in [
-      Presentacion(nombre: 'Unidad', abreviatura: 'UND', codigo: 'UND', factorUnidades: 1),
-      Presentacion(nombre: 'Caja', abreviatura: 'CAJ', codigo: 'CAJ', factorUnidades: 12),
-      Presentacion(nombre: 'Kilogramo', abreviatura: 'KG', codigo: 'KG', factorUnidades: 1),
-      Presentacion(nombre: 'Litro', abreviatura: 'LT', codigo: 'LT', factorUnidades: 1),
+      Presentacion(
+        nombre: 'Unidad',
+        abreviatura: 'UND',
+        codigo: 'UND',
+        factorUnidades: 1,
+      ),
+      Presentacion(
+        nombre: 'Caja',
+        abreviatura: 'CAJ',
+        codigo: 'CAJ',
+        factorUnidades: 12,
+      ),
+      Presentacion(
+        nombre: 'Kilogramo',
+        abreviatura: 'KG',
+        codigo: 'KG',
+        factorUnidades: 1,
+      ),
+      Presentacion(
+        nombre: 'Litro',
+        abreviatura: 'LT',
+        codigo: 'LT',
+        factorUnidades: 1,
+      ),
     ]) {
       await agregarPresentacion(p);
     }
@@ -31,21 +51,23 @@ class PresentacionRepository {
 
   Future<List<Presentacion>> obtenerPresentaciones() async {
     await _seedSiVacio();
-    final rows = await (_db.select(_db.presentacionesTable)
-          ..orderBy([(t) => OrderingTerm.asc(t.nombre)]))
-        .get();
+    final rows = await (_db.select(
+      _db.presentacionesTable,
+    )..orderBy([(t) => OrderingTerm.asc(t.nombre)])).get();
     return rows.map(_map).toList();
   }
 
   Future<void> agregarPresentacion(Presentacion presentacion) async {
     final nombre = presentacion.nombre.trim();
-    final existe = await (_db.select(_db.presentacionesTable)
-          ..where((t) => t.nombre.lower().equals(nombre.toLowerCase())))
-        .get();
+    final existe = await (_db.select(
+      _db.presentacionesTable,
+    )..where((t) => t.nombre.lower().equals(nombre.toLowerCase()))).get();
     if (existe.isNotEmpty) {
       throw Exception('Ya existe una presentación registrada con ese nombre.');
     }
-    await _db.into(_db.presentacionesTable).insert(
+    await _db
+        .into(_db.presentacionesTable)
+        .insert(
           PresentacionesTableCompanion.insert(
             nombre: nombre,
             abreviatura: Value(presentacion.abreviatura.trim().toUpperCase()),
@@ -60,8 +82,8 @@ class PresentacionRepository {
   Future<void> actualizarPresentacion(Presentacion presentacion) async {
     if (presentacion.id == null) return;
     final nombre = presentacion.nombre.trim();
-    final dup = await (_db.select(_db.presentacionesTable)
-          ..where(
+    final dup =
+        await (_db.select(_db.presentacionesTable)..where(
             (t) =>
                 t.nombre.lower().equals(nombre.toLowerCase()) &
                 t.id.isNotValue(presentacion.id!),
@@ -70,9 +92,9 @@ class PresentacionRepository {
     if (dup.isNotEmpty) {
       throw Exception('Ya existe otra presentación con ese nombre.');
     }
-    await (_db.update(_db.presentacionesTable)
-          ..where((t) => t.id.equals(presentacion.id!)))
-        .write(
+    await (_db.update(
+      _db.presentacionesTable,
+    )..where((t) => t.id.equals(presentacion.id!))).write(
       PresentacionesTableCompanion(
         nombre: Value(nombre),
         abreviatura: Value(presentacion.abreviatura.trim().toUpperCase()),
@@ -86,6 +108,8 @@ class PresentacionRepository {
   }
 
   Future<void> eliminarPresentacion(int id) async {
-    await (_db.delete(_db.presentacionesTable)..where((t) => t.id.equals(id))).go();
+    await (_db.delete(
+      _db.presentacionesTable,
+    )..where((t) => t.id.equals(id))).go();
   }
 }

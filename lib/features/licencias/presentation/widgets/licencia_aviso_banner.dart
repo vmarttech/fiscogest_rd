@@ -18,7 +18,8 @@ class LicenciaAvisoBanner extends ConsumerWidget {
     return async.maybeWhen(
       data: (lic) {
         if (lic == null) return const SizedBox.shrink();
-        if ((lic.esDesarrollador || lic.vitalicia) && esDuenoPlataforma(ref.watch(sesionProvider)?.username)) {
+        if ((lic.esDesarrollador || lic.vitalicia) &&
+            esDuenoPlataforma(ref.watch(sesionProvider)?.username)) {
           return const SizedBox.shrink();
         }
 
@@ -44,8 +45,7 @@ class LicenciaAvisoBanner extends ConsumerWidget {
         late final IconData icon;
 
         if (lic.estado == 'vencida' && lic.plan != 'gratis') {
-          texto =
-              storeOcultaCompraTransferencia
+          texto = storeOcultaCompraTransferencia
               ? 'Licencia vencida. Vaya a Configuración → Licencia para activar o renovar.'
               : 'Licencia vencida. Configuración → Sistema → Licencia y pagos para elegir plan.';
           bg = const Color(0xFFB91C1C);
@@ -66,7 +66,7 @@ class LicenciaAvisoBanner extends ConsumerWidget {
               ? 'Plan gratis · $prod productos · $cli clientes · $ven ventas/mes · fiao $fiao'
               : 'Plan gratis · límites: $prod productos, $cli clientes, '
                     '$ven ventas/mes, fiao $fiao. Toque para mejorar su plan.';
-          bg = const Color(0xFF0F766E);
+          bg = Theme.of(context).colorScheme.primary;
           icon = Icons.workspace_premium_outlined;
         } else if (lic.plan == 'demo') {
           final d = lic.diasRestantes;
@@ -75,7 +75,7 @@ class LicenciaAvisoBanner extends ConsumerWidget {
                     ? 'Prueba · $d días restantes · Ver planes'
                     : 'Prueba: $d días restantes. Elija plan de pago en Licencia y pagos.'
               : 'Está en prueba. Elija plan de pago en Configuración → Licencia y pagos.';
-          bg = const Color(0xFF0F766E);
+          bg = Theme.of(context).colorScheme.primary;
           icon = Icons.info_outline;
         } else {
           final d = lic.diasRestantes;
@@ -120,11 +120,7 @@ class LicenciaAvisoBanner extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
+                  Icon(Icons.chevron_right, color: Colors.white70, size: 18),
                 ],
               ),
             ),

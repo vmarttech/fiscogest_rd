@@ -43,7 +43,8 @@ class ComprobanteAbonoCuotaPdf {
     final pagadas = cuotaNumero.clamp(0, cuotaTotal);
     final pendientes = (cuotaTotal - pagadas).clamp(0, cuotaTotal);
     final montoCuota = montoPorCuota ?? montoAbonado;
-    final abo = numeroComprobante ??
+    final abo =
+        numeroComprobante ??
         'ABO-${fecha.millisecondsSinceEpoch.toString().substring(7)}';
     final empNombre = _nombreEmpresa(empresa);
     final empRnc = (empresa?.rnc ?? '').trim();
@@ -76,25 +77,37 @@ class ComprobanteAbonoCuotaPdf {
               pw.Text(
                 empNombre,
                 textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               if (empRnc.isNotEmpty)
                 pw.Text(
                   'RNC: $empRnc',
                   textAlign: pw.TextAlign.center,
-                  style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                  style: const pw.TextStyle(
+                    fontSize: 7,
+                    color: PdfColors.grey700,
+                  ),
                 ),
               if (empTel.isNotEmpty)
                 pw.Text(
                   'Tel: $empTel',
                   textAlign: pw.TextAlign.center,
-                  style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                  style: const pw.TextStyle(
+                    fontSize: 7,
+                    color: PdfColors.grey700,
+                  ),
                 ),
               if (empDir.isNotEmpty)
                 pw.Text(
                   empDir,
                   textAlign: pw.TextAlign.center,
-                  style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                  style: const pw.TextStyle(
+                    fontSize: 7,
+                    color: PdfColors.grey700,
+                  ),
                 ),
               pw.SizedBox(height: 4),
               pw.Divider(thickness: 1, color: PdfColors.grey800),
@@ -102,7 +115,10 @@ class ComprobanteAbonoCuotaPdf {
               pw.Text(
                 'COMPROBANTE DE PAGO',
                 textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.Text(
                 'ABONO DE CUOTA',
@@ -116,14 +132,18 @@ class ComprobanteAbonoCuotaPdf {
               pw.Text(
                 'No es comprobante fiscal NCF',
                 textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey600),
+                style: const pw.TextStyle(
+                  fontSize: 6.5,
+                  color: PdfColors.grey600,
+                ),
               ),
               pw.SizedBox(height: 4),
               _dash(),
               pw.SizedBox(height: 4),
               _row('No. comprobante:', abo),
               _row('Fecha:', fechaStr),
-              if ((cajero ?? '').trim().isNotEmpty) _row('Cajero:', cajero!.trim()),
+              if ((cajero ?? '').trim().isNotEmpty)
+                _row('Cajero:', cajero!.trim()),
               if ((cajaTurno ?? '').trim().isNotEmpty)
                 _row('Caja / turno:', cajaTurno!.trim()),
               pw.SizedBox(height: 3),
@@ -139,7 +159,10 @@ class ComprobanteAbonoCuotaPdf {
               ),
               pw.Text(
                 cliente,
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.Text('Cuenta: $cxc', style: const pw.TextStyle(fontSize: 8)),
               pw.SizedBox(height: 4),
@@ -245,25 +268,37 @@ class ComprobanteAbonoCuotaPdf {
                 'Este documento certifica el abono aplicado a la cuenta '
                 'por cobrar indicada. Conserve este comprobante.',
                 textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey600),
+                style: const pw.TextStyle(
+                  fontSize: 6.5,
+                  color: PdfColors.grey600,
+                ),
               ),
               pw.SizedBox(height: 4),
               pw.Text(
                 '¡Gracias por su pago!',
                 textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.SizedBox(height: 2),
               pw.Text(
                 'FiscoGest RD',
                 textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey500),
+                style: const pw.TextStyle(
+                  fontSize: 6.5,
+                  color: PdfColors.grey500,
+                ),
               ),
               pw.SizedBox(height: 8),
               pw.Text(
                 '$abo · $cxc',
                 textAlign: pw.TextAlign.center,
-                style: const pw.TextStyle(fontSize: 6, color: PdfColors.grey500),
+                style: const pw.TextStyle(
+                  fontSize: 6,
+                  color: PdfColors.grey500,
+                ),
               ),
             ],
           );

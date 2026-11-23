@@ -30,7 +30,7 @@ class _CotizacionesHistorialPageState
 
   Color _colorEstado(EstadoDocumento estado) => switch (estado) {
     EstadoDocumento.borrador => AppColors.textSecondary,
-    EstadoDocumento.cotizado => AppColors.primary,
+    EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
     EstadoDocumento.enCredito => const Color(0xFFE65100),
     EstadoDocumento.aprobado => AppColors.success,
     EstadoDocumento.anulado => AppColors.error,
@@ -39,7 +39,9 @@ class _CotizacionesHistorialPageState
 
   Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
     EstadoDocumento.borrador => AppColors.textSecondary.withValues(alpha: 0.12),
-    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+    EstadoDocumento.cotizado => Theme.of(
+      context,
+    ).colorScheme.primary.withValues(alpha: 0.12),
     EstadoDocumento.enCredito => const Color(
       0xFFE65100,
     ).withValues(alpha: 0.12),
@@ -57,24 +59,10 @@ class _CotizacionesHistorialPageState
     return AppScaffold(
       title: 'HISTORIAL DE COTIZACIONES',
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         tooltip: 'Atrás',
         onPressed: () => safeBack(context, fallback: '/ventas'),
       ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: TextButton.icon(
-            icon: const Icon(Icons.add, size: 20),
-            label: Text(
-              esPantallaPequena ? 'Nueva' : 'Nueva Cotización',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            onPressed: () => context.push('/ventas/cotizaciones/nueva'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-          ),
-        ),
-      ],
       body: SafeArea(
         bottom: true,
         maintainBottomViewPadding: true,
@@ -86,11 +74,7 @@ class _CotizacionesHistorialPageState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 48,
-                    color: AppColors.error,
-                  ),
+                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
                   const SizedBox(height: 12),
                   Text(
                     'Error al cargar cotizaciones:\n$e',
@@ -136,12 +120,14 @@ class _CotizacionesHistorialPageState
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        icon: const Icon(Icons.add, size: 20),
+                        icon: Icon(Icons.add, size: 20),
                         label: const Text('NUEVA COTIZACIÓN'),
                         onPressed: () =>
                             context.push('/ventas/cotizaciones/nueva'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           foregroundColor: AppColors.white,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -159,7 +145,7 @@ class _CotizacionesHistorialPageState
             }
 
             return RefreshIndicator(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               onRefresh: () async {
                 ref.invalidate(listaCotizacionesProvider);
               },
@@ -270,7 +256,7 @@ class _CotizacionesHistorialPageState
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.person_outline,
                     size: 16,
                     color: AppColors.textSecondary,
@@ -291,7 +277,7 @@ class _CotizacionesHistorialPageState
                     style: AppTypography.h4.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: tamanoTotal,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
@@ -370,7 +356,9 @@ class _CotizacionesHistorialPageState
               Icon(
                 icon,
                 size: 16,
-                color: destacado ? AppColors.success : AppColors.primary,
+                color: destacado
+                    ? AppColors.success
+                    : Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 6),
               Text(
@@ -378,7 +366,9 @@ class _CotizacionesHistorialPageState
                 style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: esPantallaPequena ? 12 : 13,
-                  color: destacado ? AppColors.success : AppColors.primary,
+                  color: destacado
+                      ? AppColors.success
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],

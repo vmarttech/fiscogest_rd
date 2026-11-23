@@ -6,11 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class LegalWebViewScreen extends StatefulWidget {
-  const LegalWebViewScreen({
-    super.key,
-    required this.title,
-    required this.url,
-  });
+  const LegalWebViewScreen({super.key, required this.title, required this.url});
 
   final String title;
   final String url;
@@ -37,10 +33,16 @@ class _LegalWebViewScreenState extends State<LegalWebViewScreen> {
         ..setNavigationDelegate(
           NavigationDelegate(
             onPageStarted: (_) {
-              if (mounted) setState(() { _isLoading = true; });
+              if (mounted)
+                setState(() {
+                  _isLoading = true;
+                });
             },
             onPageFinished: (_) {
-              if (mounted) setState(() { _isLoading = false; });
+              if (mounted)
+                setState(() {
+                  _isLoading = false;
+                });
             },
           ),
         )

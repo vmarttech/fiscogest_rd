@@ -33,7 +33,6 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   String? _planEnProceso;
 
   static const _planes = ['gratis', 'basico', 'simplificado', 'pro'];
-  static const _teal = Color(0xFF00A896);
   static const _ink = Color(0xFF0D1E34);
 
   Future<void> _pagarPayPal(String plan) async {
@@ -160,14 +159,18 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const SizedBox(height: 6),
                 const Text(
                   'Elige el plan. Se generará tu referencia FG- y verás las cuentas para depositar.',
-                  style: TextStyle(fontSize: 13, height: 1.35, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.35,
+                    color: Colors.black54,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 for (final p in planesPago) ...[
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
-                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      side: BorderSide(color: Color(0xFFE2E8F0)),
                     ),
                     title: Text(
                       nombrePlanUi(p),
@@ -188,7 +191,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                         ),
                       ],
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: Icon(Icons.chevron_right),
                     onTap: () => Navigator.pop(ctx, p),
                   ),
                   const SizedBox(height: 10),
@@ -294,9 +297,12 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 ),
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F766E),
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -315,13 +321,15 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                       IconButton(
                         tooltip: 'Copiar',
                         onPressed: () async {
-                          await Clipboard.setData(ClipboardData(text: referencia));
+                          await Clipboard.setData(
+                            ClipboardData(text: referencia),
+                          );
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Referencia copiada')),
                           );
                         },
-                        icon: const Icon(Icons.copy_rounded, color: Colors.white),
+                        icon: Icon(Icons.copy_rounded, color: Colors.white),
                       ),
                     ],
                   ),
@@ -330,7 +338,11 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const Text(
                   'Incluye esta referencia en el concepto del depósito o transferencia. '
                   'Cuando confirmemos el pago, activa la licencia con el mismo código FG-.',
-                  style: TextStyle(fontSize: 13, height: 1.35, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.35,
+                    color: Colors.black54,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -371,7 +383,10 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                         ),
                         Text(
                           'Titular: ${m.titular}',
-                          style: const TextStyle(fontSize: 13, color: Colors.black54),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -382,13 +397,17 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
                             onPressed: () async {
-                              await Clipboard.setData(ClipboardData(text: m.dato));
+                              await Clipboard.setData(
+                                ClipboardData(text: m.dato),
+                              );
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('${m.etiquetaDato} copiado')),
+                                SnackBar(
+                                  content: Text('${m.etiquetaDato} copiado'),
+                                ),
                               );
                             },
-                            icon: const Icon(Icons.copy, size: 16),
+                            icon: Icon(Icons.copy, size: 16),
                             label: const Text('Copiar dato'),
                           ),
                         ),
@@ -446,7 +465,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.arrow_back, color: _teal),
+                      icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.primary),
                       tooltip: 'Volver',
                     ),
                     const Text(
@@ -488,7 +507,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                               vertical: 14,
                             ),
                             decoration: BoxDecoration(
-                              color: _teal,
+                              color: Theme.of(context).colorScheme.primary,
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
@@ -543,7 +562,9 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                           Align(
                             alignment: Alignment.center,
                             child: TextButton(
-                              onPressed: _cargando ? null : _iniciarPagoTransferencia,
+                              onPressed: _cargando
+                                  ? null
+                                  : _iniciarPagoTransferencia,
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.textSecondary,
                                 textStyle: const TextStyle(
@@ -652,8 +673,6 @@ class _PriceCard extends StatelessWidget {
   final bool cargando;
   final bool disabled;
   final VoidCallback onAction;
-
-  static const _teal = Color(0xFF00A896);
   static const _ink = Color(0xFF0D1E34);
 
   @override
@@ -667,13 +686,13 @@ class _PriceCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: esActivo ? _teal : const Color(0xFFE2E8F0),
+          color: esActivo ? Theme.of(context).colorScheme.primary : const Color(0xFFE2E8F0),
           width: esActivo ? 2.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
             color: esActivo
-                ? _teal.withValues(alpha: 0.12)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
                 : Colors.black.withValues(alpha: 0.04),
             blurRadius: esActivo ? 16 : 8,
             offset: const Offset(0, 4),
@@ -694,7 +713,7 @@ class _PriceCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _teal,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
@@ -723,10 +742,10 @@ class _PriceCard extends StatelessWidget {
               children: [
                 TextSpan(
                   text: 'US\$ ${precio.toStringAsFixed(2)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: _teal,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const TextSpan(
@@ -742,10 +761,7 @@ class _PriceCard extends StatelessWidget {
           ),
           if (precio > 0) ...[
             const SizedBox(height: 4),
-            EquivalenteDopTexto(
-              montoUsd: precio,
-              compacto: true,
-            ),
+            EquivalenteDopTexto(montoUsd: precio, compacto: true),
           ],
           const SizedBox(height: 20),
           for (final f in features)
@@ -787,7 +803,7 @@ class _PriceCard extends StatelessWidget {
                     onPressed: null,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF475569),
-                      side: const BorderSide(color: Color(0xFFCBD5E1)),
+                      side: BorderSide(color: Color(0xFFCBD5E1)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -800,12 +816,12 @@ class _PriceCard extends StatelessWidget {
                 : FilledButton(
                     onPressed: disabled ? null : onAction,
                     style: FilledButton.styleFrom(
-                      backgroundColor: plan == 'gratis' ? Colors.white : _teal,
+                      backgroundColor: plan == 'gratis' ? Colors.white : Theme.of(context).colorScheme.primary,
                       foregroundColor: plan == 'gratis'
                           ? const Color(0xFF475569)
                           : Colors.white,
                       side: plan == 'gratis'
-                          ? const BorderSide(color: Color(0xFFCBD5E1))
+                          ? BorderSide(color: Color(0xFFCBD5E1))
                           : BorderSide.none,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -818,7 +834,7 @@ class _PriceCard extends StatelessWidget {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: plan == 'gratis' ? _teal : Colors.white,
+                              color: plan == 'gratis' ? Theme.of(context).colorScheme.primary : Colors.white,
                             ),
                           )
                         : Text(

@@ -37,8 +37,7 @@ class ComprobanteAbonoInicialPdf {
     final cliente = nombreCli.isEmpty
         ? 'CONSUMIDOR FINAL'
         : nombreCli.toUpperCase();
-    final nFactura =
-        (venta.numeroFactura ?? venta.numeroCotizacion).trim();
+    final nFactura = (venta.numeroFactura ?? venta.numeroCotizacion).trim();
     final nCotiz = venta.numeroCotizacion.trim();
     final totalDoc = venta.montoTotal;
     final saldo = (totalDoc - montoAbono).clamp(0.0, double.infinity);
@@ -62,7 +61,9 @@ class ComprobanteAbonoInicialPdf {
                 empNombre,
                 textAlign: pw.TextAlign.center,
                 style: pw.TextStyle(
-                    fontSize: 11, fontWeight: pw.FontWeight.bold),
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               if (empRnc.isNotEmpty)
                 pw.Text(
@@ -88,7 +89,9 @@ class ComprobanteAbonoInicialPdf {
                 decoration: pw.BoxDecoration(
                   color: PdfColor.fromHex('#ECFDF5'),
                   border: pw.Border.all(
-                      color: PdfColor.fromHex('#059669'), width: 1),
+                    color: PdfColor.fromHex('#059669'),
+                    width: 1,
+                  ),
                   borderRadius: pw.BorderRadius.circular(4),
                 ),
                 child: pw.Column(
@@ -156,14 +159,18 @@ class ComprobanteAbonoInicialPdf {
                 'Conserve ambos para cuadre de caja y CxC.',
                 textAlign: pw.TextAlign.center,
                 style: const pw.TextStyle(
-                    fontSize: 6.5, color: PdfColors.grey600),
+                  fontSize: 6.5,
+                  color: PdfColors.grey600,
+                ),
               ),
               pw.SizedBox(height: 6),
               pw.Text(
                 '¡Gracias!',
                 textAlign: pw.TextAlign.center,
                 style: pw.TextStyle(
-                    fontSize: 9, fontWeight: pw.FontWeight.bold),
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
             ],
           );
@@ -224,11 +231,7 @@ class ComprobanteAbonoInicialPdf {
         style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey500),
       );
 
-  static pw.Widget _row(
-    String label,
-    String value, {
-    bool boldValue = false,
-  }) {
+  static pw.Widget _row(String label, String value, {bool boldValue = false}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 2),
       child: pw.Row(
@@ -245,8 +248,9 @@ class ComprobanteAbonoInicialPdf {
               textAlign: pw.TextAlign.right,
               style: pw.TextStyle(
                 fontSize: 8,
-                fontWeight:
-                    boldValue ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontWeight: boldValue
+                    ? pw.FontWeight.bold
+                    : pw.FontWeight.normal,
               ),
             ),
           ),

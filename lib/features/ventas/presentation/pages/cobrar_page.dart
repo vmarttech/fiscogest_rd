@@ -170,7 +170,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
           ? 'Cuentas por Cobrar — Cliente'
           : 'Cuentas por Cobrar',
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           if (widget.onVolver != null) {
             widget.onVolver!();
@@ -186,7 +186,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
             child: ElevatedButton(
               onPressed: widget.onIrACredito,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: AppColors.white,
               ),
               child: const Text('NUEVO CRÉDITO'),
@@ -194,7 +194,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
           ),
       ],
       body: RefreshIndicator(
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         onRefresh: () async {
           ref.invalidate(listadoCuentasCobrarProvider(widget.clienteIdFiltro));
         },
@@ -279,7 +279,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                         decoration: InputDecoration(
                           hintText: 'Buscar nombre, RNC o cédula',
                           isDense: true,
-                          prefixIcon: const Icon(Icons.search, size: 20),
+                          prefixIcon: Icon(Icons.search, size: 20),
                           suffixIcon: _textoBusqueda.isEmpty
                               ? null
                               : IconButton(
@@ -290,7 +290,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                       _textoBusqueda = '';
                                     });
                                   },
-                                  icon: const Icon(Icons.clear, size: 18),
+                                  icon: Icon(Icons.clear, size: 18),
                                 ),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -333,7 +333,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                   : AppColors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: AppRadius.allM,
-                                side: const BorderSide(color: AppColors.border),
+                                side: BorderSide(color: AppColors.border),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: InkWell(
@@ -386,7 +386,9 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                               fontWeight: FontWeight.w600,
                                               color: vencida
                                                   ? AppColors.error
-                                                  : AppColors.primary,
+                                                  : Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary,
                                             ),
                                       ),
                                       Text(
@@ -427,7 +429,9 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                         'Cobrar en caja  ›',
                                         style: AppTypography.labelSmall
                                             .copyWith(
-                                              color: AppColors.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                               fontWeight: FontWeight.w700,
                                             ),
                                       ),

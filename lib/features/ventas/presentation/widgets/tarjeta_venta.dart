@@ -83,7 +83,7 @@ class TarjetaVenta extends StatelessWidget {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.person_outline,
                     size: 15,
                     color: AppColors.textSecondary,
@@ -119,7 +119,7 @@ class TarjetaVenta extends StatelessWidget {
                     style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: tamanoTotal,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],

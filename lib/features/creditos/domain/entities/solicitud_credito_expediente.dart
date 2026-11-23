@@ -116,7 +116,9 @@ class SolicitudCreditoExpediente {
     if (ingresoMensual <= 0) f.add('Ingreso mensual');
     if (empresa.trim().isEmpty) f.add('Empresa / ocupación');
     final refsOk = referencias
-        .where((r) => r.nombre.trim().isNotEmpty && r.telefono.trim().isNotEmpty)
+        .where(
+          (r) => r.nombre.trim().isNotEmpty && r.telefono.trim().isNotEmpty,
+        )
         .length;
     if (refsOk < 2) f.add('Al menos 2 referencias (nombre y teléfono)');
     return f;

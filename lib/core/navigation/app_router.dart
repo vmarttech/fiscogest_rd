@@ -152,8 +152,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             .timeout(const Duration(seconds: 2));
         if (cfg?.modoSimplificado == true) {
           final p = path;
-          final bloqueado = (p.startsWith('/compras') &&
-                  !p.startsWith('/compras/rapida')) ||
+          final bloqueado =
+              (p.startsWith('/compras') && !p.startsWith('/compras/rapida')) ||
               p.startsWith('/reports') ||
               p.startsWith('/reportes') ||
               p.startsWith('/usuarios');
@@ -202,18 +202,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/licencia';
         }
 
-    // Reportes: desde Esencial (gratis no incluye reportes)
-    if (!gates.permiteReportes &&
-        (path == '/reports' || path.startsWith('/reports/'))) {
-      return '/licencia';
-    }
-    // Kardex y ajustes de inventario: solo Pro
-    // (almacenes y transferencias ya tienen gate a nivel de página)
-    if (!gates.permiteAlmacenes &&
-        (path == '/kardex' || path.startsWith('/kardex/') ||
-         path == '/ajustes' || path.startsWith('/ajustes/'))) {
-      return '/licencia';
-    }
+        // Reportes: desde Esencial (gratis no incluye reportes)
+        if (!gates.permiteReportes &&
+            (path == '/reports' || path.startsWith('/reports/'))) {
+          return '/licencia';
+        }
+        // Kardex y ajustes de inventario: solo Pro
+        // (almacenes y transferencias ya tienen gate a nivel de página)
+        if (!gates.permiteAlmacenes &&
+            (path == '/kardex' ||
+                path.startsWith('/kardex/') ||
+                path == '/ajustes' ||
+                path.startsWith('/ajustes/'))) {
+          return '/licencia';
+        }
       } catch (_) {}
 
       // Setup obligatorio SOLO para cuentas reales de fábrica (no invitado).
@@ -269,19 +271,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/legal/privacidad',
         name: LegalPage.routePrivacidad,
-        builder: (_, __) =>
-            const LegalPage(documento: LegalDocumento.privacidad),
+        builder: (_, __) => AppShell(
+          child: const LegalPage(documento: LegalDocumento.privacidad),
+        ),
       ),
       GoRoute(
         path: '/legal/terminos',
         name: LegalPage.routeTerminos,
-        builder: (_, __) => const LegalPage(documento: LegalDocumento.terminos),
+        builder: (_, __) => AppShell(
+          child: const LegalPage(documento: LegalDocumento.terminos),
+        ),
       ),
       GoRoute(
         path: '/legal/eliminar-cuenta',
         name: LegalPage.routeEliminarCuenta,
-        builder: (_, __) =>
-            const LegalPage(documento: LegalDocumento.eliminarCuenta),
+        builder: (_, __) => AppShell(
+          child: const LegalPage(documento: LegalDocumento.eliminarCuenta),
+        ),
       ),
       GoRoute(
         path: '/setup-cuenta',
@@ -732,7 +738,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (c is! ClienteCompleto) {
             return const AppShell(child: ClientesGestionPage());
           }
-          return AppShell(child: ClienteDetallePage.fromCliente(c));
+          return AppShell(child: ClienteDetallePage.fromCliente(c, context));
         },
       ),
       GoRoute(path: '/customers', redirect: (_, __) => '/clientes'),

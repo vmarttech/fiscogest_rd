@@ -43,10 +43,12 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
     _nombre = TextEditingController(text: p?.nombre ?? '');
     _descripcion = TextEditingController(text: p?.descripcion ?? '');
     _valor = TextEditingController(text: p?.valor.toString() ?? '10');
-    _cantidad =
-        TextEditingController(text: p?.minimoCantidad?.toString() ?? '');
-    _minimoMonto =
-        TextEditingController(text: p?.minimoMonto?.toString() ?? '');
+    _cantidad = TextEditingController(
+      text: p?.minimoCantidad?.toString() ?? '',
+    );
+    _minimoMonto = TextEditingController(
+      text: p?.minimoMonto?.toString() ?? '',
+    );
     _productosMarcados = {...p?.productoIds ?? const <int>[]};
     _categoriasMarcadas = {...p?.categoriaIds ?? const <int>[]};
     _tipo = p?.tipo ?? 'porcentaje';
@@ -79,9 +81,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
         if (child == null) return const SizedBox.shrink();
         final size = MediaQuery.sizeOf(ctx);
         return MediaQuery(
-          data: MediaQuery.of(ctx).copyWith(
-            textScaler: const TextScaler.linear(1.0),
-          ),
+          data: MediaQuery.of(
+            ctx,
+          ).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -192,7 +194,10 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Nombre de la promoción *',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   validator: (v) => v == null || v.trim().isEmpty
                       ? 'Escribe un nombre.'
@@ -206,7 +211,10 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Descripción',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -216,7 +224,10 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Tipo de promoción',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   items: const [
                     DropdownMenuItem(
@@ -254,11 +265,13 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                           : 'Monto de descuento (RD\$) *',
                       border: const OutlineInputBorder(),
                       isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                     ),
                     validator: (v) {
-                      final n =
-                          double.tryParse((v ?? '').replaceAll(',', '.'));
+                      final n = double.tryParse((v ?? '').replaceAll(',', '.'));
                       if (n == null || n <= 0) {
                         return 'Introduce un valor mayor que cero.';
                       }
@@ -325,7 +338,10 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Cantidad mínima',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null;
@@ -343,7 +359,10 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     labelText: 'Compra mínima (RD\$)',
                     border: OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return null;
@@ -374,7 +393,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                         title: Text('No hay productos disponibles.'),
                       )
                     else
-                      ...listaProductos.where((p) => p.id != null).map(
+                      ...listaProductos
+                          .where((p) => p.id != null)
+                          .map(
                             (p) => CheckboxListTile(
                               dense: true,
                               contentPadding: EdgeInsets.zero,
@@ -413,7 +434,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                         title: Text('No hay categorías disponibles.'),
                       )
                     else
-                      ...listaCategorias.where((c) => c.id != null).map(
+                      ...listaCategorias
+                          .where((c) => c.id != null)
+                          .map(
                             (c) => CheckboxListTile(
                               dense: true,
                               contentPadding: EdgeInsets.zero,
@@ -439,7 +462,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Promoción activa'),
                   value: _activa,
-                  onChanged: (v) => setState(() { _activa = v; }),
+                  onChanged: (v) => setState(() {
+                    _activa = v;
+                  }),
                 ),
                 const SizedBox(height: 8),
               ],

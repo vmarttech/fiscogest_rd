@@ -28,23 +28,23 @@ class DashboardPage extends ConsumerWidget {
             children: [
               _buildHeader(isMobile),
               const SizedBox(height: 20),
-              _buildWelcomeBanner(isMobile),
+              _buildWelcomeBanner(context, isMobile),
               const SizedBox(height: 20),
-              _buildSmallKpis(isMobile),
+              _buildSmallKpis(context, isMobile),
               const SizedBox(height: 20),
               _buildActionCards(context, isMobile, simple),
               const SizedBox(height: 24),
               if (isMobile) ...[
-                _buildExcepcionesCard(),
+                _buildExcepcionesCard(context),
                 const SizedBox(height: 16),
-                _buildAlertasCard(),
+                _buildAlertasCard(context),
               ] else
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 3, child: _buildExcepcionesCard()),
+                    Expanded(flex: 3, child: _buildExcepcionesCard(context)),
                     const SizedBox(width: 16),
-                    Expanded(flex: 2, child: _buildAlertasCard()),
+                    Expanded(flex: 2, child: _buildAlertasCard(context)),
                   ],
                 ),
             ],
@@ -90,11 +90,24 @@ class DashboardPage extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textSecondary),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 8),
-                Text('Hoy', style: AppTypography.labelMedium.copyWith(color: AppColors.textPrimary)),
+                Text(
+                  'Hoy',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 const SizedBox(width: 4),
-                const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.textSecondary),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
               ],
             ),
           ),
@@ -105,7 +118,7 @@ class DashboardPage extends ConsumerWidget {
   // ─────────────────────────────────────────────
   // BANNER BIENVENIDA (estilo adjunto)
   // ─────────────────────────────────────────────
-  Widget _buildWelcomeBanner(bool isMobile) {
+  Widget _buildWelcomeBanner(BuildContext context, bool isMobile) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -114,12 +127,12 @@ class DashboardPage extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: AppRadius.allL,
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0F766E), // Teal-700
-            Color(0xFF115E59), // Teal-800
+            Theme.of(context).colorScheme.primary, // Teal-700
+            Theme.of(context).colorScheme.primary, // Teal-800
           ],
         ),
       ),
@@ -147,7 +160,11 @@ class DashboardPage extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.white.withValues(alpha: 0.85)),
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 14,
+                      color: AppColors.white.withValues(alpha: 0.85),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _fechaHoy(),
@@ -166,7 +183,9 @@ class DashboardPage extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: AppColors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.white.withValues(alpha: 0.25)),
+                border: Border.all(
+                  color: AppColors.white.withValues(alpha: 0.25),
+                ),
               ),
               child: Text(
                 'FiscoGest RD',
@@ -183,10 +202,28 @@ class DashboardPage extends ConsumerWidget {
 
   String _fechaHoy() {
     final now = DateTime.now();
-    const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const dias = [
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo',
+    ];
     const meses = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
     ];
     return '${dias[now.weekday - 1]}, ${now.day} de ${meses[now.month - 1]} ${now.year}';
   }
@@ -194,16 +231,64 @@ class DashboardPage extends ConsumerWidget {
   // ─────────────────────────────────────────────
   // KPIs PEQUEÑOS (fila estilo adjunto)
   // ─────────────────────────────────────────────
-  Widget _buildSmallKpis(bool isMobile) {
+  Widget _buildSmallKpis(BuildContext context, bool isMobile) {
     final kpis = [
-      const _SmallKpi(title: 'VENTAS HOY', value: '\$18,392', icon: Icons.point_of_sale_outlined, bg: Color(0xFFECFDF5), iconColor: AppColors.success),
-      const _SmallKpi(title: 'ALERTAS', value: '12', icon: Icons.warning_amber_rounded, bg: Color(0xFFFFF7ED), iconColor: AppColors.warning),
-      const _SmallKpi(title: 'VALOR STOCK', value: '\$2.8M', icon: Icons.account_balance_wallet_outlined, bg: Color(0xFFFEF2F2), iconColor: AppColors.error),
-      const _SmallKpi(title: 'FILL RATE', value: '92.6%', icon: Icons.trending_up_rounded, bg: Color(0xFFEFF6FF), iconColor: AppColors.info),
-      const _SmallKpi(title: 'CLIENTES', value: '—', icon: Icons.people_outline, bg: Color(0xFFF5F3FF), iconColor: Color(0xFF7C3AED)),
-      const _SmallKpi(title: 'PRODUCTOS', value: '—', icon: Icons.inventory_2_outlined, bg: Color(0xFFECFEFF), iconColor: AppColors.primary),
-      const _SmallKpi(title: 'COMPRAS', value: '—', icon: Icons.shopping_cart_outlined, bg: Color(0xFFF0FDF4), iconColor: AppColors.success),
-      const _SmallKpi(title: 'PENDIENTES', value: '—', icon: Icons.pending_actions_outlined, bg: Color(0xFFFDF4FF), iconColor: Color(0xFFA855F7)),
+      _SmallKpi(
+        title: 'VENTAS HOY',
+        value: '\$18,392',
+        icon: Icons.point_of_sale_outlined,
+        bg: Color(0xFFECFDF5),
+        iconColor: AppColors.success,
+      ),
+      _SmallKpi(
+        title: 'ALERTAS',
+        value: '12',
+        icon: Icons.warning_amber_rounded,
+        bg: Color(0xFFFFF7ED),
+        iconColor: AppColors.warning,
+      ),
+      _SmallKpi(
+        title: 'VALOR STOCK',
+        value: '\$2.8M',
+        icon: Icons.account_balance_wallet_outlined,
+        bg: Color(0xFFFEF2F2),
+        iconColor: AppColors.error,
+      ),
+      _SmallKpi(
+        title: 'FILL RATE',
+        value: '92.6%',
+        icon: Icons.trending_up_rounded,
+        bg: Color(0xFFEFF6FF),
+        iconColor: AppColors.info,
+      ),
+      _SmallKpi(
+        title: 'CLIENTES',
+        value: '—',
+        icon: Icons.people_outline,
+        bg: Color(0xFFF5F3FF),
+        iconColor: Color(0xFF7C3AED),
+      ),
+      _SmallKpi(
+        title: 'PRODUCTOS',
+        value: '—',
+        icon: Icons.inventory_2_outlined,
+        bg: Color(0xFFECFEFF),
+        iconColor: Theme.of(context).colorScheme.primary,
+      ),
+      _SmallKpi(
+        title: 'COMPRAS',
+        value: '—',
+        icon: Icons.shopping_cart_outlined,
+        bg: Color(0xFFF0FDF4),
+        iconColor: AppColors.success,
+      ),
+      _SmallKpi(
+        title: 'PENDIENTES',
+        value: '—',
+        icon: Icons.pending_actions_outlined,
+        bg: Color(0xFFFDF4FF),
+        iconColor: Color(0xFFA855F7),
+      ),
     ];
 
     if (isMobile) {
@@ -241,15 +326,21 @@ class DashboardPage extends ConsumerWidget {
         title: 'Nueva Venta',
         subtitle: 'Facturar o registrar una venta',
         icon: Icons.point_of_sale_rounded,
-        gradient: const [Color(0xFF0F766E), Color(0xFF0D9488)],
+        gradient: [
+          Theme.of(context).colorScheme.primary,
+          Theme.of(context).colorScheme.primary,
+        ],
         onTap: () => context.go('/ventas'),
       ),
       _ActionCardData(
         title: 'Nueva Compra',
-        subtitle: simple ? 'Compra rapida al contado' : 'Registrar compra a proveedor',
+        subtitle: simple
+            ? 'Compra rapida al contado'
+            : 'Registrar compra a proveedor',
         icon: Icons.shopping_cart_rounded,
         gradient: const [Color(0xFF2563EB), Color(0xFF3B82F6)],
-        onTap: () => context.go(simple ? '/compras/rapida' : '/compras/registrar'),
+        onTap: () =>
+            context.go(simple ? '/compras/rapida' : '/compras/registrar'),
       ),
       // ─── TARJETA VIOLETA = CARRUSEL ───
       const _ActionCardData(
@@ -268,7 +359,9 @@ class DashboardPage extends ConsumerWidget {
             .map(
               (c) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: c.isCarousel ? _CarouselCard(data: c) : _ActionCard(data: c),
+                child: c.isCarousel
+                    ? _CarouselCard(data: c)
+                    : _ActionCard(data: c),
               ),
             )
             .toList(),
@@ -281,7 +374,9 @@ class DashboardPage extends ConsumerWidget {
             (c) => Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(right: 12),
-                child: c.isCarousel ? _CarouselCard(data: c) : _ActionCard(data: c),
+                child: c.isCarousel
+                    ? _CarouselCard(data: c)
+                    : _ActionCard(data: c),
               ),
             ),
           )
@@ -292,7 +387,7 @@ class DashboardPage extends ConsumerWidget {
   // ─────────────────────────────────────────────
   // EXCEPCIONES (Recent)
   // ─────────────────────────────────────────────
-  Widget _buildExcepcionesCard() {
+  Widget _buildExcepcionesCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -312,15 +407,23 @@ class DashboardPage extends ConsumerWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.inventory_2_outlined, size: 18, color: AppColors.primary),
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Text(
                     'Excepciones de Inventario',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -328,7 +431,9 @@ class DashboardPage extends ConsumerWidget {
                 onPressed: () {},
                 child: Text(
                   'Ver todo →',
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -350,11 +455,41 @@ class DashboardPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const _ExceptionRow(name: 'Mascarilla quirúrgica 50-pack', status: 'Crítico', statusColor: AppColors.error, stock: '120', risk: '\$1,240'),
-          const _ExceptionRow(name: 'Suero IV 1000ml', status: 'Crítico', statusColor: AppColors.error, stock: '35', risk: '\$875'),
-          const _ExceptionRow(name: 'Paracetamol 500mg', status: 'Exceso', statusColor: AppColors.warning, stock: '12,750', risk: '\$2,805'),
-          const _ExceptionRow(name: 'Guantes de nitrilo 100-pack', status: 'Crítico', statusColor: AppColors.error, stock: '80', risk: '\$960'),
-          const _ExceptionRow(name: 'Cilindro de oxígeno (E)', status: 'Exceso', statusColor: AppColors.warning, stock: '45', risk: '\$4,500'),
+          const _ExceptionRow(
+            name: 'Mascarilla quirúrgica 50-pack',
+            status: 'Crítico',
+            statusColor: AppColors.error,
+            stock: '120',
+            risk: '\$1,240',
+          ),
+          const _ExceptionRow(
+            name: 'Suero IV 1000ml',
+            status: 'Crítico',
+            statusColor: AppColors.error,
+            stock: '35',
+            risk: '\$875',
+          ),
+          const _ExceptionRow(
+            name: 'Paracetamol 500mg',
+            status: 'Exceso',
+            statusColor: AppColors.warning,
+            stock: '12,750',
+            risk: '\$2,805',
+          ),
+          const _ExceptionRow(
+            name: 'Guantes de nitrilo 100-pack',
+            status: 'Crítico',
+            statusColor: AppColors.error,
+            stock: '80',
+            risk: '\$960',
+          ),
+          const _ExceptionRow(
+            name: 'Cilindro de oxígeno (E)',
+            status: 'Exceso',
+            statusColor: AppColors.warning,
+            stock: '45',
+            risk: '\$4,500',
+          ),
         ],
       ),
     );
@@ -363,7 +498,7 @@ class DashboardPage extends ConsumerWidget {
   // ─────────────────────────────────────────────
   // ALERTAS (Top)
   // ─────────────────────────────────────────────
-  Widget _buildAlertasCard() {
+  Widget _buildAlertasCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -386,12 +521,18 @@ class DashboardPage extends ConsumerWidget {
                       color: AppColors.info.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.notifications_active_outlined, size: 18, color: AppColors.info),
+                    child: Icon(
+                      Icons.notifications_active_outlined,
+                      size: 18,
+                      color: AppColors.info,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Text(
                     'Alertas Prioritarias',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w600),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -399,7 +540,9 @@ class DashboardPage extends ConsumerWidget {
                 onPressed: () {},
                 child: Text(
                   'Ver todo →',
-                  style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -440,7 +583,7 @@ class DashboardPage extends ConsumerWidget {
 // SMALL KPI
 // ─────────────────────────────────────────────
 class _SmallKpi {
-  const _SmallKpi({
+  _SmallKpi({
     required this.title,
     required this.value,
     required this.icon,
@@ -463,10 +606,7 @@ class _SmallKpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: data.bg,
-        borderRadius: AppRadius.allL,
-      ),
+      decoration: BoxDecoration(color: data.bg, borderRadius: AppRadius.allL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -565,7 +705,11 @@ class _ActionCard extends StatelessWidget {
                     ),
                     child: Icon(data.icon, color: AppColors.white, size: 22),
                   ),
-                  Icon(Icons.arrow_outward_rounded, color: AppColors.white.withValues(alpha: 0.8), size: 20),
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    color: AppColors.white.withValues(alpha: 0.8),
+                    size: 20,
+                  ),
                 ],
               ),
               const Spacer(),
@@ -649,7 +793,9 @@ class _CarouselCardState extends State<_CarouselCard> {
           PageView.builder(
             controller: _controller,
             itemCount: _slides.length,
-            onPageChanged: (i) => setState(() { _page = i; }),
+            onPageChanged: (i) => setState(() {
+              _page = i;
+            }),
             itemBuilder: (_, i) {
               final s = _slides[i];
               return Padding(
@@ -669,7 +815,11 @@ class _CarouselCardState extends State<_CarouselCard> {
                           ),
                           child: Icon(s.icon, color: AppColors.white, size: 22),
                         ),
-                        Icon(Icons.arrow_outward_rounded, color: AppColors.white.withValues(alpha: 0.8), size: 20),
+                        Icon(
+                          Icons.arrow_outward_rounded,
+                          color: AppColors.white.withValues(alpha: 0.8),
+                          size: 20,
+                        ),
                       ],
                     ),
                     const Spacer(),
@@ -709,7 +859,9 @@ class _CarouselCardState extends State<_CarouselCard> {
                   width: _page == i ? 16 : 6,
                   height: 6,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: _page == i ? 1 : 0.4),
+                    color: AppColors.white.withValues(
+                      alpha: _page == i ? 1 : 0.4,
+                    ),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -723,7 +875,11 @@ class _CarouselCardState extends State<_CarouselCard> {
 }
 
 class _Slide {
-  const _Slide({required this.title, required this.subtitle, required this.icon});
+  const _Slide({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
   final String title;
   final String subtitle;
   final IconData icon;
@@ -779,7 +935,9 @@ class _AlertItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -815,7 +973,9 @@ class _ExceptionRow extends StatelessWidget {
             flex: 3,
             child: Text(
               name,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -841,7 +1001,9 @@ class _ExceptionRow extends StatelessWidget {
             flex: 2,
             child: Text(
               stock,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

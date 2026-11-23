@@ -10,7 +10,7 @@ class KpiCard extends StatelessWidget {
     required this.value,
     this.subtitle,
     this.icon,
-    this.color = AppColors.primary,
+    this.color,
     this.change,
     this.isPositive,
     this.onTap,
@@ -20,13 +20,14 @@ class KpiCard extends StatelessWidget {
   final String value;
   final String? subtitle;
   final IconData? icon;
-  final Color color;
+  final Color? color;
   final String? change;
   final bool? isPositive;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final color = this.color ?? Theme.of(context).colorScheme.primary;
     return Material(
       color: AppColors.white,
       borderRadius: AppRadius.allL,

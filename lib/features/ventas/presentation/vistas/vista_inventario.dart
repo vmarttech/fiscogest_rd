@@ -167,11 +167,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: AppColors.error,
-                    size: 48,
-                  ),
+                  Icon(Icons.error_outline, color: AppColors.error, size: 48),
                   const SizedBox(height: AppSpacing.m),
                   Text(
                     'Error al cargar productos: $error',
@@ -187,7 +183,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.inventory_2_outlined,
                         size: 64,
                         color: AppColors.grey400,
@@ -246,7 +242,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                               Text(
                                 formatRd(producto.precioVenta),
                                 style: AppTypography.labelMedium.copyWith(
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -292,17 +288,21 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
         ),
         decoration: BoxDecoration(
           color: activo
-              ? AppColors.primary.withValues(alpha: 0.12)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
               : AppColors.surface,
           border: Border.all(
-            color: activo ? AppColors.primary : AppColors.border,
+            color: activo
+                ? Theme.of(context).colorScheme.primary
+                : AppColors.border,
           ),
           borderRadius: AppRadius.allCircular,
         ),
         child: Text(
           texto,
           style: TextStyle(
-            color: activo ? AppColors.primary : AppColors.textSecondary,
+            color: activo
+                ? Theme.of(context).colorScheme.primary
+                : AppColors.textSecondary,
             fontWeight: activo ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

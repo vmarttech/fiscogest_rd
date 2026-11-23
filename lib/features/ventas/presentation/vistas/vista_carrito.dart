@@ -31,7 +31,7 @@ class VistaCarrito extends ConsumerWidget {
     };
 
     final colorPrincipal = switch (modo) {
-      ModoOperacion.venta => AppColors.primary,
+      ModoOperacion.venta => Theme.of(context).colorScheme.primary,
       ModoOperacion.cotizacion => AppColors.info,
       ModoOperacion.apartado => AppColors.warning,
       ModoOperacion.cobrar => AppColors.error,
@@ -92,7 +92,7 @@ class VistaCarrito extends ConsumerWidget {
               TextButton.icon(
                 onPressed: () =>
                     ref.read(registrarVentaProvider.notifier).vaciarVenta(),
-                icon: const Icon(Icons.delete_outline, size: 18),
+                icon: Icon(Icons.delete_outline, size: 18),
                 label: isMobile
                     ? const SizedBox.shrink()
                     : const Text('Vaciar'),
@@ -267,7 +267,7 @@ class _CarritoVacio extends ConsumerWidget {
               onPressed: () => ref
                   .read(ventasNavegacionProvider.notifier)
                   .cambiarVista(VistaActual.inventario),
-              icon: const Icon(Icons.add_circle_outline),
+              icon: Icon(Icons.add_circle_outline),
               label: const Text('AGREGAR PRODUCTOS'),
               style: FilledButton.styleFrom(
                 backgroundColor: colorPrincipal,
@@ -399,7 +399,7 @@ class _FilaProducto extends ConsumerWidget {
             onPressed: () => ref
                 .read(registrarVentaProvider.notifier)
                 .eliminarProducto(indice),
-            icon: const Icon(Icons.close_rounded, size: 18),
+            icon: Icon(Icons.close_rounded, size: 18),
             color: AppColors.error,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -423,7 +423,11 @@ class _QtyBtn extends StatelessWidget {
       child: SizedBox(
         width: 34,
         height: 34,
-        child: Icon(icon, size: 18, color: AppColors.primary),
+        child: Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }
@@ -450,7 +454,7 @@ class _FilaTotal extends StatelessWidget {
     final c =
         color ??
         (resaltado
-            ? (colorPrincipal ?? AppColors.primary)
+            ? (colorPrincipal ?? Theme.of(context).colorScheme.primary)
             : AppColors.textSecondary);
 
     return Row(
@@ -470,7 +474,7 @@ class _FilaTotal extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontSize: resaltado ? 18 : 14,
             color: resaltado
-                ? (colorPrincipal ?? AppColors.primary)
+                ? (colorPrincipal ?? Theme.of(context).colorScheme.primary)
                 : AppColors.textPrimary,
           ),
         ),

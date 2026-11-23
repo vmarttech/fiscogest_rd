@@ -105,9 +105,9 @@ class _EquivalenteDopTextoState extends State<EquivalenteDopTexto> {
             final num = _tasa!.aDop(widget.montoUsd).toStringAsFixed(2);
             await Clipboard.setData(ClipboardData(text: num));
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Copiado: RD\$ $num')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Copiado: RD\$ $num')));
             }
           },
         ),

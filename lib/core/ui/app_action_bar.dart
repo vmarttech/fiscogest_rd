@@ -66,10 +66,7 @@ class AppActionBar extends StatelessWidget {
       elevation: 8,
       shadowColor: Colors.black26,
       color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.97),
-      child: SafeArea(
-        top: false,
-        child: capped,
-      ),
+      child: SafeArea(top: false, child: capped),
     );
   }
 }

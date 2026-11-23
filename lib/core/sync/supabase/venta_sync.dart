@@ -21,7 +21,8 @@ class VentaSync {
       debugPrint('VentaSync: no hay ventas locales');
     } else {
       final payload = ventas
-          .map((v) => <String, dynamic>{
+          .map(
+            (v) => <String, dynamic>{
                 'negocio_id': negocioId,
                 'id_local': v.id,
                 'cliente_id_local': v.clienteId,
@@ -51,10 +52,12 @@ class VentaSync {
                 'descuento_nombre': v.descuentoNombre,
                 'monto_descuento': v.montoDescuento,
                 'comprobante_entrega_impreso': v.comprobanteEntregaImpreso,
-                'fecha_comprobante_entrega':
-                    v.fechaComprobanteEntrega?.toUtc().toIso8601String(),
+              'fecha_comprobante_entrega': v.fechaComprobanteEntrega
+                  ?.toUtc()
+                  .toIso8601String(),
                 'updated_at': DateTime.now().toUtc().toIso8601String(),
-              })
+            },
+          )
           .toList();
       await SupabaseRestClient().upsert(
         table: 'ventas',
@@ -70,7 +73,8 @@ class VentaSync {
       return;
     }
     final detPayload = dets
-        .map((d) => <String, dynamic>{
+        .map(
+          (d) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': d.id,
               'venta_id_local': d.ventaId,
@@ -81,7 +85,8 @@ class VentaSync {
               'subtotal': d.subtotal,
               'impuesto': d.impuesto,
               'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
+          },
+        )
         .toList();
     await SupabaseRestClient().upsert(
       table: 'ventas_detalle',

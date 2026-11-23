@@ -29,7 +29,6 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
   static const _muted = Color(0xFF334155);
   static const _muted2 = Color(0xFF64748B);
   static const _border = Color(0xFFCBD5E1);
-  static const _accent = Color(0xFF00A896);
   static const _chipActiveBg = Color(0xFFE0F2FE);
   static const _chipActiveBorder = Color(0xFF38BDF8);
   static const _chipActiveFg = Color(0xFF0369A1);
@@ -78,8 +77,8 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     24,
                   ),
                   child: async.when(
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: _accent),
+                    loading: () => Center(
+                      child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                     ),
                     error: (e, _) => Center(
                       child: Text(
@@ -121,7 +120,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                               child: FilledButton.icon(
                                 onPressed: () => _formulario(context),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: _accent,
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(6),
@@ -163,7 +162,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                   FilledButton.icon(
                                     onPressed: () => _formulario(context),
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: _accent,
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
                                       foregroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 20,
@@ -341,7 +340,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _accent, width: 1.5),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
         ),
       ),
     );
@@ -446,10 +445,10 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
     return Container(
       padding: EdgeInsets.all(compact ? 14 : 20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF00796B), Color(0xFF00A896)],
+          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.tertiary],
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -661,7 +660,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     ),
                     child: Icon(
                       Icons.warehouse_outlined,
-                      color: a.activo ? _accent : _muted2,
+                      color: a.activo ? Theme.of(context).colorScheme.primary : _muted2,
                       size: 22,
                     ),
                   ),
@@ -770,7 +769,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                   TextButton(
                     onPressed: () => _verDetalle(context, a),
                     style: TextButton.styleFrom(
-                      foregroundColor: _accent,
+                      foregroundColor: Theme.of(context).colorScheme.primary,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     child: const Text(
@@ -823,7 +822,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                           child: OutlinedButton(
                             onPressed: () => _verDetalle(context, a),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: _accent,
+                              foregroundColor: Theme.of(context).colorScheme.primary,
                               side: const BorderSide(
                                 color: Color(0xFFCBD5E1),
                                 width: 1.5,
@@ -948,7 +947,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                       ),
                       child: Icon(
                         Icons.warehouse_outlined,
-                        color: a.activo ? _accent : _muted2,
+                        color: a.activo ? Theme.of(context).colorScheme.primary : _muted2,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -1007,7 +1006,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     _formulario(context, existente: a);
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: _accent,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(

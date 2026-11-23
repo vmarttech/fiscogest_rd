@@ -28,7 +28,7 @@ class HistorialCostosPage extends ConsumerWidget {
       title: 'Historial de Costos',
       actions: [
         IconButton(
-          icon: const Icon(Icons.refresh),
+          icon: Icon(Icons.refresh),
           tooltip: 'Actualizar',
           onPressed: () => ref.invalidate(historialCostosProvider(productoId)),
         ),
@@ -74,12 +74,12 @@ class HistorialCostosPage extends ConsumerWidget {
                     child: ListTile(
                       contentPadding: AppSpacing.hM,
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.primary.withValues(
-                          alpha: 0.1,
-                        ),
-                        child: const Icon(
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.1),
+                        child: Icon(
                           Icons.attach_money,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           size: AppSizes.iconMd,
                         ),
                       ),
@@ -147,7 +147,7 @@ class _ResumenCostos extends StatelessWidget {
                 child: _KpiMini(
                   label: 'Último costo',
                   value: ultimo,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               Expanded(

@@ -16,7 +16,8 @@ class LicenciasTable extends Table {
   IntColumn get maxDispositivos => integer().withDefault(const Constant(1))();
   IntColumn get maxCajas => integer().withDefault(const Constant(1))();
 
-  BoolColumn get ecfHabilitado => boolean().withDefault(const Constant(false))();
+  BoolColumn get ecfHabilitado =>
+      boolean().withDefault(const Constant(false))();
   BoolColumn get vitalicia => boolean().withDefault(const Constant(false))();
 
   /// activa | gracia | vencida | no_activada

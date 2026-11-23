@@ -21,6 +21,7 @@ class EnterprisePageHeader extends StatelessWidget {
   final Widget? trailing;
   final bool onlyDesktop;
   final bool showBack;
+
   /// Si no hay stack, navega aquí (ej. '/sales').
   final String? backFallbackRoute;
   final VoidCallback? onBack;
@@ -61,10 +62,7 @@ class EnterprisePageHeader extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back_rounded, size: 18),
                 label: const Text(
                   'Volver',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ),
             ),

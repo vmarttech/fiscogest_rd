@@ -83,5 +83,4 @@ abstract class ICreditoDocumentoService {
     double? saldoAnterior,
     double? saldoActual,
   });
-
 }

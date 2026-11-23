@@ -31,10 +31,12 @@ class DispositivoSync {
       'plataforma': local.plataforma,
       'tipo': local.tipo,
       'activo': local.activo,
-      'registrado_en':
-          (local.registradoEn ?? DateTime.now()).toUtc().toIso8601String(),
-      'ultimo_uso':
-          (local.ultimoUso ?? DateTime.now()).toUtc().toIso8601String(),
+      'registrado_en': (local.registradoEn ?? DateTime.now())
+          .toUtc()
+          .toIso8601String(),
+      'ultimo_uso': (local.ultimoUso ?? DateTime.now())
+          .toUtc()
+          .toIso8601String(),
     };
 
     await SupabaseRestClient().upsert(

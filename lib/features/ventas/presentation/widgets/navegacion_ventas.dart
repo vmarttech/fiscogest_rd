@@ -117,7 +117,7 @@ class NavegacionVentas extends ConsumerWidget {
                       color: AppColors.white,
                     ),
                   ),
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 3),
                 ),
@@ -139,7 +139,7 @@ class NavegacionVentas extends ConsumerWidget {
                       color: AppColors.white,
                     ),
                   ),
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 3),
                 ),
@@ -161,7 +161,7 @@ class NavegacionVentas extends ConsumerWidget {
                       color: AppColors.white,
                     ),
                   ),
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 3),
                 ),
@@ -186,7 +186,11 @@ class NavegacionVentas extends ConsumerWidget {
         vertical: AppSpacing.xs,
       ),
       child: ListTile(
-        leading: Icon(icon, size: isMobile ? 18 : 20, color: AppColors.primary),
+        leading: Icon(
+          icon,
+          size: isMobile ? 18 : 20,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         title: Text(
           title,
           style: AppTypography.bodyMedium.copyWith(
@@ -201,7 +205,9 @@ class NavegacionVentas extends ConsumerWidget {
           horizontal: isMobile ? AppSpacing.s : AppSpacing.m,
           vertical: isMobile ? 2 : AppSpacing.xs,
         ),
-        hoverColor: AppColors.primary.withValues(alpha: 0.08),
+        hoverColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.08),
         minLeadingWidth: isMobile ? 28 : 32,
       ),
     );

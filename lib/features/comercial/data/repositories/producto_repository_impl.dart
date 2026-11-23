@@ -18,9 +18,9 @@ class ProductoRepositoryImpl extends IProductoRepository {
 
   @override
   Future<List<Producto>> obtenerProductos() async {
-    final filas = await (db.select(db.productosTable)
-          ..where((tbl) => tbl.activo.equals(1)))
-        .get();
+    final filas = await (db.select(
+      db.productosTable,
+    )..where((tbl) => tbl.activo.equals(1))).get();
     return filas
         .map(
           (p) => Producto(

@@ -100,7 +100,6 @@ class _FormularioCreditoDialogState
     _fechaPrimerVencimiento = DateTime.now().add(const Duration(days: 30));
   }
 
-
   Future<void> _aplicarParametrosConfig() async {
     try {
       final p = await ref.read(parametrosCreditoProvider.future);
@@ -341,8 +340,9 @@ class _FormularioCreditoDialogState
                                 '$cuotas ${cuotas == 1 ? 'cuota' : 'cuotas'}',
                               ),
                               selected: activo,
-                              onSelected: (_) =>
-                                  setState(() { _numeroCuotas = cuotas; }),
+                              onSelected: (_) => setState(() {
+                                _numeroCuotas = cuotas;
+                              }),
                             );
                           })
                           .toList(),
@@ -408,7 +408,7 @@ class _FormularioCreditoDialogState
                       'TOTAL A PAGAR:',
                       _formatearMonto(resumen.totalAPagar), // ✅
                       destacado: true,
-                      colorTexto: AppColors.primary,
+                      colorTexto: Theme.of(context).colorScheme.primary,
                     ),
                     _buildFilaResumen(
                       resumen.numeroCuotas == 1
@@ -493,7 +493,7 @@ class _FormularioCreditoDialogState
             style: destacado
                 ? AppTypography.labelLarge.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   )
                 : AppTypography.labelMedium,
           ),

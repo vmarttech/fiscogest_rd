@@ -47,7 +47,10 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (fecha != null) setState(() { _fechaSeleccionada = fecha; });
+    if (fecha != null)
+      setState(() {
+        _fechaSeleccionada = fecha;
+      });
   }
 
   Future<void> _guardarEntrada() async {
@@ -93,7 +96,9 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
           child: SingleChildScrollView(
             padding: AppLayout.pantallaPadding,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width < 768 ? 720 : 900,
+              ),
               child: AppCard(
                 padding: AppSpacing.allXl,
                 elevation: 2,
@@ -107,12 +112,14 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                         Container(
                           padding: AppSpacing.allM,
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.05),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.add_shopping_cart,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             size: 24,
                           ),
                         ),
@@ -167,7 +174,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.calendar_today,
                               color: AppColors.textSecondary,
                               size: 20,
@@ -191,7 +198,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                                 ],
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.arrow_forward_ios,
                               size: 14,
                               color: AppColors.textDisabled,

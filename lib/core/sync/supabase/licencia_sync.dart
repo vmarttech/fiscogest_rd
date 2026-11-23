@@ -60,8 +60,7 @@ class LicenciaSync {
       return;
     }
     locales.sort((a, b) => b.id.compareTo(a.id));
-    final dev =
-        locales.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+    final dev = locales.where((r) => r.plan == 'desarrollador' || r.vitalicia);
     final lic = dev.isNotEmpty ? dev.first : locales.first;
     final planLocal = lic.plan.toLowerCase();
 
@@ -79,8 +78,7 @@ class LicenciaSync {
         if (remote.isNotEmpty) {
           final rp = (remote.first['plan'] as String?)?.toLowerCase() ?? '';
           final rv = remote.first['vitalicia'] == true;
-          if (rv ||
-              (rp.isNotEmpty && rp != 'demo' && rp != 'gratis')) {
+          if (rv || (rp.isNotEmpty && rp != 'demo' && rp != 'gratis')) {
             debugPrint(
               'LicenciaSync.push: omitido (local=$planLocal, nube=$rp vitalicia=$rv)',
             );
@@ -116,7 +114,8 @@ class LicenciaSync {
     final plan = (r['plan'] as String?)?.trim().toLowerCase() ?? 'gratis';
     final estado = (r['estado'] as String?)?.trim() ?? 'activa';
     final vitalicia = r['vitalicia'] == true;
-    final maxDisp = (r['max_dispositivos'] as num?)?.toInt() ??
+    final maxDisp =
+        (r['max_dispositivos'] as num?)?.toInt() ??
         maxInstalacionesPermitidas(plan);
     final maxCajas =
         (r['max_cajas'] as num?)?.toInt() ?? (kMaxCajasPorPlan[plan] ?? 1);
@@ -125,7 +124,8 @@ class LicenciaSync {
     String fechaInicio;
     final fi = r['fecha_inicio'];
     if (fi != null && '$fi'.isNotEmpty) {
-      fechaInicio = DateTime.tryParse('$fi')?.toIso8601String() ??
+      fechaInicio =
+          DateTime.tryParse('$fi')?.toIso8601String() ??
           DateTime.now().toIso8601String();
     } else {
       fechaInicio = DateTime.now().toIso8601String();
@@ -145,14 +145,17 @@ class LicenciaSync {
 
     final locales = await _db.select(_db.licenciasTable).get();
     locales.sort((a, b) => b.id.compareTo(a.id));
-    final prefer =
-        locales.where((x) => x.plan == 'desarrollador' || x.vitalicia);
+    final prefer = locales.where(
+      (x) => x.plan == 'desarrollador' || x.vitalicia,
+    );
     final row = prefer.isNotEmpty
         ? prefer.first
         : (locales.isNotEmpty ? locales.first : null);
 
     if (row == null) {
-      await _db.into(_db.licenciasTable).insert(
+      await _db
+          .into(_db.licenciasTable)
+          .insert(
             LicenciasTableCompanion.insert(
               plan: plan,
               vigenciaTipo: vigencia,
@@ -167,8 +170,9 @@ class LicenciaSync {
             ),
           );
     } else {
-      await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(row.id)))
-          .write(
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
         LicenciasTableCompanion(
           plan: Value(plan),
           vigenciaTipo: Value(vigencia),
@@ -185,13 +189,14 @@ class LicenciaSync {
     }
 
     if (plan != 'demo') {
-      final demos = await (_db.select(_db.licenciasTable)
-            ..where((t) => t.plan.equals('demo')))
-          .get();
+      final demos = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.plan.equals('demo'))).get();
       for (final d in demos) {
         if (row != null && d.id == row.id) continue;
-        await (_db.update(_db.licenciasTable)..where((t) => t.id.equals(d.id)))
-            .write(
+        await (_db.update(
+          _db.licenciasTable,
+        )..where((t) => t.id.equals(d.id))).write(
           LicenciasTableCompanion(
             estado: const Value('reemplazada'),
             actualizadoEn: Value(actualizado),

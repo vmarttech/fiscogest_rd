@@ -335,7 +335,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
-            icon: const Icon(Icons.chat_outlined, size: 18),
+            icon: Icon(Icons.chat_outlined, size: 18),
             label: const Text('Recibo digital'),
           ),
         ],
@@ -841,7 +841,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, true),
-                icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                icon: Icon(Icons.receipt_long_outlined, size: 18),
                 label: const Text('Imprimir / enviar'),
               ),
             ],
@@ -1245,7 +1245,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.account_balance_wallet,
                             color: Color(0xFF059669),
                           ),
@@ -1261,7 +1261,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           ),
                           IconButton(
                             onPressed: () => Navigator.pop(ctx),
-                            icon: const Icon(Icons.close),
+                            icon: Icon(Icons.close),
                           ),
                         ],
                       ),
@@ -1694,7 +1694,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
+            side: BorderSide(color: Color(0xFFE2E8F0)),
             foregroundColor: const Color(0xFF334155),
           ),
           child: Text(
@@ -1727,7 +1727,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       color: const Color(0xFF0F172A),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.point_of_sale,
                       color: Colors.white,
                       size: 20,
@@ -1848,19 +1848,19 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 hintText: showCxcList
                                     ? 'N° CXC o cliente…'
                                     : 'N° cotización o cliente…',
-                                prefixIcon: const Icon(Icons.search, size: 20),
+                                prefixIcon: Icon(Icons.search, size: 20),
                                 filled: true,
                                 fillColor: const Color(0xFFF8FAFC),
                                 isDense: true,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
@@ -2536,7 +2536,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                 color: Colors.white,
                                               ),
                                             )
-                                          : const Icon(Icons.check_circle),
+                                          : Icon(Icons.check_circle),
                                       label: Text(
                                         _procesando
                                             ? 'Procesando…'
@@ -3023,7 +3023,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     return AppScaffold(
       title: 'CAJA — BUSCAR COTIZACIÓN',
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -3050,7 +3050,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           decoration: InputDecoration(
                             hintText: 'N° cotización o nombre del cliente',
                             hintStyle: TextStyle(fontSize: tamanoCuerpo),
-                            prefixIcon: const Icon(Icons.search),
+                            prefixIcon: Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -3069,7 +3069,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                         child: ElevatedButton(
                           onPressed: _cargandoLista ? null : _buscar,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: AppColors.white,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
@@ -3130,7 +3132,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               final listaOk = _listaParaCobrar(v);
                               final colorEstado = credito
                                   ? AppColors.warning
-                                  : AppColors.primary;
+                                  : Theme.of(context).colorScheme.primary;
                               return Material(
                                 color: AppColors.white,
                                 borderRadius: BorderRadius.circular(12),
@@ -3214,7 +3216,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                           style: AppTypography.bodyMedium
                                               .copyWith(
                                                 fontWeight: FontWeight.bold,
-                                                color: AppColors.primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                                 fontSize: tamanoCuerpo + 1,
                                               ),
                                         ),
@@ -3255,7 +3259,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     return AppScaffold(
       title: esCredito ? 'COBRO A CRÉDITO' : 'COBRO EN CAJA',
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back),
         onPressed: () {
           setState(() {
             _modoBusqueda = true;
@@ -3303,7 +3307,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 children: [
                                   Icon(
                                     Icons.receipt_long,
-                                    color: AppColors.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     size: esPequena ? 20 : 22,
                                   ),
                                   const SizedBox(width: 8),
@@ -3445,7 +3451,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     style: AppTypography.h3.copyWith(
                                       fontWeight: FontWeight.bold,
                                       fontSize: tamanoTotal,
-                                      color: AppColors.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       height: 1.1,
                                     ),
                                   ),
@@ -3553,9 +3561,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       : IconButton.filledTonal(
                                           tooltip: 'Buscar RNC en línea',
                                           onPressed: _buscarRncFiscalEnLinea,
-                                          icon: const Icon(
-                                            Icons.travel_explore,
-                                          ),
+                                          icon: Icon(Icons.travel_explore),
                                         ),
                                 ),
                               ],
@@ -3595,21 +3601,21 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     ),
                                   ),
                                   selected: sel,
-                                  selectedColor: AppColors.primary.withValues(
-                                    alpha: 0.15,
-                                  ),
+                                  selectedColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.15),
                                   onSelected: (_) {
                                     setState(() {
                                       _formaPago = forma;
                                     });
                                   },
                                   side: sel
-                                      ? const BorderSide(
-                                          color: AppColors.primary,
+                                      ? BorderSide(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                         )
-                                      : const BorderSide(
-                                          color: AppColors.border,
-                                        ),
+                                      : BorderSide(color: AppColors.border),
                                 );
                               })
                               .toList(),
@@ -3801,7 +3807,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Icon(Icons.receipt_long, size: 22),
+                              : Icon(Icons.receipt_long, size: 22),
                           label: Text(
                             _procesando
                                 ? 'Procesando...'

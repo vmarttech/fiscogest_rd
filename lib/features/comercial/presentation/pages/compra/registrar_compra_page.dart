@@ -598,14 +598,14 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'REGISTRAR COMPRA',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF127369),
+                          color: Theme.of(context).colorScheme.primary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -613,7 +613,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                     FilledButton(
                       onPressed: _registrarCompraDirecta,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF127369),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -631,8 +631,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                     OutlinedButton(
                       onPressed: _guardarComoBorrador,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF127369),
-                        side: const BorderSide(color: Color(0xFF127369)),
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        side: BorderSide(color: Theme.of(context).colorScheme.primary),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -714,7 +714,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                   child: FilledButton(
                                     onPressed: _registrarCompraDirecta,
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: const Color(0xFF127369),
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
@@ -734,9 +734,9 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                   child: OutlinedButton(
                                     onPressed: _guardarComoBorrador,
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: const Color(0xFF127369),
-                                      side: const BorderSide(
-                                        color: Color(0xFF127369),
+                                      foregroundColor: Theme.of(context).colorScheme.primary,
+                                      side: BorderSide(
+                                        color: Theme.of(context).colorScheme.primary,
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -883,7 +883,9 @@ class _SelectorProductoCompraDialogState
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: AppTypography.button.copyWith(color: AppColors.primary),
+            style: AppTypography.button.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
       ],

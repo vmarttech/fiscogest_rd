@@ -24,7 +24,8 @@ class ClienteSync {
     }
 
     final payload = rows
-        .map((c) => <String, dynamic>{
+        .map(
+          (c) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': c.id,
               'codigo': c.codigo,
@@ -33,7 +34,8 @@ class ClienteSync {
               'rnc_cedula': c.rncCedula,
               'activo': c.activo,
               'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
+          },
+        )
         .toList();
 
     await SupabaseRestClient().upsert(

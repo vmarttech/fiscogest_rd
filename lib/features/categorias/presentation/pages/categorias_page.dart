@@ -8,7 +8,6 @@ import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
-import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
@@ -24,7 +23,6 @@ class CategoriasPage extends ConsumerStatefulWidget {
 class _CategoriasPageState extends ConsumerState<CategoriasPage> {
   String _filtroBusqueda = '';
 
-
   @override
   @override
   Widget build(BuildContext context) {
@@ -36,20 +34,11 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
       subtitle: 'Administración de familias de productos',
       backgroundColor: const Color(0xFFEEF2F3),
       showAppBar: isMobile,
-      leading: isMobile
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              tooltip: 'Atrás',
-              onPressed: () => safeBack(context, fallback: '/inventario'),
-            )
-          : null,
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isMobile ? 560 : 920,
-            ),
+            constraints: BoxConstraints(maxWidth: isMobile ? 560 : 920),
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 isMobile ? 16 : 24,
@@ -107,7 +96,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                   color: Color(0xFF1E293B),
                                   fontSize: 13,
                                 ),
-                                prefixIcon: const Icon(
+                                prefixIcon: Icon(
                                   Icons.search_rounded,
                                   size: 20,
                                   color: Color(0xFF1E293B),
@@ -121,20 +110,22 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
+                                  borderSide: BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Color(0xFF114E54),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     width: 1.5,
                                   ),
                                 ),
@@ -145,7 +136,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                           FilledButton.icon(
                             onPressed: () => _mostrarModalRegistro(context),
                             style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF114E54),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
@@ -156,7 +149,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.category_outlined, size: 20),
+                            icon: Icon(Icons.category_outlined, size: 20),
                             label: const Text(
                               'Nueva categoría',
                               style: TextStyle(
@@ -177,14 +170,16 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                         child: FilledButton.icon(
                           onPressed: () => _mostrarModalRegistro(context),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF114E54),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                             elevation: 0,
                           ),
-                          icon: const Icon(Icons.category_outlined, size: 20),
+                          icon: Icon(Icons.category_outlined, size: 20),
                           label: const Text(
                             'Nueva categoría',
                             style: TextStyle(fontWeight: FontWeight.w700),
@@ -193,9 +188,8 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                       ),
                     ),
                     TextField(
-                      onChanged: (v) => setState(
-                        () => _filtroBusqueda = v.toLowerCase(),
-                      ),
+                      onChanged: (v) =>
+                          setState(() => _filtroBusqueda = v.toLowerCase()),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF0F172A),
@@ -206,7 +200,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                           color: Color(0xFF1E293B),
                           fontSize: 13,
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search_rounded,
                           color: Color(0xFF1E293B),
                         ),
@@ -218,20 +212,16 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE2E8F0),
-                          ),
+                          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE2E8F0),
-                          ),
+                          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF114E54),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
                             width: 1.5,
                           ),
                         ),
@@ -242,8 +232,10 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                   if (!isMobile) const SizedBox(height: 16),
                   Expanded(
                     child: categoriasAsync.when(
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF114E54)),
+                      loading: () => Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       error: (e, _) => Center(
                         child: Text(
@@ -257,17 +249,17 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                         final filtradas = _filtroBusqueda.isEmpty
                             ? categorias
                             : categorias
-                                .where(
-                                  (c) =>
-                                      c.nombre.toLowerCase().contains(
-                                        _filtroBusqueda,
-                                      ) ||
-                                      (c.descripcion?.toLowerCase().contains(
-                                            _filtroBusqueda,
-                                          ) ??
-                                          false),
-                                )
-                                .toList();
+                                  .where(
+                                    (c) =>
+                                        c.nombre.toLowerCase().contains(
+                                          _filtroBusqueda,
+                                        ) ||
+                                        (c.descripcion?.toLowerCase().contains(
+                                              _filtroBusqueda,
+                                            ) ??
+                                            false),
+                                  )
+                                  .toList();
 
                         if (filtradas.isEmpty) {
                           return Center(
@@ -280,15 +272,18 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                     width: 64,
                                     height: 64,
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(
-                                        alpha: 0.10,
-                                      ),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.10),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.category_outlined,
                                       size: 32,
-                                      color: AppColors.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                   ),
                                   const SizedBox(height: 16),
@@ -343,7 +338,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.10),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.10),
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -362,9 +359,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.04,
-                                  ),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.04),
                                   border: const Border(
                                     bottom: BorderSide(color: AppColors.border),
                                   ),
@@ -375,11 +372,12 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                     Expanded(
                                       child: Text(
                                         'CATEGORÍA',
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: const Color(0xFF1E293B),
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.4,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: const Color(0xFF1E293B),
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.4,
+                                            ),
                                       ),
                                     ),
                                     SizedBox(
@@ -387,11 +385,12 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                       child: Text(
                                         'ACCIONES',
                                         textAlign: TextAlign.center,
-                                        style: AppTypography.labelSmall.copyWith(
-                                          color: const Color(0xFF1E293B),
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.4,
-                                        ),
+                                        style: AppTypography.labelSmall
+                                            .copyWith(
+                                              color: const Color(0xFF1E293B),
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.4,
+                                            ),
                                       ),
                                     ),
                                   ],
@@ -423,14 +422,18 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                               width: 40,
                                               height: 40,
                                               decoration: BoxDecoration(
-                                                color: AppColors.primary
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
                                                     .withValues(alpha: 0.12),
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.category_outlined,
-                                                color: AppColors.primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                                 size: 20,
                                               ),
                                             ),
@@ -445,42 +448,43 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                                     style: AppTypography
                                                         .bodyLarge
                                                         .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
                                                   ),
                                                   const SizedBox(height: 2),
                                                   Text(
-                                                    (c.descripcion
-                                                                ?.isEmpty ??
+                                                    (c.descripcion?.isEmpty ??
                                                             true)
                                                         ? 'Sin descripción'
                                                         : c.descripcion!,
                                                     style: AppTypography
                                                         .bodySmall
                                                         .copyWith(
-                                                      color: AppColors
-                                                          .textSecondary,
-                                                    ),
+                                                          color: AppColors
+                                                              .textSecondary,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             IconButton(
-                                              icon: const Icon(
+                                              icon: Icon(
                                                 Icons.edit_outlined,
-                                                color: AppColors.primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                                 size: 20,
                                               ),
                                               tooltip: 'Editar',
                                               onPressed: () =>
                                                   _mostrarModalRegistro(
-                                                context,
-                                                categoriaToEdit: c,
-                                              ),
+                                                    context,
+                                                    categoriaToEdit: c,
+                                                  ),
                                             ),
                                             IconButton(
-                                              icon: const Icon(
+                                              icon: Icon(
                                                 Icons.delete_outline,
                                                 color: AppColors.error,
                                                 size: 20,
@@ -488,9 +492,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                               tooltip: 'Eliminar',
                                               onPressed: () =>
                                                   _confirmarEliminacion(
-                                                context,
-                                                c,
-                                              ),
+                                                    context,
+                                                    c,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -588,61 +592,60 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    AppTextField(
-                      controller: codigoController,
-                      label: 'Código',
-                      hint: 'CAT-01',
-                    ),
-                    const SizedBox(height: 10),
-                    ValueListenableBuilder<int?>(
-                      valueListenable: padreN,
-                      builder: (_, padre, __) {
-                        final cats =
-                            ref.read(categoriaControllerProvider).valueOrNull ??
-                            [];
-                        return InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Categoría padre (opcional)',
+                  AppTextField(
+                    controller: codigoController,
+                    label: 'Código',
+                    hint: 'CAT-01',
+                  ),
+                  const SizedBox(height: 10),
+                  ValueListenableBuilder<int?>(
+                    valueListenable: padreN,
+                    builder: (_, padre, __) {
+                      final cats =
+                          ref.read(categoriaControllerProvider).valueOrNull ??
+                          [];
+                      return InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Categoría padre (opcional)',
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int?>(
+                            isExpanded: true,
+                            value: padre,
+                            hint: const Text('Ninguna (raíz)'),
+                            items: [
+                              const DropdownMenuItem<int?>(
+                                value: null,
+                                child: Text('Ninguna (raíz)'),
+                              ),
+                              for (final c in cats)
+                                if (c.id != null && c.id != categoriaToEdit?.id)
+                                  DropdownMenuItem<int?>(
+                                    value: c.id,
+                                    child: Text(c.nombre),
+                                  ),
+                            ],
+                            onChanged: (v) => padreN.value = v,
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<int?>(
-                              isExpanded: true,
-                              value: padre,
-                              hint: const Text('Ninguna (raíz)'),
-                              items: [
-                                const DropdownMenuItem<int?>(
-                                  value: null,
-                                  child: Text('Ninguna (raíz)'),
-                                ),
-                                for (final c in cats)
-                                  if (c.id != null &&
-                                      c.id != categoriaToEdit?.id)
-                                    DropdownMenuItem<int?>(
-                                      value: c.id,
-                                      child: Text(c.nombre),
-                                    ),
-                              ],
-                              onChanged: (v) => padreN.value = v,
-                            ),
-                          ),
-                        );
-                      },
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  AppTextField(
+                    controller: itbisController,
+                    label: 'ITBIS % (opcional)',
+                    hint: '18',
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: activoN,
+                    builder: (_, v, __) => SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Activa'),
+                      value: v,
+                      onChanged: (nv) => activoN.value = nv,
                     ),
-                    const SizedBox(height: 10),
-                    AppTextField(
-                      controller: itbisController,
-                      label: 'ITBIS % (opcional)',
-                      hint: '18',
-                    ),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: activoN,
-                      builder: (_, v, __) => SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Activa'),
-                        value: v,
-                        onChanged: (nv) => activoN.value = nv,
-                      ),
-                    ),
+                  ),
 
                   FormField<String>(
                     initialValue: nombreController.text,
@@ -760,7 +763,10 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                                   codigo: codigoController.text.trim(),
                                   padreId: padreN.value,
                                   itbisPorCiento: double.tryParse(
-                                    itbisController.text.trim().replaceAll(',', '.'),
+                                    itbisController.text.trim().replaceAll(
+                                      ',',
+                                      '.',
+                                    ),
                                   ),
                                   activo: activoN.value,
                                   descripcion: descripcionController.text
@@ -829,7 +835,6 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
   }
 }
 
-
 class _CategoriaCard extends StatelessWidget {
   const _CategoriaCard({
     required this.categoria,
@@ -873,9 +878,9 @@ class _CategoriaCard extends StatelessWidget {
               color: const Color(0xFFE5F2F3),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.category_outlined,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: 22,
             ),
           ),
@@ -903,11 +908,15 @@ class _CategoriaCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+            icon: Icon(
+              Icons.edit_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: Icon(Icons.delete_outline, color: AppColors.error, size: 20),
             onPressed: onDelete,
           ),
         ],

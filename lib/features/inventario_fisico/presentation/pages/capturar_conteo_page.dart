@@ -30,7 +30,6 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  static const _teal = Color(0xFF0D9488);
 
   @override
   void dispose() {
@@ -70,7 +69,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       _guardando = true;
     });
     try {
-      await ref.read(guardarDiferenciaProvider).call(
+      await ref
+          .read(guardarDiferenciaProvider)
+          .call(
             DiferenciaConteo(
               id: 0,
               conteoId: widget.conteoId,
@@ -113,7 +114,10 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
         );
       }
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -123,9 +127,13 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.go('/inventario-fisico');
       });
-      return const AppScaffold(
+      return AppScaffold(
         title: 'Capturar',
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF0D9488))),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
       );
     }
 
@@ -149,9 +157,10 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
           ? [
               IconButton(
                 tooltip: 'Diferencias',
-                icon: const Icon(Icons.difference_outlined),
-                onPressed: () => context
-                    .push('/diferencias-conteo-fisico/${widget.conteoId}'),
+                icon: Icon(Icons.difference_outlined),
+                onPressed: () => context.push(
+                  '/diferencias-conteo-fisico/${widget.conteoId}',
+                ),
               ),
             ]
           : const [],
@@ -180,20 +189,26 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                             context.go('/inventario-fisico');
                           }
                         },
-                        icon: const Icon(Icons.arrow_back_rounded),
+                        icon: Icon(Icons.arrow_back_rounded),
                         tooltip: 'Atrás',
                       ),
 
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context).colorScheme.tertiary,
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(11),
                         ),
-                        child: const Icon(Icons.qr_code_scanner_rounded,
-                            color: Colors.white, size: 22),
+                        child: Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -223,14 +238,18 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                         onPressed: () => context.push(
                           '/diferencias-conteo-fisico/${widget.conteoId}',
                         ),
-                        icon: const Icon(Icons.difference_outlined, size: 18),
+                        icon: Icon(Icons.difference_outlined, size: 18),
                         label: const Text(
                           'Ver diferencias',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: _teal,
-                          side: const BorderSide(color: _teal),
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
@@ -270,7 +289,10 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(flex: 5, child: _panelCaptura(productosAsync, isMobile)),
+                      Expanded(
+                        flex: 5,
+                        child: _panelCaptura(productosAsync, isMobile),
+                      ),
                       const SizedBox(width: 16),
                       Expanded(flex: 5, child: _panelLineas(difsAsync)),
                     ],
@@ -335,7 +357,10 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
     );
   }
 
-  Widget _panelCaptura(AsyncValue<List<Producto>> productosAsync, bool isMobile) {
+  Widget _panelCaptura(
+    AsyncValue<List<Producto>> productosAsync,
+    bool isMobile,
+  ) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
@@ -364,8 +389,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
           const SizedBox(height: 12),
           TextField(
             controller: _busquedaCtrl,
-            onChanged: (v) =>
-                setState(() { _filtro = v.trim().toLowerCase(); }),
+            onChanged: (v) => setState(() {
+              _filtro = v.trim().toLowerCase();
+            }),
             style: const TextStyle(fontWeight: FontWeight.w700),
             decoration: InputDecoration(
               hintText: 'Buscar por código o nombre…',
@@ -373,27 +399,31 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF94A3B8),
               ),
-              prefixIcon: const Icon(Icons.search_rounded,
-                  color: Color(0xFF94A3B8)),
+              prefixIcon: Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
               filled: true,
               fillColor: const Color(0xFFF8FAFC),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: const BorderSide(color: _border),
+                borderSide: BorderSide(color: _border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: const BorderSide(color: _border),
+                borderSide: BorderSide(color: _border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: const BorderSide(color: _teal, width: 1.5),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 12),
           productosAsync.when(
-            loading: () => const LinearProgressIndicator(color: _teal),
+            loading: () => LinearProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
             error: (e, _) => Text(
               'Error productos: $e',
               style: const TextStyle(
@@ -405,9 +435,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
               final filtrados = _filtro.isEmpty
                   ? lista.take(8).toList()
                   : lista
-                      .where((p) =>
+                        .where(
+                          (p) =>
                           p.codigo.toLowerCase().contains(_filtro) ||
-                          p.nombre.toLowerCase().contains(_filtro))
+                              p.nombre.toLowerCase().contains(_filtro),
+                        )
                       .take(12)
                       .toList();
               if (filtrados.isEmpty) {
@@ -423,9 +455,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                 );
               }
               return Column(
-                children: [
-                  for (final p in filtrados) _productoTile(p),
-                ],
+                children: [for (final p in filtrados) _productoTile(p)],
               );
             },
           ),
@@ -450,8 +480,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
             const SizedBox(height: 12),
             TextField(
               controller: _fisicoCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               decoration: InputDecoration(
                 labelText: 'Cantidad física',
@@ -460,15 +491,18 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                 fillColor: const Color(0xFFF8FAFC),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(11),
-                  borderSide: const BorderSide(color: _border),
+                  borderSide: BorderSide(color: _border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(11),
-                  borderSide: const BorderSide(color: _border),
+                  borderSide: BorderSide(color: _border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(11),
-                  borderSide: const BorderSide(color: _teal, width: 1.5),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),
@@ -486,7 +520,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(Icons.save_rounded, size: 20),
+                    : Icon(Icons.save_rounded, size: 20),
                 label: Text(
                   _guardando ? 'Guardando…' : 'Guardar línea',
                   style: const TextStyle(
@@ -495,7 +529,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                   ),
                 ),
                 style: FilledButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -513,7 +547,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
   Widget _productoTile(Producto p) {
     final sel = _seleccionado?.id == p.id;
     return Material(
-      color: sel ? const Color(0xFFCCFBF1) : Colors.transparent,
+      color: sel
+          ? Theme.of(context).colorScheme.primaryContainer
+          : Colors.transparent,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: () {
@@ -530,7 +566,9 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
               Icon(
                 sel ? Icons.check_circle_rounded : Icons.inventory_2_outlined,
                 size: 18,
-                color: sel ? _teal : const Color(0xFF94A3B8),
+                color: sel
+                    ? Theme.of(context).colorScheme.primary
+                    : const Color(0xFF94A3B8),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -586,9 +624,13 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
           ),
           const SizedBox(height: 10),
           difsAsync.when(
-            loading: () => const Padding(
+            loading: () => Padding(
               padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator(color: _teal)),
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
             error: (e, _) => Text(
               'Error: $e',
@@ -603,8 +645,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                   padding: EdgeInsets.symmetric(vertical: 28),
                   child: Column(
                     children: [
-                      Icon(Icons.inbox_outlined,
-                          size: 36, color: Color(0xFFCBD5E1)),
+                      Icon(
+                        Icons.inbox_outlined,
+                        size: 36,
+                        color: Color(0xFFCBD5E1),
+                      ),
                       SizedBox(height: 8),
                       Text(
                         'Aún no hay líneas en este conteo',

@@ -162,7 +162,7 @@ class SeccionLineasWidget extends StatelessWidget {
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Agregar Producto'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF127369),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
@@ -258,10 +258,7 @@ class SeccionLineasWidget extends StatelessWidget {
                   ),
                   SizedBox(
                     width: 40,
-                    child: Text(
-                      '',
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text('', textAlign: TextAlign.center),
                   ),
                 ],
               ),
@@ -322,8 +319,10 @@ class _BuscadorProductoCompraState extends State<_BuscadorProductoCompra> {
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
         isDense: true,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Color(0xFFCBD5E0)),
@@ -334,7 +333,7 @@ class _BuscadorProductoCompraState extends State<_BuscadorProductoCompra> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFF127369)),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
         ),
       ),
       // Solo Enter o escáner abren el selector (evita crash por diálogos apilados).

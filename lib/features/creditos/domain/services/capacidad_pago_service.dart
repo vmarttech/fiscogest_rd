@@ -20,7 +20,8 @@ class CapacidadPagoService {
     required double montoCuota,
     required double limiteCuotaMensual,
   }) {
-    if (limiteCuotaMensual <= 0) return true; // sin límite definido → no bloquea
+    if (limiteCuotaMensual <= 0)
+      return true; // sin límite definido → no bloquea
     return montoCuota <= limiteCuotaMensual + 0.01;
   }
 

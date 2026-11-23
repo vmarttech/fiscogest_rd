@@ -298,7 +298,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
                     onPressed: _cerrarFormularioCredito,
-                    icon: const Icon(Icons.arrow_back),
+                    icon: Icon(Icons.arrow_back),
                     label: const Text('Volver'),
                   ),
                 ),
@@ -375,7 +375,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                           subtitle: Text(
                             _formatearMonto(prod.precioUnitario),
                             style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                           onTap: () => _seleccionarProducto(prod),
@@ -398,7 +398,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.person_outline,
                         size: 20,
                         color: AppColors.warning,
@@ -669,7 +669,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
             icon: Icons.request_quote_outlined,
             title: 'Historial de cotizaciones',
             subtitle: 'Presupuestos y estados',
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             onTap: irHistorialCotizaciones,
           ),
         ],
@@ -677,7 +677,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
           icon: Icons.inventory_2_outlined,
           title: 'Consultar stock',
           subtitle: isMobile ? 'Solo lectura' : 'Solo lectura, sin salir',
-          color: AppColors.primary,
+          color: Theme.of(context).colorScheme.primary,
           onTap: consultarStock,
         ),
         if (!simplificado)
@@ -797,14 +797,16 @@ class _PosCtaCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primaryDark,
-                AppColors.primary,
-                AppColors.primaryLight.withValues(alpha: 0.95),
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.95),
               ],
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.35),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.35),
                 blurRadius: isMobile ? 10 : 20,
                 offset: Offset(0, isMobile ? 4 : 8),
               ),
@@ -997,9 +999,11 @@ class _PosFlujoBanner extends StatelessWidget {
         vertical: isMobile ? 10 : 16,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+        ),
       ),
       child: isMobile
           ? Wrap(
@@ -1008,12 +1012,14 @@ class _PosFlujoBanner extends StatelessWidget {
               alignment: WrapAlignment.center,
               children: [
                 for (var i = 0; i < pasos.length; i++) ...[
-                  _paso(pasos[i].$1, pasos[i].$2, compact: true),
+                  _paso(context, pasos[i].$1, pasos[i].$2, compact: true),
                   if (i < pasos.length - 1)
                     Icon(
                       Icons.chevron_right_rounded,
                       size: 14,
-                      color: AppColors.primary.withValues(alpha: 0.45),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.45),
                     ),
                 ],
               ],
@@ -1021,12 +1027,14 @@ class _PosFlujoBanner extends StatelessWidget {
           : Row(
               children: [
                 for (var i = 0; i < pasos.length; i++) ...[
-                  Expanded(child: _paso(pasos[i].$1, pasos[i].$2)),
+                  Expanded(child: _paso(context, pasos[i].$1, pasos[i].$2)),
                   if (i < pasos.length - 1)
                     Icon(
                       Icons.arrow_forward_rounded,
                       size: 18,
-                      color: AppColors.primary.withValues(alpha: 0.45),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.45),
                     ),
                 ],
               ],
@@ -1034,12 +1042,16 @@ class _PosFlujoBanner extends StatelessWidget {
     );
   }
 
-  Widget _paso(IconData icon, String label, {bool compact = false}) {
+  Widget _paso(BuildContext context, IconData icon, String label, {bool compact = false}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, size: compact ? 16 : 20, color: AppColors.primary),
+        Icon(
+          icon,
+          size: compact ? 16 : 20,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         SizedBox(width: compact ? 4 : 8),
         Text(
           label,

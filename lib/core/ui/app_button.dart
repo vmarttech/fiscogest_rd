@@ -36,9 +36,13 @@ class AppButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: effectiveOnPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: inAppBar ? AppColors.white : AppColors.primary,
+          backgroundColor: inAppBar
+              ? AppColors.white
+              : Theme.of(context).colorScheme.primary,
           disabledBackgroundColor: AppColors.grey300,
-          foregroundColor: inAppBar ? AppColors.primaryDark : AppColors.white,
+          foregroundColor: inAppBar
+              ? Theme.of(context).colorScheme.primary
+              : AppColors.white,
           disabledForegroundColor: AppColors.grey500,
           shape: RoundedRectangleBorder(
             borderRadius: AppRadius.allM,

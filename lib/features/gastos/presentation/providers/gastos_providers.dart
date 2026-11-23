@@ -7,7 +7,8 @@ final gastosRepositoryProvider = Provider<GastosRepository>((ref) {
   return GastosRepository(ref.watch(databaseProvider));
 });
 
-final gastosListaProvider =
-    FutureProvider.autoDispose<List<Gasto>>((ref) async {
+final gastosListaProvider = FutureProvider.autoDispose<List<Gasto>>((
+  ref,
+) async {
   return ref.watch(gastosRepositoryProvider).listar();
 });

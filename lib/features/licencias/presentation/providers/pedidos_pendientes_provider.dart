@@ -6,8 +6,9 @@ import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
 
 /// Pedidos pendientes de plataforma (solo dueño). 0 para el resto.
-final pedidosPendientesCountProvider =
-    FutureProvider.autoDispose<int>((ref) async {
+final pedidosPendientesCountProvider = FutureProvider.autoDispose<int>((
+  ref,
+) async {
   final sesion = ref.watch(sesionProvider);
   if (!esDuenoPlataforma(sesion?.username)) return 0;
 
@@ -29,8 +30,7 @@ final pedidosPendientesCountProvider =
   final rows = await db.select(db.pedidosLicenciaTable).get();
   return rows
       .where(
-        (p) =>
-            p.estado == 'pendiente_pago' || p.estado == 'pago_reportado',
+        (p) => p.estado == 'pendiente_pago' || p.estado == 'pago_reportado',
       )
       .length;
 });

@@ -1,10 +1,13 @@
 enum AmbienteDgii {
   /// Desarrollo local / sin red DGII.
   deshabilitado,
+
   /// Ambiente de pruebas DGII (precertificación).
   precertificacion,
+
   /// Certificación formal.
   certificacion,
+
   /// Producción.
   produccion;
 

@@ -125,7 +125,9 @@ class SalesPage extends ConsumerWidget {
                   const SizedBox(height: 22),
                   Text(
                     'Operaciones',
-                    style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -144,7 +146,7 @@ class SalesPage extends ConsumerWidget {
                             icon: Icons.receipt_long_outlined,
                             title: 'Emitir factura',
                             subtitle: 'B01, B02 y comprobantes fiscales',
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             onTap: () => context.push('/sales/emitir-factura'),
                           ),
                         ),
@@ -196,7 +198,7 @@ class SalesPage extends ConsumerWidget {
                       icon: Icons.receipt_long_outlined,
                       title: 'Emitir factura',
                       subtitle: 'B01, B02 y comprobantes fiscales',
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       onTap: () => context.push('/sales/emitir-factura'),
                     ),
                     const SizedBox(height: 10),
@@ -238,13 +240,16 @@ class SalesPage extends ConsumerWidget {
                             title: 'Últimos comprobantes',
                             footerLabel: 'Ver historial completo →',
                             onFooter: () => context.push('/sales/historial'),
-                            children: const [
+                            children: [
                               _ListaItem(
                                 nombre: 'Factura B01',
-                                detalle: 'Consulta el historial para el detalle',
+                                detalle:
+                                    'Consulta el historial para el detalle',
                                 valor: '—',
                                 chip: 'Factura',
-                                chipColor: AppColors.primary,
+                                chipColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                               ),
                               _ListaItem(
                                 nombre: 'Nota de crédito',
@@ -302,13 +307,13 @@ class SalesPage extends ConsumerWidget {
                       title: 'Últimos comprobantes',
                       footerLabel: 'Ver historial completo →',
                       onFooter: () => context.push('/sales/historial'),
-                      children: const [
+                      children: [
                         _ListaItem(
                           nombre: 'Historial de facturas y NC',
                           detalle: 'Consulta comprobantes emitidos',
                           valor: '—',
                           chip: 'Ver',
-                          chipColor: AppColors.primary,
+                          chipColor: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ),
@@ -351,14 +356,19 @@ class _BannerFacturacion extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
+          ],
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.22),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -375,7 +385,7 @@ class _BannerFacturacion extends StatelessWidget {
             ),
             child: Icon(
               Icons.receipt_long_rounded,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: mobile ? 24 : 28,
             ),
           ),
@@ -386,7 +396,8 @@ class _BannerFacturacion extends StatelessWidget {
               children: [
                 Text(
                   'Facturación y NC',
-                  style: (mobile ? AppTypography.h4 : AppTypography.h3).copyWith(
+                  style: (mobile ? AppTypography.h4 : AppTypography.h3)
+                      .copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
                   ),
@@ -549,7 +560,7 @@ class _OpCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
+              Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
             ],
           ),
         ),
@@ -585,8 +596,9 @@ class _ListaPanel extends StatelessWidget {
         children: [
           Text(
             title,
-            style:
-                AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w800),
+            style: AppTypography.labelLarge.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 8),
           ...children,
@@ -603,7 +615,7 @@ class _ListaPanel extends StatelessWidget {
               child: Text(
                 footerLabel,
                 style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -639,11 +651,11 @@ class _ListaItem extends StatelessWidget {
           Container(
             width: 34,
             height: 34,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.grey100,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.receipt_outlined,
               size: 18,
               color: AppColors.grey600,
@@ -677,13 +689,14 @@ class _ListaItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: (chipColor ?? AppColors.primary).withValues(alpha: 0.12),
+                color: (chipColor ?? Theme.of(context).colorScheme.primary)
+                    .withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 chip!,
                 style: AppTypography.labelSmall.copyWith(
-                  color: chipColor ?? AppColors.primary,
+                  color: chipColor ?? Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

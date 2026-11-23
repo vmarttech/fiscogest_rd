@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 /// Tarjeta consolidada: total fiado por cliente + color al dia / atrasado.
 class TarjetaConsolidadaCliente extends StatelessWidget {
   const TarjetaConsolidadaCliente({
-    super.key, required this.nombreCliente, required this.totalPendiente,
-    required this.cantidadFios, this.fechaCompromisoMasCercana, this.onTap,
+    super.key,
+    required this.nombreCliente,
+    required this.totalPendiente,
+    required this.cantidadFios,
+    this.fechaCompromisoMasCercana,
+    this.onTap,
   });
 
   final String nombreCliente;
@@ -33,16 +37,27 @@ class TarjetaConsolidadaCliente extends StatelessWidget {
       ),
       child: ListTile(
         onTap: onTap,
-        title: Text(nombreCliente, style: const TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(
+          nombreCliente,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
         subtitle: Text('$cantidadFios fio(s) pendiente(s)'),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('RD\$${totalPendiente.toStringAsFixed(2)}',
-                style: TextStyle(fontWeight: FontWeight.w800, color: textoColor)),
-            Text(atrasado ? 'ATRASADO' : 'AL DIA',
-                style: TextStyle(fontSize: 11, color: textoColor, fontWeight: FontWeight.w600)),
+            Text(
+              'RD\$${totalPendiente.toStringAsFixed(2)}',
+              style: TextStyle(fontWeight: FontWeight.w800, color: textoColor),
+            ),
+            Text(
+              atrasado ? 'ATRASADO' : 'AL DIA',
+              style: TextStyle(
+                fontSize: 11,
+                color: textoColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),

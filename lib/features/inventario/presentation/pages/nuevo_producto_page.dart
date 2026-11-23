@@ -228,7 +228,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         child: IconButton.filledTonal(
           tooltip: tooltip,
           onPressed: onCrear,
-          icon: const Icon(Icons.add_rounded),
+          icon: Icon(Icons.add_rounded),
         ),
       ),
     ],
@@ -625,7 +625,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
             Row(
               children: [
                 if (icono != null) ...[
-                  Icon(icono, size: 20, color: AppColors.primary),
+                  Icon(
+                    icono,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                 ],
                 Text(titulo, style: AppTypography.h4),
@@ -770,8 +774,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                         ? _marcaSel
                                         : null,
                                     items: items,
-                                    onChanged: (v) =>
-                                        setState(() { _marcaSel = v; }),
+                                    onChanged: (v) => setState(() {
+                                      _marcaSel = v;
+                                    }),
                                   ),
                                 );
                               },
@@ -814,8 +819,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                         ? _unidadSel
                                         : null,
                                     items: items,
-                                    onChanged: (v) =>
-                                        setState(() { _unidadSel = v; }),
+                                    onChanged: (v) => setState(() {
+                                      _unidadSel = v;
+                                    }),
                                   ),
                                 );
                               },
@@ -872,7 +878,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                       ),
                                     ),
                                   ],
-                                  onChanged: (v) => setState(() { _impSel = v; }),
+                                  onChanged: (v) => setState(() {
+                                    _impSel = v;
+                                  }),
                                 );
                               },
                               loading: () => const Center(
@@ -901,8 +909,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                   RegExp(r'^\d+\.?\d{0,2}'),
                                 ),
                               ],
-                              onChanged: (_) =>
-                                  setState(() { _recalcularPrecioVenta(); }),
+                              onChanged: (_) => setState(() {
+                                _recalcularPrecioVenta();
+                              }),
                             ),
                             child2: AppTextField(
                               label: 'Gastos Asociados',
@@ -918,8 +927,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                   RegExp(r'^\d+\.?\d{0,2}'),
                                 ),
                               ],
-                              onChanged: (_) =>
-                                  setState(() { _recalcularPrecioVenta(); }),
+                              onChanged: (_) => setState(() {
+                                _recalcularPrecioVenta();
+                              }),
                             ),
                           ),
                           AppLayout.vM,
@@ -976,8 +986,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                                   RegExp(r'^\d+\.?\d{0,2}'),
                                 ),
                               ],
-                              onChanged: (_) =>
-                                  setState(() { _recalcularPrecioVenta(); }),
+                              onChanged: (_) => setState(() {
+                                _recalcularPrecioVenta();
+                              }),
                             ),
                             child2: AppTextField(
                               label: 'Precio de Venta',
@@ -1117,8 +1128,12 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
                             alignment: Alignment.centerLeft,
                             child: Switch(
                               value: _activo,
-                              activeThumbColor: AppColors.primary,
-                              onChanged: (v) => setState(() { _activo = v; }),
+                              activeThumbColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              onChanged: (v) => setState(() {
+                                _activo = v;
+                              }),
                             ),
                           ),
                         ],

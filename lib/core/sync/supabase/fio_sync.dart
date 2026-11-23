@@ -21,7 +21,8 @@ class FioSync {
       return;
     }
     final payload = rows
-        .map((f) => <String, dynamic>{
+        .map(
+          (f) => <String, dynamic>{
               'negocio_id': negocioId,
               'id_local': f.id,
               'nombre_cliente': f.nombreCliente,
@@ -33,7 +34,8 @@ class FioSync {
               'estado': f.estado,
               'venta_id_local': f.ventaId,
               'updated_at': DateTime.now().toUtc().toIso8601String(),
-            })
+          },
+        )
         .toList();
     await SupabaseRestClient().upsert(
       table: 'fios',

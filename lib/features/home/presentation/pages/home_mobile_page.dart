@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,8 +15,6 @@ import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar
 class HomeMobilePage extends ConsumerWidget {
   const HomeMobilePage({super.key});
 
-  static const Color _teal = Color(0xFF00796B);
-  static const Color _tealSoft = Color(0xFFE0F2F1);
   static const Color _bg = Color(0xFFF8FAFC);
   static const Color _text = Color(0xFF1E293B);
   static const Color _muted = Color(0xFF64748B);
@@ -29,7 +26,6 @@ class HomeMobilePage extends ConsumerWidget {
 
   static const List<BoxShadow> _cardShadow = [
     BoxShadow(color: Color(0x1A0F172A), blurRadius: 12, offset: Offset(0, 4)),
-    BoxShadow(color: Color(0x0D00796B), blurRadius: 20, offset: Offset(0, 8)),
   ];
 
   static const List<BoxShadow> _cardShadowSoft = [
@@ -48,8 +44,7 @@ class HomeMobilePage extends ConsumerWidget {
     final simple = ref.watch(modoSimplificadoProvider);
     final n1 = cfg?.nombreComercial.trim() ?? '';
     final n2 = cfg?.razonSocial.trim() ?? '';
-    final negocio =
-        n1.isNotEmpty ? n1 : (n2.isNotEmpty ? n2 : 'Mi negocio');
+    final negocio = n1.isNotEmpty ? n1 : (n2.isNotEmpty ? n2 : 'Mi negocio');
     final direccionStr = (cfg?.direccion ?? '').trim();
 final dash = ref.watch(dashboardSnapshotProvider);
     final ventasHoy = dash.when(
@@ -81,15 +76,11 @@ final dash = ref.watch(dashboardSnapshotProvider);
     return Scaffold(
       backgroundColor: _bg,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE0F2F1),
-              Color(0xFFF8FAFC),
-              Color(0xFFF1F5F9),
-            ],
+            colors: [Color(0xFFE0F2F1), Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
             stops: [0.0, 0.22, 1.0],
           ),
         ),
@@ -102,8 +93,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
               onMenu: () => ShellDrawerScope.open(context),
               trailing: Theme(
                 data: Theme.of(context).copyWith(
-                  iconTheme:
-                      const IconThemeData(color: Colors.white, size: 22),
+                  iconTheme: const IconThemeData(color: Colors.white, size: 22),
                 ),
                 child: const CampanaNotificaciones(),
               ),
@@ -121,7 +111,9 @@ final dash = ref.watch(dashboardSnapshotProvider);
                     stockBajo: stockLabel,
                     onVentas: null,
                     onPorCobrar: () => go('/creditos/cuentas'),
-                    onPorPagar: simple ? null : () => go('/compras/cuentas-pagar'),
+                    onPorPagar: simple
+                        ? null
+                        : () => go('/compras/cuentas-pagar'),
                     onStock: () => go('/inventario?filtro=bajo'),
                   ),
                   const SizedBox(height: 20),
@@ -129,7 +121,8 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   const SizedBox(height: 10),
                   _AccionesRapidas(
                     onNuevaVenta: () => go('/ventas/cotizaciones/nueva'),
-                    onCompra: () => go(simple ? '/compras/rapida' : '/compras/registrar'),
+                    onCompra: () =>
+                        go(simple ? '/compras/rapida' : '/compras/registrar'),
                     onGasto: () => go('/gastos'),
                     onCliente: () => go('/clientes/nuevo'),
                     onProducto: () => go('/productos/nuevo'),
@@ -165,15 +158,18 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   Row(
                     children: [
                       const Expanded(
-                          child: _SectionTitle('Actividad reciente')),
+                        child: _SectionTitle('Actividad reciente'),
+                      ),
                       GestureDetector(
-                        onTap: () { if (!simple) go('/reports'); },
-                        child: const Text(
+                        onTap: () {
+                          if (!simple) go('/reports');
+                        },
+                        child: Text(
                           'Ver todo',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: _teal,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -181,7 +177,8 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   ),
                   const SizedBox(height: 10),
                   _ActividadReciente(
-                    onCompra: () => go(simple ? '/compras/rapida' : '/compras/lista'),
+                    onCompra: () =>
+                        go(simple ? '/compras/rapida' : '/compras/lista'),
                     onCxc: () => go('/creditos/cuentas'),
                   ),
                 ],
@@ -209,12 +206,27 @@ final dash = ref.watch(dashboardSnapshotProvider);
 
   static String _fechaHoy() {
     const d = [
-      'Lunes', 'Martes', 'Miércoles', 'Jueves',
-      'Viernes', 'Sábado', 'Domingo',
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo',
     ];
     const m = [
-      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-      'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
     ];
     final n = DateTime.now();
     return '${d[n.weekday - 1]}, ${n.day} ${m[n.month - 1]}';
@@ -252,7 +264,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
               ),
               const SizedBox(height: 8),
               ListTile(
-                leading: const Icon(Icons.add_shopping_cart, color: _teal),
+                leading: Icon(Icons.add_shopping_cart, color: Theme.of(context).colorScheme.primary),
                 title: const Text(
                   'Nueva venta',
                   style: TextStyle(fontWeight: FontWeight.w700, color: _text),
@@ -263,16 +275,19 @@ final dash = ref.watch(dashboardSnapshotProvider);
                 },
               ),
               ListTile(
-                leading:
-                    const Icon(Icons.add_business_outlined, color: _teal),
+                leading: Icon(Icons.add_business_outlined, color: Theme.of(context).colorScheme.primary),
                 title: const Text(
                   'Nueva compra',
                   style: TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  final modoSimple = ProviderScope.containerOf(context).read(modoSimplificadoProvider);
-                  context.push(modoSimple ? '/compras/rapida' : '/compras/registrar');
+                  final modoSimple = ProviderScope.containerOf(
+                    context,
+                  ).read(modoSimplificadoProvider);
+                  context.push(
+                    modoSimple ? '/compras/rapida' : '/compras/registrar',
+                  );
                 },
               ),
             ],
@@ -317,19 +332,16 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Material(
-      color: HomeMobilePage._teal,
+      color: scheme.primary,
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF00796B),
-              Color(0xFF00695C),
-              Color(0xFF004D40),
-            ],
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: scheme.onPrimary.withValues(alpha: 0.24),
+            ),
           ),
         ),
         padding: EdgeInsets.only(
@@ -346,8 +358,11 @@ class _Header extends StatelessWidget {
                 IconButton(
                   tooltip: 'Menú',
                   onPressed: onMenu,
-                  icon: const Icon(Icons.menu_rounded,
-                      color: Colors.white, size: 26),
+                  icon: Icon(
+                    Icons.menu_rounded,
+                    color: scheme.onPrimary,
+                    size: 26,
+                  ),
                 ),
                 Expanded(
                   child: Column(
@@ -357,10 +372,10 @@ class _Header extends StatelessWidget {
                         negocio,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: scheme.onPrimary,
                           letterSpacing: -0.3,
                           height: 1.15,
                         ),
@@ -374,7 +389,7 @@ class _Header extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.88),
+                            color: scheme.onPrimary.withValues(alpha: 0.82),
                             height: 1.25,
                           ),
                         ),
@@ -390,19 +405,23 @@ class _Header extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 7),
+                  horizontal: 12,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: scheme.onPrimary.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: scheme.onPrimary.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today_outlined,
-                        size: 13,
-                        color: Colors.white.withValues(alpha: 0.9)),
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 13,
+                      color: scheme.onPrimary,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -410,7 +429,7 @@ class _Header extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.95),
+                          color: scheme.onPrimary,
                         ),
                       ),
                     ),
@@ -428,7 +447,7 @@ class _Header extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white.withValues(alpha: 0.92),
+                        color: scheme.onPrimary,
                       ),
                     ),
                   ],
@@ -469,8 +488,8 @@ class _KpiGrid extends StatelessWidget {
       children: [
         _KpiCard(
           icon: Icons.show_chart,
-          iconBg: HomeMobilePage._tealSoft,
-          iconColor: HomeMobilePage._teal,
+          iconBg: Theme.of(context).colorScheme.primaryContainer,
+          iconColor: Theme.of(context).colorScheme.primary,
           label: 'Ventas hoy',
           value: ventasHoy,
           onTap: onVentas,
@@ -485,8 +504,8 @@ class _KpiGrid extends StatelessWidget {
         ),
         _KpiCard(
           icon: Icons.payments_outlined,
-          iconBg: HomeMobilePage._tealSoft,
-          iconColor: HomeMobilePage._teal,
+          iconBg: Theme.of(context).colorScheme.primaryContainer,
+          iconColor: Theme.of(context).colorScheme.primary,
           label: 'Por pagar',
           value: porPagar,
           onTap: onPorPagar,
@@ -550,8 +569,10 @@ class _KpiCard extends StatelessWidget {
                   Container(
                     width: 32,
                     height: 32,
-                    decoration:
-                        BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      shape: BoxShape.circle,
+                    ),
                     child: Icon(icon, size: 16, color: iconColor),
                   ),
                   const SizedBox(width: 8),
@@ -670,7 +691,7 @@ class _PrimaryBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: HomeMobilePage._teal,
+      color: Theme.of(context).colorScheme.primary,
       borderRadius: BorderRadius.circular(10),
       elevation: 2,
       shadowColor: const Color(0x4000796B),
@@ -727,22 +748,22 @@ class _OutlineBtn extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: HomeMobilePage._teal, width: 1.5),
+            border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: HomeMobilePage._teal),
+              Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w800,
-                    color: HomeMobilePage._teal,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -801,12 +822,11 @@ class _ModulosGrid extends StatelessWidget {
                 ),
                 boxShadow: HomeMobilePage._cardShadowSoft,
               ),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 26, color: HomeMobilePage._teal),
+                  Icon(icon, size: 26, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(height: 8),
                   Text(
                     label,
@@ -830,10 +850,7 @@ class _ModulosGrid extends StatelessWidget {
 }
 
 class _ActividadReciente extends StatelessWidget {
-  const _ActividadReciente({
-    required this.onCompra,
-    required this.onCxc,
-  });
+  const _ActividadReciente({required this.onCompra, required this.onCxc});
 
   final VoidCallback onCompra, onCxc;
 
@@ -868,8 +885,7 @@ class _ActividadReciente extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < items.length; i++) ...[
-            if (i > 0)
-              const Divider(height: 1, color: HomeMobilePage._border),
+            if (i > 0) const Divider(height: 1, color: HomeMobilePage._border),
             Material(
               color: Colors.transparent,
               child: InkWell(
@@ -877,7 +893,9 @@ class _ActividadReciente extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 14),
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -951,14 +969,14 @@ class _BottomNav extends StatelessWidget {
           height: 64,
           child: Row(
             children: [
-              _item(0, Icons.home_outlined, Icons.home, 'Inicio'),
-              _item(1, Icons.history, Icons.history, 'Ventas'),
+              _item(context, 0, Icons.home_outlined, Icons.home, 'Inicio'),
+              _item(context, 1, Icons.history, Icons.history, 'Ventas'),
               Expanded(
                 child: Center(
                   child: Transform.translate(
                     offset: const Offset(0, -12),
                     child: Material(
-                      color: HomeMobilePage._teal,
+                      color: Theme.of(context).colorScheme.primary,
                       shape: const CircleBorder(),
                       elevation: 4,
                       shadowColor: const Color(0x5900796B),
@@ -971,17 +989,22 @@ class _BottomNav extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: HomeMobilePage._bg, width: 4),
+                              color: HomeMobilePage._bg,
+                              width: 4,
                           ),
-                          child: const Icon(Icons.add,
-                              color: Colors.white, size: 28),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-              _item(3, Icons.settings_outlined, Icons.settings, 'Más'),
+              _item(context, 3, Icons.settings_outlined, Icons.settings, 'Más'),
             ],
           ),
         ),
@@ -989,7 +1012,7 @@ class _BottomNav extends StatelessWidget {
     );
   }
 
-  Widget _item(int index, IconData icon, IconData active, String label) {
+  Widget _item(BuildContext context, int index, IconData icon, IconData active, String label) {
     final on = currentIndex == index;
     return Expanded(
       child: InkWell(
@@ -1000,7 +1023,7 @@ class _BottomNav extends StatelessWidget {
             Icon(
               on ? active : icon,
               size: 22,
-              color: on ? HomeMobilePage._teal : HomeMobilePage._muted,
+              color: on ? Theme.of(context).colorScheme.primary : HomeMobilePage._muted,
             ),
             const SizedBox(height: 2),
             Text(
@@ -1008,7 +1031,7 @@ class _BottomNav extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
-                color: on ? HomeMobilePage._teal : HomeMobilePage._muted,
+                color: on ? Theme.of(context).colorScheme.primary : HomeMobilePage._muted,
               ),
             ),
           ],
@@ -1017,6 +1040,5 @@ class _BottomNav extends StatelessWidget {
     );
   }
 }
-
 
 /// Menú hamburguesa — accesos del home móvil.

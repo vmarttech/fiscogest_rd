@@ -18,6 +18,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/ui/app_theme.dart';
 
 enum _SeccionConfig {
   empresa,
@@ -276,7 +277,10 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -306,18 +310,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       title: isMobile ? 'Configuración Global' : null,
       subtitle: isMobile
           ? 'Mantenimiento de parámetros del sistema y documentos'
-          : null,
-      leading: isMobile
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/');
-                }
-              },
-            )
           : null,
       body: asyncCfg.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -349,7 +341,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                         // Forzar 8 en desktop ancho; 4 solo si no caben
                         final cols = w >= 980 ? 8 : (w >= 560 ? 4 : 2);
                         // Más anchas que altas → fila compacta como el mock
-                        final ratio = cols == 8 ? 1.35 : (cols == 4 ? 1.2 : 1.4);
+                        final ratio = cols == 8
+                            ? 1.35
+                            : (cols == 4 ? 1.2 : 1.4);
                         return GridView.count(
                           crossAxisCount: cols,
                           shrinkWrap: true,
@@ -363,7 +357,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                                 icon: _iconoSeccion(s),
                                 label: _tituloSeccion(s),
                                 selected: s == _seccion,
-                                onTap: () => setState(() { _seccion = s; }),
+                                onTap: () => setState(() {
+                                  _seccion = s;
+                                }),
                               ),
                           ],
                         );
@@ -383,8 +379,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           bottom: 18,
           child: _HistorialModificacionesCard(
             collapsed: _historialColapsado,
-            onToggle: () =>
-                setState(() { _historialColapsado = !_historialColapsado; }),
+            onToggle: () => setState(() {
+              _historialColapsado = !_historialColapsado;
+            }),
             entradas: _historialEntradas,
           ),
         ),
@@ -420,24 +417,34 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                   avatar: Icon(
                     _iconoSeccion(s),
                     size: 16,
-                    color: sel ? AppColors.primary : AppColors.textSecondary,
+                    color: sel
+                        ? Theme.of(context).colorScheme.primary
+                        : AppColors.textSecondary,
                   ),
                   label: Text(_tituloSeccion(s)),
                   labelStyle: AppTypography.labelMedium.copyWith(
-                    color: sel ? AppColors.primary : AppColors.textSecondary,
+                    color: sel
+                        ? Theme.of(context).colorScheme.primary
+                        : AppColors.textSecondary,
                     fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
                   ),
-                  selectedColor: AppColors.primary.withValues(alpha: 0.14),
+                  selectedColor: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.14),
                   backgroundColor: Colors.white,
                   side: BorderSide(
                     color: sel
-                        ? AppColors.primary.withValues(alpha: 0.45)
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.45)
                         : AppColors.border,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  onSelected: (_) => setState(() { _seccion = s; }),
+                  onSelected: (_) => setState(() {
+                    _seccion = s;
+                  }),
                 );
               },
             ),
@@ -561,15 +568,18 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(mob ? 10 : 14),
-          borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
+          borderSide: BorderSide(color: Color(0xFFCBD2D7)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(mob ? 10 : 14),
-          borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
+          borderSide: BorderSide(color: Color(0xFFCBD2D7)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(mob ? 10 : 14),
-          borderSide: const BorderSide(color: Color(0xFF21877C), width: 1.5),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.5,
+          ),
         ),
       );
     }
@@ -623,7 +633,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       );
     }
 
-    final hasLogo = _logoPath != null &&
+    final hasLogo =
+        _logoPath != null &&
         _logoPath!.isNotEmpty &&
         File(_logoPath!).existsSync();
 
@@ -696,7 +707,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                         ),
                       ),
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF21877C),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: const Color(0xFFCBD5E1),
                         padding: EdgeInsets.symmetric(
@@ -711,7 +722,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                             ? MaterialTapTargetSize.shrinkWrap
                             : MaterialTapTargetSize.padded,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(isMobile ? 9 : 11),
+                          borderRadius: BorderRadius.circular(
+                            isMobile ? 9 : 11,
+                          ),
                         ),
                       ),
                     ),
@@ -738,10 +751,13 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                             borderRadius: BorderRadius.circular(21),
                             gradient: hasLogo
                                 ? null
-                                : const LinearGradient(
+                                : LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
-                                    colors: [Color(0xFF148779), Color(0xFF07584F)],
+                                    colors: [
+                                      Color(0xFF148779),
+                                      Color(0xFF07584F),
+                                    ],
                                   ),
                             image: hasLogo
                                 ? DecorationImage(
@@ -751,7 +767,9 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                                 : null,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF0A514B).withValues(alpha: 0.21),
+                                color: const Color(
+                                  0xFF0A514B,
+                                ).withValues(alpha: 0.21),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -798,7 +816,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                     const SizedBox(height: 15),
                     TextButton.icon(
                       onPressed: _elegirLogo,
-                      icon: const Icon(Icons.image_outlined, size: 16),
+                      icon: Icon(Icons.image_outlined, size: 16),
                       label: const Text(
                         'Cambiar logo',
                         style: TextStyle(
@@ -981,11 +999,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
 
                 if (!side) {
                   return Column(
-                    children: [
-                      logoCol,
-                      const SizedBox(height: 20),
-                      fields,
-                    ],
+                    children: [logoCol, const SizedBox(height: 20), fields],
                   );
                 }
                 return Row(
@@ -1003,7 +1017,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       ),
     );
   }
-
 
   /// Panel blanco unificado (mismo estilo que Identidad).
   /// En móvil: título más chico + botón Guardar compacto para no romper el layout.
@@ -1049,45 +1062,46 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF17212B),
                       ),
-                      maxLines: 1,
+                      maxLines: isMobile ? 2 : 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   if (onGuardar != null) ...[
                     const SizedBox(width: 8),
-                    FilledButton.icon(
-                      onPressed: _guardando ? null : onGuardar,
-                      icon: Icon(Icons.save_rounded, size: isMobile ? 16 : 18),
-                      label: Text(
-                        _guardando
-                            ? 'Guardando...'
-                            : (isMobile ? 'Guardar' : 'Guardar Cambios'),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: isMobile ? 13 : 14,
+                    if (isMobile)
+                      IconButton.filledTonal(
+                        tooltip: _guardando ? 'Guardando...' : 'Guardar',
+                        onPressed: _guardando ? null : onGuardar,
+                        icon: Icon(
+                          _guardando ? Icons.hourglass_top : Icons.save_rounded,
+                        ),
+                      )
+                    else
+                      FilledButton.icon(
+                        onPressed: _guardando ? null : onGuardar,
+                        icon: Icon(
+                          _guardando ? Icons.hourglass_top : Icons.save_rounded,
+                          size: 18,
+                        ),
+                        label: Text(
+                          _guardando ? 'Guardando...' : 'Guardar Cambios',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: const Color(0xFFCBD5E1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 17,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(11),
+                          ),
                         ),
                       ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF21877C),
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: const Color(0xFFCBD5E1),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 12 : 17,
-                          vertical: isMobile ? 8 : 12,
-                        ),
-                        visualDensity: isMobile
-                            ? VisualDensity.compact
-                            : VisualDensity.standard,
-                        minimumSize: isMobile ? const Size(0, 36) : null,
-                        tapTargetSize: isMobile
-                            ? MaterialTapTargetSize.shrinkWrap
-                            : MaterialTapTargetSize.padded,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(isMobile ? 9 : 11),
-                        ),
-                      ),
-                    ),
                   ],
                 ],
               ),
@@ -1120,7 +1134,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             ),
             Switch.adaptive(
               value: valor,
-              activeThumbColor: AppColors.primary,
+              activeThumbColor: Theme.of(context).colorScheme.primary,
               onChanged: onChanged,
             ),
           ],
@@ -1134,276 +1148,306 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        const Text(
-          'Campos visibles en la factura / ticket que emite caja. '
-          'Activa o desactiva según tu operación.',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF64748B),
+          const Text(
+            'Campos visibles en la factura / ticket que emite caja. '
+            'Activa o desactiva según tu operación.',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF64748B),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        LayoutBuilder(
-          builder: (context, c) {
-            final ancho = c.maxWidth;
-            final preview = AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Vista previa (ticket)', style: AppTypography.h4),
-                  const Divider(),
-                  if (_docLogo)
-                    const Center(
-                      child: Icon(
-                        Icons.store,
-                        size: 36,
-                        color: AppColors.primary,
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, c) {
+              final ancho = c.maxWidth;
+              final preview = AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Vista previa (ticket)',
+                      style: AppTypography.h4,
+                    ),
+                    const Divider(),
+                    if (_docLogo)
+                      Center(
+                        child: Icon(
+                          Icons.store,
+                          size: 36,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
-                    ),
-                  Center(
-                    child: Text(
-                      _nombreController.text.isEmpty
-                          ? 'Nombre del negocio'
-                          : _nombreController.text,
-                      style: AppTypography.labelLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  if (_docRnc)
                     Center(
                       child: Text(
-                        'RNC: ${_rncController.text.isEmpty ? '—' : _rncController.text}',
-                        style: AppTypography.bodySmall,
-                      ),
-                    ),
-                  if (_docDireccion && _direccionController.text.isNotEmpty)
-                    Center(
-                      child: Text(
-                        _direccionController.text,
-                        style: AppTypography.bodySmall,
+                        _nombreController.text.isEmpty
+                            ? 'Nombre del negocio'
+                            : _nombreController.text,
+                        style: AppTypography.labelLarge,
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  if (_docTelefono && _telefonoController.text.isNotEmpty)
-                    Center(
-                      child: Text(
-                        'Tel: ${_telefonoController.text}',
+                    if (_docRnc)
+                      Center(
+                        child: Text(
+                          'RNC: ${_rncController.text.isEmpty ? '—' : _rncController.text}',
+                          style: AppTypography.bodySmall,
+                        ),
+                      ),
+                    if (_docDireccion && _direccionController.text.isNotEmpty)
+                      Center(
+                        child: Text(
+                          _direccionController.text,
+                          style: AppTypography.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (_docTelefono && _telefonoController.text.isNotEmpty)
+                      Center(
+                        child: Text(
+                          'Tel: ${_telefonoController.text}',
+                          style: AppTypography.bodySmall,
+                        ),
+                      ),
+                    const Divider(),
+                    if (_docCliente)
+                      const Text(
+                        'Cliente: Consumidor Final',
                         style: AppTypography.bodySmall,
                       ),
-                    ),
-                  const Divider(),
-                  if (_docCliente)
+                    if (_docNcf)
+                      const Text(
+                        'NCF: B0200000001',
+                        style: AppTypography.bodySmall,
+                      ),
+                    const SizedBox(height: 8),
                     const Text(
-                      'Cliente: Consumidor Final',
+                      'Producto ejemplo × 1',
                       style: AppTypography.bodySmall,
                     ),
-                  if (_docNcf)
+                    const Text('RD\$ 1,000.00', style: AppTypography.bodySmall),
+                    const Divider(),
+                    if (_docItbisDesglose) ...[
+                      const Text(
+                        'Subtotal  RD\$ 847.46',
+                        style: AppTypography.bodySmall,
+                      ),
+                      const Text(
+                        'ITBIS    RD\$ 152.54',
+                        style: AppTypography.bodySmall,
+                      ),
+                    ],
                     const Text(
-                      'NCF: B0200000001',
-                      style: AppTypography.bodySmall,
+                      'TOTAL    RD\$ 1,000.00',
+                      style: AppTypography.labelMedium,
                     ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Producto ejemplo × 1',
-                    style: AppTypography.bodySmall,
-                  ),
-                  const Text('RD\$ 1,000.00', style: AppTypography.bodySmall),
-                  const Divider(),
-                  if (_docItbisDesglose) ...[
-                    const Text(
-                      'Subtotal  RD\$ 847.46',
-                      style: AppTypography.bodySmall,
-                    ),
-                    const Text(
-                      'ITBIS    RD\$ 152.54',
-                      style: AppTypography.bodySmall,
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text(
+                        _pieController.text,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ],
-                  const Text(
-                    'TOTAL    RD\$ 1,000.00',
-                    style: AppTypography.labelMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      _pieController.text,
+                ),
+              );
+
+              final form = AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Campos del comprobante',
+                      style: AppTypography.h4,
+                    ),
+                    switchCampo(
+                      'Logo',
+                      _docLogo,
+                      (v) => setState(() {
+                        _docLogo = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'RNC del emisor',
+                      _docRnc,
+                      (v) => setState(() {
+                        _docRnc = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'Dirección',
+                      _docDireccion,
+                      (v) => setState(() {
+                        _docDireccion = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'Teléfono',
+                      _docTelefono,
+                      (v) => setState(() {
+                        _docTelefono = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'Correo',
+                      _docCorreo,
+                      (v) => setState(() {
+                        _docCorreo = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'NCF',
+                      _docNcf,
+                      (v) => setState(() {
+                        _docNcf = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'Datos del cliente',
+                      _docCliente,
+                      (v) => setState(() {
+                        _docCliente = v;
+                      }),
+                    ),
+                    switchCampo(
+                      'Desglose ITBIS',
+                      _docItbisDesglose,
+                      (v) => setState(() {
+                        _docItbisDesglose = v;
+                      }),
+                    ),
+                    AppLayout.vM,
+                    AppTextField(
+                      label: 'Pie de página',
+                      controller: _pieController,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    AppLayout.vM,
+                    Text(
+                      'La persistencia de estos switches se enlazará al PDF/ticket en el siguiente paso.',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                ],
-              ),
-            );
-
-            final form = AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Campos del comprobante', style: AppTypography.h4),
-                  switchCampo(
-                    'Logo',
-                    _docLogo,
-                    (v) => setState(() { _docLogo = v; }),
-                  ),
-                  switchCampo(
-                    'RNC del emisor',
-                    _docRnc,
-                    (v) => setState(() { _docRnc = v; }),
-                  ),
-                  switchCampo(
-                    'Dirección',
-                    _docDireccion,
-                    (v) => setState(() { _docDireccion = v; }),
-                  ),
-                  switchCampo(
-                    'Teléfono',
-                    _docTelefono,
-                    (v) => setState(() { _docTelefono = v; }),
-                  ),
-                  switchCampo(
-                    'Correo',
-                    _docCorreo,
-                    (v) => setState(() { _docCorreo = v; }),
-                  ),
-                  switchCampo(
-                    'NCF',
-                    _docNcf,
-                    (v) => setState(() { _docNcf = v; }),
-                  ),
-                  switchCampo(
-                    'Datos del cliente',
-                    _docCliente,
-                    (v) => setState(() { _docCliente = v; }),
-                  ),
-                  switchCampo(
-                    'Desglose ITBIS',
-                    _docItbisDesglose,
-                    (v) => setState(() { _docItbisDesglose = v; }),
-                  ),
-                  AppLayout.vM,
-                  AppTextField(
-                    label: 'Pie de página',
-                    controller: _pieController,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  AppLayout.vM,
-                  Text(
-                    'La persistencia de estos switches se enlazará al PDF/ticket en el siguiente paso.',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            );
-
-            if (ancho > 700) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(flex: 5, child: form),
-                  AppLayout.hL,
-                  Expanded(flex: 4, child: preview),
-                ],
+                  ],
+                ),
               );
-            }
-            return Column(children: [form, AppLayout.vL, preview]);
-          },
-        ),
-        const SizedBox(height: 20),
-        const Divider(),
-        const SizedBox(height: 12),
-        const Text(
-          'Manifiesto de transferencia (packing list)',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Edita el contenido del PDF que se genera al transferir entre almacenes.',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 8),
-        SwitchListTile.adaptive(
-          tileColor: Colors.white,
-          contentPadding: EdgeInsets.zero,
-          title: const Text(
-            'Imprimir manifiesto al transferir',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+
+              if (ancho > 700) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 5, child: form),
+                    AppLayout.hL,
+                    Expanded(flex: 4, child: preview),
+                  ],
+                );
+              }
+              return Column(children: [form, AppLayout.vL, preview]);
+            },
           ),
-          subtitle: const Text(
-            'Si está activo, al completar una transferencia se abre el PDF.',
-            style: TextStyle(fontSize: 12),
+          const SizedBox(height: 20),
+          const Divider(),
+          const SizedBox(height: 12),
+          const Text(
+            'Manifiesto de transferencia (packing list)',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
           ),
-          value: _transfImprimirManifiesto,
-          activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
-          onChanged: (v) => setState(() { _transfImprimirManifiesto = v; }),
-        ),
-        if (_transfImprimirManifiesto) ...[
+          const SizedBox(height: 4),
+          const Text(
+            'Edita el contenido del PDF que se genera al transferir entre almacenes.',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
           const SizedBox(height: 8),
-          TextField(
-            controller: _transfTituloCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Título del documento',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _transfSubtituloCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Subtítulo',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _transfTransportistaCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Transportista / Operador (por defecto)',
-              hintText: 'Ej. TransLogística S.A.',
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _transfObsCtrl,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Observaciones / instrucciones de carga',
-              border: OutlineInputBorder(),
-              alignLabelWithHint: true,
-            ),
-            onChanged: (_) => setState(() {}),
-          ),
           SwitchListTile.adaptive(
-          tileColor: Colors.white,
+            tileColor: Colors.white,
             contentPadding: EdgeInsets.zero,
             title: const Text(
-              'Mostrar bloque de firmas',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              'Imprimir manifiesto al transferir',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
             ),
             subtitle: const Text(
-              'Despachado / Transportista / Recibido',
-              style: TextStyle(fontSize: 11),
+              'Si está activo, al completar una transferencia se abre el PDF.',
+              style: TextStyle(fontSize: 12),
             ),
-            value: _transfMostrarFirmas,
-            activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
-            onChanged: (v) => setState(() { _transfMostrarFirmas = v; }),
+            value: _transfImprimirManifiesto,
+            activeTrackColor: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.5),
+            onChanged: (v) => setState(() {
+              _transfImprimirManifiesto = v;
+            }),
           ),
-          const Text(
-            'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-          ),
+          if (_transfImprimirManifiesto) ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: _transfTituloCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Título del documento',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _transfSubtituloCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Subtítulo',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _transfTransportistaCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Transportista / Operador (por defecto)',
+                hintText: 'Ej. TransLogística S.A.',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _transfObsCtrl,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Observaciones / instrucciones de carga',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            SwitchListTile.adaptive(
+              tileColor: Colors.white,
+              contentPadding: EdgeInsets.zero,
+              title: const Text(
+                'Mostrar bloque de firmas',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              subtitle: const Text(
+                'Despachado / Transportista / Recibido',
+                style: TextStyle(fontSize: 11),
+              ),
+              value: _transfMostrarFirmas,
+              activeTrackColor: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
+              onChanged: (v) => setState(() {
+                _transfMostrarFirmas = v;
+              }),
+            ),
+            const Text(
+              'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
+              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            ),
+          ],
         ],
-      ],
       ),
     );
   }
@@ -1424,7 +1468,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             ),
             Switch.adaptive(
               value: valor,
-              activeThumbColor: AppColors.primary,
+              activeThumbColor: Theme.of(context).colorScheme.primary,
               onChanged: onChanged,
             ),
           ],
@@ -1438,80 +1482,86 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        const Text(
-          'Formas de pago y reglas al cobrar en caja.',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF64748B),
+          const Text(
+            'Formas de pago y reglas al cobrar en caja.',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF64748B),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Forma de pago por defecto', style: AppTypography.h4),
-              AppLayout.vM,
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final e in const [
-                    ('efectivo', 'Efectivo'),
-                    ('tarjeta', 'Tarjeta'),
-                    ('transferencia', 'Transferencia'),
-                  ])
-                    ChoiceChip(
-                      label: Text(e.$2),
-                      selected: _cajaFormaPagoDefault == e.$1,
-                      onSelected: (_) =>
-                          setState(() { _cajaFormaPagoDefault = e.$1; }),
-                    ),
-                ],
-              ),
-            ],
+          const SizedBox(height: 16),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Forma de pago por defecto',
+                  style: AppTypography.h4,
+                ),
+                AppLayout.vM,
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final e in const [
+                      ('efectivo', 'Efectivo'),
+                      ('tarjeta', 'Tarjeta'),
+                      ('transferencia', 'Transferencia'),
+                    ])
+                      ChoiceChip(
+                        label: Text(e.$2),
+                        selected: _cajaFormaPagoDefault == e.$1,
+                        onSelected: (_) => setState(() {
+                          _cajaFormaPagoDefault = e.$1;
+                        }),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        AppLayout.vM,
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Métodos habilitados', style: AppTypography.h4),
-              AppLayout.vS,
-              filaSwitch('Tarjeta', _cajaPermitirTarjeta, (v) {
-                setState(() {
-                  _cajaPermitirTarjeta = v;
-                });
-              }),
-              filaSwitch('Transferencia', _cajaPermitirTransferencia, (v) {
-                setState(() {
-                  _cajaPermitirTransferencia = v;
-                });
-              }),
-              filaSwitch('Cheque', _cajaPermitirCheque, (v) {
-                setState(() {
-                  _cajaPermitirCheque = v;
-                });
-              }),
-            ],
+          AppLayout.vM,
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Métodos habilitados', style: AppTypography.h4),
+                AppLayout.vS,
+                filaSwitch('Tarjeta', _cajaPermitirTarjeta, (v) {
+                  setState(() {
+                    _cajaPermitirTarjeta = v;
+                  });
+                }),
+                filaSwitch('Transferencia', _cajaPermitirTransferencia, (v) {
+                  setState(() {
+                    _cajaPermitirTransferencia = v;
+                  });
+                }),
+                filaSwitch('Cheque', _cajaPermitirCheque, (v) {
+                  setState(() {
+                    _cajaPermitirCheque = v;
+                  });
+                }),
+              ],
+            ),
           ),
-        ),
-        AppLayout.vM,
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Sesión de caja', style: AppTypography.h4),
-              AppLayout.vS,
-              filaSwitch(
-                'Exigir sesión abierta para cobrar',
-                _cajaExigirSesion,
-                (v) => setState(() { _cajaExigirSesion = v; }),
-              ),
-            ],
+          AppLayout.vM,
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Sesión de caja', style: AppTypography.h4),
+                AppLayout.vS,
+                filaSwitch(
+                  'Exigir sesión abierta para cobrar',
+                  _cajaExigirSesion,
+                  (v) => setState(() {
+                    _cajaExigirSesion = v;
+                  }),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -1523,44 +1573,44 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        const Text(
-          'Prefijos del número de cotización (Contado / Crédito).',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF64748B),
+          const Text(
+            'Prefijos del número de cotización (Contado / Crédito).',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF64748B),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Numeración', style: AppTypography.h4),
-              AppLayout.vM,
-              AppTextField(
-                label: 'Prefijo contado',
-                hint: 'C',
-                controller: _prefijoContadoController,
-                onChanged: (_) => setState(() {}),
-              ),
-              AppLayout.vM,
-              AppTextField(
-                label: 'Prefijo crédito',
-                hint: 'CR',
-                controller: _prefijoCreditoController,
-                onChanged: (_) => setState(() {}),
-              ),
-              AppLayout.vS,
-              Text(
-                'Ejemplo: ${_prefijoContadoController.text}-000001 · ${_prefijoCreditoController.text}-000001',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+          const SizedBox(height: 16),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Numeración', style: AppTypography.h4),
+                AppLayout.vM,
+                AppTextField(
+                  label: 'Prefijo contado',
+                  hint: 'C',
+                  controller: _prefijoContadoController,
+                  onChanged: (_) => setState(() {}),
                 ),
-              ),
-            ],
+                AppLayout.vM,
+                AppTextField(
+                  label: 'Prefijo crédito',
+                  hint: 'CR',
+                  controller: _prefijoCreditoController,
+                  onChanged: (_) => setState(() {}),
+                ),
+                AppLayout.vS,
+                Text(
+                  'Ejemplo: ${_prefijoContadoController.text}-000001 · ${_prefijoCreditoController.text}-000001',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -1590,7 +1640,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               ),
               Switch.adaptive(
                 value: _modoSimplificado,
-                activeThumbColor: AppColors.primary,
+                activeThumbColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) {
                   setState(() {
                     _modoSimplificado = v;
@@ -1607,6 +1657,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
   }
 
   Widget _seccionSistema() {
+    final temaActual = ref.watch(appThemeProvider);
     Widget tile({
       required IconData icon,
       required String title,
@@ -1620,14 +1671,14 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         child: ListTile(
           tileColor: Colors.white,
           selectedTileColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 2,
+          ),
           leading: Icon(icon, color: c),
           title: Text(
             title,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: c,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w700, color: c),
           ),
           subtitle: Text(
             subtitle,
@@ -1636,9 +1687,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               color: Color(0xFF64748B),
             ),
           ),
-          trailing: onTap == null
-              ? null
-              : Icon(Icons.chevron_right, color: c),
+          trailing: onTap == null ? null : Icon(Icons.chevron_right, color: c),
           onTap: onTap,
         ),
       );
@@ -1649,27 +1698,75 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            'Tema de la aplicación',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'El cambio se aplica al instante y se guarda en este dispositivo.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: AppThemeOption.values
+                .map(
+                  (tema) => ChoiceChip(
+                    label: Text(tema.label),
+                    avatar: CircleAvatar(
+                      backgroundColor: tema.seedColor,
+                      radius: 8,
+                    ),
+                    selected: temaActual == tema,
+                    onSelected: (_) {
+                      ref.read(appThemeProvider.notifier).state = tema;
+                      saveAppTheme(tema);
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 18),
           Material(
-            color: const Color(0xFF0F766E).withValues(alpha: 0.10),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(14),
             child: ListTile(
-              tileColor: const Color(0xFF0F766E).withValues(alpha: 0.10),
-              selectedTileColor: const Color(0xFF0F766E).withValues(alpha: 0.14),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              tileColor: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.10),
+              selectedTileColor: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
-                side: const BorderSide(color: Color(0xFF0F766E), width: 1.2),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1.2,
+                ),
               ),
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF0F766E),
-                child: Icon(Icons.workspace_premium, color: Colors.white, size: 22),
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: Icon(
+                  Icons.workspace_premium,
+                  color: Colors.white,
+                  size: 22,
+                ),
               ),
-              title: const Text(
+              title: Text(
                 'Licencia y pagos',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F766E),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               subtitle: Text(
@@ -1678,8 +1775,10 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                     : 'Elige tu plan · Toke o transferencia · Referencia FG-',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              trailing:
-                  const Icon(Icons.chevron_right, color: Color(0xFF0F766E)),
+              trailing: Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               onTap: () => context.push('/licencia'),
             ),
           ),
@@ -1708,7 +1807,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               final info = snap.data;
               final label = info == null
                   ? 'Cargando…'
-                  : 'FiscoGest RD ${info.version} (${info.buildNumber})';
+                  : 'VendiFlux ${info.version} (${info.buildNumber})';
               return tile(
                 icon: Icons.info_outline,
                 title: 'Version',
@@ -1755,13 +1854,13 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: onTap,
-              icon: const Icon(Icons.open_in_new, size: 18),
+              icon: Icon(Icons.open_in_new, size: 18),
               label: Text(
                 boton,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF21877C),
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -1774,9 +1873,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       ),
     );
   }
-
 }
-
 
 class _TarjetaSeccionConfig extends StatelessWidget {
   const _TarjetaSeccionConfig({
@@ -1803,7 +1900,9 @@ class _TarjetaSeccionConfig extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected ? const Color(0xFFBFD5D2) : const Color(0xFFD5DCE1),
+              color: selected
+                  ? const Color(0xFFBFD5D2)
+                  : const Color(0xFFD5DCE1),
             ),
             boxShadow: [
               BoxShadow(
@@ -1820,7 +1919,9 @@ class _TarjetaSeccionConfig extends StatelessWidget {
               Icon(
                 icon,
                 size: 26,
-                color: selected ? const Color(0xFF173E3C) : const Color(0xFF101820),
+                color: selected
+                    ? const Color(0xFF173E3C)
+                    : const Color(0xFF101820),
               ),
               const SizedBox(height: 6),
               Text(
@@ -1831,7 +1932,9 @@ class _TarjetaSeccionConfig extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: selected ? const Color(0xFF173E3C) : const Color(0xFF101820),
+                  color: selected
+                      ? const Color(0xFF173E3C)
+                      : const Color(0xFF101820),
                   height: 1.1,
                 ),
               ),
@@ -1908,7 +2011,7 @@ class _HistorialModificacionesCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.access_time_rounded,
                         size: 18,
                         color: Color(0xFF6D7A82),

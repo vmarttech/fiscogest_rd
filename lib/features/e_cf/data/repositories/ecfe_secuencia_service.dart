@@ -53,9 +53,9 @@ class EcfeSecuenciaService {
   }
 
   Future<List<EcfeSecuenciaInfo>> listar() async {
-    final rows = await (_db.select(_db.ecfeSecuenciasTable)
-          ..orderBy([(t) => OrderingTerm.asc(t.tipoEcf)]))
-        .get();
+    final rows = await (_db.select(
+      _db.ecfeSecuenciasTable,
+    )..orderBy([(t) => OrderingTerm.asc(t.tipoEcf)])).get();
     return rows
         .map(
           (r) => EcfeSecuenciaInfo(
@@ -105,17 +105,19 @@ class EcfeSecuenciaService {
     // Si se activa esta, se desactivan las demás del mismo tipo.
     await _db.transaction(() async {
       if (activo) {
-        await (_db.update(_db.ecfeSecuenciasTable)
-              ..where((t) =>
+        await (_db.update(_db.ecfeSecuenciasTable)..where(
+              (t) =>
                   t.tipoEcf.equals(tipoEcf) &
                   t.activo.equals(true) &
-                  (id != null ? t.id.isNotValue(id) : const Constant(true))))
+                  (id != null ? t.id.isNotValue(id) : const Constant(true)),
+            ))
             .write(const EcfeSecuenciasTableCompanion(activo: Value(false)));
       }
 
       if (id != null) {
-        await (_db.update(_db.ecfeSecuenciasTable)..where((t) => t.id.equals(id)))
-            .write(
+        await (_db.update(
+          _db.ecfeSecuenciasTable,
+        )..where((t) => t.id.equals(id))).write(
           EcfeSecuenciasTableCompanion(
             tipoEcf: Value(tipoEcf),
             secuenciaActual: Value(secuenciaActual),
@@ -126,7 +128,9 @@ class EcfeSecuenciaService {
           ),
         );
       } else {
-        await _db.into(_db.ecfeSecuenciasTable).insert(
+        await _db
+            .into(_db.ecfeSecuenciasTable)
+            .insert(
               EcfeSecuenciasTableCompanion.insert(
                 tipoEcf: tipoEcf,
                 secuenciaActual: Value(secuenciaActual),
@@ -149,9 +153,12 @@ class EcfeSecuenciaService {
     for (var intento = 1; intento <= maxIntentos; intento++) {
       try {
         return await _db.transaction(() async {
-          final rows = await (_db.select(_db.ecfeSecuenciasTable)
-                ..where((t) =>
-                    t.tipoEcf.equals(tipo.codigo) & t.activo.equals(true))
+          final rows =
+              await (_db.select(_db.ecfeSecuenciasTable)
+                    ..where(
+                      (t) =>
+                          t.tipoEcf.equals(tipo.codigo) & t.activo.equals(true),
+                    )
                 ..orderBy([(t) => OrderingTerm.asc(t.id)])
                 ..limit(1))
               .get();
@@ -192,14 +199,14 @@ class EcfeSecuenciaService {
 
           // Actualización CONDICIONAL: solo si el valor leído sigue siendo el mismo.
           // Si otra transacción ya lo cambió → 0 filas afectadas → reintento.
-          final actualizadas = await (_db.update(_db.ecfeSecuenciasTable)
-                ..where((t) =>
+          final actualizadas =
+              await (_db.update(_db.ecfeSecuenciasTable)..where(
+                    (t) =>
                     t.id.equals(r.id) &
-                    t.secuenciaActual.equals(r.secuenciaActual)))
+                        t.secuenciaActual.equals(r.secuenciaActual),
+                  ))
               .write(
-            EcfeSecuenciasTableCompanion(
-              secuenciaActual: Value(next),
-            ),
+                    EcfeSecuenciasTableCompanion(secuenciaActual: Value(next)),
           );
 
           if (actualizadas == 0) {

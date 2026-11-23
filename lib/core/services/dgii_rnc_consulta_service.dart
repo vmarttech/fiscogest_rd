@@ -29,8 +29,7 @@ class DgiiRncConsultaService {
   final String baseUrl;
   final Duration timeout;
 
-  static String normalizar(String raw) =>
-      raw.replaceAll(RegExp(r'[^\d]'), '');
+  static String normalizar(String raw) => raw.replaceAll(RegExp(r'[^\d]'), '');
 
   static bool esFormatoValido(String raw) {
     final d = normalizar(raw);
@@ -43,26 +42,22 @@ class DgiiRncConsultaService {
       throw Exception('RNC (9 dígitos) o cédula (11 dígitos)');
     }
 
-    final uri = Uri.parse('$baseUrl/api/consulta').replace(
-      queryParameters: {'rnc': rnc},
-    );
+    final uri = Uri.parse(
+      '$baseUrl/api/consulta',
+    ).replace(queryParameters: {'rnc': rnc});
 
     late final http.Response res;
     try {
       res = await _client.get(uri).timeout(timeout);
     } on Exception catch (e) {
-      throw Exception(
-        'Sin conexión o servicio RNC no disponible. ($e)',
-      );
+      throw Exception('Sin conexión o servicio RNC no disponible. ($e)');
     }
 
     if (res.statusCode == 404) {
       throw Exception('RNC/cédula no encontrado en el padrón');
     }
     if (res.statusCode != 200) {
-      throw Exception(
-        'No se pudo consultar el RNC (código ${res.statusCode})',
-      );
+      throw Exception('No se pudo consultar el RNC (código ${res.statusCode})');
     }
 
     final decoded = jsonDecode(res.body);
@@ -74,7 +69,8 @@ class DgiiRncConsultaService {
       throw Exception(map['mensaje']?.toString() ?? 'RNC no encontrado');
     }
 
-    final nombre = (map['nombre_razon_social'] ??
+    final nombre =
+        (map['nombre_razon_social'] ??
             map['nombre'] ??
             map['razon_social'] ??
             '')

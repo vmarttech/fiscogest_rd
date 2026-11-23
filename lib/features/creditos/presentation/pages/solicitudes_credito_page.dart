@@ -224,7 +224,9 @@ class SolicitudesCreditoPage extends ConsumerWidget {
                                                               .end,
                                                       children: [
                                                         Text(
-                                                          formatRd(v.montoTotal),
+                                                          formatRd(
+                                                            v.montoTotal,
+                                                          ),
                                                           style: AppTypography
                                                               .labelMedium
                                                               .copyWith(

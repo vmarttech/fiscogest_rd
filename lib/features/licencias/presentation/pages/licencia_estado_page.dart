@@ -33,17 +33,22 @@ class LicenciaEstadoPage extends ConsumerWidget {
           }
           final gates = LicenciaGates(lic);
           final sesion = ref.watch(sesionProvider);
-          final esDev = lic.esDesarrollador &&
-              esDuenoPlataforma(sesion?.username);
+          final esDev =
+              lic.esDesarrollador && esDuenoPlataforma(sesion?.username);
           final colorEstado = switch (lic.estado) {
-            'activa' => const Color(0xFF0F766E),
+            'activa' => Theme.of(context).colorScheme.primary,
             'gracia' => Colors.orange.shade800,
             'vencida' => AppColors.error,
             _ => AppColors.textSecondary,
           };
 
           return ListView(
-            padding: EdgeInsets.fromLTRB(esMovil ? 16 : 24, 16, esMovil ? 16 : 24, 32),
+            padding: EdgeInsets.fromLTRB(
+              esMovil ? 16 : 24,
+              16,
+              esMovil ? 16 : 24,
+              32,
+            ),
             children: [
               // Hero (estilo Reportes móvil / Centro de datos desktop)
               _HeroLicencia(
@@ -59,7 +64,8 @@ class LicenciaEstadoPage extends ConsumerWidget {
               const SizedBox(height: 20),
 
               if (esMovil) ...[
-                _MetricGrid(children: [
+                _MetricGrid(
+                  children: [
                   _MetricCard(
                     icon: Icons.event_available_outlined,
                     label: 'Vigencia',
@@ -84,7 +90,8 @@ class LicenciaEstadoPage extends ConsumerWidget {
                     label: 'Cajas',
                     value: '${lic.maxCajas}',
                   ),
-                ]),
+                  ],
+                ),
                 const SizedBox(height: 16),
                 _InfoCard(
                   title: 'Detalle',
@@ -114,7 +121,10 @@ class LicenciaEstadoPage extends ConsumerWidget {
                         child: Column(
                           children: [
                             _kv('Plan', esDev ? 'Desarrollador' : lic.plan),
-                            _kv('Vigencia', esDev ? 'Vitalicia' : lic.vigenciaTipo),
+                            _kv(
+                              'Vigencia',
+                              esDev ? 'Vitalicia' : lic.vigenciaTipo,
+                            ),
                             if (lic.fechaFin != null && !esDev)
                               _kv(
                                 'Vence',
@@ -132,7 +142,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    ref.watch(dispositivosListaProvider).when(
+                            ref
+                                .watch(dispositivosListaProvider)
+                                .when(
                           data: (list) {
                             if (list.isEmpty) {
                               return const Text(
@@ -151,7 +163,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                                           ? Icons.phone_android
                                           : Icons.computer,
                                       color: d.esEsteEquipo
-                                          ? const Color(0xFF0F766E)
+                                                  ? Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary
                                           : null,
                                     ),
                                     title: Text(
@@ -171,7 +185,8 @@ class LicenciaEstadoPage extends ConsumerWidget {
                               ],
                             );
                           },
-                          loading: () => const LinearProgressIndicator(),
+                                  loading: () =>
+                                      const LinearProgressIndicator(),
                           error: (e, _) => Text('Dispositivos: $e'),
                         ),
 
@@ -183,7 +198,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    ref.watch(dispositivosListaProvider).when(
+                            ref
+                                .watch(dispositivosListaProvider)
+                                .when(
                           data: (list) {
                             if (list.isEmpty) {
                               return const Text(
@@ -202,7 +219,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                                           ? Icons.phone_android
                                           : Icons.computer,
                                       color: d.esEsteEquipo
-                                          ? const Color(0xFF0F766E)
+                                                  ? Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary
                                           : null,
                                     ),
                                     title: Text(
@@ -222,11 +241,15 @@ class LicenciaEstadoPage extends ConsumerWidget {
                               ],
                             );
                           },
-                          loading: () => const LinearProgressIndicator(),
+                                  loading: () =>
+                                      const LinearProgressIndicator(),
                           error: (e, _) => Text('Dispositivos: $e'),
                         ),
                             _kv('Máx. cajas', '${lic.maxCajas}'),
-                            _kv('e-CF', lic.ecfHabilitado ? 'Incluido' : 'No incluido'),
+                            _kv(
+                              'e-CF',
+                              lic.ecfHabilitado ? 'Incluido' : 'No incluido',
+                            ),
                           ],
                         ),
                       ),
@@ -261,15 +284,19 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   width: double.infinity,
                   height: 48,
                   child: FilledButton.icon(
-                    onPressed: () => context.push(storeOcultaCompraTransferencia ? '/licencia/activar' : '/licencia/comprar'),
-                    icon: const Icon(Icons.shopping_cart_outlined),
+                    onPressed: () => context.push(
+                      storeOcultaCompraTransferencia
+                          ? '/licencia/activar'
+                          : '/licencia/comprar',
+                    ),
+                    icon: Icon(Icons.shopping_cart_outlined),
                     label: Text(
                       storeOcultaCompraTransferencia
                           ? 'Ver planes (activar con código)'
                           : 'Comprar / renovar licencia',
                     ),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F766E),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -282,11 +309,14 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   height: 48,
                   child: OutlinedButton.icon(
                     onPressed: () => context.push('/licencia/activar'),
-                    icon: const Icon(Icons.key_outlined),
+                    icon: Icon(Icons.key_outlined),
                     label: const Text('Activar con código (opcional)'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0F766E),
-                      side: const BorderSide(color: Color(0xFF0F766E), width: 1.2),
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1.2,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -296,9 +326,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
               ],
               const SizedBox(height: 8),
               // Cancelar renovación: sigue hasta fechaFin, luego gratis
-              if (!esDev &&
-                  lic.plan != 'gratis' &&
-                  lic.plan != 'demo') ...[
+              if (!esDev && lic.plan != 'gratis' && lic.plan != 'demo') ...[
                 const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
@@ -343,17 +371,17 @@ class LicenciaEstadoPage extends ConsumerWidget {
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
-                          );
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
                         }
                       }
                     },
-                    icon: const Icon(Icons.cancel_outlined),
+                    icon: Icon(Icons.cancel_outlined),
                     label: const Text('Cancelar renovación del plan'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFB91C1C),
-                      side: const BorderSide(color: Color(0xFFB91C1C)),
+                      side: BorderSide(color: Color(0xFFB91C1C)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -376,7 +404,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                     : 'Planes móviles: Simplificado US\$8.99/mes y Básico US\$15.99/mes con PayPal. '
                       'Profesional/Empresa: contacte a FiscoGest. '
                       'No confundir con los cobros del comercio a sus clientes en caja.',
-                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -396,13 +426,17 @@ class LicenciaEstadoPage extends ConsumerWidget {
             width: 110,
             child: Text(
               k,
-              style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               v,
-              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -435,14 +469,20 @@ class _HeroLicencia extends StatelessWidget {
       padding: EdgeInsets.all(esMovil ? 20 : 24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF14B8A6)],
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.tertiary,
+          ],
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F766E).withValues(alpha: 0.25),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.25),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -471,7 +511,9 @@ class _HeroLicencia extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      esDev ? 'Plataforma · desarrollador' : 'Estado de licencia',
+                      esDev
+                          ? 'Plataforma · desarrollador'
+                          : 'Estado de licencia',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 13,
@@ -492,7 +534,10 @@ class _HeroLicencia extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -572,7 +617,7 @@ class _MetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 22, color: const Color(0xFF0F766E)),
+          Icon(icon, size: 22, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 8),
           Text(
             label,

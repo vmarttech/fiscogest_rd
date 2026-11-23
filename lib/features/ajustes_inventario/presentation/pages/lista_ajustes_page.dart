@@ -24,12 +24,21 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  static const _teal = Color(0xFF0D9488);
 
   String _fmtFecha(DateTime d) {
     const m = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
     ];
     return '${d.day.toString().padLeft(2, '0')} ${m[d.month - 1]} ${d.year} '
         '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
@@ -56,9 +65,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
       floatingActionButton: isMobile
           ? FloatingActionButton.extended(
               onPressed: _nuevo,
-              backgroundColor: _teal,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.add_rounded),
+              icon: Icon(Icons.add_rounded),
               label: const Text(
                 'Nuevo',
                 style: TextStyle(fontWeight: FontWeight.w900),
@@ -66,8 +75,10 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
             )
           : null,
       body: listaAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: _teal),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         error: (e, _) => Center(
           child: Text(
@@ -83,12 +94,10 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
           final entradas = lista
               .where((a) => a.tipoAjuste.toLowerCase() == 'entrada')
               .length;
-          final salidas = lista
-              .where((a) {
+          final salidas = lista.where((a) {
                 final t = a.tipoAjuste.toLowerCase();
                 return t == 'salida' || t == 'merma';
-              })
-              .length;
+          }).length;
           final otros = total - entradas - salidas;
 
           var filtrados = lista;
@@ -130,15 +139,15 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 colors: [
-                                  Color(0xFF0D9488),
-                                  Color(0xFF14B8A6),
+                                  Theme.of(context).colorScheme.primary,
+                                  Theme.of(context).colorScheme.tertiary,
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.tune_rounded,
                               color: Colors.white,
                               size: 24,
@@ -170,13 +179,15 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           ),
                           FilledButton.icon(
                             onPressed: _nuevo,
-                            icon: const Icon(Icons.add_rounded, size: 20),
+                            icon: Icon(Icons.add_rounded, size: 20),
                             label: const Text(
                               'Nuevo ajuste',
                               style: TextStyle(fontWeight: FontWeight.w900),
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor: _teal,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
@@ -195,7 +206,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: _nuevo,
-                          icon: const Icon(Icons.add_rounded),
+                          icon: Icon(Icons.add_rounded),
                           label: const Text(
                             'Nuevo ajuste',
                             style: TextStyle(
@@ -204,7 +215,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                             ),
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: _teal,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -228,7 +241,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                   '$total',
                                   Icons.list_alt_rounded,
                                   const Color(0xFF64748B),
-                                  () => setState(() { _tipoFiltro = null; }),
+                                  () => setState(() {
+                                    _tipoFiltro = null;
+                                  }),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -239,8 +254,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                   Icons.add_circle_outline,
                                   const Color(0xFF16A34A),
                                   () => setState(() {
-                                    _tipoFiltro =
-                                        _tipoFiltro == 'entrada'
+                                    _tipoFiltro = _tipoFiltro == 'entrada'
                                             ? null
                                             : 'entrada';
                                   }),
@@ -258,8 +272,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                   Icons.remove_circle_outline,
                                   const Color(0xFFDC2626),
                                   () => setState(() {
-                                    _tipoFiltro =
-                                        _tipoFiltro == 'salida'
+                                    _tipoFiltro = _tipoFiltro == 'salida'
                                             ? null
                                             : 'salida';
                                   }),
@@ -288,7 +301,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                               '$total',
                               Icons.list_alt_rounded,
                               const Color(0xFF64748B),
-                              () => setState(() { _tipoFiltro = null; }),
+                              () => setState(() {
+                                _tipoFiltro = null;
+                              }),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -299,8 +314,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                               Icons.add_circle_outline,
                               const Color(0xFF16A34A),
                               () => setState(() {
-                                _tipoFiltro =
-                                    _tipoFiltro == 'entrada' ? null : 'entrada';
+                                _tipoFiltro = _tipoFiltro == 'entrada'
+                                    ? null
+                                    : 'entrada';
                               }),
                             ),
                           ),
@@ -312,8 +328,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                               Icons.remove_circle_outline,
                               const Color(0xFFDC2626),
                               () => setState(() {
-                                _tipoFiltro =
-                                    _tipoFiltro == 'salida' ? null : 'salida';
+                                _tipoFiltro = _tipoFiltro == 'salida'
+                                    ? null
+                                    : 'salida';
                               }),
                             ),
                           ),
@@ -334,8 +351,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
 
                     // —— Buscar ——
                     TextField(
-                      onChanged: (v) =>
-                          setState(() { _filtro = v.trim().toLowerCase(); }),
+                      onChanged: (v) => setState(() {
+                        _filtro = v.trim().toLowerCase();
+                      }),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                       decoration: InputDecoration(
                         hintText: 'Buscar producto, tipo o motivo…',
@@ -343,7 +361,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF94A3B8),
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search_rounded,
                           color: Color(0xFF94A3B8),
                         ),
@@ -355,16 +373,18 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: _border),
+                          borderSide: BorderSide(color: _border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: _border),
+                          borderSide: BorderSide(color: _border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: _teal, width: 1.5),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -385,8 +405,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                             'Entrada',
                             _tipoFiltro == 'entrada',
                             () => setState(() {
-                              _tipoFiltro =
-                                  _tipoFiltro == 'entrada' ? null : 'entrada';
+                              _tipoFiltro = _tipoFiltro == 'entrada'
+                                  ? null
+                                  : 'entrada';
                             }),
                           ),
                           const SizedBox(width: 6),
@@ -394,8 +415,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                             'Salida',
                             _tipoFiltro == 'salida',
                             () => setState(() {
-                              _tipoFiltro =
-                                  _tipoFiltro == 'salida' ? null : 'salida';
+                              _tipoFiltro = _tipoFiltro == 'salida'
+                                  ? null
+                                  : 'salida';
                             }),
                           ),
                         ],
@@ -416,9 +438,9 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         const Spacer(),
                         Text(
                           '${filtrados.length}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w900,
-                            color: _teal,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ],
@@ -600,8 +622,10 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
@@ -622,10 +646,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _badge(
-                'Cant. ${a.cantidad}',
-                color,
-              ),
+              _badge('Cant. ${a.cantidad}', color),
               _badge(
                 _fmtFecha(a.fechaCreacion),
                 const Color(0xFF64748B),

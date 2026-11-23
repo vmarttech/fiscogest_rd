@@ -29,7 +29,6 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
     show cajaRepositoryProvider;
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
-import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
 
@@ -633,7 +632,7 @@ class _NuevaVentaBorradorPageState
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, true),
-                icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                icon: Icon(Icons.receipt_long_outlined, size: 18),
                 label: const Text('Imprimir / enviar'),
               ),
             ],
@@ -663,7 +662,7 @@ class _NuevaVentaBorradorPageState
                 ),
                 FilledButton.icon(
                   onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
-                  icon: const Icon(Icons.chat_outlined, size: 18),
+                  icon: Icon(Icons.chat_outlined, size: 18),
                   label: const Text('Recibo digital'),
                 ),
               ],
@@ -852,17 +851,11 @@ class _NuevaVentaBorradorPageState
       // En desktop la entrada es directa: atrás → Dashboard
       leading: (_modoFormularioCredito && _estadoFormularioCredito != null)
           ? IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: Icon(Icons.arrow_back),
               tooltip: 'Volver al POS',
               onPressed: _cerrarFormularioCredito,
             )
-          : (desktop
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Atrás',
-                    onPressed: () => safeBack(context, fallback: '/inicio'),
-                  )),
+          : null,
       // En crédito desktop también mostrar AppBar para poder volver
       // (showAppBar se ajusta abajo si hace falta)
       body: SafeArea(
@@ -961,7 +954,7 @@ class _NuevaVentaBorradorPageState
 
     return Container(
       height: 48,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
       ),
@@ -1058,6 +1051,9 @@ class _NuevaVentaBorradorPageState
           if (!esPantallaPequena) ...[
             _buildAccesosSecundarios(),
             const SizedBox(height: 12),
+          ] else ...[
+            _buildEnlaceHistorial(),
+            const SizedBox(height: 14),
           ],
           _buildSeccionTipoYVencimiento(esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
@@ -1070,8 +1066,6 @@ class _NuevaVentaBorradorPageState
           _buildSeccionDelivery(estado, esPantallaPequena),
           SizedBox(height: esPantallaPequena ? 12 : 16),
           _buildSeccionResumen(estado, esPantallaPequena),
-          const SizedBox(height: 8),
-          _buildEnlaceHistorial(),
           const SizedBox(height: 16),
         ],
       ),
@@ -1179,7 +1173,7 @@ class _NuevaVentaBorradorPageState
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFF334155),
             backgroundColor: Colors.white,
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
+            side: BorderSide(color: Color(0xFFE2E8F0)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -1350,7 +1344,7 @@ class _NuevaVentaBorradorPageState
                       if (productoId != null) ...[
                         IconButton(
                           tooltip: 'Menos',
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.remove,
                             size: 16,
                             color: Color(0xFF64748B),
@@ -1369,7 +1363,7 @@ class _NuevaVentaBorradorPageState
                         ),
                         IconButton(
                           tooltip: 'Más',
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.add,
                             size: 16,
                             color: Color(0xFF0EA5E9),
@@ -1408,7 +1402,7 @@ class _NuevaVentaBorradorPageState
                       if (productoId != null)
                         IconButton(
                           tooltip: 'Quitar',
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.delete_outline,
                             size: 18,
                             color: Color(0xFFDC2626),
@@ -1449,7 +1443,7 @@ class _NuevaVentaBorradorPageState
                   Container(
                     height: 48,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(color: Color(0xFFF1F5F9)),
                       ),
@@ -1524,7 +1518,7 @@ class _NuevaVentaBorradorPageState
                           icon: Icons.request_quote_outlined,
                           label: 'Historial cotizaciones',
                           value: 'F7 · Ver listado',
-                          accent: const Color(0xFF0F766E),
+                          accent: Theme.of(context).colorScheme.primary,
                           onTap: () =>
                               context.push('/ventas/cotizaciones/historial'),
                         ),
@@ -1560,7 +1554,7 @@ class _NuevaVentaBorradorPageState
                   Container(
                     height: 48,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(color: Color(0xFFF1F5F9)),
                       ),
@@ -1650,7 +1644,7 @@ class _NuevaVentaBorradorPageState
                                         _guardarCotizacion(esCredito: false);
                                       }
                                     },
-                              icon: const Icon(Icons.credit_card, size: 18),
+                              icon: Icon(Icons.credit_card, size: 18),
                               label: const Text(
                                 'Contado',
                                 style: TextStyle(
@@ -1773,7 +1767,11 @@ class _NuevaVentaBorradorPageState
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 16, color: const Color(0xFF0F766E)),
+                Icon(
+                  icon,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   label,
@@ -1856,7 +1854,9 @@ class _NuevaVentaBorradorPageState
   Widget _buildSeccionTipoYVencimiento(bool esPantallaPequena) {
     Widget opcionPago({required bool credito}) {
       final seleccionada = _esCredito == credito;
-      final color = credito ? AppColors.warning : AppColors.primary;
+      final color = credito
+          ? AppColors.warning
+          : Theme.of(context).colorScheme.primary;
       return Expanded(
         child: Material(
           color: seleccionada ? color.withValues(alpha: 0.10) : AppColors.white,
@@ -1949,10 +1949,10 @@ class _NuevaVentaBorradorPageState
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.calendar_today_outlined,
                       size: 18,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     SizedBox(width: esPantallaPequena ? 6 : 10),
                     Expanded(
@@ -2026,8 +2026,10 @@ class _NuevaVentaBorradorPageState
                 height: 44,
                 decoration: BoxDecoration(
                   color: clienteSeleccionado
-                      ? const Color(0xFF0F766E)
-                      : const Color(0xFF0F766E).withValues(alpha: 0.12),
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Icon(
@@ -2035,7 +2037,7 @@ class _NuevaVentaBorradorPageState
                   size: 22,
                   color: clienteSeleccionado
                       ? Colors.white
-                      : const Color(0xFF0F766E),
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -2095,7 +2097,7 @@ class _NuevaVentaBorradorPageState
                             style: AppTypography.bodySmall.copyWith(
                               color: saldo > 0
                                   ? AppColors.warning
-                                  : AppColors.primary,
+                                  : Theme.of(context).colorScheme.primary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -2108,18 +2110,18 @@ class _NuevaVentaBorradorPageState
                 ),
               ),
               Text(
-                'Cambiar',
+                clienteSeleccionado ? 'Cambiar' : 'Buscar',
                 style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                   fontSize: esPantallaPequena ? 12 : 13,
                 ),
               ),
               const SizedBox(width: 4),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -2149,7 +2151,7 @@ class _NuevaVentaBorradorPageState
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: tieneEnvio
-                  ? AppColors.primary.withValues(alpha: 0.5)
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
                   : AppColors.border,
             ),
           ),
@@ -2158,7 +2160,9 @@ class _NuevaVentaBorradorPageState
               Icon(
                 Icons.delivery_dining,
                 size: 22,
-                color: tieneEnvio ? AppColors.primary : AppColors.textSecondary,
+                color: tieneEnvio
+                    ? Theme.of(context).colorScheme.primary
+                    : AppColors.textSecondary,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -2180,17 +2184,17 @@ class _NuevaVentaBorradorPageState
                       style: AppTypography.bodySmall.copyWith(
                         fontSize: esPantallaPequena ? 11 : 12,
                         color: tieneEnvio
-                            ? AppColors.primary
+                            ? Theme.of(context).colorScheme.primary
                             : AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -2296,10 +2300,10 @@ class _NuevaVentaBorradorPageState
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.shopping_bag_outlined,
                   size: 18,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -2316,13 +2320,15 @@ class _NuevaVentaBorradorPageState
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '${estado.detalles.length} art.',
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
                       fontSize: tamanoEtiqueta,
                     ),
@@ -2470,7 +2476,7 @@ class _NuevaVentaBorradorPageState
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete_outline,
                                 size: 20,
                                 color: AppColors.error,
@@ -2532,7 +2538,7 @@ class _NuevaVentaBorradorPageState
                 width: 4,
                 height: 18,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F766E),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -2582,14 +2588,14 @@ class _NuevaVentaBorradorPageState
                     ? Icons.discount
                     : Icons.discount_outlined,
                 size: 18,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
               label: Text(
                 estado.montoDescuento > 0
                     ? 'Editar / quitar descuento general'
                     : 'Aplicar descuento general',
                 style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -2616,7 +2622,7 @@ class _NuevaVentaBorradorPageState
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: esPantallaPequena ? 20.0 : 24.0,
-                  color: const Color(0xFF0F766E),
+                  color: Theme.of(context).colorScheme.primary,
                   letterSpacing: -0.4,
                 ),
               ),
@@ -2659,24 +2665,113 @@ class _NuevaVentaBorradorPageState
   }
 
   Widget _buildEnlaceHistorial() {
-    return Center(
-      child: Wrap(
-        spacing: 8,
-        children: [
-          TextButton.icon(
-            icon: const Icon(Icons.request_quote_outlined, size: 18),
-            label: const Text('Historial cotizaciones'),
-            onPressed: () => context.push('/ventas/cotizaciones/historial'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+    final primary = Theme.of(context).colorScheme.primary;
+
+    Widget historyCard({
+      required String title,
+      required String subtitle,
+      required IconData icon,
+      required Color accent,
+      required VoidCallback onTap,
+    }) {
+      return Expanded(
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 76),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: accent.withValues(alpha: 0.38)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Icon(icon, size: 20, color: accent),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            height: 1.15,
+                            color: Color(0xFF172033),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          TextButton.icon(
-            icon: const Icon(Icons.receipt_long_outlined, size: 18),
-            label: const Text('Historial ventas'),
-            onPressed: () => context.push('/ventas/historial'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.info),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 2, bottom: 7),
+          child: Text(
+            'ACCESO RÁPIDO',
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.7,
+              color: Color(0xFF64748B),
+            ),
           ),
-        ],
-      ),
+        ),
+        Row(
+          children: [
+            historyCard(
+              title: 'Historial de ventas',
+              subtitle: 'Ver ventas registradas',
+              icon: Icons.receipt_long_outlined,
+              accent: AppColors.info,
+              onTap: () => context.push('/ventas/historial'),
+            ),
+            const SizedBox(width: 8),
+            historyCard(
+              title: 'Historial cotizaciones',
+              subtitle: 'Ver presupuestos',
+              icon: Icons.request_quote_outlined,
+              accent: primary,
+              onTap: () => context.push('/ventas/cotizaciones/historial'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -2706,8 +2801,10 @@ class _NuevaVentaBorradorPageState
         ? 'GENERAR VENTA'
         : (_esCredito ? 'Crear cotización (CR)' : 'Crear cotización (C)');
     final bg = flujoDirecto
-        ? AppColors.primary
-        : (_esCredito ? AppColors.warning : AppColors.primary);
+        ? Theme.of(context).colorScheme.primary
+        : (_esCredito
+              ? AppColors.warning
+              : Theme.of(context).colorScheme.primary);
     return Material(
       elevation: 8,
       color: AppColors.white,
@@ -2846,7 +2943,7 @@ class _NuevaVentaBorradorPageState
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
@@ -2957,7 +3054,7 @@ class _NuevaVentaBorradorPageState
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
@@ -2997,7 +3094,7 @@ class _QtyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.primary.withValues(alpha: 0.1),
+      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,
@@ -3005,7 +3102,11 @@ class _QtyChip extends StatelessWidget {
         child: SizedBox(
           width: 32,
           height: 32,
-          child: Icon(icon, size: 18, color: AppColors.primary),
+          child: Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       ),
     );

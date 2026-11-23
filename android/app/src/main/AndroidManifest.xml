@@ -16,7 +16,7 @@
     <application
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
-        android:label="${appLabel}"
+        android:label="VendiFlux"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         

@@ -11,10 +11,7 @@ class CampanaNotificaciones extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(alertasOperativasProvider);
-    final count = async.maybeWhen(
-      data: (list) => list.length,
-      orElse: () => 0,
-    );
+    final count = async.maybeWhen(data: (list) => list.length, orElse: () => 0);
 
     return IconButton(
       tooltip: count > 0 ? '$count alerta(s)' : 'Notificaciones',
@@ -81,8 +78,11 @@ class CampanaNotificaciones extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Row(
               children: [
-                Icon(Icons.check_circle_outline,
-                    size: 20, color: Colors.green.shade600),
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 20,
+                  color: Colors.green.shade600,
+                ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(

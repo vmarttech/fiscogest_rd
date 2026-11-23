@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
-import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 
 /// Encabezado de dashboard compartido por los módulos en pantallas móviles.
@@ -26,6 +25,7 @@ class AppDashboardHero extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
     final sesion = ref.watch(sesionProvider);
     final nombre = sesion?.nombre.trim().isNotEmpty == true
         ? sesion!.nombre.trim()
@@ -34,17 +34,14 @@ class AppDashboardHero extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [AppColors.primary, AppColors.primaryLight],
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.7)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.24),
-            blurRadius: 22,
-            offset: const Offset(0, 9),
+            color: const Color(0x140F172A),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -57,7 +54,7 @@ class AppDashboardHero extends ConsumerWidget {
                 child: Text(
                   '${_saludo()}${nombre.isNotEmpty ? ', $nombre' : ''}',
                   style: AppTypography.h4.copyWith(
-                    color: Colors.white,
+                    color: scheme.onSurface,
                     fontWeight: FontWeight.w700,
                   ),
                   maxLines: 1,
@@ -68,7 +65,7 @@ class AppDashboardHero extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Icon(
                   icon,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: scheme.primary,
                   size: 27,
                 ),
               ],
@@ -78,7 +75,7 @@ class AppDashboardHero extends ConsumerWidget {
           Text(
             title.toUpperCase(),
             style: AppTypography.h4.copyWith(
-              color: Colors.white.withValues(alpha: 0.88),
+              color: scheme.primary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -86,7 +83,7 @@ class AppDashboardHero extends ConsumerWidget {
           Text(
             subtitle,
             style: AppTypography.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: scheme.onSurfaceVariant,
               height: 1.3,
             ),
           ),

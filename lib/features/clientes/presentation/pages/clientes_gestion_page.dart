@@ -12,7 +12,6 @@ const _bgCanvas = Color(0xFFF3F7F9);
 const _border = Color(0xFFE2E8F0);
 const _muted = Color(0xFF334155);
 const _ink = Color(0xFF020617);
-const _tealDark = Color(0xFF115E59);
 
 const List<BoxShadow> _cardShadow = [
   BoxShadow(color: Color(0x1F0F172A), blurRadius: 16, offset: Offset(0, 6)),
@@ -40,9 +39,9 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
     super.dispose();
   }
 
-  Color _themeFor(ClienteCompleto c) {
-    const themes = [
-      Color(0xFF14B8A6),
+  Color _themeFor(ClienteCompleto c, BuildContext context) {
+    final themes = [
+      Theme.of(context).colorScheme.primary,
       Color(0xFF3B82F6),
       Color(0xFF10B981),
       Color(0xFF8B5CF6),
@@ -94,8 +93,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
           constraints: BoxConstraints(maxWidth: mobile ? 560 : 1200),
           child: SafeArea(
             child: clientesAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: _tealDark),
+              loading: () => Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               error: (e, _) => Center(
                 child: Text(
@@ -109,7 +110,10 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 if (_seleccionado != null &&
                     filtrados.every((c) => c.id != _seleccionado!.id)) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) setState(() { _seleccionado = null; });
+                    if (mounted)
+                      setState(() {
+                        _seleccionado = null;
+                      });
                   });
                 }
                 if (!mobile && filtrados.isNotEmpty && _seleccionado == null) {
@@ -149,7 +153,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
                 final c = filtrados[i];
-                final theme = _themeFor(c);
+                final theme = _themeFor(c, context);
                 return _ClienteCardPremium(
                   cliente: c,
                   theme: theme,
@@ -180,7 +184,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
           Container(
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Color(0xFFF3F7F9),
               border: Border(
                 bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
@@ -233,12 +237,13 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                                 final c = filtrados[i];
                                 return _ClienteCardPremium(
                                   cliente: c,
-                                  theme: _themeFor(c),
+                                  theme: _themeFor(c, context),
                                   iniciales: _iniciales(c.nombre),
                                   mobile: false,
                                   selected: _seleccionado?.id == c.id,
-                                  onOpen: () =>
-                                      setState(() { _seleccionado = c; }),
+                                  onOpen: () => setState(() {
+                                    _seleccionado = c;
+                                  }),
                                   onEdit: () => _irAEditarCliente(context, c),
                                   onDelete: () =>
                                       _confirmarEliminar(context, c),
@@ -252,7 +257,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 ),
                 Container(
                   width: 320,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Color(0xFFFFFFFF),
                     border: Border(
                       left: BorderSide(color: Color(0xFFE2E8F0), width: 1),
@@ -262,12 +267,12 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                       ? const _PanelVacio()
                       : _PanelDerechoDesktop(
                           cliente: _seleccionado!,
-                          theme: _themeFor(_seleccionado!),
+                          theme: _themeFor(_seleccionado!, context),
                           iniciales: _iniciales(_seleccionado!.nombre),
                           onDetalleCompleto: () => _abrirDetalle(
                             context,
                             _seleccionado!,
-                            _themeFor(_seleccionado!),
+                            _themeFor(_seleccionado!, context),
                           ),
                           onEdit: () =>
                               _irAEditarCliente(context, _seleccionado!),
@@ -361,16 +366,6 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (mobile) ...[
-            // En móvil el AppBar ya muestra "CLIENTES"; no repetir el label.
-            const Text(
-              'Cartera de clientes',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF020617),
-                fontSize: 22,
-              ),
-            ),
-            const SizedBox(height: 4),
             const Text(
               'Datos personales, fiscales y contacto',
               style: TextStyle(color: Color(0xFF334155), fontSize: 13),
@@ -383,13 +378,13 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
               child: FilledButton.icon(
                 onPressed: () => _irANuevoCliente(context),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF115E59),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                icon: const Icon(Icons.person_add_rounded, size: 22),
+                icon: Icon(Icons.person_add_rounded, size: 22),
                 label: const Text(
                   'Nuevo cliente',
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
@@ -429,7 +424,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   child: FilledButton.icon(
                     onPressed: () => _irANuevoCliente(context),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF115E59),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.white,
                       elevation: 1,
                       shadowColor: const Color(0x66115E59),
@@ -437,7 +432,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: const Icon(Icons.person_add_rounded, size: 20),
+                    icon: Icon(Icons.person_add_rounded, size: 20),
                     label: const Text(
                       'Nuevo cliente',
                       style: TextStyle(
@@ -452,8 +447,9 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
           const SizedBox(height: 14),
           TextField(
             controller: _searchController,
-            onChanged: (v) =>
-                setState(() { _filtroBusqueda = v.trim().toLowerCase(); }),
+            onChanged: (v) => setState(() {
+              _filtroBusqueda = v.trim().toLowerCase();
+            }),
             style: AppTypography.bodyMedium,
             decoration: InputDecoration(
               hintText: 'Buscar por nombre, RNC, teléfono o correo…',
@@ -461,7 +457,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                 color: Color(0xFF334155),
                 fontSize: 13,
               ),
-              prefixIcon: const Icon(Icons.search_rounded, size: 22),
+              prefixIcon: Icon(Icons.search_rounded, size: 22),
               isDense: true,
               filled: true,
               fillColor: Colors.white,
@@ -471,16 +467,16 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderSide: BorderSide(color: Color(0xFFE2E8F0)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderSide: BorderSide(color: Color(0xFFE2E8F0)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFF14B8A6),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.tertiary,
                   width: 1.5,
                 ),
               ),
@@ -689,7 +685,7 @@ class _ClienteCardPremium extends StatelessWidget {
                                     ],
                                     if (tieneSaldo && !selected) ...[
                                       const SizedBox(width: 6),
-                                      const Icon(
+                                      Icon(
                                         Icons.warning_amber_rounded,
                                         size: 16,
                                         color: Color(0xFFD97706),
@@ -734,9 +730,7 @@ class _ClienteCardPremium extends StatelessWidget {
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xFF334155),
                                 backgroundColor: const Color(0xFFF1F5F9),
-                                side: const BorderSide(
-                                  color: Color(0xFFE2E8F0),
-                                ),
+                                side: BorderSide(color: Color(0xFFE2E8F0)),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 14,
                                   vertical: 6,
@@ -1004,8 +998,8 @@ class _PanelDerechoDesktop extends StatelessWidget {
             child: CustomPaint(
               painter: _MultiDonutPainter(
                 segments: [a / total, b / total, c / total],
-                colors: const [
-                  Color(0xFF14B8A6),
+                colors: [
+                  Theme.of(context).colorScheme.primary,
                   Color(0xFF3B82F6),
                   Color(0xFFF59E0B),
                 ],
@@ -1052,7 +1046,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
           child: FilledButton(
             onPressed: onDetalleCompleto,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF115E59),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -1078,7 +1072,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF020617),
-              side: const BorderSide(color: Color(0xFFE2E8F0)),
+              side: BorderSide(color: Color(0xFFE2E8F0)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -1189,9 +1183,9 @@ class ClienteDetallePage extends StatelessWidget {
   });
 
   /// Desde GoRouter (extra = ClienteCompleto).
-  factory ClienteDetallePage.fromCliente(ClienteCompleto c) {
-    const themes = [
-      Color(0xFF14B8A6),
+  factory ClienteDetallePage.fromCliente(ClienteCompleto c, BuildContext context) {
+    final themes = [
+      Theme.of(context).colorScheme.primary,
       Color(0xFF3B82F6),
       Color(0xFF10B981),
       Color(0xFF8B5CF6),
@@ -1260,7 +1254,9 @@ class ClienteDetallePage extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
-              gradient: LinearGradient(colors: [_tealDark, theme]),
+              gradient: LinearGradient(
+                colors: [Theme.of(context).colorScheme.primary, theme],
+              ),
             ),
           ),
           Container(
@@ -1313,11 +1309,11 @@ class ClienteDetallePage extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: goEdit,
-              icon: const Icon(Icons.edit_outlined, size: 16),
+              icon: Icon(Icons.edit_outlined, size: 16),
               label: const Text('Editar'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: _tealDark,
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                side: BorderSide(color: Color(0xFFE2E8F0)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1411,7 +1407,7 @@ class ClienteDetallePage extends StatelessWidget {
                     _MetricRow(
                       label: 'Límite cuota',
                       value: 'RD\$${limite.toStringAsFixed(2)}',
-                      color: _tealDark,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(height: 8),
                     _MetricRow(
@@ -1500,7 +1496,7 @@ class ClienteDetallePage extends StatelessWidget {
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back_rounded,
                         size: 20,
                         color: Color(0xFF020617),
@@ -1553,7 +1549,7 @@ class ClienteDetallePage extends StatelessWidget {
             onPressed: goBack,
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF020617),
-              side: const BorderSide(color: Color(0xFFE2E8F0)),
+              side: BorderSide(color: Color(0xFFE2E8F0)),
               minimumSize: const Size.fromHeight(46),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

@@ -35,7 +35,6 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  static const _teal = Color(0xFF0D9488);
 
   @override
   void dispose() {
@@ -77,19 +76,21 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
           : Icon(prefix, color: const Color(0xFF94A3B8), size: 20),
       filled: true,
       fillColor: Colors.white,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _border),
+        borderSide: BorderSide(color: _border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _border),
+        borderSide: BorderSide(color: _border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _teal, width: 1.5),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.primary,
+          width: 1.5,
+        ),
       ),
     );
   }
@@ -111,13 +112,12 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
     final producto = _productoSeleccionado;
     if (producto == null) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Seleccione un producto usando la lupa'),
-        ),
+        const SnackBar(content: Text('Seleccione un producto usando la lupa')),
       );
       return;
     }
-    final cant = double.tryParse(_cantidadCtrl.text.replaceAll(',', '.')) ?? 0.0;
+    final cant =
+        double.tryParse(_cantidadCtrl.text.replaceAll(',', '.')) ?? 0.0;
     if (cant <= 0) {
       FiscoGestNotifications.show(
         const SnackBar(content: Text('La cantidad debe ser mayor a cero')),
@@ -127,9 +127,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
     final stockActual = producto.stock ?? 0.0;
     if (_tipoSeleccionado == 'salida' && cant > stockActual) {
       FiscoGestNotifications.show(
-        SnackBar(
-          content: Text('Stock insuficiente. Disponible: $stockActual'),
-        ),
+        SnackBar(content: Text('Stock insuficiente. Disponible: $stockActual')),
       );
       return;
     }
@@ -161,16 +159,16 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
         usuarioId: usuarioId,
         fechaCreacion: DateTime.now(),
       );
-      final exito =
-          await ref.read(ajusteInventarioProvider).registrar(ajuste);
+      final exito = await ref.read(ajusteInventarioProvider).registrar(ajuste);
       if (!mounted) return;
       setState(() {
         final stockBase = _productoSeleccionado?.stock ?? 0;
         final stockNuevo = _tipoSeleccionado == 'entrada'
             ? stockBase + cant
             : stockBase - cant;
-        _productoSeleccionado =
-            _productoSeleccionado?.copyWith(stock: stockNuevo);
+        _productoSeleccionado = _productoSeleccionado?.copyWith(
+          stock: stockNuevo,
+        );
       });
       ref.invalidate(productoControllerProvider);
       ref.invalidate(kardexHistorialCompletoProvider);
@@ -178,13 +176,14 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       ref.invalidate(ajusteInventarioListaProvider);
       if (!exito || !context.mounted) return;
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('✅ Ajuste guardado — stock actualizado'),
-        ),
+        const SnackBar(content: Text('✅ Ajuste guardado — stock actualizado')),
       );
       context.pop();
     } finally {
-      if (mounted) setState(() { _guardando = false; });
+      if (mounted)
+        setState(() {
+          _guardando = false;
+        });
     }
   }
 
@@ -200,7 +199,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       showBackButton: true,
       backgroundColor: _bg,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_rounded),
+        icon: Icon(Icons.arrow_back_rounded),
         tooltip: 'Volver',
         onPressed: () {
           if (context.canPop()) {
@@ -211,8 +210,10 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
         },
       ),
       body: productosAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: _teal),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         error: (e, _) => Center(
           child: Text(
@@ -249,11 +250,11 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                             }
                           },
                           tooltip: 'Volver',
-                          icon: const Icon(Icons.arrow_back_rounded),
+                          icon: Icon(Icons.arrow_back_rounded),
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: _textPrimary,
-                            side: const BorderSide(color: _border),
+                            side: BorderSide(color: _border),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -263,15 +264,15 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               colors: [
-                                Color(0xFF0D9488),
-                                Color(0xFF14B8A6),
+                                Theme.of(context).colorScheme.primary,
+                                Theme.of(context).colorScheme.tertiary,
                               ],
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.tune_rounded,
                             color: Colors.white,
                             size: 24,
@@ -336,7 +337,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                                 Icons.search_rounded,
                                 color: _productoSeleccionado == null
                                     ? const Color(0xFF94A3B8)
-                                    : _teal,
+                                    : Theme.of(context).colorScheme.primary,
                               ),
                               label: Align(
                                 alignment: Alignment.centerLeft,
@@ -363,7 +364,8 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                                 side: BorderSide(
                                   color: _productoSeleccionado == null
                                       ? _border
-                                      : _teal.withValues(alpha: 0.5),
+                                      : Theme.of(context).colorScheme.primary
+                                            .withValues(alpha: 0.5),
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -464,7 +466,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Icon(Icons.save_rounded, size: 20),
+                                  : Icon(Icons.save_rounded, size: 20),
                               label: Text(
                                 _guardando ? 'Guardando…' : 'Guardar ajuste',
                                 style: const TextStyle(
@@ -473,10 +475,13 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                                 ),
                               ),
                               style: FilledButton.styleFrom(
-                                backgroundColor: _teal,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                                 foregroundColor: Colors.white,
-                                disabledBackgroundColor:
-                                    _teal.withValues(alpha: 0.5),
+                                disabledBackgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.5),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -496,17 +501,14 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
     );
   }
 
-  Widget _tipoChip(
-    String value,
-    String label,
-    IconData icon,
-    Color accent,
-  ) {
+  Widget _tipoChip(String value, String label, IconData icon, Color accent) {
     final selected = _tipoSeleccionado == value;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => setState(() { _tipoSeleccionado = value; }),
+        onTap: () => setState(() {
+          _tipoSeleccionado = value;
+        }),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
@@ -558,7 +560,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
   List<Producto> _resultados = [];
 
   static const _border = Color(0xFFE2E8F0);
-  static const _teal = Color(0xFF0D9488);
+
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
 
@@ -599,11 +601,16 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _teal.withValues(alpha: 0.12),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.search_rounded,
-                        color: _teal, size: 20),
+                    child: Icon(
+                      Icons.search_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   const Expanded(
@@ -618,7 +625,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded),
+                    icon: Icon(Icons.close_rounded),
                   ),
                 ],
               ),
@@ -634,8 +641,10 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF94A3B8),
                   ),
-                  prefixIcon: const Icon(Icons.search_rounded,
-                      color: Color(0xFF94A3B8)),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFF94A3B8),
+                  ),
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
                   contentPadding: const EdgeInsets.symmetric(
@@ -644,15 +653,18 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _border),
+                    borderSide: BorderSide(color: _border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _border),
+                    borderSide: BorderSide(color: _border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _teal, width: 1.5),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -695,7 +707,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                                 fontSize: 12,
                               ),
                             ),
-                            trailing: const Icon(
+                            trailing: Icon(
                               Icons.chevron_right_rounded,
                               color: Color(0xFF94A3B8),
                             ),

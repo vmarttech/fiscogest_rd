@@ -1,5 +1,7 @@
 import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'dart:io';
+import 'dart:async';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
@@ -58,9 +60,9 @@ class AppShell extends ConsumerWidget {
     // Label limpio y corto para el menú
     final operadorLabel = sesion == null
         ? 'Sin sesión'
-        : (sesion.nombre.isNotEmpty 
-            ? sesion.nombre.split(' ').first 
-            : sesion.username);
+        : (sesion.nombre.isNotEmpty
+              ? sesion.nombre.split(' ').first
+              : sesion.username);
     final cfg = ref.watch(configuracionControllerProvider).valueOrNull;
     final nombreEmpresa = (cfg?.nombreComercial.trim().isNotEmpty == true)
         ? cfg!.nombreComercial.trim()
@@ -104,7 +106,9 @@ class AppShell extends ConsumerWidget {
               currentPath: currentPath,
               context: context,
               nombreEmpresa: nombreEmpresa,
-              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true) ? cfg!.logoUrl.trim() : '',
+              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true)
+                  ? cfg!.logoUrl.trim()
+                  : '',
               modoSimplificado: modoSimplificado,
               esAdmin: esAdmin,
               esVendedor: esVendedor,
@@ -114,7 +118,8 @@ class AppShell extends ConsumerWidget {
               usernameSesion: sesion?.username ?? '',
               onLogout: () {
                 UpdateChecker.promptsEnabled = false;
-      ref.read(sesionProvider.notifier).state = null;
+                unawaited(SesionPersistente.limpiar());
+                ref.read(sesionProvider.notifier).state = null;
                 SesionNube.clear();
                 context.go('/login');
               },
@@ -141,7 +146,8 @@ class AppShell extends ConsumerWidget {
                     operadorLabel: operadorLabel,
                     onLogout: () {
                       UpdateChecker.promptsEnabled = false;
-      ref.read(sesionProvider.notifier).state = null;
+                      unawaited(SesionPersistente.limpiar());
+                      ref.read(sesionProvider.notifier).state = null;
                       SesionNube.clear();
                       context.go('/login');
                     },
@@ -183,7 +189,8 @@ class AppShell extends ConsumerWidget {
               usernameSesion: sesion?.username ?? '',
               onLogout: () {
                 UpdateChecker.promptsEnabled = false;
-      ref.read(sesionProvider.notifier).state = null;
+                unawaited(SesionPersistente.limpiar());
+                ref.read(sesionProvider.notifier).state = null;
                 SesionNube.clear();
                 context.go('/login');
               },
@@ -208,9 +215,7 @@ class AppShell extends ConsumerWidget {
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: child),
-              ],
+              children: [Expanded(child: child)],
             ),
           );
         },
@@ -231,8 +236,13 @@ class AppShell extends ConsumerWidget {
     required VoidCallback onLogout,
   }) {
     final rnc = rncEmpresa;
-    final fecha = DateFormat("EEEE, d 'de' MMMM yyyy", 'es').format(DateTime.now());
-    final fechaCap = fecha.isEmpty ? fecha : '${fecha[0].toUpperCase()}${fecha.substring(1)}';
+    final fecha = DateFormat(
+      "EEEE, d 'de' MMMM yyyy",
+      'es',
+    ).format(DateTime.now());
+    final fechaCap = fecha.isEmpty
+        ? fecha
+        : '${fecha[0].toUpperCase()}${fecha.substring(1)}';
 
     return Container(
       height: 64,
@@ -254,7 +264,11 @@ class AppShell extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.business_outlined, size: 15, color: Color(0xFF60A5FA)),
+                Icon(
+                  Icons.business_outlined,
+                  size: 15,
+                  color: Color(0xFF60A5FA),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   nombreEmpresa,
@@ -265,7 +279,10 @@ class AppShell extends ConsumerWidget {
                   ),
                 ),
                 if (rnc.isNotEmpty) ...[
-                  const Text('  •  ', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                  const Text(
+                    '  •  ',
+                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                  ),
                   Text(
                     'RNC: $rnc',
                     style: const TextStyle(
@@ -287,25 +304,42 @@ class AppShell extends ConsumerWidget {
               child: SizedBox(
                 height: 40,
                 child: TextField(
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Buscar clientes, facturas, e-CF, créditos...',
-                    hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
-                    prefixIcon: const Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                    hintStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF94A3B8),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 18,
+                      color: Color(0xFF94A3B8),
+                    ),
                     filled: true,
                     fillColor: const Color(0xFF1E293B),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 0,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: BorderSide(color: Color(0xFF334155)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderSide: BorderSide(color: Color(0xFF334155)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+                      borderSide: BorderSide(
+                        color: Color(0xFF3B82F6),
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -316,7 +350,11 @@ class AppShell extends ConsumerWidget {
           // Date
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 15, color: Color(0xFF94A3B8)),
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 15,
+                color: Color(0xFF94A3B8),
+              ),
               const SizedBox(width: 6),
               Text(
                 fechaCap,
@@ -366,8 +404,13 @@ class AppShell extends ConsumerWidget {
           const SizedBox(width: 4),
           // Exportar Resumen
           FilledButton.icon(
-            onPressed: () { if (!ProviderScope.containerOf(context).read(modoSimplificadoProvider)) context.push('/reports'); },
-            icon: const Icon(Icons.download_outlined, size: 16),
+            onPressed: () {
+              if (!ProviderScope.containerOf(
+                context,
+              ).read(modoSimplificadoProvider))
+                context.push('/reports');
+            },
+            icon: Icon(Icons.download_outlined, size: 16),
             label: const Text(
               'Exportar Resumen',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
@@ -376,7 +419,9 @@ class AppShell extends ConsumerWidget {
               backgroundColor: const Color(0xFF2563EB),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 0,
             ),
           ),
@@ -384,8 +429,6 @@ class AppShell extends ConsumerWidget {
       ),
     );
   }
-
-
 
   Widget _buildMenu({
     required double width,
@@ -416,28 +459,28 @@ class AppShell extends ConsumerWidget {
 
     bool puede(String permiso) => rolTienePermiso(rolUsuario, permiso);
 
-    // Móvil: degradado teal profundo (barra app → oscuro).
-    // Desktop (isPermanent): fondo sidebar actual.
-    final menuBg = isPermanent
-        ? null
-        : const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF00796B), // verde AppBar
-                Color(0xFF00695C),
-                Color(0xFF004D40),
-                Color(0xFF003D36),
-                Color(0xFF0A1F1C), // pie profundo
-              ],
-              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
-            ),
-          );
+    final primary = Theme.of(context).colorScheme.primary;
+    final sidebarBase = const Color(0xFF111827);
+    final menuBg = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color.lerp(
+            sidebarBase,
+            Color.lerp(primary, Colors.white, 0.12),
+            0.78,
+          )!,
+          Color.lerp(sidebarBase, primary, 0.62)!,
+          Color.lerp(sidebarBase, primary, 0.46)!,
+          Color.lerp(sidebarBase, primary, 0.30)!,
+          Color.lerp(sidebarBase, primary, 0.16)!,
+        ],
+        stops: const [0.0, 0.24, 0.5, 0.76, 1.0],
+      ),
+    );
     return Material(
-      color: isPermanent
-          ? AppColors.sidebarBackground
-          : Colors.transparent,
+      color: Colors.transparent,
       child: Container(
         width: width,
         decoration: menuBg,
@@ -447,64 +490,72 @@ class AppShell extends ConsumerWidget {
             children: [
               // ─── HEADER DEL MENÚ (oculto en desktop: va en barra superior) ───
               if (!hideBrandHeader)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
-                child: Row(
-                  children: [
-                    _buildBusinessLogo(logoUrl, nombreEmpresa),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            nombreEmpresa,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              height: 1.15,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
+                  child: Row(
+                    children: [
+                      _buildBusinessLogo(context, logoUrl, nombreEmpresa),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nombreEmpresa,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                height: 1.15,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            'Gestión Fiscal y Créditos',
-                            style: TextStyle(
-                              color: Color(0xFF9DB5DA),
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w500,
-                              height: 1.2,
+                            const SizedBox(height: 2),
+                            Text(
+                              'Gestiona. Vende. Crece.',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.72),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w500,
+                                height: 1.2,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Divider(
-                color: isPermanent
-                    ? AppColors.divider
-                    : Colors.white.withValues(alpha: 0.18),
-                height: 1,
-              ),
+              Divider(color: Colors.white.withValues(alpha: 0.18), height: 1),
 
               // ─── ÍTEMS DEL MENÚ ───
               Expanded(
                 child: ListView(
+                  key: const PageStorageKey<String>('app-shell-sidebar'),
                   padding: const EdgeInsets.fromLTRB(10, 14, 10, 20),
                   children: [
                     _buildSectionTitle('OPERACIONES'),
                     if (usernameSesion.isEmpty ||
                         usernameSesion.toLowerCase() == 'invitado') ...[
-                      _buildNavItem(context, '/setup-cuenta', 'Registro',
-                          Icons.person_add_outlined, currentPath, isPermanent),
-                      _buildNavItem(context, '/login', 'Iniciar sesión',
-                          Icons.login_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/setup-cuenta',
+                        'Registro',
+                        Icons.person_add_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                      _buildNavItem(
+                        context,
+                        '/login',
+                        'Iniciar sesión',
+                        Icons.login_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     ],
                     if (puede(Permiso.dashboardVer))
                       _buildNavItem(
@@ -515,8 +566,7 @@ class AppShell extends ConsumerWidget {
                         currentPath,
                         isPermanent,
                       ),
-                    if (!modoColmadoFlag &&
-                        puede(Permiso.facturacionGestionar))
+                    if (!modoColmadoFlag && puede(Permiso.facturacionGestionar))
                       _buildNavItem(
                         context,
                         '/sales',
@@ -526,20 +576,47 @@ class AppShell extends ConsumerWidget {
                         isPermanent,
                       ),
                     if (puede(Permiso.ventasCotizar))
-                      _buildNavItem(context, '/ventas/cotizaciones/nueva', 'Ventas',
-                          Icons.point_of_sale, currentPath, isPermanent),
-                    if (puede(Permiso.cajaCobrar) && !AppBreakpoints.isMobile(context))
+                      _buildNavItem(
+                        context,
+                        '/ventas/cotizaciones/nueva',
+                        'Ventas',
+                        Icons.point_of_sale,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (puede(Permiso.cajaCobrar) &&
+                        !AppBreakpoints.isMobile(context))
                       if (!modoSimplificado)
-                        _buildNavItem(context, '/ventas/cobro', 'Caja',
-                          Icons.payments_outlined, currentPath, isPermanent),
-                    if (modoSimplificado && permiteFiaoLicencia &&
+                        _buildNavItem(
+                          context,
+                          '/ventas/cobro',
+                          'Caja',
+                          Icons.payments_outlined,
+                          currentPath,
+                          isPermanent,
+                        ),
+                    if (modoSimplificado &&
+                        permiteFiaoLicencia &&
                         puede(Permiso.fiaoUsar))
-                      _buildNavItem(context, '/ventas/fios', 'Fiao',
-                          Icons.edit_note_rounded, currentPath, isPermanent),
-                    if (!modoSimplificado && permiteCreditoFormalLicencia &&
+                      _buildNavItem(
+                        context,
+                        '/ventas/fios',
+                        'Fiao',
+                        Icons.edit_note_rounded,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (!modoSimplificado &&
+                        permiteCreditoFormalLicencia &&
                         puede(Permiso.creditosGestionar))
-                      _buildNavItem(context, '/creditos', 'Crédito',
-                          Icons.credit_score_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/creditos',
+                        'Crédito',
+                        Icons.credit_score_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.comprasGestionar))
                       _buildNavItem(
                         context,
@@ -549,77 +626,183 @@ class AppShell extends ConsumerWidget {
                         currentPath,
                         isPermanent,
                       ),
-                    if (!modoSimplificado && permiteReportesLicencia && (puede(Permiso.reportesVer) || esAdmin))
-                      _buildNavItem(context, '/gastos', 'Gastos',
-                          Icons.money_off_csred_outlined, currentPath, isPermanent),
+                    if (!modoSimplificado &&
+                        permiteReportesLicencia &&
+                        (puede(Permiso.reportesVer) || esAdmin))
+                      _buildNavItem(
+                        context,
+                        '/gastos',
+                        'Gastos',
+                        Icons.money_off_csred_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
 
                     const SizedBox(height: 16),
                     _buildSectionTitle('INVENTARIO'),
                     if (puede(Permiso.inventarioVer))
-                      _buildNavItem(context, '/inventario', 'Productos',
-                          Icons.inventory_2_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/inventario',
+                        'Productos',
+                        Icons.inventory_2_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (!modoColmadoFlag && puede(Permiso.kardexVer)) ...[
-                      _buildNavItem(context, '/kardex', 'Kárdex',
-                          Icons.receipt_long_outlined, currentPath, isPermanent),
                       _buildNavItem(
-                          context,
-                          '/inventario-fisico',
-                          'Inventario Físico',
-                          Icons.fact_check_outlined,
-                          currentPath,
-                          isPermanent),
-                      _buildNavItem(context, '/lista-ajustes', 'Ajustes',
-                          Icons.tune_outlined, currentPath, isPermanent),
+                        context,
+                        '/kardex',
+                        'Kárdex',
+                        Icons.receipt_long_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                       _buildNavItem(
-                            context,
-                            '/transferencias/registrar',
-                            'Transferencias',
-                            Icons.swap_horiz_outlined,
-                            currentPath,
-                            isPermanent),
+                        context,
+                        '/inventario-fisico',
+                        'Inventario Físico',
+                        Icons.fact_check_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                      _buildNavItem(
+                        context,
+                        '/lista-ajustes',
+                        'Ajustes',
+                        Icons.tune_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                      _buildNavItem(
+                        context,
+                        '/transferencias/registrar',
+                        'Transferencias',
+                        Icons.swap_horiz_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     ],
 
                     const SizedBox(height: 16),
                     _buildSectionTitle('CATÁLOGOS'),
                     if (puede(Permiso.clientesVer))
-                      _buildNavItem(context, '/clientes', 'Clientes',
-                          Icons.people_outline, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/clientes',
+                        'Clientes',
+                        Icons.people_outline,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(context, '/proveedores', 'Proveedores',
-                          Icons.business_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/proveedores',
+                        'Proveedores',
+                        Icons.business_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(context, '/categorias', 'Categorías',
-                          Icons.category_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/categorias',
+                        'Categorías',
+                        Icons.category_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(context, '/marcas', 'Marcas',
-                          Icons.branding_watermark_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/marcas',
+                        'Marcas',
+                        Icons.branding_watermark_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(context, '/unidades', 'Unidades',
-                          Icons.straighten_outlined, currentPath, isPermanent),
-                    if (!modoSimplificado && permiteAlmacenesLicencia && puede(Permiso.catalogoGestionar))
-                      _buildNavItem(context, '/almacenes', 'Almacenes',
-                          Icons.warehouse_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/unidades',
+                        'Unidades',
+                        Icons.straighten_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (!modoSimplificado &&
+                        permiteAlmacenesLicencia &&
+                        puede(Permiso.catalogoGestionar))
+                      _buildNavItem(
+                        context,
+                        '/almacenes',
+                        'Almacenes',
+                        Icons.warehouse_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.catalogoGestionar))
-                      _buildNavItem(context, '/presentaciones', 'Presentaciones',
-                          Icons.view_module_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/presentaciones',
+                        'Presentaciones',
+                        Icons.view_module_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
 
                     const SizedBox(height: 16),
                     _buildSectionTitle('SISTEMA'),
                     if (!modoSimplificado &&
                         (puede(Permiso.reportesVer) || esAdmin))
-                      _buildNavItem(context, '/reports', 'Reportes',
-                          Icons.assessment_outlined, currentPath, isPermanent),
-                    if (!modoColmadoFlag && esAdmin && permiteFiscalLicencia) ...[
-                      _buildNavItem(context, '/ecfe', 'e-CF · DGII',
-                          Icons.cloud_sync_outlined, currentPath, isPermanent),
-                      _buildNavItem(context, '/impuestos', 'Impuestos',
-                          Icons.calculate_outlined, currentPath, isPermanent),
-                      _buildNavItem(context, '/import-export', 'Importar / Exportar',
-                          Icons.import_export, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/reports',
+                        'Reportes',
+                        Icons.assessment_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (!modoColmadoFlag &&
+                        esAdmin &&
+                        permiteFiscalLicencia) ...[
+                      _buildNavItem(
+                        context,
+                        '/ecfe',
+                        'e-CF · DGII',
+                        Icons.cloud_sync_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                      _buildNavItem(
+                        context,
+                        '/impuestos',
+                        'Impuestos',
+                        Icons.calculate_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                      _buildNavItem(
+                        context,
+                        '/import-export',
+                        'Importar / Exportar',
+                        Icons.import_export,
+                        currentPath,
+                        isPermanent,
+                      ),
                     ],
-                    if (!modoSimplificado && permiteUsuariosExtraLicencia && puede(Permiso.usuariosGestionar))
-                      _buildNavItem(context, '/usuarios', 'Usuarios',
-                          Icons.manage_accounts_outlined, currentPath, isPermanent),
+                    if (!modoSimplificado &&
+                        permiteUsuariosExtraLicencia &&
+                        puede(Permiso.usuariosGestionar))
+                      _buildNavItem(
+                        context,
+                        '/usuarios',
+                        'Usuarios',
+                        Icons.manage_accounts_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (esDuenoPlataforma(usernameSesion))
                       _buildNavItem(
                         context,
@@ -632,25 +815,31 @@ class AppShell extends ConsumerWidget {
                       ),
                     if (esAdmin || esDuenoPlataforma(usernameSesion))
                       _buildNavItem(
-                      context,
-                      '/licencia/comprar',
-                      'Planes y pago',
-                      Icons.workspace_premium_outlined,
-                      currentPath,
-                      isPermanent,
-                    ),
+                        context,
+                        '/licencia/comprar',
+                        'Planes y pago',
+                        Icons.workspace_premium_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (esAdmin || esDuenoPlataforma(usernameSesion))
                       _buildNavItem(
-                      context,
-                      '/licencia',
-                      'Mi licencia',
-                      Icons.verified_outlined,
-                      currentPath,
-                      isPermanent,
-                    ),
+                        context,
+                        '/licencia',
+                        'Mi licencia',
+                        Icons.verified_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     if (puede(Permiso.configAdmin))
-                      _buildNavItem(context, '/configuracion', 'Configuración',
-                          Icons.settings_outlined, currentPath, isPermanent),
+                      _buildNavItem(
+                        context,
+                        '/configuracion',
+                        'Configuración',
+                        Icons.settings_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
                     _buildNavAction(
                       context,
                       title: 'Contactar',
@@ -660,9 +849,7 @@ class AppShell extends ConsumerWidget {
                         final uri = Uri(
                           scheme: 'mailto',
                           path: 'fiscogestrd@gmail.com',
-                          queryParameters: {
-                            'subject': 'Contacto FiscoGest',
-                          },
+                          queryParameters: {'subject': 'Contacto FiscoGest'},
                         );
                         try {
                           final ok = await launchUrl(
@@ -759,13 +946,18 @@ class AppShell extends ConsumerWidget {
                     ),
                     ListTile(
                       dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                      ),
                       // Splash visible sobre sidebar navy (evita assert Flutter)
                       hoverColor: const Color(0x33FFFFFF),
                       splashColor: const Color(0x44FFFFFF),
                       focusColor: const Color(0x22FFFFFF),
-                      leading: const Icon(Icons.logout,
-                          color: AppColors.grey400, size: 20),
+                      leading: Icon(
+                        Icons.logout,
+                        color: AppColors.grey400,
+                        size: 20,
+                      ),
                       title: Text(
                         'Cerrar sesión',
                         style: AppTypography.bodyMedium.copyWith(
@@ -779,8 +971,6 @@ class AppShell extends ConsumerWidget {
                   ],
                 ),
               ),
-
-
             ],
           ),
         ),
@@ -802,7 +992,6 @@ class AppShell extends ConsumerWidget {
       ),
     );
   }
-
 
   /// Acción externa (correo / web) con el mismo look del menú lateral.
   Widget _buildNavAction(
@@ -833,7 +1022,11 @@ class AppShell extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
-                Icon(icon, color: const Color(0xFF9DB5DA), size: 19),
+                Icon(
+                  icon,
+                  color: Colors.white.withValues(alpha: 0.72),
+                  size: 19,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -866,6 +1059,9 @@ class AppShell extends ConsumerWidget {
     bool isPermanent, {
     int badgeCount = 0,
   }) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final sidebarBase = const Color(0xFF111827);
+    final sidebarBg = Color.lerp(sidebarBase, primary, 0.48)!;
     final esSeleccionado =
         currentPath == routePath || currentPath.startsWith('$routePath/');
 
@@ -873,7 +1069,7 @@ class AppShell extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: Material(
         color: esSeleccionado
-            ? const Color(0xFF1A3A6B) // azul marino (no brillante)
+            ? Color.lerp(sidebarBg, primary, 0.52)!
             : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
@@ -887,7 +1083,7 @@ class AppShell extends ConsumerWidget {
               Navigator.of(context).pop();
             }
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.push(routePath);
+              if (currentPath != routePath) context.go(routePath);
             });
           },
           child: Padding(
@@ -898,7 +1094,7 @@ class AppShell extends ConsumerWidget {
                   icon,
                   color: esSeleccionado
                       ? Colors.white
-                      : const Color(0xFF9DB5DA),
+                      : Colors.white.withValues(alpha: 0.72),
                   size: 19,
                 ),
                 const SizedBox(width: 10),
@@ -918,8 +1114,10 @@ class AppShell extends ConsumerWidget {
                 ),
                 if (badgeCount > 0) ...[
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFB91C1C),
                       borderRadius: BorderRadius.circular(10),
@@ -940,7 +1138,7 @@ class AppShell extends ConsumerWidget {
                     width: 3.5,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
+                      color: Theme.of(context).colorScheme.tertiary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -952,7 +1150,11 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildBusinessLogo(String logoUrl, String nombreEmpresa) {
+  Widget _buildBusinessLogo(
+    BuildContext context,
+    String logoUrl,
+    String nombreEmpresa,
+  ) {
     final tieneLogo = logoUrl.isNotEmpty && File(logoUrl).existsSync();
     final iniciales = nombreEmpresa
         .trim()
@@ -965,9 +1167,11 @@ class AppShell extends ConsumerWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: const Color(0xFF0F2A52),
+        color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: const Color(0xFF1E3A6B)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.72),
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: tieneLogo
@@ -998,7 +1202,6 @@ class AppShell extends ConsumerWidget {
     );
   }
 }
-
 
 class _UpdatePromptGate {
   static bool done = false;

@@ -56,7 +56,8 @@ class LoginPrefs {
     await _secure.delete(key: _secPass);
   }
 
-  static Future<({String user, String pass})?> readBiometricCredentials() async {
+  static Future<({String user, String pass})?>
+  readBiometricCredentials() async {
     if (!await isBiometricEnabled()) return null;
     final u = await _secure.read(key: _secUser);
     final pass = await _secure.read(key: _secPass);

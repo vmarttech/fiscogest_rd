@@ -30,18 +30,20 @@ class HistorialVentasBorrador extends ConsumerWidget {
     EstadoDocumento.facturado => 'Facturada',
   };
 
-  Color _colorEstado(EstadoDocumento estado) => switch (estado) {
+  Color _colorEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
     EstadoDocumento.borrador => AppColors.textSecondary,
-    EstadoDocumento.cotizado => AppColors.primary,
+    EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
     EstadoDocumento.enCredito => const Color(0xFFE65100),
     EstadoDocumento.aprobado => AppColors.success,
     EstadoDocumento.anulado => AppColors.error,
     EstadoDocumento.facturado => AppColors.success,
   };
 
-  Color _colorFondoEstado(EstadoDocumento estado) => switch (estado) {
+  Color _colorFondoEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
     EstadoDocumento.borrador => AppColors.textSecondary.withValues(alpha: 0.12),
-    EstadoDocumento.cotizado => AppColors.primary.withValues(alpha: 0.12),
+    EstadoDocumento.cotizado => Theme.of(
+      context,
+    ).colorScheme.primary.withValues(alpha: 0.12),
     EstadoDocumento.enCredito => const Color(
       0xFFE65100,
     ).withValues(alpha: 0.12),
@@ -88,7 +90,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
               SizedBox(
                 height: esPantallaPequena ? 40 : 44,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.add, size: 18),
+                  icon: Icon(Icons.add, size: 18),
                   label: Text(
                     esPantallaPequena ? 'Nueva' : 'Nueva Cotización',
                     style: TextStyle(
@@ -100,7 +102,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
                     context.push('/ventas/cotizaciones/nueva');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: AppColors.white,
                     elevation: 0,
                     padding: EdgeInsets.symmetric(
@@ -122,11 +124,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: AppColors.error,
-                    ),
+                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: 12),
                     Text(
                       'Error al cargar cotizaciones: $e',
@@ -180,8 +178,8 @@ class HistorialVentasBorrador extends ConsumerWidget {
                     return _TarjetaCotizacion(
                       cotizacion: c,
                       etiquetaEstado: _etiquetaEstado(c.estadoDocumento),
-                      colorTextoEstado: _colorEstado(c.estadoDocumento),
-                      colorFondoEstado: _colorFondoEstado(c.estadoDocumento),
+                      colorTextoEstado: _colorEstado(c.estadoDocumento, context),
+                      colorFondoEstado: _colorFondoEstado(c.estadoDocumento, context),
                       fechaEmision: _formatearFecha(c.fecha),
                       fechaVencimiento: _formatearFecha(c.vencimiento),
                       esPantallaPequena: esPantallaPequena,
@@ -234,7 +232,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
             ),
             child: const Text('Enviar'),
@@ -400,7 +398,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
               Text(
                 formatRd(cotizacion.montoTotal),
                 style: AppTypography.h4.copyWith(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: tamanoTotal,
                 ),
@@ -416,7 +414,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
                 width: double.infinity,
                 height: esPantallaPequena ? 40 : 44,
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.send_outlined, size: 18),
+                  icon: Icon(Icons.send_outlined, size: 18),
                   label: Text(
                     'Enviar a aprobación',
                     style: TextStyle(
@@ -426,8 +424,10 @@ class _TarjetaCotizacion extends ConsumerWidget {
                   ),
                   onPressed: () => _enviarAprobacion(ref, context),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -439,7 +439,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
                 width: double.infinity,
                 height: esPantallaPequena ? 40 : 44,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.point_of_sale, size: 18),
+                  icon: Icon(Icons.point_of_sale, size: 18),
                   label: Text(
                     'Ir a Caja / Cobrar',
                     style: TextStyle(
@@ -461,11 +461,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
             else if (convertida)
               Row(
                 children: [
-                  const Icon(
-                    Icons.check_circle,
-                    size: 16,
-                    color: AppColors.success,
-                  ),
+                  Icon(Icons.check_circle, size: 16, color: AppColors.success),
                   const SizedBox(width: 6),
                   Text(
                     'Venta generada',

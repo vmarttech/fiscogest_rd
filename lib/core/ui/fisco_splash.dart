@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
+import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 
 class FiscoSplashPage extends ConsumerStatefulWidget {
   const FiscoSplashPage({
     super.key,
-    this.minDuration = const Duration(milliseconds: 1500),
+    this.minDuration = const Duration(milliseconds: 1200),
   });
 
   final Duration minDuration;
@@ -36,25 +38,45 @@ class _FiscoSplashPageState extends ConsumerState<FiscoSplashPage>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
     _c.forward();
+
     Future<void>.delayed(widget.minDuration, () async {
       if (!mounted) return;
-      final db = ref.read(databaseProvider);
-      final usuarios = await db.select(db.usuariosTable).get();
-      if (!mounted) return;
-      if (usuarios.isEmpty) {
-        ref.read(sesionProvider.notifier).state = const UsuarioSesion(
-          id: 0,
-          username: 'invitado',
-          nombre: 'Modo prueba',
-          rol: 'Admin',
-          requiereSetupInicial: false,
-        );
-        // ignore: avoid_print
-        print('FISCO_SPLASH: invitado → /');
-        context.go('/');
-      } else {
-        // ignore: avoid_print
-        print('FISCO_SPLASH: hay usuarios → /login');
+      try {
+        try {
+          await ref
+              .read(configuracionControllerProvider.future)
+              .timeout(const Duration(milliseconds: 1500));
+        } catch (_) {}
+
+        final db = ref.read(databaseProvider);
+        final sesionGuardada = await SesionPersistente.restaurar(db);
+        if (sesionGuardada != null) {
+          ref.read(sesionProvider.notifier).state = sesionGuardada;
+          if (!mounted) return;
+          context.go(
+            sesionGuardada.requiereSetupInicial
+                ? '/setup-cuenta'
+                : sesionGuardada.rutaInicio,
+          );
+          return;
+        }
+        final usuarios = await db.select(db.usuariosTable).get();
+
+        if (!mounted) return;
+        if (usuarios.isEmpty) {
+          ref.read(sesionProvider.notifier).state = const UsuarioSesion(
+            id: 0,
+            username: 'invitado',
+            nombre: 'Modo prueba',
+            rol: 'Admin',
+            requiereSetupInicial: false,
+          );
+          context.go('/');
+        } else {
+          context.go('/login');
+        }
+      } catch (e) {
+        if (!mounted) return;
         context.go('/login');
       }
     });
@@ -125,7 +147,7 @@ class _FiscoSplashPageState extends ConsumerState<FiscoSplashPage>
                     ),
                     const SizedBox(height: 28),
                     Text(
-                      'FiscoGest',
+                      'VendiFlux',
                       style: TextStyle(
                         fontSize: 34,
                         fontWeight: FontWeight.w800,
@@ -135,7 +157,7 @@ class _FiscoSplashPageState extends ConsumerState<FiscoSplashPage>
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Tu negocio, en orden',
+                      'Gestiona. Vende. Crece.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
