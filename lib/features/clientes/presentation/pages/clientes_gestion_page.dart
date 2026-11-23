@@ -228,22 +228,26 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                           const Expanded(child: _EmptyState())
                         else
                           Expanded(
-                            child: ListView.separated(
+                            child: GridView.builder(
                               padding: EdgeInsets.zero,
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 500,
+                                    mainAxisExtent: 132,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                  ),
                               itemCount: filtrados.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 10),
                               itemBuilder: (_, i) {
                                 final c = filtrados[i];
                                 return _ClienteCardPremium(
                                   cliente: c,
                                   theme: _themeFor(c, context),
                                   iniciales: _iniciales(c.nombre),
-                                  mobile: false,
+                                  mobile: true,
                                   selected: _seleccionado?.id == c.id,
-                                  onOpen: () => setState(() {
-                                    _seleccionado = c;
-                                  }),
+                                  onOpen: () =>
+                                      setState(() => _seleccionado = c),
                                   onEdit: () => _irAEditarCliente(context, c),
                                   onDelete: () =>
                                       _confirmarEliminar(context, c),
@@ -1183,7 +1187,10 @@ class ClienteDetallePage extends StatelessWidget {
   });
 
   /// Desde GoRouter (extra = ClienteCompleto).
-  factory ClienteDetallePage.fromCliente(ClienteCompleto c, BuildContext context) {
+  factory ClienteDetallePage.fromCliente(
+    ClienteCompleto c,
+    BuildContext context,
+  ) {
     final themes = [
       Theme.of(context).colorScheme.primary,
       Color(0xFF3B82F6),

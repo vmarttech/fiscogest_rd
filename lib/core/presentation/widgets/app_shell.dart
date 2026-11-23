@@ -2,6 +2,7 @@ import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
+import 'package:fiscogest_rd/core/navigation/rutas_principales.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/permisos_roles.dart';
@@ -164,61 +165,66 @@ class AppShell extends ConsumerWidget {
     // ─────────────────────────────────────────────
     // MÓVIL / TABLET → Drawer (comportamiento actual)
     // ─────────────────────────────────────────────
-    return Scaffold(
-      backgroundColor: AppColors.pageBackground,
-      drawer: Builder(
-        builder: (drawerCtx) {
-          final screenW = MediaQuery.sizeOf(drawerCtx).width;
-          final drawerW = (screenW * 0.85).clamp(220.0, 280.0);
-          return SizedBox(
-            width: drawerW,
-            child: _buildMenu(
+    return PopScope<void>(
+      // Las rutas principales no tienen flecha Atrás en la app; el sistema
+      // Android debe respetar lo mismo y no mostrar la pantalla anterior.
+      canPop: !esRutaPrincipalApp(currentPath),
+      child: Scaffold(
+        backgroundColor: AppColors.pageBackground,
+        drawer: Builder(
+          builder: (drawerCtx) {
+            final screenW = MediaQuery.sizeOf(drawerCtx).width;
+            final drawerW = (screenW * 0.85).clamp(220.0, 280.0);
+            return SizedBox(
               width: drawerW,
-              currentPath: currentPath,
-              context: context,
-              nombreEmpresa: nombreEmpresa,
-              logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true)
-                  ? cfg!.logoUrl.trim()
-                  : '',
-              modoSimplificado: modoSimplificado,
-              esAdmin: esAdmin,
-              esVendedor: esVendedor,
-              esCajero: esCajero,
-              operadorLabel: operadorLabel,
-              rolUsuario: sesion?.rol ?? '',
-              usernameSesion: sesion?.username ?? '',
-              onLogout: () {
-                UpdateChecker.promptsEnabled = false;
-                unawaited(SesionPersistente.limpiar());
-                ref.read(sesionProvider.notifier).state = null;
-                SesionNube.clear();
-                context.go('/login');
+              child: _buildMenu(
+                width: drawerW,
+                currentPath: currentPath,
+                context: context,
+                nombreEmpresa: nombreEmpresa,
+                logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true)
+                    ? cfg!.logoUrl.trim()
+                    : '',
+                modoSimplificado: modoSimplificado,
+                esAdmin: esAdmin,
+                esVendedor: esVendedor,
+                esCajero: esCajero,
+                operadorLabel: operadorLabel,
+                rolUsuario: sesion?.rol ?? '',
+                usernameSesion: sesion?.username ?? '',
+                onLogout: () {
+                  UpdateChecker.promptsEnabled = false;
+                  unawaited(SesionPersistente.limpiar());
+                  ref.read(sesionProvider.notifier).state = null;
+                  SesionNube.clear();
+                  context.go('/login');
+                },
+                permiteFiscalLicencia: permiteFiscalLicencia,
+                permiteFiaoLicencia: permiteFiaoLicencia,
+                permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
+                permiteAlmacenesLicencia: permiteAlmacenesLicencia,
+                permiteReportesLicencia: permiteReportesLicencia,
+                permiteUsuariosExtraLicencia: permiteUsuariosExtraLicencia,
+                pedidosPendientes: pedidosPendientes,
+                isPermanent: false,
+              ),
+            );
+          },
+        ),
+        body: Builder(
+          builder: (scaffoldContext) {
+            return ShellDrawerScope(
+              openDrawer: () {
+                final s = Scaffold.maybeOf(scaffoldContext);
+                if (s != null && s.hasDrawer) s.openDrawer();
               },
-              permiteFiscalLicencia: permiteFiscalLicencia,
-              permiteFiaoLicencia: permiteFiaoLicencia,
-              permiteCreditoFormalLicencia: permiteCreditoFormalLicencia,
-              permiteAlmacenesLicencia: permiteAlmacenesLicencia,
-              permiteReportesLicencia: permiteReportesLicencia,
-              permiteUsuariosExtraLicencia: permiteUsuariosExtraLicencia,
-              pedidosPendientes: pedidosPendientes,
-              isPermanent: false,
-            ),
-          );
-        },
-      ),
-      body: Builder(
-        builder: (scaffoldContext) {
-          return ShellDrawerScope(
-            openDrawer: () {
-              final s = Scaffold.maybeOf(scaffoldContext);
-              if (s != null && s.hasDrawer) s.openDrawer();
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [Expanded(child: child)],
-            ),
-          );
-        },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [Expanded(child: child)],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

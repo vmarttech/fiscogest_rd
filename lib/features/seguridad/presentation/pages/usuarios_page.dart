@@ -87,15 +87,20 @@ class UsuariosPage extends ConsumerWidget {
                 if (lista.isEmpty) {
                   return const Center(child: Text('No hay usuarios'));
                 }
-                return ListView.separated(
+                return GridView.builder(
                   padding: EdgeInsets.fromLTRB(
                     mobile ? 16 : 24,
                     4,
                     mobile ? 16 : 24,
                     24,
                   ),
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: mobile ? 720 : 520,
+                    mainAxisExtent: 112,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
                   itemCount: lista.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (ctx, i) {
                     final u = lista[i];
                     final activo = u.estado.toLowerCase() == 'activo';

@@ -1079,6 +1079,9 @@ class _NuevaVentaBorradorPageState
     bool puedeGenerar,
     bool esPantallaPequena,
   ) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final esTemaOscuro = theme.brightness == Brightness.dark;
     final simp = ref.watch(modoColmadoProvider);
     final carritoVacio = estado.detalles.isEmpty;
     final showSub = carritoVacio ? 0.0 : estado.subtotal;
@@ -1099,9 +1102,10 @@ class _NuevaVentaBorradorPageState
       required String label,
       required String value,
       VoidCallback? onTap,
-      Color accent = const Color(0xFF0F172A),
+      Color? accent,
     }) {
       final canTap = onTap != null;
+      final colorAcento = accent ?? colors.onSurface;
       return Material(
         color: Colors.transparent,
         child: InkWell(
@@ -1114,10 +1118,10 @@ class _NuevaVentaBorradorPageState
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
+                    color: colorAcento.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, size: 18, color: accent),
+                  child: Icon(icon, size: 18, color: colorAcento),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1130,7 +1134,7 @@ class _NuevaVentaBorradorPageState
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.3,
-                          color: accent.withValues(alpha: 0.75),
+                          color: colorAcento.withValues(alpha: 0.75),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -1141,7 +1145,7 @@ class _NuevaVentaBorradorPageState
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: accent,
+                          color: colorAcento,
                         ),
                       ),
                     ],
@@ -1151,7 +1155,7 @@ class _NuevaVentaBorradorPageState
                   Icon(
                     Icons.chevron_right,
                     size: 20,
-                    color: accent.withValues(alpha: 0.45),
+                    color: colorAcento.withValues(alpha: 0.45),
                   ),
               ],
             ),
@@ -1165,39 +1169,44 @@ class _NuevaVentaBorradorPageState
       required String label,
       required String shortcut,
       required VoidCallback? onPressed,
+      required Color color,
+      required Color foregroundColor,
     }) {
       return SizedBox(
-        height: 40,
-        child: OutlinedButton(
+        height: 42,
+        child: FilledButton(
           onPressed: onPressed,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF334155),
-            backgroundColor: Colors.white,
-            side: BorderSide(color: Color(0xFFE2E8F0)),
+          style: FilledButton.styleFrom(
+            foregroundColor: foregroundColor,
+            backgroundColor: color,
+            disabledForegroundColor: colors.onSurfaceVariant,
+            disabledBackgroundColor: colors.surfaceContainerHighest,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(9),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
           ),
           child: Row(
             children: [
-              Icon(icon, size: 16, color: const Color(0xFF94A3B8)),
+              Icon(icon, size: 16, color: foregroundColor),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
                     fontSize: 13,
+                    color: foregroundColor,
                   ),
                 ),
               ),
               Text(
                 shortcut,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF94A3B8),
+                  color: foregroundColor.withValues(alpha: 0.78),
                 ),
               ),
             ],
@@ -1209,52 +1218,52 @@ class _NuevaVentaBorradorPageState
     // —— Carrito: vacío (mock) o tabla con ítems ——
     final Widget cartBody;
     if (estado.detalles.isEmpty) {
-      cartBody = Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.shopping_cart_outlined,
-                  size: 64,
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.95),
-                  shadows: const [
-                    Shadow(color: Color(0x590EA5E9), blurRadius: 16),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Text.rich(
-                  TextSpan(
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF334155),
-                    ),
-                    children: [
-                      TextSpan(text: 'Carrito vacío — '),
-                      TextSpan(
-                        text: 'busca un producto',
-                        style: TextStyle(color: Color(0xFF0EA5E9)),
+      cartBody = Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 64,
+                    color: colors.primary,
+                    shadows: [
+                      Shadow(
+                        color: colors.primary.withValues(alpha: 0.22),
+                        blurRadius: 16,
                       ),
                     ],
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Agrega productos para comenzar una nueva operación.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
-                ),
-                const SizedBox(height: 16),
-                // Buscador centrado (mismo motor que PanelProductos)
-                PanelProductos(alAgregar: _agregarProductoACotizacion),
-              ],
+                  const SizedBox(height: 12),
+                  Text(
+                    'Carrito vacío — busca un producto',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Agrega productos para comenzar una nueva operación.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: PanelProductos(alAgregar: _agregarProductoACotizacion),
+          ),
+        ],
       );
     } else {
       cartBody = Column(
@@ -1264,21 +1273,21 @@ class _NuevaVentaBorradorPageState
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Carrito de compra',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: colors.onSurface,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   '${estado.detalles.length} ítem(s)',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -1289,7 +1298,7 @@ class _NuevaVentaBorradorPageState
               padding: const EdgeInsets.symmetric(horizontal: 12),
               itemCount: estado.detalles.length,
               separatorBuilder: (_, __) =>
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Divider(height: 1, color: colors.outlineVariant),
               itemBuilder: (context, i) {
                 final item = estado.detalles[i];
                 final nombre =
@@ -1323,19 +1332,19 @@ class _NuevaVentaBorradorPageState
                     nombre,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Color(0xFF0F172A),
+                      color: colors.onSurface,
                     ),
                   ),
                   subtitle: Text(
                     simp
                         ? '$cantLabel × ${formatRd(precio)}${tieneDesc ? ' · desc.' : ''}'
                         : '$cantLabel × ${formatRd(precio)} · ITBIS ${formatRd(itbisLinea)}${tieneDesc ? ' · desc.' : ''}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF64748B),
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                   trailing: Row(
@@ -1347,7 +1356,7 @@ class _NuevaVentaBorradorPageState
                           icon: Icon(
                             Icons.remove,
                             size: 16,
-                            color: Color(0xFF64748B),
+                            color: colors.onSurfaceVariant,
                           ),
                           onPressed: () {
                             final n = cant <= 1
@@ -1366,7 +1375,7 @@ class _NuevaVentaBorradorPageState
                           icon: Icon(
                             Icons.add,
                             size: 16,
-                            color: Color(0xFF0EA5E9),
+                            color: colors.primary,
                           ),
                           onPressed: () {
                             ref
@@ -1380,8 +1389,8 @@ class _NuevaVentaBorradorPageState
                             Icons.percent,
                             size: 16,
                             color: tieneDesc
-                                ? const Color(0xFF059669)
-                                : const Color(0xFF64748B),
+                                ? colors.tertiary
+                                : colors.onSurfaceVariant,
                           ),
                           onPressed: () => _abrirDescuentoLineaCotizacion(
                             context,
@@ -1393,10 +1402,10 @@ class _NuevaVentaBorradorPageState
                       ],
                       Text(
                         formatRd(sub + (simp ? 0 : itbisLinea)),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
-                          color: Color(0xFF0F172A),
+                          color: colors.onSurface,
                         ),
                       ),
                       if (productoId != null)
@@ -1405,7 +1414,7 @@ class _NuevaVentaBorradorPageState
                           icon: Icon(
                             Icons.delete_outline,
                             size: 18,
-                            color: Color(0xFFDC2626),
+                            color: colors.error,
                           ),
                           onPressed: () {
                             ref
@@ -1427,8 +1436,15 @@ class _NuevaVentaBorradorPageState
       );
     }
 
-    return ColoredBox(
-      color: const Color(0xFFF8FAFC),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: const AssetImage('assets/images/fondo.png'),
+          fit: BoxFit.cover,
+          opacity: esTemaOscuro ? 0.035 : 0.28,
+        ),
+        color: esTemaOscuro ? colors.surface : const Color(0xFFF4F6F9),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1436,7 +1452,9 @@ class _NuevaVentaBorradorPageState
           SizedBox(
             width: 288,
             child: Container(
-              color: Colors.white,
+              color: colors.surface.withValues(
+                alpha: esTemaOscuro ? 0.96 : 0.72,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -1445,20 +1463,24 @@ class _NuevaVentaBorradorPageState
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                        bottom: BorderSide(color: colors.outlineVariant),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.tune, size: 16, color: Color(0xFF94A3B8)),
-                        SizedBox(width: 8),
+                        Icon(
+                          Icons.tune,
+                          size: 16,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Configuración de operación',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
+                              color: colors.onSurface,
                             ),
                           ),
                         ),
@@ -1483,7 +1505,7 @@ class _NuevaVentaBorradorPageState
                             ref.watch(sesionProvider),
                           ),
                           onTap: null,
-                          accent: const Color(0xFF2563EB),
+                          accent: colors.primary,
                         ),
                         configRow(
                           icon: Icons.location_on_outlined,
@@ -1502,15 +1524,15 @@ class _NuevaVentaBorradorPageState
                           },
                         ),
                         const SizedBox(height: 8),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                           child: Text(
                             'CONSULTAS',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.6,
-                              color: Color(0xFF94A3B8),
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -1526,7 +1548,7 @@ class _NuevaVentaBorradorPageState
                           icon: Icons.receipt_long_outlined,
                           label: 'Historial ventas',
                           value: 'F8 · Ver listado',
-                          accent: const Color(0xFF1D4ED8),
+                          accent: colors.secondary,
                           onTap: () => context.push('/ventas/historial'),
                         ),
                       ],
@@ -1536,18 +1558,20 @@ class _NuevaVentaBorradorPageState
               ),
             ),
           ),
-          const VerticalDivider(width: 1, color: Color(0xFFE2E8F0)),
+          VerticalDivider(width: 1, color: colors.outlineVariant),
 
           // ═══ CENTRO: CARRITO ═══
           Expanded(child: cartBody),
 
-          const VerticalDivider(width: 1, color: Color(0xFFE2E8F0)),
+          VerticalDivider(width: 1, color: colors.outlineVariant),
 
           // ═══ CIERRE (w-80 ≈ 320) ═══
           SizedBox(
             width: 320,
             child: Container(
-              color: Colors.white,
+              color: colors.surface.withValues(
+                alpha: esTemaOscuro ? 0.96 : 0.72,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -1556,23 +1580,23 @@ class _NuevaVentaBorradorPageState
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                        bottom: BorderSide(color: colors.outlineVariant),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Icon(
                           Icons.shopping_cart_outlined,
                           size: 16,
-                          color: Color(0xFF94A3B8),
+                          color: colors.onSurfaceVariant,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           'Cierre de operación',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F172A),
+                            color: colors.onSurface,
                           ),
                         ),
                       ],
@@ -1597,27 +1621,27 @@ class _NuevaVentaBorradorPageState
                             _htmlTotRow('ITBIS (18%)', formatRd(showItbis)),
                           ],
                           const SizedBox(height: 12),
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                          Divider(height: 1, color: colors.outlineVariant),
                           const SizedBox(height: 12),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              const Text(
+                              Text(
                                 'TOTAL',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF475569),
+                                  color: colors.onSurfaceVariant,
                                 ),
                               ),
                               const Spacer(),
                               Text(
                                 formatRd(showTotal),
-                                style: const TextStyle(
-                                  fontSize: 24,
+                                style: TextStyle(
+                                  fontSize: 26,
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0284C7),
+                                  color: colors.primary,
                                 ),
                               ),
                             ],
@@ -1644,7 +1668,7 @@ class _NuevaVentaBorradorPageState
                                         _guardarCotizacion(esCredito: false);
                                       }
                                     },
-                              icon: Icon(Icons.credit_card, size: 18),
+                              icon: const Icon(Icons.credit_card, size: 18),
                               label: const Text(
                                 'Contado',
                                 style: TextStyle(
@@ -1653,15 +1677,16 @@ class _NuevaVentaBorradorPageState
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0EA5E9),
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: const Color(
-                                  0xFF94A3B8,
-                                ),
+                                backgroundColor: colors.primary,
+                                foregroundColor: colors.onPrimary,
+                                disabledBackgroundColor:
+                                    colors.surfaceContainerHighest,
                                 elevation: 0,
-                                shadowColor: const Color(0x4D0EA5E9),
+                                shadowColor: colors.primary.withValues(
+                                  alpha: 0.22,
+                                ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(9),
                                 ),
                               ),
                             ),
@@ -1672,6 +1697,8 @@ class _NuevaVentaBorradorPageState
                               icon: Icons.credit_card,
                               label: 'Crédito',
                               shortcut: 'F9',
+                              color: colors.secondary,
+                              foregroundColor: colors.onSecondary,
                               onPressed: disabled
                                   ? null
                                   : () {
@@ -1686,6 +1713,8 @@ class _NuevaVentaBorradorPageState
                               icon: Icons.description_outlined,
                               label: 'Crear Cotización',
                               shortcut: 'F10',
+                              color: colors.tertiary,
+                              foregroundColor: colors.onTertiary,
                               onPressed: disabled
                                   ? null
                                   : () {
@@ -1701,6 +1730,8 @@ class _NuevaVentaBorradorPageState
                             icon: Icons.check,
                             label: 'Finalizar operación',
                             shortcut: 'F11',
+                            color: colors.inverseSurface,
+                            foregroundColor: colors.onInverseSurface,
                             onPressed: disabled
                                 ? null
                                 : () {
@@ -1730,16 +1761,17 @@ class _NuevaVentaBorradorPageState
   }
 
   Widget _htmlTotRow(String k, String v) {
+    final colors = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Text(k, style: const TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+        Text(k, style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
         const Spacer(),
         Text(
           v,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF334155),
+            color: colors.onSurface,
           ),
         ),
       ],

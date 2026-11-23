@@ -348,193 +348,40 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                           );
                         }
 
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Theme.of(
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(12),
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 520,
+                                mainAxisExtent: 124,
+                                crossAxisSpacing: 14,
+                                mainAxisSpacing: 14,
+                              ),
+                          itemCount: filtradas.length,
+                          itemBuilder: (_, i) {
+                            final u = filtradas[i];
+                            return _UnidadCard(
+                              item: u,
+                              badge:
+                                  (u.abreviatura != null &&
+                                      u.abreviatura!.isNotEmpty)
+                                  ? u.abreviatura!
+                                  : '—',
+                              title: u.nombre,
+                              subtitle:
+                                  (u.abreviatura != null &&
+                                      u.abreviatura!.isNotEmpty)
+                                  ? '${u.abreviatura ?? '—'} · factor ${u.factorABase}'
+                                  : ((u.descripcion?.isNotEmpty ?? false)
+                                        ? u.descripcion!
+                                        : 'Sin descripción'),
+                              onEdit: () => _mostrarModalRegistro(
                                 context,
-                              ).colorScheme.primary.withValues(alpha: 0.10),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.04),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
+                                unidadToEdit: u,
                               ),
-                            ],
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withValues(alpha: 0.04),
-                                  border: const Border(
-                                    bottom: BorderSide(color: AppColors.border),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const SizedBox(width: 52),
-                                    Expanded(
-                                      child: Text(
-                                        'NOMBRE',
-                                        style: AppTypography.labelSmall
-                                            .copyWith(
-                                              color: const Color(0xFF1E293B),
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 0.4,
-                                            ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 100,
-                                      child: Text(
-                                        'ACCIONES',
-                                        textAlign: TextAlign.center,
-                                        style: AppTypography.labelSmall
-                                            .copyWith(
-                                              color: const Color(0xFF1E293B),
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 0.4,
-                                            ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: ListView.separated(
-                                  itemCount: filtradas.length,
-                                  separatorBuilder: (_, __) => const Divider(
-                                    height: 1,
-                                    color: AppColors.border,
-                                  ),
-                                  itemBuilder: (_, i) {
-                                    final u = filtradas[i];
-                                    return Material(
-                                      color: i.isEven
-                                          ? Colors.white
-                                          : AppColors.grey50.withValues(
-                                              alpha: 0.55,
-                                            ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 10,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    .withValues(alpha: 0.12),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  (u.abreviatura != null &&
-                                                          u
-                                                              .abreviatura!
-                                                              .isNotEmpty)
-                                                      ? u.abreviatura!
-                                                      : '—',
-                                                  style: AppTypography
-                                                      .labelSmall
-                                                      .copyWith(
-                                                        color: Theme.of(
-                                                          context,
-                                                        ).colorScheme.primary,
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    u.nombre,
-                                                    style: AppTypography
-                                                        .bodyLarge
-                                                        .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ),
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    (u.abreviatura != null &&
-                                                            u
-                                                                .abreviatura!
-                                                                .isNotEmpty)
-                                                        ? 'Abreviatura: ${u.abreviatura}'
-                                                        : ((u
-                                                                      .descripcion
-                                                                      ?.isNotEmpty ??
-                                                                  false)
-                                                              ? u.descripcion!
-                                                              : 'Sin descripción'),
-                                                    style: AppTypography
-                                                        .bodySmall
-                                                        .copyWith(
-                                                          color: const Color(
-                                                            0xFF1E293B,
-                                                          ),
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.edit_outlined,
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
-                                                size: 20,
-                                              ),
-                                              onPressed: () =>
-                                                  _mostrarModalRegistro(
-                                                    context,
-                                                    unidadToEdit: u,
-                                                  ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.delete_outline,
-                                                color: AppColors.error,
-                                                size: 20,
-                                              ),
-                                              onPressed: () =>
-                                                  _onDelete(context, u),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
+                              onDelete: () => _onDelete(context, u),
+                            );
+                          },
                         );
                       },
                     ),

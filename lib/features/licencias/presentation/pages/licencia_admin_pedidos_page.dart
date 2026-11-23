@@ -160,18 +160,16 @@ class _LicenciaAdminPedidosPageState
             );
           }
 
-          return ListView.builder(
-            padding: EdgeInsets.fromLTRB(
-              esMovil ? 16 : 24,
-              16,
-              esMovil ? 16 : 24,
-              32,
-            ),
-            itemCount: rows.length + 1,
-            itemBuilder: (context, i) {
-              if (i == 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    esMovil ? 16 : 24,
+                    16,
+                    esMovil ? 16 : 24,
+                    12,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
@@ -185,7 +183,10 @@ class _LicenciaAdminPedidosPageState
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.receipt_long_outlined, color: Colors.white),
+                        const Icon(
+                          Icons.receipt_long_outlined,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -199,108 +200,150 @@ class _LicenciaAdminPedidosPageState
                       ],
                     ),
                   ),
-                );
-              }
-              final p = rows[i - 1];
-              final puedeMarcar =
-                  p.estado == 'pendiente_pago' || p.estado == 'pago_reportado';
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.referencia,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 17,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${p.plan} · ${p.vigenciaTipo}\n'
-                            '${_adminMontoLabel(p)} · ${p.estado}'
-                            '${p.medioPagoPreferido == null ? '' : ' · ${p.medioPagoPreferido}'}'
-                            '${p.medioPagoPreferido != null ? ' · ${p.medioPagoPreferido}' : ''}',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                              height: 1.35,
-                            ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  esMovil ? 16 : 24,
+                  0,
+                  esMovil ? 16 : 24,
+                  32,
+                ),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: esMovil ? 720 : 520,
+                    mainAxisExtent: 150,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                  ),
+                  delegate: SliverChildBuilderDelegate((context, i) {
+                    final p = rows[i];
+                    final puedeMarcar =
+                        p.estado == 'pendiente_pago' ||
+                        p.estado == 'pago_reportado';
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                    ),
-                    if (puedeMarcar)
-                      FilledButton(
-                        onPressed: () async {
-                          try {
-                            await ref
-                                .read(licenciaServiceProvider)
-                                .marcarPagadoYEmitirLicencia(p.referencia);
-                            try {
-                              await PedidoSync(
-                                ref.read(databaseProvider),
-                              ).pushTodos();
-                            } catch (e) {
-                              debugPrint('Push pedido tras emitir: $e');
-                            }
-                            ref.invalidate(licenciaActualProvider);
-                            FiscoGestNotifications.show(
-                              SnackBar(
-                                content: Text(
-                                  'Licencia emitida: ${p.referencia}',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  p.referencia,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 16,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                               ),
-                            );
-                            setState(() {
-                              _tick++;
-                            });
-                          } catch (e) {
-                            FiscoGestNotifications.show(
-                              SnackBar(
-                                content: Text('$e'),
-                                backgroundColor: AppColors.error,
+                              Text(
+                                p.estado,
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: puedeMarcar
+                                      ? Theme.of(context).colorScheme.primary
+                                      : AppColors.textSecondary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            );
-                          }
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            ],
                           ),
-                        ),
-                        child: const Text('Pagado'),
-                      )
-                    else
-                      Text(
-                        p.estado,
-                        style: AppTypography.labelMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${p.plan} · ${p.vigenciaTipo}'
+                            '${p.medioPagoPreferido == null ? '' : ' · ${p.medioPagoPreferido}'}',
+                            style: AppTypography.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Spacer(),
+                          const Divider(height: 1),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _adminMontoLabel(p),
+                                  style: AppTypography.bodyLarge.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                              if (puedeMarcar)
+                                FilledButton(
+                                  onPressed: () async {
+                                    try {
+                                      await ref
+                                          .read(licenciaServiceProvider)
+                                          .marcarPagadoYEmitirLicencia(
+                                            p.referencia,
+                                          );
+                                      try {
+                                        await PedidoSync(
+                                          ref.read(databaseProvider),
+                                        ).pushTodos();
+                                      } catch (e) {
+                                        debugPrint(
+                                          'Push pedido tras emitir: $e',
+                                        );
+                                      }
+                                      ref.invalidate(licenciaActualProvider);
+                                      FiscoGestNotifications.show(
+                                        SnackBar(
+                                          content: Text(
+                                            'Licencia emitida: ${p.referencia}',
+                                          ),
+                                        ),
+                                      );
+                                      setState(() => _tick++);
+                                    } catch (e) {
+                                      FiscoGestNotifications.show(
+                                        SnackBar(
+                                          content: Text('$e'),
+                                          backgroundColor: AppColors.error,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text('Pagado'),
+                                ),
+                            ],
+                          ),
+                        ],
                       ),
-                  ],
+                    );
+                  }, childCount: rows.length),
                 ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),

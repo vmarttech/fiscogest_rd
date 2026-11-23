@@ -95,8 +95,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
               .where((a) => a.tipoAjuste.toLowerCase() == 'entrada')
               .length;
           final salidas = lista.where((a) {
-                final t = a.tipoAjuste.toLowerCase();
-                return t == 'salida' || t == 'merma';
+            final t = a.tipoAjuste.toLowerCase();
+            return t == 'salida' || t == 'merma';
           }).length;
           final otros = total - entradas - salidas;
 
@@ -255,8 +255,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                   const Color(0xFF16A34A),
                                   () => setState(() {
                                     _tipoFiltro = _tipoFiltro == 'entrada'
-                                            ? null
-                                            : 'entrada';
+                                        ? null
+                                        : 'entrada';
                                   }),
                                 ),
                               ),
@@ -273,8 +273,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                                   const Color(0xFFDC2626),
                                   () => setState(() {
                                     _tipoFiltro = _tipoFiltro == 'salida'
-                                            ? null
-                                            : 'salida';
+                                        ? null
+                                        : 'salida';
                                   }),
                                 ),
                               ),
@@ -473,11 +473,28 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           ],
                         ),
                       )
-                    else
+                    else if (isMobile)
                       for (final a in filtrados) ...[
-                        _ajusteCard(a, isMobile),
+                        _ajusteCard(a, true),
                         const SizedBox(height: 8),
-                      ],
+                      ]
+                    else
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final ancho = (constraints.maxWidth - 12) / 2;
+                          return Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              for (final a in filtrados)
+                                SizedBox(
+                                  width: ancho,
+                                  child: _ajusteCard(a, false),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

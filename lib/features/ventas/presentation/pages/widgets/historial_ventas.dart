@@ -129,6 +129,245 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
         .cambiarVista(VistaActual.detalle);
   }
 
+  Widget _tarjetaVenta(Venta v, {required bool desktop}) {
+    final color = _colorTipo(v);
+    final etiqueta = _tipo(v);
+    final cliente = (v.nombreCliente ?? '').trim().isEmpty
+        ? 'Consumidor final'
+        : v.nombreCliente!.trim();
+    final ncf = (v.numeroFactura ?? '').trim();
+
+    if (!desktop) {
+      return Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () => _abrirDetalle(v),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              v.numero,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _badgeVenta(etiqueta, color),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _fecha(v.fecha),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _monto(v.total),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: Color(0xFF94A3B8),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => _abrirDetalle(v),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        v.numero,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                    _badgeVenta(etiqueta, color),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        cliente,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 13,
+                      color: Color(0xFF64748B),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _fecha(v.fecha),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                    if (ncf.isNotEmpty) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'NCF: $ncf',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const Spacer(),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _monto(v.total),
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Ver detalle',
+                      onPressed: () => _abrirDetalle(v),
+                      icon: Icon(
+                        Icons.open_in_new,
+                        size: 19,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      constraints: const BoxConstraints.tightFor(
+                        width: 36,
+                        height: 36,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _badgeVenta(String etiqueta, Color color) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      etiqueta,
+      style: TextStyle(
+        color: color,
+        fontSize: 11.5,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final desktop = AppBreakpoints.isDesktop(context);
@@ -384,192 +623,29 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     ),
                                   ),
                                 )
-                              : ListView.separated(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  itemCount: filtradas.length,
-                                  separatorBuilder: (_, __) =>
-                                      SizedBox(height: desktop ? 10 : 8),
-                                  itemBuilder: (ctx, i) {
-                                    final v = filtradas[i];
-                                    final color = _colorTipo(v);
-                                    final etiqueta = _tipo(v);
-                                    final cliente =
-                                        (v.nombreCliente ?? '').trim().isEmpty
-                                        ? 'Consumidor final'
-                                        : v.nombreCliente!.trim();
-                                    final ncf = (v.numeroFactura ?? '').trim();
-
-                                    return Material(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: InkWell(
-                                        onTap: () => _abrirDetalle(v),
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: desktop ? 16 : 14,
-                                            vertical: desktop ? 14 : 12,
+                              : LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final columnas =
+                                        desktop && constraints.maxWidth >= 820
+                                        ? 2
+                                        : 1;
+                                    return GridView.builder(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      itemCount: filtradas.length,
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: columnas,
+                                            crossAxisSpacing: columnas == 2
+                                                ? 14
+                                                : 0,
+                                            mainAxisSpacing: desktop ? 12 : 8,
+                                            mainAxisExtent: desktop ? 194 : 82,
                                           ),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            border: Border.all(
-                                              color: const Color(0xFFE2E8F0),
-                                            ),
-                                            boxShadow: desktop
-                                                ? [
-                                                    BoxShadow(
-                                                      color: const Color(
-                                                        0xFF0F172A,
-                                                      ).withValues(alpha: 0.04),
-                                                      blurRadius: 8,
-                                                      offset: const Offset(
-                                                        0,
-                                                        2,
-                                                      ),
-                                                    ),
-                                                  ]
-                                                : null,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              // Icono tipo
-                                              if (desktop) ...[
-                                                Container(
-                                                  width: 42,
-                                                  height: 42,
-                                                  decoration: BoxDecoration(
-                                                    color: color.withValues(
-                                                      alpha: 0.12,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          10,
-                                                        ),
-                                                  ),
-                                                  child: Icon(
-                                                    _esCotizacion(v)
-                                                        ? Icons
-                                                              .request_quote_outlined
-                                                        : Icons
-                                                              .receipt_long_outlined,
-                                                    color: color,
-                                                    size: 22,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 14),
-                                              ],
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Flexible(
-                                                          child: Text(
-                                                            v.numero,
-                                                            style:
-                                                                const TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w800,
-                                                                  color: Color(
-                                                                    0xFF0F172A,
-                                                                  ),
-                                                                ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 3,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color: color
-                                                                .withValues(
-                                                                  alpha: 0.12,
-                                                                ),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  20,
-                                                                ),
-                                                          ),
-                                                          child: Text(
-                                                            etiqueta,
-                                                            style: TextStyle(
-                                                              color: color,
-                                                              fontSize: 11.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      desktop
-                                                          ? '$cliente · ${_fecha(v.fecha)}'
-                                                          : _fecha(v.fecha),
-                                                      style: const TextStyle(
-                                                        fontSize: 12.5,
-                                                        color: AppColors
-                                                            .textSecondary,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    if (desktop &&
-                                                        ncf.isNotEmpty) ...[
-                                                      const SizedBox(height: 2),
-                                                      Text(
-                                                        'NCF: $ncf',
-                                                        style: const TextStyle(
-                                                          fontSize: 11.5,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: Color(
-                                                            0xFF64748B,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ],
-                                                ),
-                                              ),
-                                              Text(
-                                                _monto(v.total),
-                                                style: TextStyle(
-                                                  fontSize: desktop ? 15 : 13.5,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Icon(
-                                                Icons.chevron_right,
-                                                size: 20,
-                                                color: Color(0xFF94A3B8),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                      itemBuilder: (ctx, i) => _tarjetaVenta(
+                                        filtradas[i],
+                                        desktop: desktop,
                                       ),
                                     );
                                   },

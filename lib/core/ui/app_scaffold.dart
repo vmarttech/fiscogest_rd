@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
+import 'package:fiscogest_rd/core/navigation/rutas_principales.dart';
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
@@ -53,48 +54,9 @@ class AppScaffold extends StatelessWidget {
   final double? contentMaxWidth;
 
   /// Rutas de módulo: menú sándwich, sin flecha atrás.
-  static const rutasPrincipales = {
-    '/',
-    '/ventas',
-    '/ventas/cobro',
-    '/creditos',
-    '/compras',
-    '/inventario',
-    '/clientes',
-    '/proveedores',
-    '/sales',
-    '/reports',
-    '/impuestos',
-    '/import-export',
-    '/configuracion',
-    '/kardex',
-    '/categorias',
-    '/marcas',
-    '/unidades',
-    '/presentaciones',
-    '/ajustes-inventario',
-    '/lista-ajustes',
-    '/inventario-fisico',
-    '/inventario-fisico/listar',
-    '/almacenes',
-    '/compras/rapida',
-    '/ecfe',
-    '/gastos',
-    '/legal/eliminar-cuenta',
-    '/legal/privacidad',
-    '/legal/terminos',
-    '/licencia',
-    '/licencia/admin',
-    '/licencia/comprar',
-    '/login',
-    '/setup-cuenta',
-    '/transferencias/registrar',
-    '/usuarios',
-    '/ventas/cotizaciones/nueva',
-    '/ventas/fios',
-  };
+  static const rutasPrincipales = rutasPrincipalesApp;
 
-  static bool esRutaPrincipal(String path) => rutasPrincipales.contains(path);
+  static bool esRutaPrincipal(String path) => esRutaPrincipalApp(path);
 
   @override
   Widget build(BuildContext context) {

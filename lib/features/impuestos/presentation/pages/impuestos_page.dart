@@ -318,10 +318,14 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                 else
                   SliverPadding(
                     padding: EdgeInsets.fromLTRB(hPad, 4, hPad, 24),
-                    sliver: SliverList.separated(
-                      itemCount: filtrados.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) {
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: mobile ? 700 : 520,
+                        mainAxisExtent: 116,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      delegate: SliverChildBuilderDelegate((context, i) {
                         final impuesto = filtrados[i];
                         return _ImpuestoCard(
                           impuesto: impuesto,
@@ -332,7 +336,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                           ),
                           onDelete: () => _confirmarEliminar(impuesto),
                         );
-                      },
+                      }, childCount: filtrados.length),
                     ),
                   ),
               ],

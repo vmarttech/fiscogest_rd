@@ -149,18 +149,29 @@ class _CotizacionesHistorialPageState
               onRefresh: () async {
                 ref.invalidate(listaCotizacionesProvider);
               },
-              child: ListView.builder(
-                padding: EdgeInsets.fromLTRB(
-                  padding,
-                  padding,
-                  padding,
-                  padding + 32,
-                ),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: lista.length,
-                itemBuilder: (context, i) {
-                  final cot = lista[i];
-                  return _buildTarjetaCotizacion(cot, esPantallaPequena);
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final columnas = constraints.maxWidth >= 900 ? 2 : 1;
+                  return GridView.builder(
+                    padding: EdgeInsets.fromLTRB(
+                      padding,
+                      padding,
+                      padding,
+                      padding + 32,
+                    ),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columnas,
+                      crossAxisSpacing: columnas == 2 ? 16 : 0,
+                      mainAxisSpacing: esPantallaPequena ? 10 : 14,
+                      mainAxisExtent: esPantallaPequena ? 174 : 178,
+                    ),
+                    itemCount: lista.length,
+                    itemBuilder: (context, i) => _buildTarjetaCotizacion(
+                      lista[i],
+                      esPantallaPequena,
+                    ),
+                  );
                 },
               ),
             );
@@ -174,105 +185,97 @@ class _CotizacionesHistorialPageState
     final numero = cot.numeroCotizacion;
     final estado = cot.estadoDocumento;
     final esCotizacionActiva =
-        estado != EstadoDocumento.facturado &&
-        estado != EstadoDocumento.anulado;
-    final tamanoCuerpo = esPantallaPequena ? 13.0 : 14.0;
-    final tamanoTotal = esPantallaPequena ? 16.0 : 18.0;
+        estado != EstadoDocumento.facturado && estado != EstadoDocumento.anulado;
     final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
+    final tamanoTotal = esPantallaPequena ? 16.0 : 18.0;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: esPantallaPequena ? 10 : 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cabecera: N° + badge estado + fecha
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                esPantallaPequena ? 12 : 14,
-                esPantallaPequena ? 12 : 14,
-                esPantallaPequena ? 12 : 14,
-                8,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'N° $numero',
-                          style: AppTypography.h4.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: esPantallaPequena ? 15 : 16,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _colorFondoEstado(estado),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            _etiquetaEstado(estado),
-                            style: AppTypography.labelSmall.copyWith(
-                              color: _colorEstado(estado),
-                              fontWeight: FontWeight.w600,
-                              fontSize: tamanoEtiqueta,
-                            ),
-                          ),
-                        ),
-                      ],
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'N° $numero',
+                    style: AppTypography.h4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: esPantallaPequena ? 15 : 16,
+                      color: AppColors.textPrimary,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    '${cot.fecha.day.toString().padLeft(2, '0')}/'
-                    '${cot.fecha.month.toString().padLeft(2, '0')}/'
-                    '${cot.fecha.year}',
-                    style: AppTypography.bodySmall.copyWith(
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _colorFondoEstado(estado),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _etiquetaEstado(estado),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: _colorEstado(estado),
+                      fontWeight: FontWeight.w600,
                       fontSize: tamanoEtiqueta,
-                      color: AppColors.textSecondary,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            // Cliente + Total
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: esPantallaPequena ? 12 : 14,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.person_outline,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      cot.nombreCliente ?? 'Consumidor Final',
-                      style: AppTypography.bodyMedium.copyWith(
-                        fontSize: tamanoCuerpo,
-                        color: AppColors.textPrimary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              children: [
+                Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    cot.nombreCliente ?? 'Consumidor Final',
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontSize: esPantallaPequena ? 13 : 14,
+                      color: AppColors.textPrimary,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.grey600),
+                const SizedBox(width: 6),
+                Text(
+                  '${cot.fecha.day.toString().padLeft(2, '0')}/'
+                  '${cot.fecha.month.toString().padLeft(2, '0')}/'
+                  '${cot.fecha.year}',
+                  style: AppTypography.bodySmall.copyWith(
+                    fontSize: tamanoEtiqueta,
+                    color: AppColors.grey600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
                     formatRd(cot.montoTotal),
                     style: AppTypography.h4.copyWith(
                       fontWeight: FontWeight.bold,
@@ -280,98 +283,57 @@ class _CotizacionesHistorialPageState
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-
-            // Acciones
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                esPantallaPequena ? 8 : 10,
-                8,
-                esPantallaPequena ? 8 : 10,
-                esPantallaPequena ? 10 : 12,
-              ),
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  if (esCotizacionActiva)
-                    _chipAccion(
-                      icon: Icons.print_outlined,
-                      label: 'Imprimir',
-                      onTap: () => _imprimirCotizacion(numero),
-                      esPantallaPequena: esPantallaPequena,
-                    ),
-                  _chipAccion(
-                    icon: Icons.email_outlined,
-                    label: 'Correo',
-                    onTap: () => _enviarPorCorreo(numero),
-                    esPantallaPequena: esPantallaPequena,
+                ),
+                if (esCotizacionActiva)
+                  _iconoAccion(
+                    icon: Icons.print_outlined,
+                    label: 'Imprimir',
+                    onTap: () => _imprimirCotizacion(numero),
                   ),
-                  if (estado == EstadoDocumento.aprobado ||
-                      estado == EstadoDocumento.cotizado)
-                    _chipAccion(
-                      icon: Icons.shopping_cart_checkout,
-                      label: 'Convertir',
-                      onTap: () => _convertirEnVenta(numero),
-                      esPantallaPequena: esPantallaPequena,
-                      destacado: true,
-                    ),
-                ],
-              ),
+                _iconoAccion(
+                  icon: Icons.email_outlined,
+                  label: 'Enviar por correo',
+                  onTap: () => _enviarPorCorreo(numero),
+                ),
+                if (estado == EstadoDocumento.aprobado || estado == EstadoDocumento.cotizado)
+                  _iconoAccion(
+                    icon: Icons.shopping_cart_checkout,
+                    label: 'Convertir en venta',
+                    onTap: () => _convertirEnVenta(numero),
+                    destacado: true,
+                  ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _chipAccion({
+  Widget _iconoAccion({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-    required bool esPantallaPequena,
     bool destacado = false,
   }) {
-    return Material(
-      color: destacado
-          ? AppColors.success.withValues(alpha: 0.12)
-          : AppColors.grey50,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: Material(
+        color: destacado ? AppColors.success.withValues(alpha: 0.12) : AppColors.grey50,
         borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: esPantallaPequena ? 10 : 12,
-            vertical: esPantallaPequena ? 8 : 9,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Tooltip(
+            message: label,
+            child: Padding(
+              padding: const EdgeInsets.all(9),
+              child: Icon(
                 icon,
-                size: 16,
-                color: destacado
-                    ? AppColors.success
-                    : Theme.of(context).colorScheme.primary,
+                size: 18,
+                color: destacado ? AppColors.success : Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: AppTypography.labelSmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: esPantallaPequena ? 12 : 13,
-                  color: destacado
-                      ? AppColors.success
-                      : Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
