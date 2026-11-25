@@ -47,10 +47,11 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (fecha != null)
+    if (fecha != null) {
       setState(() {
         _fechaSeleccionada = fecha;
       });
+    }
   }
 
   Future<void> _guardarEntrada() async {
@@ -174,7 +175,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.calendar_today,
                               color: AppColors.textSecondary,
                               size: 20,
@@ -198,7 +199,7 @@ class _RegistrarEntradaPageState extends ConsumerState<RegistrarEntradaPage> {
                                 ],
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.arrow_forward_ios,
                               size: 14,
                               color: AppColors.textDisabled,

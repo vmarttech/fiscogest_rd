@@ -375,12 +375,12 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
         IconButton(
           tooltip: 'CSV',
           onPressed: _data == null || _cargando ? null : _exportarCsv,
-          icon: Icon(Icons.table_view_outlined),
+          icon: const Icon(Icons.table_view_outlined),
         ),
         IconButton(
           tooltip: 'PDF',
           onPressed: _data == null || _cargando ? null : _exportarPdf,
-          icon: Icon(Icons.picture_as_pdf_outlined),
+          icon: const Icon(Icons.picture_as_pdf_outlined),
         ),
       ],
       body: SafeArea(
@@ -410,7 +410,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                             tooltip: 'Atrás',
                             onPressed: () =>
                                 safeBack(context, fallback: '/reports/hub'),
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.arrow_back,
                               color: Color(0xFF0F172A),
                             ),
@@ -470,7 +470,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                           final dates = <Widget>[
                             OutlinedButton.icon(
                               onPressed: _cargando ? null : _pickDesde,
-                              icon: Icon(Icons.calendar_today, size: 16),
+                              icon: const Icon(Icons.calendar_today, size: 16),
                               label: Text(
                                 'Desde ${_fmtFecha.format(_desde)}',
                                 style: const TextStyle(
@@ -480,7 +480,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                             ),
                             OutlinedButton.icon(
                               onPressed: _cargando ? null : _pickHasta,
-                              icon: Icon(Icons.event, size: 16),
+                              icon: const Icon(Icons.event, size: 16),
                               label: Text(
                                 'Hasta ${_fmtFecha.format(_hasta.subtract(const Duration(days: 1)))}',
                                 style: const TextStyle(
@@ -503,7 +503,7 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : Icon(Icons.play_arrow_rounded),
+                                  : const Icon(Icons.play_arrow_rounded),
                               label: Text(
                                 _cargando ? 'Generando…' : 'Generar',
                                 style: const TextStyle(
@@ -524,11 +524,11 @@ class _DetalleReportePageState extends ConsumerState<DetalleReportePage> {
                                   ),
                                   decoration: InputDecoration(
                                     hintText: 'Buscar en resultados…',
-                                    prefixIcon: Icon(Icons.search),
+                                    prefixIcon: const Icon(Icons.search),
                                     suffixIcon: _busqueda.isEmpty
                                         ? null
                                         : IconButton(
-                                            icon: Icon(Icons.clear),
+                                            icon: const Icon(Icons.clear),
                                             onPressed: () {
                                               _busquedaCtrl.clear();
                                               setState(() {

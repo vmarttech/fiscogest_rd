@@ -3,12 +3,14 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync_policy.dart';
 
 class ClienteSync {
   ClienteSync(this._db);
   final AppDatabase _db;
 
   Future<void> pushTodos() async {
+    if (!await LicenciaSyncPolicy.puedeSincronizarDatosOperativos(_db)) return;
     if (!SupabaseConfig.isConfigured) return;
 
     final negocioId = await NegocioLocal.getId();
@@ -26,14 +28,14 @@ class ClienteSync {
     final payload = rows
         .map(
           (c) => <String, dynamic>{
-              'negocio_id': negocioId,
-              'id_local': c.id,
-              'codigo': c.codigo,
-              'nombre': c.nombre,
-              'telefono': c.telefono,
-              'rnc_cedula': c.rncCedula,
-              'activo': c.activo,
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            'negocio_id': negocioId,
+            'id_local': c.id,
+            'codigo': c.codigo,
+            'nombre': c.nombre,
+            'telefono': c.telefono,
+            'rnc_cedula': c.rncCedula,
+            'activo': c.activo,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           },
         )
         .toList();

@@ -114,10 +114,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 
@@ -157,7 +158,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
           ? [
               IconButton(
                 tooltip: 'Diferencias',
-                icon: Icon(Icons.difference_outlined),
+                icon: const Icon(Icons.difference_outlined),
                 onPressed: () => context.push(
                   '/diferencias-conteo-fisico/${widget.conteoId}',
                 ),
@@ -189,7 +190,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                             context.go('/inventario-fisico');
                           }
                         },
-                        icon: Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(Icons.arrow_back_rounded),
                         tooltip: 'Atrás',
                       ),
 
@@ -204,7 +205,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                           ),
                           borderRadius: BorderRadius.circular(11),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.qr_code_scanner_rounded,
                           color: Colors.white,
                           size: 22,
@@ -238,7 +239,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                         onPressed: () => context.push(
                           '/diferencias-conteo-fisico/${widget.conteoId}',
                         ),
-                        icon: Icon(Icons.difference_outlined, size: 18),
+                        icon: const Icon(Icons.difference_outlined, size: 18),
                         label: const Text(
                           'Ver diferencias',
                           style: TextStyle(fontWeight: FontWeight.w800),
@@ -399,16 +400,16 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF94A3B8),
               ),
-              prefixIcon: Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+              prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
               filled: true,
               fillColor: const Color(0xFFF8FAFC),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: BorderSide(color: _border),
+                borderSide: const BorderSide(color: _border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
-                borderSide: BorderSide(color: _border),
+                borderSide: const BorderSide(color: _border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(11),
@@ -491,11 +492,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                 fillColor: const Color(0xFFF8FAFC),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(11),
-                  borderSide: BorderSide(color: _border),
+                  borderSide: const BorderSide(color: _border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(11),
-                  borderSide: BorderSide(color: _border),
+                  borderSide: const BorderSide(color: _border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(11),
@@ -520,7 +521,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                           color: Colors.white,
                         ),
                       )
-                    : Icon(Icons.save_rounded, size: 20),
+                    : const Icon(Icons.save_rounded, size: 20),
                 label: Text(
                   _guardando ? 'Guardando…' : 'Guardar línea',
                   style: const TextStyle(
@@ -625,7 +626,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
           const SizedBox(height: 10),
           difsAsync.when(
             loading: () => Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Center(
                 child: CircularProgressIndicator(
                   color: Theme.of(context).colorScheme.primary,

@@ -15,6 +15,8 @@ import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
 import 'package:fiscogest_rd/features/licencias/data/paypal_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/paypal_checkout_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/campanas/data/oferta_reserva_pago_store.dart';
+import 'package:fiscogest_rd/features/campanas/presentation/providers/campanas_providers.dart';
 
 /// Compra: solo PayPal en USD. PC sin AppBar; móvil con AppBar + scroll.
 class LicenciaComprarPage extends ConsumerStatefulWidget {
@@ -31,9 +33,36 @@ class LicenciaComprarPage extends ConsumerStatefulWidget {
 class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   bool _cargando = false;
   String? _planEnProceso;
+  double? _ofertaPct;
 
   static const _planes = ['gratis', 'basico', 'simplificado', 'pro'];
   static const _ink = Color(0xFF0D1E34);
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarOfertaReservada();
+  }
+
+  Future<void> _cargarOfertaReservada() async {
+    try {
+      final r = await OfertaReservaPagoStore.leer();
+      if (r == null || r.efectoTipo != 'descuento') return;
+      final m = RegExp(r'(\d+(?:[.,]\d+)?)').firstMatch(r.valor);
+      final v = double.tryParse(m?.group(1)?.replaceAll(',', '.') ?? '');
+      if (v != null && v > 0 && v <= 100 && mounted) {
+        setState(() => _ofertaPct = v);
+      }
+    } catch (_) {}
+  }
+
+  double _montoConDescuento(String plan) {
+    final base = precioMensualUsd(plan) ?? 0.0;
+    final p = _ofertaPct ?? 0.0;
+    if (p <= 0 || p > 100) return base;
+    final valor = base * (1 - p / 100);
+    return valor < 0 ? 0.0 : valor;
+  }
 
   Future<void> _pagarPayPal(String plan) async {
     if (plan == 'gratis') {
@@ -43,9 +72,14 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
       );
       return;
     }
-    final montoUsd = precioMensualUsd(plan);
-    if (montoUsd == null) {
+    final montoBase = precioMensualUsd(plan);
+    if (montoBase == null) {
       _snack('Este plan no tiene precio de suscripción.');
+      return;
+    }
+    final montoUsd = _montoConDescuento(plan);
+    if (montoUsd <= 0) {
+      _snack('La oferta cubre el pago de este plan; no se genera cargo.');
       return;
     }
     if (!PaypalConfig.configurado) {
@@ -100,6 +134,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
       );
 
       ref.invalidate(licenciaActualProvider);
+      await _aplicarOfertaReservada();
       if (!mounted) return;
       _snack('¡Pago recibido! Tu plan ${nombrePlanUi(plan)} ya está activo.');
       await Navigator.of(context).maybePop();
@@ -170,7 +205,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
-                      side: BorderSide(color: Color(0xFFE2E8F0)),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
                     ),
                     title: Text(
                       nombrePlanUi(p),
@@ -181,17 +216,17 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'US\$ ${(precioMensualUsd(p) ?? 0).toStringAsFixed(2)} / mes',
+                          'US\$ ${_montoConDescuento(p).toStringAsFixed(2)} / mes',
                         ),
                         const SizedBox(height: 2),
                         EquivalenteDopTexto(
-                          montoUsd: (precioMensualUsd(p) ?? 0).toDouble(),
+                          montoUsd: _montoConDescuento(p),
                           compacto: true,
                           color: Colors.black54,
                         ),
                       ],
                     ),
-                    trailing: Icon(Icons.chevron_right),
+                    trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.pop(ctx, p),
                   ),
                   const SizedBox(height: 10),
@@ -225,7 +260,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
       await _mostrarInstruccionesTransferencia(
         referencia: refCode,
         plan: plan,
-        montoUsd: precioMensualUsd(plan) ?? 0,
+        montoUsd: _montoConDescuento(plan),
       );
     } catch (e) {
       if (mounted) _snack('No se pudo generar la referencia: $e');
@@ -244,7 +279,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
     required String plan,
     required double montoUsd,
   }) async {
-    await showModalBottomSheet<void>(
+    final irActivar = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -329,7 +364,10 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                             const SnackBar(content: Text('Referencia copiada')),
                           );
                         },
-                        icon: Icon(Icons.copy_rounded, color: Colors.white),
+                        icon: const Icon(
+                          Icons.copy_rounded,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -407,7 +445,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                                 ),
                               );
                             },
-                            icon: Icon(Icons.copy, size: 16),
+                            icon: const Icon(Icons.copy, size: 16),
                             label: const Text('Copiar dato'),
                           ),
                         ),
@@ -417,10 +455,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 ],
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    context.push('/licencia/activar');
-                  },
+                  onPressed: () => Navigator.pop(ctx, true),
                   child: const Text('Ya pagué · Activar con mi FG-'),
                 ),
               ],
@@ -429,6 +464,9 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
         );
       },
     );
+    if (irActivar == true && mounted) {
+      await context.push('/licencia/activar');
+    }
   }
 
   String _planActualId() {
@@ -465,7 +503,10 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.primary),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       tooltip: 'Volver',
                     ),
                     const Text(
@@ -541,6 +582,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                           ),
                           const SizedBox(height: 28),
                           _PricingGrid(
+                            descuentoPct: _ofertaPct,
                             planes: _planes,
                             planActual: planActual,
                             cargando: _cargando,
@@ -595,6 +637,36 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
       ),
     );
   }
+
+  Future<void> _aplicarOfertaReservada() async {
+    try {
+      final reserva = await OfertaReservaPagoStore.leer();
+      if (reserva == null) return;
+      final res = await ref
+          .read(campanasRemoteProvider)
+          .aplicar(reserva.campanaId);
+      await OfertaReservaPagoStore.limpiar();
+      if (mounted) setState(() => _ofertaPct = null);
+      ref.read(campanasTickProvider.notifier).state++;
+      ref.invalidate(licenciaActualProvider);
+      final efecto = res['efecto'];
+      if (efecto is Map && efecto['tipo'] == 'meses_gratis') {
+        final meses = (efecto['meses'] as num?)?.toInt() ?? 0;
+        if (meses > 0) {
+          await ref
+              .read(licenciaServiceProvider)
+              .aplicarMesesGratisOferta(meses);
+        }
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Oferta aplicada: ${reserva.titulo}')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Aplicar oferta reservada: $e');
+    }
+  }
 }
 
 class _PricingGrid extends StatelessWidget {
@@ -605,6 +677,7 @@ class _PricingGrid extends StatelessWidget {
     required this.planEnProceso,
     required this.onSelect,
     required this.maxWidth,
+    this.descuentoPct,
   });
 
   final List<String> planes;
@@ -613,6 +686,7 @@ class _PricingGrid extends StatelessWidget {
   final String? planEnProceso;
   final void Function(String plan) onSelect;
   final double maxWidth;
+  final double? descuentoPct;
 
   @override
   Widget build(BuildContext context) {
@@ -637,6 +711,7 @@ class _PricingGrid extends StatelessWidget {
             width: cardW,
             child: _PriceCard(
               plan: p,
+              descuentoPct: descuentoPct,
               esActivo: _esMismoPlan(p, planActual),
               cargando: cargando && planEnProceso == p,
               disabled: cargando,
@@ -666,6 +741,7 @@ class _PriceCard extends StatelessWidget {
     required this.cargando,
     required this.disabled,
     required this.onAction,
+    this.descuentoPct,
   });
 
   final String plan;
@@ -673,11 +749,16 @@ class _PriceCard extends StatelessWidget {
   final bool cargando;
   final bool disabled;
   final VoidCallback onAction;
+  final double? descuentoPct;
   static const _ink = Color(0xFF0D1E34);
 
   @override
   Widget build(BuildContext context) {
     final precio = precioMensualUsd(plan) ?? 0;
+    final pct = descuentoPct ?? 0;
+    final precioOferta = pct > 0 && pct <= 100
+        ? precio * (1 - pct / 100)
+        : precio;
     final features = _features(plan);
 
     return Container(
@@ -686,7 +767,9 @@ class _PriceCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: esActivo ? Theme.of(context).colorScheme.primary : const Color(0xFFE2E8F0),
+          color: esActivo
+              ? Theme.of(context).colorScheme.primary
+              : const Color(0xFFE2E8F0),
           width: esActivo ? 2.5 : 1,
         ),
         boxShadow: [
@@ -741,7 +824,7 @@ class _PriceCard extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'US\$ ${precio.toStringAsFixed(2)}',
+                  text: 'US\$ ${precioOferta.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
@@ -759,10 +842,23 @@ class _PriceCard extends StatelessWidget {
               ],
             ),
           ),
-          if (precio > 0) ...[
+          if (precioOferta > 0) ...[
             const SizedBox(height: 4),
-            EquivalenteDopTexto(montoUsd: precio, compacto: true),
+            EquivalenteDopTexto(montoUsd: precioOferta, compacto: true),
           ],
+          if (pct > 0 && precio > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                'Antes US\$ ${precio.toStringAsFixed(2)} · '
+                '${pct.toStringAsFixed(0)}% dto.',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF64748B),
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+            ),
           const SizedBox(height: 20),
           for (final f in features)
             Padding(
@@ -803,7 +899,7 @@ class _PriceCard extends StatelessWidget {
                     onPressed: null,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF475569),
-                      side: BorderSide(color: Color(0xFFCBD5E1)),
+                      side: const BorderSide(color: Color(0xFFCBD5E1)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -816,12 +912,14 @@ class _PriceCard extends StatelessWidget {
                 : FilledButton(
                     onPressed: disabled ? null : onAction,
                     style: FilledButton.styleFrom(
-                      backgroundColor: plan == 'gratis' ? Colors.white : Theme.of(context).colorScheme.primary,
+                      backgroundColor: plan == 'gratis'
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.primary,
                       foregroundColor: plan == 'gratis'
                           ? const Color(0xFF475569)
                           : Colors.white,
                       side: plan == 'gratis'
-                          ? BorderSide(color: Color(0xFFCBD5E1))
+                          ? const BorderSide(color: Color(0xFFCBD5E1))
                           : BorderSide.none,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -834,7 +932,9 @@ class _PriceCard extends StatelessWidget {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: plan == 'gratis' ? Theme.of(context).colorScheme.primary : Colors.white,
+                              color: plan == 'gratis'
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.white,
                             ),
                           )
                         : Text(
@@ -857,11 +957,11 @@ class _PriceCard extends StatelessWidget {
     switch (plan.toLowerCase()) {
       case 'gratis':
         return const [
-          _Feat(true, 'Ventas al contado'),
-          _Feat(true, '40 productos / 20 clientes'),
-          _Feat(true, '30 facturas al mes'),
-          _Feat(true, '1 equipo · solo local'),
-          _Feat(false, 'Sin reportes ni sync en la nube'),
+          _Feat(true, '15 ventas al mes'),
+          _Feat(true, '20 productos registrados al mes'),
+          _Feat(true, '30 clientes registrados al mes'),
+          _Feat(true, '1 equipo · datos operativos locales'),
+          _Feat(false, 'Sin sincronización operativa en la nube'),
         ];
       case 'basico':
         return const [

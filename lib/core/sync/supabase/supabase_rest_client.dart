@@ -154,4 +154,19 @@ class SupabaseRestClient {
     if (decoded is! List) return [];
     return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
+
+  // [ADMIN_FASE2] RPC protegida (POST /rest/v1/rpc/<fn>) con JWT de sesión.
+  Future<dynamic> rpc(String funcion, Map<String, dynamic> parametros) async {
+    if (!SupabaseConfig.isConfigured) return null;
+    final uri = Uri.parse('${SupabaseConfig.url}/rest/v1/rpc/$funcion');
+    final headers = await _headers(upsert: false, usarJwt: true);
+    final res = await _http
+        .post(uri, headers: headers, body: jsonEncode(parametros))
+        .timeout(const Duration(seconds: 8));
+    if (res.statusCode >= 300) {
+      throw Exception('RPC $funcion ${res.statusCode} ${res.body}');
+    }
+    if (res.body.isEmpty) return null;
+    return jsonDecode(res.body);
+  }
 }

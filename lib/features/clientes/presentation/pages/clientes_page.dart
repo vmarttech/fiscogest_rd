@@ -176,7 +176,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                               size: 22,
                             ),
                             AppLayout.hS,
-                            Text(
+                            const Text(
                               'Información General',
                               style: AppTypography.h3,
                             ),
@@ -242,7 +242,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                                 size: 22,
                               ),
                               AppLayout.hS,
-                              Text(
+                              const Text(
                                 'Información Fiscal y Tributaria (DGII)',
                                 style: AppTypography.h3,
                               ),

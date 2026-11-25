@@ -427,7 +427,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                               .cambiarVista(VistaActual.inicio);
                         }
                       },
-                      icon: Icon(Icons.arrow_back, size: 18),
+                      icon: const Icon(Icons.arrow_back, size: 18),
                       label: const Text('Volver'),
                     ),
                   ],
@@ -456,7 +456,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                         onPressed: () => ref
                             .read(ventasNavegacionProvider.notifier)
                             .cambiarVista(VistaActual.inicio),
-                        icon: Icon(Icons.arrow_back, size: 18),
+                        icon: const Icon(Icons.arrow_back, size: 18),
                         label: const Text('Volver'),
                       ),
                     ],
@@ -548,17 +548,17 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     decoration: InputDecoration(
                                       hintText:
                                           'Buscar por número, cliente o NCF…',
-                                      prefixIcon: Icon(Icons.search, size: 20),
+                                      prefixIcon: const Icon(Icons.search, size: 20),
                                       isDense: true,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0xFFE2E8F0),
                                         ),
                                       ),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Color(0xFFE2E8F0),
                                         ),
                                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 String _rutaAnterior(String path, String fallback) {
+  if (path.startsWith('/admin/negocios/')) return '/admin/negocios';
   if (path.startsWith('/compras/detalle/')) return '/compras/lista';
   if (path.startsWith('/compras/historial-costos/')) return '/compras';
   if (path.startsWith('/inventario/entrada/') ||
@@ -20,6 +21,11 @@ String _rutaAnterior(String path, String fallback) {
   }
 
   const rutasAnteriores = <String, String>{
+    '/admin/negocios': '/',
+    '/admin/avisos/nuevo': '/',
+    '/admin/campanas': '/',
+    '/admin/campanas/nueva': '/admin/campanas',
+    '/ofertas-disponibles': '/',
     '/productos/nuevo': '/inventario',
     '/registrar-ajuste': '/lista-ajustes',
     '/lista-ajustes': '/inventario',

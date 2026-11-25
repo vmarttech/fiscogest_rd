@@ -37,6 +37,11 @@ const rutasPrincipalesApp = <String>{
   '/setup-cuenta',
   '/transferencias/registrar',
   '/usuarios',
+  // Entradas de plataforma / administración accesibles desde el menú.
+  '/admin/negocios',
+  '/admin/avisos/nuevo',
+  '/admin/campanas',
+  '/ofertas-disponibles',
   '/ventas/cotizaciones/nueva',
   '/ventas/fios',
 };

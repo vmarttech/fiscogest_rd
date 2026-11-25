@@ -146,7 +146,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: AppColors.border),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -174,7 +174,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        icon: Icon(Icons.save_rounded, size: 20),
+        icon: const Icon(Icons.save_rounded, size: 20),
         label: Text(
           _esEdicion ? 'ACTUALIZAR' : 'GUARDAR CLIENTE',
           style: const TextStyle(fontWeight: FontWeight.w800),
@@ -230,7 +230,7 @@ class _NuevoClientePageState extends ConsumerState<NuevoClientePage> {
                                         color: const Color(0xFFE2E8F0),
                                       ),
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.arrow_back_rounded,
                                       size: 20,
                                       color: Color(0xFF0F172A),

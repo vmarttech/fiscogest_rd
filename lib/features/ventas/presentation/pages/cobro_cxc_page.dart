@@ -35,6 +35,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
   bool _cargando = true;
   String? _error;
   bool _procesando = false;
+  Cuota? _cuotaSugerida;
 
   final _montoCtrl = TextEditingController();
   final _refCtrl = TextEditingController();
@@ -82,13 +83,19 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
       }
       final pendientes =
           c.planPago?.cuotas.where((q) => !q.pagada).toList() ?? <Cuota>[];
-      final sugerido = pendientes.isNotEmpty
-          ? pendientes.first.montoTotal.clamp(0.01, c.saldoPendiente)
-          : c.saldoPendiente;
+      final cuotaSugerida = pendientes.isNotEmpty ? pendientes.first : null;
+      final baseCuota = cuotaSugerida == null
+          ? c.saldoCuotasPendiente
+          : c.saldoPendienteCuota(cuotaSugerida);
+      final moraCuota = cuotaSugerida == null
+          ? c.moraCalculada
+          : c.moraEstimadaCuota(cuotaSugerida, moraMensual: 0);
+      final sugerido = (baseCuota + moraCuota).clamp(0.01, c.saldoPendiente);
       _montoCtrl.text = sugerido.toStringAsFixed(2);
       _efectivoCtrl.text = sugerido.toStringAsFixed(2);
       setState(() {
         _cuenta = c;
+        _cuotaSugerida = cuotaSugerida;
         _cargando = false;
       });
     } catch (e) {
@@ -311,9 +318,31 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                             const Divider(height: 1),
                             const SizedBox(height: 12),
                             _rowInfo(
-                              'Saldo pendiente',
-                              formatRd(c?.saldoPendiente ?? 0),
+                              'Capital e interés pendientes',
+                              formatRd(c?.saldoCuotasPendiente ?? 0),
                             ),
+                            if ((c?.moraCalculada ?? 0) > 0.001)
+                              _rowInfo(
+                                'Mora acumulada',
+                                formatRd(c!.moraCalculada),
+                              ),
+                            if (_cuotaSugerida != null) ...[
+                              const SizedBox(height: 8),
+                              const Divider(height: 1),
+                              const SizedBox(height: 8),
+                              _rowInfo(
+                                'Cuota ${_cuotaSugerida!.numeroCuota} · capital + interés',
+                                formatRd(
+                                  c!.saldoPendienteCuota(_cuotaSugerida!),
+                                ),
+                              ),
+                              if (_cuotaSugerida!.moraPendiente != null &&
+                                  _cuotaSugerida!.moraPendiente! > 0.001)
+                                _rowInfo(
+                                  'Mora de la cuota',
+                                  formatRd(_cuotaSugerida!.moraPendiente!),
+                                ),
+                            ],
                             if (c?.ventaId != null)
                               _rowInfo('Venta', '#${c!.ventaId}'),
                             _rowInfo(

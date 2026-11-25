@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_estado.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
 
 final licenciaServiceProvider = Provider<LicenciaService>((ref) {
   final db = ref.watch(databaseProvider);
@@ -16,13 +17,23 @@ final licenciaActualProvider = FutureProvider<LicenciaInfo?>((ref) async {
   return svc.obtenerActual();
 });
 
+final licenciaUsoGratisProvider = StreamProvider.autoDispose<Map<String, int>>((
+  ref,
+) async* {
+  final guard = LicenciaLimitesGuard(ref.watch(databaseProvider));
+  yield await guard.resumenUsoGratis();
+  await for (final _ in LicenciaUsoSignals.cambios) {
+    yield await guard.resumenUsoGratis();
+  }
+});
+
 final dispositivoServiceProvider = Provider<DispositivoService>((ref) {
   return DispositivoService(ref.watch(databaseProvider));
 });
 
 final dispositivosListaProvider =
     FutureProvider.autoDispose<List<DispositivoInfo>>((ref) async {
-  final svc = ref.watch(dispositivoServiceProvider);
-  await svc.ensureDispositivoRegistrado();
-  return svc.listar();
-});
+      final svc = ref.watch(dispositivoServiceProvider);
+      await svc.ensureDispositivoRegistrado();
+      return svc.listar();
+    });

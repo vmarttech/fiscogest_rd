@@ -67,7 +67,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
               onPressed: _nuevo,
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
-              icon: Icon(Icons.add_rounded),
+              icon: const Icon(Icons.add_rounded),
               label: const Text(
                 'Nuevo',
                 style: TextStyle(fontWeight: FontWeight.w900),
@@ -147,7 +147,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.tune_rounded,
                               color: Colors.white,
                               size: 24,
@@ -179,7 +179,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           ),
                           FilledButton.icon(
                             onPressed: _nuevo,
-                            icon: Icon(Icons.add_rounded, size: 20),
+                            icon: const Icon(Icons.add_rounded, size: 20),
                             label: const Text(
                               'Nuevo ajuste',
                               style: TextStyle(fontWeight: FontWeight.w900),
@@ -206,7 +206,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: _nuevo,
-                          icon: Icon(Icons.add_rounded),
+                          icon: const Icon(Icons.add_rounded),
                           label: const Text(
                             'Nuevo ajuste',
                             style: TextStyle(
@@ -361,7 +361,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF94A3B8),
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
                           color: Color(0xFF94A3B8),
                         ),
@@ -373,11 +373,11 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: _border),
+                          borderSide: const BorderSide(color: _border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: _border),
+                          borderSide: const BorderSide(color: _border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),

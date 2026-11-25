@@ -202,7 +202,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
               elevation: 4,
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
       body: SafeArea(bottom: true, child: _construirVistaActual()),
@@ -301,7 +301,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                     child: OutlinedButton.icon(
                       onPressed: () =>
                           context.pushNamed(OfertasPromocionesPage.routeName),
-                      icon: Icon(Icons.local_offer_outlined, size: 18),
+                      icon: const Icon(Icons.local_offer_outlined, size: 18),
                       label: const Text('Ofertas y promociones'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.primary,
@@ -327,7 +327,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                     .watch(productoControllerProvider)
                     .when(
                       loading: () => Padding(
-                        padding: EdgeInsets.symmetric(vertical: 40),
+                        padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Center(
                           child: CircularProgressIndicator(
                             color: Theme.of(context).colorScheme.primary,
@@ -350,7 +350,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                             padding: const EdgeInsets.only(top: 60),
                             child: Column(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.inventory_2_outlined,
                                   size: 48,
                                   color: AppColors.grey300,
@@ -425,10 +425,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               if (_productoSeleccionado != null &&
                   filtrados.every((p) => p.id != _productoSeleccionado!.id)) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted)
+                  if (mounted) {
                     setState(() {
                       _productoSeleccionado = null;
                     });
+                  }
                 });
               }
               return Row(
@@ -692,7 +693,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.sort_rounded,
                     size: 18,
                     color: AppColors.textSecondary,
@@ -708,7 +709,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       ),
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.keyboard_arrow_down_rounded,
                     size: 20,
                     color: AppColors.textSecondary,
@@ -827,7 +828,7 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () => setState(() {
                   _vistaActual = 0;
                 }),
@@ -1097,7 +1098,7 @@ class _PanelConfigInventario extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: onNuevo,
-              icon: Icon(Icons.add_circle_outline, size: 18),
+              icon: const Icon(Icons.add_circle_outline, size: 18),
               label: const Text('[F3] NUEVO PRODUCTO'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
@@ -1120,7 +1121,7 @@ class _PanelConfigInventario extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onOfertas,
-                icon: Icon(Icons.local_offer_outlined, size: 18),
+                icon: const Icon(Icons.local_offer_outlined, size: 18),
                 label: const Text('OFERTAS Y PROMOCIONES'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.primary,
@@ -1526,7 +1527,7 @@ class _PanelDetalleProducto extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.touch_app_outlined,
                     size: 40,
                     color: AppColors.grey300,
@@ -1646,7 +1647,7 @@ class _PanelDetalleProducto extends StatelessWidget {
         const SizedBox(height: 10),
         ElevatedButton.icon(
           onPressed: onEditar,
-          icon: Icon(Icons.edit_outlined, size: 18),
+          icon: const Icon(Icons.edit_outlined, size: 18),
           label: const Text('Editar producto'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -1661,7 +1662,7 @@ class _PanelDetalleProducto extends StatelessWidget {
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: onEliminar,
-            icon: Icon(Icons.delete_outline, size: 18),
+            icon: const Icon(Icons.delete_outline, size: 18),
             label: const Text('Eliminar'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.error,
@@ -1919,7 +1920,7 @@ class _ProductoCardMobile extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onEditar,
-                  icon: Icon(Icons.edit_outlined, size: 18),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
                   label: const Text('Editar'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
@@ -1940,7 +1941,7 @@ class _ProductoCardMobile extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onEliminar,
-                    icon: Icon(Icons.delete_outline, size: 18),
+                    icon: const Icon(Icons.delete_outline, size: 18),
                     label: const Text('Eliminar'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,

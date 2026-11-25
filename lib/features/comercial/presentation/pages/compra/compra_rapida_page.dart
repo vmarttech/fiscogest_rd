@@ -331,10 +331,11 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
         FiscoGestNotifications.show(SnackBar(content: Text('Error: $e')));
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 
@@ -352,11 +353,11 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _C.border),
+        borderSide: const BorderSide(color: _C.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _C.border),
+        borderSide: const BorderSide(color: _C.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -381,7 +382,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: _C.white,
                 border: Border(bottom: BorderSide(color: _C.border)),
               ),
@@ -445,13 +446,13 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                     onPressed: _guardando ? null : _agregarLinea,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
-                      side: BorderSide(color: Color(0xFF99D5CE)),
+                      side: const BorderSide(color: Color(0xFF99D5CE)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: Icon(Icons.add_circle_outline, size: 18),
+                    icon: const Icon(Icons.add_circle_outline, size: 18),
                     label: const Text(
                       'Agregar otra línea',
                       style: TextStyle(fontWeight: FontWeight.w600),
@@ -612,7 +613,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                         size: 12,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         'Inventario',
                         style: TextStyle(
@@ -889,11 +890,11 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: _C.border),
+                  borderSide: const BorderSide(color: _C.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: _C.border),
+                  borderSide: const BorderSide(color: _C.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -1045,7 +1046,7 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 11, color: _C.muted),
                           ),
-                        trailing: Icon(
+                        trailing: const Icon(
                           Icons.chevron_right_rounded,
                           color: _C.muted,
                         ),

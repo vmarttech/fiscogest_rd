@@ -51,7 +51,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
       title: 'HISTORIAL',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -151,7 +151,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.history,
                               size: 48,
                               color: AppColors.grey300,
@@ -379,7 +379,7 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                               }
                             }
                           },
-                          icon: Icon(Icons.print, size: 20),
+                          icon: const Icon(Icons.print, size: 20),
                           label: const Text('Imprimir comprobante'),
                           style: FilledButton.styleFrom(
                             backgroundColor: Theme.of(

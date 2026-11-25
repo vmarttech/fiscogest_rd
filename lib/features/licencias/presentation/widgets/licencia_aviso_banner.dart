@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 
-/// Banner superior: demo / gratis / por vencer / vencida → Licencia.
+/// Banner de estado de licencia y consumo mensual del plan Gratis.
 class LicenciaAvisoBanner extends ConsumerWidget {
   const LicenciaAvisoBanner({super.key});
 
@@ -17,7 +17,16 @@ class LicenciaAvisoBanner extends ConsumerWidget {
 
     return async.maybeWhen(
       data: (lic) {
-        if (lic == null) return const SizedBox.shrink();
+        if (lic == null) {
+          return _banner(
+            context,
+            texto:
+                'Licencia pendiente de validación. Registra o vincula tu negocio para iniciar.',
+            icon: Icons.verified_user_outlined,
+            color: Colors.blueGrey.shade700,
+            onTap: () => context.push('/setup-cuenta'),
+          );
+        }
         if ((lic.esDesarrollador || lic.vitalicia) &&
             esDuenoPlataforma(ref.watch(sesionProvider)?.username)) {
           return const SizedBox.shrink();
@@ -37,6 +46,7 @@ class LicenciaAvisoBanner extends ConsumerWidget {
             lic.plan == 'gratis' ||
             lic.estado == 'gracia' ||
             lic.estado == 'vencida' ||
+            lic.estado == 'registro_requerido' ||
             porVencer;
         if (!mostrar) return const SizedBox.shrink();
 
@@ -44,37 +54,43 @@ class LicenciaAvisoBanner extends ConsumerWidget {
         late final Color bg;
         late final IconData icon;
 
-        if (lic.estado == 'vencida' && lic.plan != 'gratis') {
+        if (lic.estado == 'registro_requerido') {
+          texto =
+              'La prueba terminó. Completa el registro para continuar con el plan Gratis.';
+          bg = const Color(0xFFB91C1C);
+          icon = Icons.person_add_alt_1_outlined;
+        } else if (lic.estado == 'vencida' && lic.plan != 'gratis') {
           texto = storeOcultaCompraTransferencia
               ? 'Licencia vencida. Vaya a Configuración → Licencia para activar o renovar.'
               : 'Licencia vencida. Configuración → Sistema → Licencia y pagos para elegir plan.';
           bg = const Color(0xFFB91C1C);
           icon = Icons.error_outline;
         } else if (lic.estado == 'gracia') {
-          final d = lic.diasRestantes;
+          final d = lic.diasGraciaRestantes;
           texto = d != null
-              ? 'Periodo de gracia ($d días). Renueve en Licencia y pagos.'
-              : 'Periodo de gracia. Renueve en Configuración → Licencia y pagos.';
+              ? 'Prueba gratuita · $d días de gracia restantes.'
+              : 'Prueba gratuita en período de gracia.';
           bg = const Color(0xFFC2410C);
           icon = Icons.schedule;
         } else if (lic.plan == 'gratis') {
-          final fiao = gates.maxCuentasFiao ?? 25;
-          final prod = gates.maxProductos ?? 50;
+          final uso =
+              ref.watch(licenciaUsoGratisProvider).valueOrNull ??
+              const <String, int>{};
+          final prod = gates.maxProductos ?? 20;
           final cli = gates.maxClientes ?? 30;
-          final ven = gates.maxVentasMes ?? 40;
+          final ven = gates.maxVentasMes ?? 15;
           texto = mobile
-              ? 'Plan gratis · $prod productos · $cli clientes · $ven ventas/mes · fiao $fiao'
-              : 'Plan gratis · límites: $prod productos, $cli clientes, '
-                    '$ven ventas/mes, fiao $fiao. Toque para mejorar su plan.';
+              ? 'Gratis · ventas ${uso['ventas'] ?? 0}/$ven · productos ${uso['productos'] ?? 0}/$prod · clientes ${uso['clientes'] ?? 0}/$cli'
+              : 'Gratis este mes: ventas ${uso['ventas'] ?? 0}/$ven, productos ${uso['productos'] ?? 0}/$prod, clientes ${uso['clientes'] ?? 0}/$cli.';
           bg = Theme.of(context).colorScheme.primary;
           icon = Icons.workspace_premium_outlined;
         } else if (lic.plan == 'demo') {
           final d = lic.diasRestantes;
           texto = d != null
               ? mobile
-                    ? 'Prueba · $d días restantes · Ver planes'
-                    : 'Prueba: $d días restantes. Elija plan de pago en Licencia y pagos.'
-              : 'Está en prueba. Elija plan de pago en Configuración → Licencia y pagos.';
+                    ? 'Prueba · $d días restantes · acceso completo'
+                    : 'Prueba gratuita: $d días restantes con acceso completo. Luego puedes registrarte en el plan Gratis.'
+              : 'Prueba gratuita con acceso completo. Luego puedes registrarte en el plan Gratis.';
           bg = Theme.of(context).colorScheme.primary;
           icon = Icons.info_outline;
         } else {
@@ -90,44 +106,62 @@ class LicenciaAvisoBanner extends ConsumerWidget {
             .replaceAll('Configuración → ', '')
             .replaceAll('Toque para mejorar su plan.', '· Ver planes');
 
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => context.push('/licencia'),
-            borderRadius: BorderRadius.circular(9),
-            child: Container(
-              width: double.infinity,
-              margin: const EdgeInsets.fromLTRB(12, 5, 12, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Row(
-                children: [
-                  Icon(icon, color: Colors.white, size: 17),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      mobile ? texto : textoCompacto,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.chevron_right, color: Colors.white70, size: 18),
-                ],
-              ),
-            ),
-          ),
+        return _banner(
+          context,
+          texto: mobile ? texto : textoCompacto,
+          icon: icon,
+          color: bg,
+          onTap: () => lic.estado == 'registro_requerido'
+              ? context.push('/setup-cuenta')
+              : context.push('/licencia'),
         );
       },
       orElse: () => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _banner(
+    BuildContext context, {
+    required String texto,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9),
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(12, 5, 12, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 17),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  texto,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right, color: Colors.white70, size: 18),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

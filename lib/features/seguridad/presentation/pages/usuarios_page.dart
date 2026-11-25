@@ -69,7 +69,7 @@ class UsuariosPage extends ConsumerWidget {
                 const SizedBox(width: 12),
                 FilledButton.icon(
                   onPressed: () => _abrirFormulario(context, ref, null),
-                  icon: Icon(Icons.person_add_outlined, size: 20),
+                  icon: const Icon(Icons.person_add_outlined, size: 20),
                   label: Text(mobile ? 'Nuevo' : 'Nuevo usuario'),
                   style: FilledButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
@@ -429,10 +429,11 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
         _error = 'Error: $e';
       });
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 
@@ -510,10 +511,11 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                     .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                     .toList(),
                 onChanged: (v) {
-                  if (v != null)
+                  if (v != null) {
                     setState(() {
                       _rol = v;
                     });
+                  }
                 },
               ),
               const SizedBox(height: 10),
@@ -528,10 +530,11 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                   DropdownMenuItem(value: 'Inactivo', child: Text('Inactivo')),
                 ],
                 onChanged: (v) {
-                  if (v != null)
+                  if (v != null) {
                     setState(() {
                       _estado = v;
                     });
+                  }
                 },
               ),
               if (_error != null) ...[

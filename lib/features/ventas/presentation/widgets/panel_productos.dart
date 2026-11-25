@@ -109,7 +109,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                     children: [
                       IconButton(
                         onPressed: () => aplicarDelta(-1),
-                        icon: Icon(Icons.remove),
+                        icon: const Icon(Icons.remove),
                       ),
                       SizedBox(
                         width: 96,
@@ -127,7 +127,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                       ),
                       IconButton(
                         onPressed: () => aplicarDelta(1),
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                       ),
                     ],
                   );
@@ -214,10 +214,10 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
               fontWeight: FontWeight.w500,
               color: Color(0xFF94A3B8),
             ),
-            prefixIcon: Icon(Icons.search),
+            prefixIcon: const Icon(Icons.search),
             suffixIcon: IconButton(
               tooltip: 'Escanear código de barras',
-              icon: Icon(Icons.qr_code_scanner),
+              icon: const Icon(Icons.qr_code_scanner),
               onPressed: _escanearCodigoBarras,
             ),
             border: const OutlineInputBorder(),

@@ -87,29 +87,29 @@ class AppScaffold extends StatelessWidget {
     final underShell =
         context.findAncestorWidgetOfExactType<AppShell>() != null;
 
-    Widget? resolvedLeading = leading;
-    if (resolvedLeading == null && showBackButton) {
-      // Con menú fijo (AppShell) nunca mostrar hamburguesa en desktop/tablet
-      final isDesktop = AppBreakpoints.useWideChrome(context);
-
-      if (principal && underShell && !isDesktop) {
-        // Solo mostrar hamburguesa en móvil/tablet
-        resolvedLeading = IconButton(
-          icon: Icon(Icons.menu),
-          tooltip: 'Menú',
-          onPressed: () => ShellDrawerScope.open(context),
-          style: IconButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.white.withValues(alpha: 0.1),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+    final isDesktop = AppBreakpoints.useWideChrome(context);
+    Widget? resolvedLeading;
+    if (principal && underShell && !isDesktop) {
+      // Un destino principal siempre conserva acceso al menú; no vuelve a
+      // mostrar un retorno aunque la página haya definido un leading propio.
+      resolvedLeading = IconButton(
+        icon: const Icon(Icons.menu),
+        tooltip: 'Menú',
+        onPressed: () => ShellDrawerScope.open(context),
+        style: IconButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.white.withValues(alpha: 0.1),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      } else if (!principal) {
+        ),
+      );
+    } else {
+      resolvedLeading = leading;
+      if (resolvedLeading == null && showBackButton && !principal) {
         resolvedLeading = IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           tooltip: 'Atrás',
           onPressed: () => safeBack(context),
           style: IconButton.styleFrom(

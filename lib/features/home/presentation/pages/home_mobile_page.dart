@@ -76,7 +76,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
     return Scaffold(
       backgroundColor: _bg,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -232,8 +232,8 @@ final dash = ref.watch(dashboardSnapshotProvider);
     return '${d[n.weekday - 1]}, ${n.day} ${m[n.month - 1]}';
   }
 
-  void _showFab(BuildContext context) {
-    showModalBottomSheet<void>(
+  Future<void> _showFab(BuildContext context) async {
+    final ruta = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -269,10 +269,10 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   'Nueva venta',
                   style: TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  context.push('/ventas/cotizaciones/nueva');
-                },
+                onTap: () => Navigator.pop(
+                  ctx,
+                  '/ventas/cotizaciones/nueva',
+                ),
               ),
               ListTile(
                 leading: Icon(Icons.add_business_outlined, color: Theme.of(context).colorScheme.primary),
@@ -281,11 +281,11 @@ final dash = ref.watch(dashboardSnapshotProvider);
                   style: TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
                 onTap: () {
-                  Navigator.pop(ctx);
                   final modoSimple = ProviderScope.containerOf(
                     context,
                   ).read(modoSimplificadoProvider);
-                  context.push(
+                  Navigator.pop(
+                    ctx,
                     modoSimple ? '/compras/rapida' : '/compras/registrar',
                   );
                 },
@@ -295,6 +295,7 @@ final dash = ref.watch(dashboardSnapshotProvider);
         ),
       ),
     );
+    if (ruta != null && context.mounted) await context.push(ruta);
   }
 }
 

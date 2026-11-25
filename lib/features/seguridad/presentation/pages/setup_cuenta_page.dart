@@ -5,11 +5,19 @@ import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/auth/sesion_persistente.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_remote.dart';
+import 'package:fiscogest_rd/core/sync/supabase/dispositivo_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
+import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/features/campanas/data/campanas_remote.dart';
+import 'package:fiscogest_rd/features/campanas/data/campana_pendiente_store.dart';
+import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
 
 /// Configuración de la cuenta al iniciar por primera vez.
 class SetupCuentaPage extends ConsumerStatefulWidget {
@@ -31,6 +39,8 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
   bool _cargando = false;
   bool _ocultar = true;
   String? _error;
+  String? _campanaId;
+  final List<CampanaPromocional> _nuevasOfertas = [];
 
   static const _preguntas = [
     '¿Nombre de su primer negocio?',
@@ -78,6 +88,9 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
               : 'Negocio ${_userCtrl.text.trim()}';
           final negocioId = await NegocioRemote().crear(nombre: nombreNegocio);
           await NegocioLocal.setId(negocioId);
+          if (_campanaId != null && _campanaId!.isNotEmpty) {
+            await CampanaPendienteStore.guardar(_campanaId!);
+          }
         }
         final cuenta = await auth.crearCuentaInicial(
           username: _userCtrl.text,
@@ -118,6 +131,8 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
       if (sesionActualizada != null) {
         await SesionPersistente.guardar(sesionActualizada);
       }
+      await _prepararValidacionRemota(db);
+      ref.invalidate(licenciaActualProvider);
       if (!mounted) return;
       final s = ref.read(sesionProvider);
       context.go(s?.rutaInicio ?? '/');
@@ -128,11 +143,44 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
             : 'No se pudo guardar la cuenta',
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
+  }
+
+  Future<void> _prepararValidacionRemota(AppDatabase db) async {
+    try {
+      await DispositivoService(db).ensureDispositivoRegistrado();
+      if (!SupabaseConfig.isConfigured) return;
+      await DispositivoSync(db).pushEsteEquipo();
+      // Solo recupera el estado que ya concedió el backend. No crea ni extiende
+      // pruebas desde Flutter.
+      await LicenciaSync(db).pullDesdeNegocio();
+    } catch (e) {
+      // El alta de cuenta debe terminar aunque el dispositivo esté offline.
+      debugPrint('Validación de dispositivo pendiente: $e');
+    }
+  }
+
+  Future<void> _cargarOfertasRegistro() async {
+    try {
+      final remotas = await CampanasRemote().vigentes(paraRegistro: true);
+      if (!mounted) return;
+      setState(() {
+        _nuevasOfertas
+          ..clear()
+          ..addAll(remotas);
+      });
+    } catch (_) {}
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarOfertasRegistro();
   }
 
   @override
@@ -256,6 +304,67 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
                           style: const TextStyle(color: Colors.white),
                           decoration: _dec('Respuesta *'),
                         ),
+                        if (_nuevasOfertas.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.18),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Oferta para tu nueva cuenta',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.92),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                RadioGroup<String>(
+                                  groupValue: _campanaId,
+                                  onChanged: (v) =>
+                                      setState(() => _campanaId = v),
+                                  child: Column(
+                                    children: _nuevasOfertas
+                                        .map(
+                                          (c) => RadioListTile<String>(
+                                            dense: true,
+                                            contentPadding: EdgeInsets.zero,
+                                            activeColor: const Color(
+                                              0xFF2DD4BF,
+                                            ),
+                                            title: Text(
+                                              c.nombre,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              '${c.tipoEtiqueta} · ${c.valor}'
+                                              '${c.descripcion.isEmpty ? '' : ' · ${c.descripcion}'}',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                            value: c.id,
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         if (_error != null) ...[
                           const SizedBox(height: 14),
                           Text(
@@ -330,7 +439,7 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Color(0xFF2DD4BF)),
+        borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
       ),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );

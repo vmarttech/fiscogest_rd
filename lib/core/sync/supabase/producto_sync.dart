@@ -3,12 +3,14 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync_policy.dart';
 
 class ProductoSync {
   ProductoSync(this._db);
   final AppDatabase _db;
 
   Future<void> pushTodos() async {
+    if (!await LicenciaSyncPolicy.puedeSincronizarDatosOperativos(_db)) return;
     if (!SupabaseConfig.isConfigured) return;
 
     final negocioId = await NegocioLocal.getId();
@@ -26,15 +28,15 @@ class ProductoSync {
     final payload = rows
         .map(
           (p) => <String, dynamic>{
-              'negocio_id': negocioId,
-              'id_local': p.id,
-              'codigo': p.codigo,
-              'nombre': p.nombre,
-              'precio_venta': p.precioVenta ?? 0,
-              'precio_compra': p.precioCompra ?? 0,
-              'stock': p.stock ?? 0,
-              'activo': (p.activo) == 1,
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            'negocio_id': negocioId,
+            'id_local': p.id,
+            'codigo': p.codigo,
+            'nombre': p.nombre,
+            'precio_venta': p.precioVenta ?? 0,
+            'precio_compra': p.precioCompra ?? 0,
+            'stock': p.stock ?? 0,
+            'activo': (p.activo) == 1,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           },
         )
         .toList();

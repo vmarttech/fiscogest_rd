@@ -47,10 +47,11 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (fecha != null)
+    if (fecha != null) {
       setState(() {
         _fechaSeleccionada = fecha;
       });
+    }
   }
 
   Future<void> _guardarSalida() async {

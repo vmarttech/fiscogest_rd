@@ -100,18 +100,20 @@ class _LicenciaAdminPedidosPageState
           );
         }
       }
-      if (mounted)
+      if (mounted) {
         setState(() {
           _tick++;
         });
+      }
     } catch (e, st) {
       debugPrint('Admin pedidos pull nube: $e');
       debugPrint('$st');
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _sincronizandoNube = false;
         });
+      }
     }
   }
 

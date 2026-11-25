@@ -3,14 +3,13 @@
 /// Planes self-serve (USD / PayPal, activación automática):
 ///   gratis · basico · simplificado · pro
 ///
-/// Prueba: 30 días al instalar (sin fricción). Al vencer → límites del plan actual
-/// (si no pagó → gratis). Todo el menú visible; al usar sin derecho → aviso de upgrade.
+/// Una prueba autorizada remotamente; al terminar la gracia requiere registro.
 library;
 
-/// Días de prueba al instalar.
+/// Duración de la prueba concedida por la autoridad remota.
 const int kDiasPrueba = 30;
 
-/// Días de gracia tras vencer.
+/// Días de gracia luego de la prueba.
 const int kDiasGracia = 3;
 
 /// Días de validez de un pedido FG- sin confirmar (legado transferencia).
@@ -33,7 +32,6 @@ const kPreciosLicenciaDop = <String, Map<String, double>>{
 };
 
 const kMaxCajasPorPlan = <String, int>{
-  'demo': 1,
   'gratis': 1,
   'basico': 1,
   'simplificado': 3,
@@ -44,7 +42,6 @@ const kMaxCajasPorPlan = <String, int>{
 };
 
 const kMaxDispositivosBase = <String, int>{
-  'demo': 1,
   'gratis': 1,
   'basico': 1,
   'simplificado': 3,
@@ -102,11 +99,11 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteUsuariosExtra: true,
     permiteEcf: true,
   ),
-  // Gratis: 30 ventas/mes, sin fiao (solo contado), sin reportes.
+  // Gratis: contadores mensuales locales; datos operativos no sincronizados.
   'gratis': LimitesPlan(
-    maxProductos: 40,
-    maxClientes: 20,
-    maxVentasMes: 30,
+    maxProductos: 20,
+    maxClientes: 30,
+    maxVentasMes: 15,
     maxCuentasFiaoAbiertas: 25,
     permiteFiao: true,
     permiteCreditoFormal: false,
@@ -214,7 +211,7 @@ bool esPlanNormal(String plan) {
       p == 'profesional' ||
       p == 'empresa' ||
       p == 'desarrollador' ||
-      p == 'demo';
+      p == 'demo'; // Compatibilidad con licencias de prueba históricas.
 }
 
 bool esPlanSimplificado(String plan) => plan.toLowerCase() == 'simplificado';
@@ -323,7 +320,7 @@ String nombrePlanUi(String plan) {
 String descripcionPlanCorta(String plan) {
   switch (plan.toLowerCase()) {
     case 'gratis':
-      return 'Prueba el flujo, sin compromiso.';
+      return 'Plan sin pago, con límites mensuales y datos locales.';
     case 'basico':
       return 'Esencial: respaldo en la nube y reportes, 1 equipo.';
     case 'simplificado':
@@ -341,11 +338,11 @@ List<String> beneficiosPlanUi(String plan) {
   switch (plan.toLowerCase()) {
     case 'gratis':
       return const [
-        'Ventas al contado',
-        'Catálogo limitado (40 productos / 20 clientes)',
-        '30 facturas al mes',
-        '1 equipo · solo local',
-        'Sin reportes ni sync en la nube',
+        '15 ventas al mes',
+        '20 productos registrados al mes',
+        '30 clientes registrados al mes',
+        '1 equipo · datos operativos locales',
+        'Sin sincronización operativa en la nube',
       ];
     case 'basico':
       return const [

@@ -141,7 +141,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.check_circle, size: 48, color: Colors.green),
+                      const Icon(Icons.check_circle, size: 48, color: Colors.green),
                       const SizedBox(height: 16),
                       const Text(
                         'Esta cuenta ya está pagada.',
@@ -149,7 +149,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                       ),
                       const SizedBox(height: 24),
                       TextButton.icon(
-                        icon: Icon(Icons.arrow_back),
+                        icon: const Icon(Icons.arrow_back),
                         label: const Text('Volver'),
                         onPressed: () => context.pop(),
                       ),
@@ -211,10 +211,11 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                             const Duration(days: 365),
                           ),
                         );
-                        if (picked != null)
+                        if (picked != null) {
                           setState(() {
                             _fecha = picked;
                           });
+                        }
                       },
                     ),
                     const SizedBox(height: 16),

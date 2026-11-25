@@ -181,7 +181,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
           ? [
               IconButton(
                 tooltip: 'PDF',
-                icon: Icon(Icons.picture_as_pdf_outlined),
+                icon: const Icon(Icons.picture_as_pdf_outlined),
                 onPressed: _exportarReporte,
               ),
             ]
@@ -236,7 +236,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                       context.go('/inventario-fisico');
                                     }
                                   },
-                                  icon: Icon(Icons.arrow_back_rounded),
+                                  icon: const Icon(Icons.arrow_back_rounded),
                                   tooltip: 'Atrás',
                                 ),
 
@@ -251,7 +251,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                     ),
                                     borderRadius: BorderRadius.circular(11),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.balance_rounded,
                                     color: Colors.white,
                                     size: 22,
@@ -284,7 +284,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                 ),
                                 OutlinedButton.icon(
                                   onPressed: _exportarReporte,
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.picture_as_pdf_outlined,
                                     size: 18,
                                   ),
@@ -317,7 +317,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : Icon(Icons.check_rounded, size: 18),
+                                      : const Icon(Icons.check_rounded, size: 18),
                                   label: Text(
                                     _aprobando
                                         ? 'Aplicando…'
@@ -529,7 +529,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                   color: Colors.white,
                                 ),
                               )
-                            : Icon(Icons.check_rounded),
+                            : const Icon(Icons.check_rounded),
                         label: Text(
                           _aprobando ? 'Aplicando…' : 'Aprobar ajustes',
                           style: const TextStyle(

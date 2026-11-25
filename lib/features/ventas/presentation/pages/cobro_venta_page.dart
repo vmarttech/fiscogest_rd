@@ -335,7 +335,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
-            icon: Icon(Icons.chat_outlined, size: 18),
+            icon: const Icon(Icons.chat_outlined, size: 18),
             label: const Text('Recibo digital'),
           ),
         ],
@@ -841,7 +841,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, true),
-                icon: Icon(Icons.receipt_long_outlined, size: 18),
+                icon: const Icon(Icons.receipt_long_outlined, size: 18),
                 label: const Text('Imprimir / enviar'),
               ),
             ],
@@ -956,13 +956,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     // Monto sugerido: próxima cuota pendiente, o liquidación pronto pago
     double montoDef = cuenta.saldoPendiente;
     if (acuerdo != null) {
-      montoDef = acuerdo.montoLiquidacion;
+      montoDef = acuerdo.montoLiquidacion + cuenta.moraCalculada;
     } else {
       final plan = cuenta.planPago;
       if (plan != null && plan.cuotas.isNotEmpty) {
         final pend = plan.cuotas.where((q) => !q.pagada).toList();
         if (pend.isNotEmpty) {
-          montoDef = pend.first.montoTotal;
+          final cuota = pend.first;
+          montoDef =
+              cuenta.saldoPendienteCuota(cuota) +
+              cuenta.moraEstimadaCuota(cuota, moraMensual: 0);
         } else if (plan.montoPorCuota > 0) {
           montoDef = plan.montoPorCuota;
         }
@@ -1245,7 +1248,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.account_balance_wallet,
                             color: Color(0xFF059669),
                           ),
@@ -1261,7 +1264,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           ),
                           IconButton(
                             onPressed: () => Navigator.pop(ctx),
-                            icon: Icon(Icons.close),
+                            icon: const Icon(Icons.close),
                           ),
                         ],
                       ),
@@ -1694,7 +1697,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            side: BorderSide(color: Color(0xFFE2E8F0)),
+            side: const BorderSide(color: Color(0xFFE2E8F0)),
             foregroundColor: const Color(0xFF334155),
           ),
           child: Text(
@@ -1727,7 +1730,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       color: const Color(0xFF0F172A),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.point_of_sale,
                       color: Colors.white,
                       size: 20,
@@ -1848,19 +1851,19 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 hintText: showCxcList
                                     ? 'N° CXC o cliente…'
                                     : 'N° cotización o cliente…',
-                                prefixIcon: Icon(Icons.search, size: 20),
+                                prefixIcon: const Icon(Icons.search, size: 20),
                                 filled: true,
                                 fillColor: const Color(0xFFF8FAFC),
                                 isDense: true,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
@@ -2005,7 +2008,16 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               child: Column(
                                 children: [
                                   _totRow(
-                                    'Saldo pendiente',
+                                    'Capital e interés pendientes',
+                                    formatRd(_cxcActiva!.saldoCuotasPendiente),
+                                  ),
+                                  if (_cxcActiva!.moraCalculada > 0.001)
+                                    _totRow(
+                                      'Mora incluida',
+                                      formatRd(_cxcActiva!.moraCalculada),
+                                    ),
+                                  _totRow(
+                                    'TOTAL A COBRAR',
                                     formatRd(_cxcActiva!.saldoPendiente),
                                     bold: true,
                                     green: true,
@@ -2311,7 +2323,15 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                   .where((q) => !q.pagada)
                                                   .toList();
                                               if (pend.isNotEmpty) {
-                                                m = pend.first.montoTotal;
+                                                final cuota = pend.first;
+                                                m =
+                                                    c.saldoPendienteCuota(
+                                                      cuota,
+                                                    ) +
+                                                    c.moraEstimadaCuota(
+                                                      cuota,
+                                                      moraMensual: 0,
+                                                    );
                                               }
                                             }
                                             _cxcMontoController.text = m
@@ -2536,7 +2556,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                 color: Colors.white,
                                               ),
                                             )
-                                          : Icon(Icons.check_circle),
+                                          : const Icon(Icons.check_circle),
                                       label: Text(
                                         _procesando
                                             ? 'Procesando…'
@@ -3023,7 +3043,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     return AppScaffold(
       title: 'CAJA — BUSCAR COTIZACIÓN',
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -3050,7 +3070,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                           decoration: InputDecoration(
                             hintText: 'N° cotización o nombre del cliente',
                             hintStyle: TextStyle(fontSize: tamanoCuerpo),
-                            prefixIcon: Icon(Icons.search),
+                            prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -3259,7 +3279,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     return AppScaffold(
       title: esCredito ? 'COBRO A CRÉDITO' : 'COBRO EN CAJA',
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           setState(() {
             _modoBusqueda = true;
@@ -3561,7 +3581,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       : IconButton.filledTonal(
                                           tooltip: 'Buscar RNC en línea',
                                           onPressed: _buscarRncFiscalEnLinea,
-                                          icon: Icon(Icons.travel_explore),
+                                          icon: const Icon(
+                                            Icons.travel_explore,
+                                          ),
                                         ),
                                 ),
                               ],
@@ -3615,7 +3637,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                             context,
                                           ).colorScheme.primary,
                                         )
-                                      : BorderSide(color: AppColors.border),
+                                      : const BorderSide(
+                                          color: AppColors.border,
+                                        ),
                                 );
                               })
                               .toList(),
@@ -3807,7 +3831,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : Icon(Icons.receipt_long, size: 22),
+                              : const Icon(Icons.receipt_long, size: 22),
                           label: Text(
                             _procesando
                                 ? 'Procesando...'

@@ -18,6 +18,9 @@ class DispositivoInfo {
     this.remoteId,
     this.registradoEn,
     this.ultimoUso,
+    this.identificacionPersistente = false,
+    this.metodoIdentificacion = 'desconocido',
+    this.pendienteValidacionRemota = true,
   });
 
   final int id;
@@ -31,6 +34,9 @@ class DispositivoInfo {
   final String? remoteId;
   final DateTime? registradoEn;
   final DateTime? ultimoUso;
+  final bool identificacionPersistente;
+  final String metodoIdentificacion;
+  final bool pendienteValidacionRemota;
 }
 
 /// Registro local de equipos. Listo para upsert a Supabase.
@@ -39,7 +45,8 @@ class DispositivoService {
   final AppDatabase _db;
 
   Future<List<DispositivoInfo>> listar({bool soloActivos = true}) async {
-    final fp = await DeviceFingerprint.obtener();
+    final identidad = await DeviceFingerprint.obtenerResultado();
+    final fp = identidad.fingerprint;
     final q = _db.select(_db.dispositivosLicenciaTable);
     if (soloActivos) {
       q.where((t) => t.activo.equals(true));
@@ -59,6 +66,8 @@ class DispositivoService {
             remoteId: r.remoteId,
             registradoEn: DateTime.tryParse(r.registradoEn),
             ultimoUso: DateTime.tryParse(r.ultimoUso),
+            identificacionPersistente: identidad.persistenteTrasReinstalar,
+            metodoIdentificacion: identidad.metodo,
           ),
         )
         .toList();
@@ -69,7 +78,8 @@ class DispositivoService {
   /// Offline: el cupo se aplica sobre la BD local (1 fila = este equipo).
   /// Con Supabase: la lista vendrá de la nube y [maxDispositivos] será real.
   Future<DispositivoInfo> ensureDispositivoRegistrado() async {
-    final fp = await DeviceFingerprint.obtener();
+    final identidad = await DeviceFingerprint.obtenerResultado();
+    final fp = identidad.fingerprint;
     final ahora = DateTime.now().toIso8601String();
     final existentes = await (_db.select(
       _db.dispositivosLicenciaTable,
@@ -91,10 +101,30 @@ class DispositivoService {
       )).firstWhere((d) => d.fingerprint == fp);
     }
 
+    // Desactiva el fingerprint anterior. El sincronizador mantiene este
+    // registro inactivo y registra el nuevo hash sin colisionar el remoteId.
+    final legacy = identidad.legacyFingerprint;
+    if (legacy != null && legacy.isNotEmpty) {
+      final anterior = await (_db.select(
+        _db.dispositivosLicenciaTable,
+      )..where((t) => t.fingerprint.equals(legacy))).getSingleOrNull();
+      if (anterior != null) {
+        await (_db.update(
+          _db.dispositivosLicenciaTable,
+        )..where((t) => t.id.equals(anterior.id))).write(
+          const DispositivosLicenciaTableCompanion(
+            activo: Value(false),
+            pendienteSync: Value(true),
+          ),
+        );
+      }
+    }
+
     // Cupo local (cuando haya sync, contar activos remotos + locales)
     final lic = await LicenciaService(_db).obtenerActual();
     final max =
-        lic?.maxDispositivos ?? maxInstalacionesPermitidas(lic?.plan ?? 'demo');
+        lic?.maxDispositivos ??
+        maxInstalacionesPermitidas(lic?.plan ?? 'gratis');
     final activos = await (_db.select(
       _db.dispositivosLicenciaTable,
     )..where((t) => t.activo.equals(true))).get();
@@ -137,6 +167,8 @@ class DispositivoService {
       remoteId: row.remoteId,
       registradoEn: DateTime.tryParse(row.registradoEn),
       ultimoUso: DateTime.tryParse(row.ultimoUso),
+      identificacionPersistente: identidad.persistenteTrasReinstalar,
+      metodoIdentificacion: identidad.metodo,
     );
   }
 

@@ -28,7 +28,7 @@ class HistorialCostosPage extends ConsumerWidget {
       title: 'Historial de Costos',
       actions: [
         IconButton(
-          icon: Icon(Icons.refresh),
+          icon: const Icon(Icons.refresh),
           tooltip: 'Actualizar',
           onPressed: () => ref.invalidate(historialCostosProvider(productoId)),
         ),

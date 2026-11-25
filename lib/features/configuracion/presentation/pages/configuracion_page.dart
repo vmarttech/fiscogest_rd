@@ -277,10 +277,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 
@@ -568,11 +569,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(mob ? 10 : 14),
-          borderSide: BorderSide(color: Color(0xFFCBD2D7)),
+          borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(mob ? 10 : 14),
-          borderSide: BorderSide(color: Color(0xFFCBD2D7)),
+          borderSide: const BorderSide(color: Color(0xFFCBD2D7)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(mob ? 10 : 14),
@@ -751,7 +752,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                             borderRadius: BorderRadius.circular(21),
                             gradient: hasLogo
                                 ? null
-                                : LinearGradient(
+                                : const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
@@ -816,7 +817,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                     const SizedBox(height: 15),
                     TextButton.icon(
                       onPressed: _elegirLogo,
-                      icon: Icon(Icons.image_outlined, size: 16),
+                      icon: const Icon(Icons.image_outlined, size: 16),
                       label: const Text(
                         'Cambiar logo',
                         style: TextStyle(
@@ -1362,7 +1363,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           ),
           const SizedBox(height: 8),
           SwitchListTile.adaptive(
-            tileColor: Colors.white,
             contentPadding: EdgeInsets.zero,
             title: const Text(
               'Imprimir manifiesto al transferir',
@@ -1424,7 +1424,6 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               onChanged: (_) => setState(() {}),
             ),
             SwitchListTile.adaptive(
-              tileColor: Colors.white,
               contentPadding: EdgeInsets.zero,
               title: const Text(
                 'Mostrar bloque de firmas',
@@ -1756,7 +1755,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               ),
               leading: CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Icon(
+                child: const Icon(
                   Icons.workspace_premium,
                   color: Colors.white,
                   size: 22,
@@ -1854,7 +1853,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: onTap,
-              icon: Icon(Icons.open_in_new, size: 18),
+              icon: const Icon(Icons.open_in_new, size: 18),
               label: Text(
                 boton,
                 style: const TextStyle(fontWeight: FontWeight.w700),
@@ -2011,7 +2010,7 @@ class _HistorialModificacionesCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.access_time_rounded,
                         size: 18,
                         color: Color(0xFF6D7A82),

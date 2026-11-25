@@ -73,9 +73,15 @@ class NavegacionVentas extends ConsumerWidget {
             icon: Icons.description,
             title: 'Cotizaciones',
             isMobile: isMobile,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/ventas/cotizaciones/nueva');
+            onTap: () async {
+              final router = GoRouter.of(context);
+              if (isMobile) {
+                Navigator.pop(context);
+                await Future<void>.delayed(const Duration(milliseconds: 300));
+              }
+              if (context.mounted) {
+                await router.push('/ventas/cotizaciones/nueva');
+              }
             },
           ),
           _buildListTile(

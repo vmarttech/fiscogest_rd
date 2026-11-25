@@ -63,10 +63,11 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
         SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
   }
 

@@ -168,7 +168,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                       borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
-                                  icon: Icon(Icons.add_rounded, size: 20),
+                                  icon: const Icon(Icons.add_rounded, size: 20),
                                   label: const Text(
                                     'NUEVO IMPUESTO',
                                     style: TextStyle(
@@ -220,7 +220,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  icon: Icon(Icons.add_rounded, size: 18),
+                                  icon: const Icon(Icons.add_rounded, size: 18),
                                   label: const Text(
                                     'Nuevo impuesto',
                                     style: TextStyle(
@@ -249,7 +249,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         hintStyle: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
-                        prefixIcon: Icon(Icons.search, size: 20),
+                        prefixIcon: const Icon(Icons.search, size: 20),
                         isDense: true,
                         filled: true,
                         fillColor: AppColors.white,
@@ -259,11 +259,11 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: AppColors.border),
+                          borderSide: const BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: AppColors.border),
+                          borderSide: const BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -288,7 +288,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.calculate_outlined,
                               size: 48,
                               color: AppColors.grey300,
@@ -656,7 +656,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.border),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
     );
   }
@@ -788,7 +788,7 @@ class _ImpuestoCard extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Eliminar',
                 onPressed: onDelete,
-                icon: Icon(
+                icon: const Icon(
                   Icons.delete_outline,
                   size: 20,
                   color: AppColors.error,

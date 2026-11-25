@@ -63,11 +63,11 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: BorderSide(color: Color(0xFFCBD5E0)),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E0)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: BorderSide(color: Color(0xFFCBD5E0)),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E0)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
@@ -233,7 +233,7 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                 width: 40,
                 child: IconButton(
                   tooltip: 'Eliminar',
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.delete_outline,
                     color: Color(0xFFE53E3E),
                     size: 20,
@@ -378,7 +378,7 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                   style: AppTypography.labelMedium,
                 ),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.delete_outline,
                     color: AppColors.error,
                     size: 20,

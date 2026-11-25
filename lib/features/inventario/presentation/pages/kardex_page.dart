@@ -315,7 +315,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     Navigator.of(ctx).pop();
                     await _abrirDocumentoRelacionado(doc);
                   },
-                      icon: Icon(Icons.open_in_new, size: 18),
+                      icon: const Icon(Icons.open_in_new, size: 18),
                   label: const Text(
                     'Abrir documento relacionado',
                     style: TextStyle(fontWeight: FontWeight.w700),
@@ -800,7 +800,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           }),
           decoration: InputDecoration(
             hintText: 'Producto o documento',
-            prefixIcon: Icon(Icons.search, size: 20, color: _textMuted),
+            prefixIcon: const Icon(Icons.search, size: 20, color: _textMuted),
             filled: true,
             fillColor: Colors.white,
             isDense: true,
@@ -810,11 +810,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _border, width: 1.5),
+              borderSide: const BorderSide(color: _border, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _border, width: 1.5),
+              borderSide: const BorderSide(color: _border, width: 1.5),
             ),
           ),
         ),
@@ -893,7 +893,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                         _pagina = paginaActual - 1;
                       })
                     : null,
-                icon: Icon(Icons.chevron_left),
+                icon: const Icon(Icons.chevron_left),
               ),
               Text(
                 '$paginaActual / $totalPaginas',
@@ -908,7 +908,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                         _pagina = paginaActual + 1;
                       })
                     : null,
-                icon: Icon(Icons.chevron_right),
+                icon: const Icon(Icons.chevron_right),
               ),
             ],
           ),
@@ -1331,11 +1331,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: _border, width: 1.5),
+        borderSide: const BorderSide(color: _border, width: 1.5),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: _border, width: 1.5),
+        borderSide: const BorderSide(color: _border, width: 1.5),
           ),
         );
 
@@ -1360,7 +1360,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               }),
               style: const TextStyle(fontWeight: FontWeight.w700),
               decoration: deco('Buscar producto o documento').copyWith(
-                prefixIcon: Icon(Icons.search, color: _textMuted, size: 20),
+                prefixIcon: const Icon(Icons.search, color: _textMuted, size: 20),
                 labelText: null,
                 hintText: 'Buscar producto o documento',
                 hintStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -1387,7 +1387,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               child: InputDecorator(
                 decoration: deco(
                   'Fecha',
-                ).copyWith(suffixIcon: Icon(Icons.calendar_today, size: 16)),
+                ).copyWith(suffixIcon: const Icon(Icons.calendar_today, size: 16)),
                 child: Text(
                   _filtroFecha == null ? '—' : _fmtFecha(_filtroFecha),
                   style: const TextStyle(
@@ -1514,7 +1514,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   horizontal: 14,
                   vertical: 14,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFFF1F5F9),
                   border: Border(
                     bottom: BorderSide(color: _border, width: 1.5),
@@ -1621,7 +1621,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             border: Border(bottom: BorderSide(color: _border)),
           ),
           child: Row(
@@ -1846,7 +1846,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   _pagina = 1;
                 })
               : null,
-          icon: Icon(Icons.keyboard_double_arrow_left),
+          icon: const Icon(Icons.keyboard_double_arrow_left),
           iconSize: 20,
         ),
         IconButton(
@@ -1855,7 +1855,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   _pagina = paginaActual - 1;
                 })
               : null,
-          icon: Icon(Icons.chevron_left),
+          icon: const Icon(Icons.chevron_left),
           iconSize: 20,
         ),
         for (var n = 1; n <= totalPaginas && n <= 5; n++)
@@ -1909,7 +1909,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   _pagina = paginaActual + 1;
                 })
               : null,
-          icon: Icon(Icons.chevron_right),
+          icon: const Icon(Icons.chevron_right),
           iconSize: 20,
         ),
         IconButton(
@@ -1918,7 +1918,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   _pagina = totalPaginas;
                 })
               : null,
-          icon: Icon(Icons.keyboard_double_arrow_right),
+          icon: const Icon(Icons.keyboard_double_arrow_right),
           iconSize: 20,
         ),
         const SizedBox(width: 12),

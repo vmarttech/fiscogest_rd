@@ -167,7 +167,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, color: AppColors.error, size: 48),
+                  const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                   const SizedBox(height: AppSpacing.m),
                   Text(
                     'Error al cargar productos: $error',
@@ -183,7 +183,7 @@ class _VistaInventarioState extends ConsumerState<VistaInventario> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.inventory_2_outlined,
                         size: 64,
                         color: AppColors.grey400,

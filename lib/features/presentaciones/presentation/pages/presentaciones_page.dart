@@ -103,7 +103,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                   color: Color(0xFF1E293B),
                                   fontSize: 13,
                                 ),
-                                prefixIcon: Icon(
+                                prefixIcon: const Icon(
                                   Icons.search_rounded,
                                   size: 20,
                                   color: Color(0xFF1E293B),
@@ -117,13 +117,13 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFFE2E8F0),
                                   ),
                                 ),
@@ -156,7 +156,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                               ),
                               elevation: 0,
                             ),
-                            icon: Icon(Icons.layers_outlined, size: 20),
+                            icon: const Icon(Icons.layers_outlined, size: 20),
                             label: const Text(
                               'Nueva presentación',
                               style: TextStyle(
@@ -186,7 +186,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                             ),
                             elevation: 0,
                           ),
-                          icon: Icon(Icons.layers_outlined, size: 20),
+                          icon: const Icon(Icons.layers_outlined, size: 20),
                           label: const Text(
                             'Nueva presentación',
                             style: TextStyle(fontWeight: FontWeight.w700),
@@ -208,7 +208,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                           color: Color(0xFF1E293B),
                           fontSize: 13,
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
                           color: Color(0xFF1E293B),
                         ),
@@ -220,11 +220,11 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -666,7 +666,7 @@ class _PresentacionCard extends StatelessWidget {
             onPressed: onEdit,
           ),
           IconButton(
-            icon: Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
             onPressed: onDelete,
           ),
         ],

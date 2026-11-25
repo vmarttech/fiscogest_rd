@@ -176,7 +176,7 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
       title: 'EMITIR FACTURA',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -517,7 +517,7 @@ class _PanelEmitir extends StatelessWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Icon(Icons.check, size: 20),
+                : const Icon(Icons.check, size: 20),
             label: Text(emitiendo ? 'Emitiendo…' : 'Emitir $tipoNcf'),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,

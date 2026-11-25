@@ -231,7 +231,7 @@ class _SelectorRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Icon(
+              const Icon(
                 Icons.chevron_right,
                 size: 18,
                 color: AppColors.textSecondary,

@@ -52,16 +52,18 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
 
   Future<void> _cargarDetalles() async {
     if (_compraId == 0) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargandoDetalles = false;
         });
+      }
       return;
     }
-    if (mounted)
+    if (mounted) {
       setState(() {
         _cargandoDetalles = true;
       });
+    }
     try {
       final repoCompra = ref.read(repo.compraRepositoryProvider);
       final lista = await repoCompra.listarDetallesDeCompra(_compraId);
@@ -128,7 +130,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline,
                           size: 48,
                           color: AppColors.error,
@@ -154,7 +156,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.inbox_outlined,
                             size: 48,
                             color: AppColors.grey500,
@@ -780,7 +782,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         if (mounted) {
           FiscoGestNotifications.show(
             SnackBar(
-              content: Text('Compra marcada como Pagada ✅'),
+              content: const Text('Compra marcada como Pagada ✅'),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
@@ -845,7 +847,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         SizedBox(
           width: esPequena ? double.infinity : 160,
           child: ElevatedButton.icon(
-            icon: Icon(Icons.check_circle, size: 18),
+            icon: const Icon(Icons.check_circle, size: 18),
             label: const Text('Confirmar'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
@@ -862,7 +864,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         SizedBox(
           width: esPequena ? double.infinity : 160,
           child: ElevatedButton.icon(
-            icon: Icon(Icons.inventory, size: 18),
+            icon: const Icon(Icons.inventory, size: 18),
             label: const Text('Marcar Recibida'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
@@ -880,7 +882,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         SizedBox(
           width: esPequena ? double.infinity : 160,
           child: ElevatedButton.icon(
-            icon: Icon(Icons.payment, size: 18),
+            icon: const Icon(Icons.payment, size: 18),
             label: const Text('Marcar Pagada'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
@@ -898,11 +900,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         SizedBox(
           width: esPequena ? double.infinity : 160,
           child: OutlinedButton.icon(
-            icon: Icon(Icons.cancel, size: 18),
+            icon: const Icon(Icons.cancel, size: 18),
             label: const Text('Anular'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.error,
-              side: BorderSide(color: AppColors.error),
+              side: const BorderSide(color: AppColors.error),
             ),
             onPressed: ejecutarAnular,
           ),

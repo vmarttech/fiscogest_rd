@@ -291,7 +291,10 @@ class InicioPage extends ConsumerWidget {
     );
   }
 
-  void _mostrarMasAccionesNormal(BuildContext context, WidgetRef ref) {
+  Future<void> _mostrarMasAccionesNormal(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final gates = ref
         .watch(licenciaActualProvider)
         .maybeWhen(
@@ -300,7 +303,7 @@ class InicioPage extends ConsumerWidget {
         );
     final modoCfg = ref.watch(modoSimplificadoProvider);
     final mostrarCredito = !modoCfg && gates.permiteCreditoFormal;
-    showModalBottomSheet<void>(
+    final ruta = await showModalBottomSheet<String>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -335,10 +338,7 @@ class InicioPage extends ConsumerWidget {
                 color: AppColors.textSecondary,
               ),
             ),
-            onTap: () {
-              Navigator.pop(ctx);
-              context.push(route);
-            },
+            onTap: () => Navigator.pop(ctx, route),
           );
         }
 
@@ -390,6 +390,7 @@ class InicioPage extends ConsumerWidget {
         );
       },
     );
+    if (ruta != null && context.mounted) await context.push(ruta);
   }
 }
 
@@ -542,11 +543,11 @@ class _DashboardColmado extends StatelessWidget {
                       ).colorScheme.tertiary.withValues(alpha: 0.95),
                     ],
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: const Color(0x1F0F172A),
+                      color: Color(0x1F0F172A),
                       blurRadius: 14,
-                      offset: const Offset(0, 6),
+                      offset: Offset(0, 6),
                     ),
                   ],
                 ),
@@ -595,7 +596,7 @@ class _DashboardColmado extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon: Icon(Icons.add_shopping_cart_rounded),
+                        icon: const Icon(Icons.add_shopping_cart_rounded),
                         label: const Text(
                           'NUEVA VENTA',
                           style: TextStyle(
@@ -796,11 +797,11 @@ class _HeroBanner extends StatelessWidget {
             Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.95),
           ],
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x240F172A),
+            color: Color(0x240F172A),
             blurRadius: 24,
-            offset: const Offset(0, 12),
+            offset: Offset(0, 12),
           ),
         ],
       ),
@@ -1005,11 +1006,11 @@ class _KpiTile extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.18)),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x0F0F172A),
+            color: Color(0x0F0F172A),
             blurRadius: 12,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -1136,7 +1137,7 @@ class _Acceso extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
+            const Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
               color: AppColors.grey400,
@@ -1577,7 +1578,7 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
                                         onPressed:
                                             s.onAction ??
                                             widget.onNuevaCotizacion,
-                                        icon: Icon(Icons.open_in_new, size: 18),
+                                        icon: const Icon(Icons.open_in_new, size: 18),
                                         label: Text(s.actionLabel),
                                         style: FilledButton.styleFrom(
                                           backgroundColor: Theme.of(
@@ -1718,11 +1719,11 @@ class _ActionBigCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: gradient,
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
-                color: const Color(0x1F0F172A),
+                color: Color(0x1F0F172A),
                 blurRadius: 14,
-                offset: const Offset(0, 6),
+                offset: Offset(0, 6),
               ),
             ],
           ),

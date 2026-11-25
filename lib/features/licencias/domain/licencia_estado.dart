@@ -38,4 +38,11 @@ class LicenciaInfo {
     if (esDesarrollador || fechaFin == null) return null;
     return fechaFin!.difference(DateTime.now()).inDays;
   }
+
+  int? get diasGraciaRestantes {
+    if (esDesarrollador || fechaFin == null) return null;
+    final finGracia = fechaFin!.add(const Duration(days: 3));
+    if (DateTime.now().isAfter(finGracia)) return 0;
+    return finGracia.difference(DateTime.now()).inDays + 1;
+  }
 }

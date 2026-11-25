@@ -74,7 +74,7 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                   height: 48,
                   child: FilledButton.icon(
                     onPressed: () => context.push('/licencia/comprar'),
-                    icon: Icon(Icons.workspace_premium_outlined),
+                    icon: const Icon(Icons.workspace_premium_outlined),
                     label: const Text(
                       'Ver planes y pagar',
                       style: TextStyle(fontWeight: FontWeight.w700),

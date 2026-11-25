@@ -83,7 +83,7 @@ class TarjetaVenta extends StatelessWidget {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.person_outline,
                     size: 15,
                     color: AppColors.textSecondary,

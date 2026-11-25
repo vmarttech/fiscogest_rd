@@ -49,7 +49,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
       // ✅ DECISIÓN: INSERT si es nuevo, UPDATE si ya existe
       if (producto.id == null) {
         // PRODUCTO NUEVO → tope de plan + INSERT
-        await LicenciaLimitesGuard(_db).assertPuedeCrearProducto();
+        await LicenciaLimitesGuard(_db).registrarProductoNuevo();
         final idGenerado = await _db.into(_db.productosTable).insert(companion);
         await _kardexRepo.registrarMovimiento(
           Kardex(
@@ -109,7 +109,7 @@ class ProductoRepositoryImpl implements IProductoRepository {
   Future<bool> eliminarProducto(int id) async {
     final rowsAffected =
         await (_db.update(_db.productosTable)..where((t) => t.id.equals(id)))
-        .write(const ProductosTableCompanion(activo: Value(0)));
+            .write(const ProductosTableCompanion(activo: Value(0)));
     if (rowsAffected > 0) {
       try {
         if (SupabaseConfig.isConfigured && await SupabaseConfig.hayRed()) {

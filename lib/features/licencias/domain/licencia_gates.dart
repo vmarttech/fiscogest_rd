@@ -6,7 +6,7 @@ class LicenciaGates {
 
   final LicenciaInfo? lic;
 
-  String get plan => (lic?.plan ?? 'demo').toLowerCase();
+  String get plan => (lic?.plan ?? 'gratis').toLowerCase();
 
   LimitesPlan get limites => limitesDe(plan);
 
@@ -14,7 +14,7 @@ class LicenciaGates {
 
   bool get puedeEscribir => lic?.puedeEscribir ?? false;
 
-  bool get esDemo => plan == 'demo';
+  bool get esDemo => plan == 'demo' && lic?.estado != 'registro_requerido';
 
   bool get esDesarrollador => lic?.esDesarrollador == true;
 
@@ -52,7 +52,7 @@ class LicenciaGates {
     if (esDesarrollador || esDemo) return true;
     return limites.permiteEcf;
   }
-  
+
   bool get permiteNotifWhatsappFiao {
     if (esDesarrollador || esDemo) return true;
     return limites.notificaPagosFiaoWhatsapp;
@@ -91,10 +91,10 @@ class LicenciaGates {
       return 'Licencia de plataforma · desarrollador autorizado.';
     }
     if (esDemo) {
-      return 'Prueba 30 días · acceso completo · 1 equipo.';
+      return 'Prueba gratuita · 30 días y 3 días de gracia · acceso completo.';
     }
     if (esGratis) {
-      return 'Gratis · 30 ventas/mes · 40 productos · 1 equipo · sin reportes.';
+      return 'Gratis · 15 ventas, 20 productos y 30 clientes al mes.';
     }
     if (plan == 'basico') {
       return 'Esencial · 300 facturas/mes · reportes · fiao c/WhatsApp · 1 equipo.';

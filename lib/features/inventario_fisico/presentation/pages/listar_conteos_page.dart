@@ -90,7 +90,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
               onPressed: () => context.push('/inventario-fisico'),
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
-              icon: Icon(Icons.add_rounded),
+              icon: const Icon(Icons.add_rounded),
               label: const Text(
                 'Nuevo',
                 style: TextStyle(fontWeight: FontWeight.w900),
@@ -172,7 +172,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.inventory_2_outlined,
                               color: Colors.white,
                               size: 24,
@@ -204,7 +204,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                           ),
                           FilledButton.icon(
                             onPressed: () => context.push('/inventario-fisico'),
-                            icon: Icon(Icons.add_rounded, size: 20),
+                            icon: const Icon(Icons.add_rounded, size: 20),
                             label: const Text(
                               'Nuevo conteo',
                               style: TextStyle(fontWeight: FontWeight.w900),
@@ -232,7 +232,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: () => context.push('/inventario-fisico'),
-                          icon: Icon(Icons.add_rounded),
+                          icon: const Icon(Icons.add_rounded),
                           label: const Text(
                             'Nuevo conteo',
                             style: TextStyle(
@@ -396,7 +396,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF94A3B8),
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
                           color: Color(0xFF94A3B8),
                         ),
@@ -408,11 +408,11 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: _border),
+                          borderSide: const BorderSide(color: _border),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: _border),
+                          borderSide: const BorderSide(color: _border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -689,7 +689,7 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
             ],
           ),
         ),

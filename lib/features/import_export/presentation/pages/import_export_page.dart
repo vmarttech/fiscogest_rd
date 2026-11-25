@@ -447,7 +447,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: onRespaldar,
-                  icon: Icon(Icons.backup_outlined, size: 18),
+                  icon: const Icon(Icons.backup_outlined, size: 18),
                   label: const Text('Respaldo completo'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -459,7 +459,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: onProductos,
-                  icon: Icon(Icons.inventory_2_outlined, size: 18),
+                  icon: const Icon(Icons.inventory_2_outlined, size: 18),
                   label: const Text('Productos'),
                   style: FilledButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
@@ -473,7 +473,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: onClientes,
-                  icon: Icon(Icons.people_outline, size: 18),
+                  icon: const Icon(Icons.people_outline, size: 18),
                   label: const Text('Clientes'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -485,7 +485,7 @@ class _ExportCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: onProveedores,
-                  icon: Icon(Icons.business_outlined, size: 18),
+                  icon: const Icon(Icons.business_outlined, size: 18),
                   label: const Text('Proveedores'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -549,7 +549,7 @@ class _ImportCard extends StatelessWidget {
                     color: AppColors.info.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.cloud_upload_outlined,
                     color: AppColors.info,
                     size: 22,
@@ -625,7 +625,7 @@ class _ImportCard extends StatelessWidget {
                       const SizedBox(height: 14),
                       FilledButton.icon(
                         onPressed: onSimular,
-                        icon: Icon(Icons.folder_open, size: 18),
+                        icon: const Icon(Icons.folder_open, size: 18),
                         label: const Text('Elegir archivo CSV'),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.info,
@@ -655,7 +655,7 @@ class _ImportCard extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_circle_outline,
                           size: 18,
                           color: AppColors.success,
@@ -707,7 +707,7 @@ class _ErroresPanel extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
               child: Column(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.check_circle_outline,
                     size: 40,
                     color: AppColors.grey300,
@@ -733,7 +733,7 @@ class _ErroresPanel extends StatelessWidget {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: AppColors.error.withValues(alpha: 0.12),
-                    child: Icon(
+                    child: const Icon(
                       Icons.error_outline,
                       color: AppColors.error,
                       size: 18,

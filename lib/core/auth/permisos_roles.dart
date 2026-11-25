@@ -146,8 +146,9 @@ String? permisoParaRuta(String path) {
     return null; // público
   }
   if (p == '/') return Permiso.dashboardVer;
-  if (p.startsWith('/ventas/cobrar') || p == '/ventas/cobrar')
+  if (p.startsWith('/ventas/cobrar') || p == '/ventas/cobrar') {
     return Permiso.cajaCobrar;
+  }
   if (p.startsWith('/ventas/cobro')) return Permiso.cajaCobrar;
   if (p.startsWith('/ventas/fios')) return Permiso.fiaoUsar;
   if (p.startsWith('/ventas')) return Permiso.ventasCotizar;

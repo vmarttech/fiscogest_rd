@@ -79,10 +79,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         SnackBar(content: Text('RI: $e'), backgroundColor: AppColors.error),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 
@@ -167,10 +168,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 
@@ -274,10 +276,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 
@@ -338,10 +341,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 
@@ -377,10 +381,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 
@@ -417,10 +422,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 
@@ -521,10 +527,11 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _generando = false;
         });
+      }
     }
   }
 

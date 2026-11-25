@@ -545,7 +545,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     const SizedBox(height: 10),
                     TextButton.icon(
                       onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close, color: Colors.white70),
+                      icon: const Icon(Icons.close, color: Colors.white70),
                       label: const Text(
                         'Cancelar',
                         style: TextStyle(
@@ -584,7 +584,7 @@ class _ErrorPanel extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.videocam_off_outlined, color: Colors.white54, size: 48),
+            const Icon(Icons.videocam_off_outlined, color: Colors.white54, size: 48),
             const SizedBox(height: 16),
             Text(
               mensaje,
@@ -598,7 +598,7 @@ class _ErrorPanel extends StatelessWidget {
             const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: onAjustes,
-              icon: Icon(Icons.settings),
+              icon: const Icon(Icons.settings),
               label: const Text('Abrir Ajustes'),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,

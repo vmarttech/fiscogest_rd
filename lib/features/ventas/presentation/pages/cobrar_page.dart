@@ -170,7 +170,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
           ? 'Cuentas por Cobrar — Cliente'
           : 'Cuentas por Cobrar',
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (widget.onVolver != null) {
             widget.onVolver!();
@@ -279,7 +279,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                         decoration: InputDecoration(
                           hintText: 'Buscar nombre, RNC o cédula',
                           isDense: true,
-                          prefixIcon: Icon(Icons.search, size: 20),
+                          prefixIcon: const Icon(Icons.search, size: 20),
                           suffixIcon: _textoBusqueda.isEmpty
                               ? null
                               : IconButton(
@@ -290,7 +290,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                       _textoBusqueda = '';
                                     });
                                   },
-                                  icon: Icon(Icons.clear, size: 18),
+                                  icon: const Icon(Icons.clear, size: 18),
                                 ),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -333,7 +333,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                                   : AppColors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: AppRadius.allM,
-                                side: BorderSide(color: AppColors.border),
+                                side: const BorderSide(color: AppColors.border),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: InkWell(

@@ -3,12 +3,14 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync_policy.dart';
 
 class CajaSync {
   CajaSync(this._db);
   final AppDatabase _db;
 
   Future<void> pushTodos() async {
+    if (!await LicenciaSyncPolicy.puedeSincronizarDatosOperativos(_db)) return;
     if (!SupabaseConfig.isConfigured) return;
     final negocioId = await NegocioLocal.getId();
     if (negocioId == null || negocioId.isEmpty) {
@@ -21,18 +23,18 @@ class CajaSync {
       final payload = sesiones
           .map(
             (s) => <String, dynamic>{
-                'negocio_id': negocioId,
-                'id_local': s.id,
-                'fecha_apertura': s.fechaApertura.toUtc().toIso8601String(),
-                'fondo_inicial': s.fondoInicial,
-                'usuario_id_local': s.usuarioId,
-                'estado': s.estado,
-                'fecha_cierre': s.fechaCierre?.toUtc().toIso8601String(),
-                'saldo_teorico': s.saldoTeorico,
-                'monto_contado': s.montoContado,
-                'diferencia': s.diferencia,
-                'observacion': s.observacion,
-                'updated_at': DateTime.now().toUtc().toIso8601String(),
+              'negocio_id': negocioId,
+              'id_local': s.id,
+              'fecha_apertura': s.fechaApertura.toUtc().toIso8601String(),
+              'fondo_inicial': s.fondoInicial,
+              'usuario_id_local': s.usuarioId,
+              'estado': s.estado,
+              'fecha_cierre': s.fechaCierre?.toUtc().toIso8601String(),
+              'saldo_teorico': s.saldoTeorico,
+              'monto_contado': s.montoContado,
+              'diferencia': s.diferencia,
+              'observacion': s.observacion,
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
             },
           )
           .toList();
@@ -52,19 +54,19 @@ class CajaSync {
     final mPayload = movs
         .map(
           (m) => <String, dynamic>{
-              'negocio_id': negocioId,
-              'id_local': m.id,
-              'tipo': m.tipo.name,
-              'referencia_tipo': m.referenciaTipo.name,
+            'negocio_id': negocioId,
+            'id_local': m.id,
+            'tipo': m.tipo.name,
+            'referencia_tipo': m.referenciaTipo.name,
             'referencia_id': (m.referenciaId.abs() > 2147483647)
                 ? 0
                 : m.referenciaId,
-              'monto': m.monto,
-              'forma_pago': m.formaPago.name,
-              'saldo_anterior': m.saldoAnterior,
-              'saldo_nuevo': m.saldoNuevo,
-              'fecha': m.fecha.toUtc().toIso8601String(),
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            'monto': m.monto,
+            'forma_pago': m.formaPago.name,
+            'saldo_anterior': m.saldoAnterior,
+            'saldo_nuevo': m.saldoNuevo,
+            'fecha': m.fecha.toUtc().toIso8601String(),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           },
         )
         .toList();

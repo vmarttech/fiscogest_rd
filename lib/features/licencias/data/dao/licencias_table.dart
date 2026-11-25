@@ -4,7 +4,7 @@ import 'package:drift/drift.dart';
 class LicenciasTable extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  /// demo | basico | profesional | empresa | desarrollador
+  /// gratis | basico | simplificado | pro | aliases históricos
   TextColumn get plan => text()();
 
   /// prueba | mensual | trimestral | semestral | anual | vitalicia
@@ -20,7 +20,7 @@ class LicenciasTable extends Table {
       boolean().withDefault(const Constant(false))();
   BoolColumn get vitalicia => boolean().withDefault(const Constant(false))();
 
-  /// activa | gracia | vencida | no_activada
+  /// activa | gracia | vencida | no_activada | registro_requerido
   TextColumn get estado => text()();
 
   TextColumn get fingerprint => text().nullable()();

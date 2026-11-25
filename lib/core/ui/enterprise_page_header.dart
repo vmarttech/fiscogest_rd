@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/navigation/rutas_principales.dart';
 
 /// Título + subtítulo estilo Dashboard / hub.
 /// [showBack]: flecha "Volver" visible en desktop (AppBar suele estar oculto).
@@ -43,12 +44,14 @@ class EnterprisePageHeader extends StatelessWidget {
     if (onlyDesktop && !AppBreakpoints.isDesktop(context)) {
       return const SizedBox.shrink();
     }
+    final path = GoRouterState.of(context).uri.path;
+    final mostrarVolver = showBack && !esRutaPrincipalApp(path);
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (showBack) ...[
+          if (mostrarVolver) ...[
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(

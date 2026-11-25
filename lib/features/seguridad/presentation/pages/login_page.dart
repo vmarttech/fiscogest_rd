@@ -302,10 +302,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
           if (ok) {
             await LoginPrefs.enableBiometric(username: user, password: pass);
-            if (mounted)
+            if (mounted) {
               setState(() {
                 _bioEnabled = true;
               });
+            }
           }
         }
       } else if (await LoginPrefs.isBiometricEnabled()) {
@@ -362,10 +363,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _error = 'Error: $e';
       });
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
   }
 
@@ -443,10 +445,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _error = 'Error: $e';
       });
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
   }
 

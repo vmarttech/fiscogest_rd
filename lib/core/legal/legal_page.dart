@@ -68,16 +68,18 @@ class _LegalPageState extends State<LegalPage> {
         ..setNavigationDelegate(
           NavigationDelegate(
             onPageStarted: (_) {
-              if (mounted)
+              if (mounted) {
                 setState(() {
                   _isLoading = true;
                 });
+              }
             },
             onPageFinished: (_) {
-              if (mounted)
+              if (mounted) {
                 setState(() {
                   _isLoading = false;
                 });
+              }
             },
           ),
         )

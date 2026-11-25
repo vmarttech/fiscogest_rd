@@ -28,7 +28,7 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     double montoInteresTotal = 0.0,
   }) async {
     final vencimiento = fechaVencimiento ?? _hoy.add(const Duration(days: 30));
-    final saldoPendiente = montoOriginal - montoAbonado;
+    final saldoPendiente = montoOriginal + montoInteresTotal - montoAbonado;
     return await into(cuentasCobrarTable).insert(
       CuentasCobrarTableCompanion.insert(
         clienteId: clienteId,
@@ -120,6 +120,7 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
   Future<int> registrarPago({
     required int cuentaId,
     required double montoPago,
+    required double moraMensual,
     required CobrosTableCompanion cobro,
   }) async {
     return transaction(() async {
@@ -128,11 +129,59 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
       if (montoPago <= 0) {
         throw StateError('El monto del pago debe ser mayor a cero');
       }
-      if (montoPago > cuenta.saldoPendiente + 0.001) {
+      final cuotas = await listarCuotas(cuentaId);
+      final cobrosPrevios = await listarCobros(cuentaId);
+      final totalAbonado = cobrosPrevios.fold<double>(
+        0,
+        (total, cobro) => total + cobro.montoAbonado,
+      );
+      final interesCronograma = cuotas.fold<double>(
+        0,
+        (total, cuota) => total + cuota.montoInteres,
+      );
+      final totalCuotas = cuotas.fold<double>(
+        0,
+        (total, cuota) => total + cuota.monto,
+      );
+      final totalObligacion = totalCuotas > 0
+          ? totalCuotas
+          : cuenta.montoOriginal + cuenta.montoInteresTotal;
+      final abonadoEnCuotas = cuotas.fold<double>(
+        0,
+        (total, cuota) => total + cuota.montoPagado,
+      );
+      final saldoCuotas =
+          (totalObligacion -
+                  (cuotas.isNotEmpty ? abonadoEnCuotas : totalAbonado))
+              .clamp(0.0, double.infinity);
+      await _acumularMoraVencida(cuentaId, moraMensual: moraMensual);
+      final moraPendiente = await _totalMoraPendiente(cuentaId);
+      final saldoActual = saldoCuotas + moraPendiente;
+      await (update(
+        cuentasCobrarTable,
+      )..where((t) => t.id.equals(cuentaId))).write(
+        CuentasCobrarTableCompanion(
+          montoInteresTotal: Value(
+            interesCronograma > cuenta.montoInteresTotal
+                ? interesCronograma
+                : cuenta.montoInteresTotal,
+          ),
+          saldoPendiente: Value(saldoActual),
+        ),
+      );
+      if (montoPago > saldoActual + 0.001) {
         throw StateError('El pago excede el saldo pendiente');
       }
-      final cobroId = await into(cobrosTable).insert(cobro);
-      await aplicarPagoACuotas(cuentaId, montoPago);
+      final moraAplicada = await _aplicarPagoAMora(cuentaId, montoPago);
+      final cobroId = await into(cobrosTable).insert(
+        cobro.copyWith(
+          saldoAnterior: Value(saldoActual),
+          saldoActual: Value(
+            (saldoActual - montoPago).clamp(0.0, double.infinity),
+          ),
+        ),
+      );
+      await aplicarPagoACuotas(cuentaId, montoPago - moraAplicada);
       await actualizarSaldoYEstado(cuentaId);
       return cobroId;
     });
@@ -155,10 +204,27 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
       0.0,
       (sum, c) => sum + c.montoAbonado,
     );
-    final saldoPendiente = (cuenta.montoOriginal - totalAbonado).clamp(
-      0.0,
-      double.infinity,
+    final cuotas = await listarCuotas(cuentaId);
+    final interesCronograma = cuotas.fold<double>(
+      0,
+      (total, cuota) => total + cuota.montoInteres,
     );
+    final totalCuotas = cuotas.fold<double>(
+      0,
+      (total, cuota) => total + cuota.monto,
+    );
+    final totalObligacion = totalCuotas > 0
+        ? totalCuotas
+        : cuenta.montoOriginal + cuenta.montoInteresTotal;
+    final abonadoCuotas = cuotas.fold<double>(
+      0,
+      (total, cuota) => total + cuota.montoPagado,
+    );
+    final saldoCuotas =
+        (totalObligacion - (cuotas.isNotEmpty ? abonadoCuotas : totalAbonado))
+            .clamp(0.0, double.infinity);
+    final moraPendiente = await _totalMoraPendiente(cuentaId);
+    final saldoPendiente = saldoCuotas + moraPendiente;
     CobrarEstado nuevoEstado;
     if (saldoPendiente <= 0.001) {
       nuevoEstado = CobrarEstado.pagado;
@@ -178,10 +244,188 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
       CuentasCobrarTableCompanion(
         montoAbonado: Value(totalAbonado),
         saldoPendiente: Value(saldoPendiente),
+        montoInteresTotal: Value(
+          interesCronograma > cuenta.montoInteresTotal
+              ? interesCronograma
+              : cuenta.montoInteresTotal,
+        ),
         estado: Value(nuevoEstado),
       ),
     );
   }
+
+  Future<Map<int, double>> moraPendientePorCuota(
+    int cuentaId, {
+    required double moraMensual,
+    DateTime? hoy,
+  }) async {
+    final actual = _dia(hoy ?? DateTime.now());
+    final cuotas = await listarCuotas(cuentaId);
+    final diasGracia = await obtenerDiasGraciaMora();
+    if (moraMensual < 0) {
+      throw ArgumentError.value(moraMensual, 'moraMensual');
+    }
+    final ledgerRows = await customSelect(
+      'SELECT cuota_id, monto_generado, monto_pagado, fecha_calculo_ms '
+      'FROM moras_cuotas WHERE cuenta_cobrar_id = ?',
+      variables: [Variable.withInt(cuentaId)],
+    ).get();
+    final ledgerPorCuota = {
+      for (final row in ledgerRows) row.read<int>('cuota_id'): row,
+    };
+    return {
+      for (final cuota in cuotas)
+        cuota.id: _moraPendienteActual(
+          cuota,
+          ledgerPorCuota[cuota.id],
+          moraMensual: moraMensual,
+          diasGracia: diasGracia,
+          hoy: actual,
+        ),
+    };
+  }
+
+  Future<double> obtenerTasaMoraMensual() async {
+    final rows = await customSelect(
+      'SELECT mora_porcentaje FROM parametros_credito_table '
+      'ORDER BY id LIMIT 1',
+    ).get();
+    if (rows.isEmpty) return 0;
+    return rows.first
+        .read<double>('mora_porcentaje')
+        .clamp(0.0, double.infinity);
+  }
+
+  Future<int> obtenerDiasGraciaMora() async {
+    final rows = await customSelect(
+      'SELECT dias_gracia FROM parametros_credito_table ORDER BY id LIMIT 1',
+    ).get();
+    if (rows.isEmpty) return 0;
+    return rows.first.read<int>('dias_gracia').clamp(0, 3650);
+  }
+
+  double _moraPendienteActual(
+    CuotaCuentaData cuota,
+    QueryRow? ledger, {
+    required double moraMensual,
+    required int diasGracia,
+    required DateTime hoy,
+  }) {
+    final saldo = (cuota.monto - cuota.montoPagado).clamp(0.0, double.infinity);
+    final fechaVence = _dia(cuota.fechaVencimiento);
+    final inicioMora = fechaVence.add(Duration(days: diasGracia));
+    if (saldo <= 0.001 || !hoy.isAfter(inicioMora)) return 0;
+    final generado = ledger?.read<double>('monto_generado') ?? 0.0;
+    final pagado = ledger?.read<double>('monto_pagado') ?? 0.0;
+    final fechaBase = ledger == null
+        ? inicioMora
+        : _dia(
+            DateTime.fromMillisecondsSinceEpoch(
+              ledger.read<int>('fecha_calculo_ms'),
+            ),
+          );
+    final dias = hoy.difference(fechaBase).inDays.clamp(0, 1000000);
+    final adicional = moraMensual <= 0 || dias <= 0
+        ? 0.0
+        : _redondearMoneda(saldo * moraMensual / 30 * dias);
+    return _redondearMoneda(
+      (generado - pagado + adicional).clamp(0.0, double.infinity),
+    );
+  }
+
+  Future<void> _acumularMoraVencida(
+    int cuentaId, {
+    required double moraMensual,
+    DateTime? hoy,
+  }) async {
+    final actual = _dia(hoy ?? DateTime.now());
+    final cuotas = await listarCuotas(cuentaId);
+    final diasGracia = await obtenerDiasGraciaMora();
+    for (final cuota in cuotas) {
+      final fechaVence = _dia(cuota.fechaVencimiento);
+      final inicioMora = fechaVence.add(Duration(days: diasGracia));
+      final saldo = (cuota.monto - cuota.montoPagado).clamp(
+        0.0,
+        double.infinity,
+      );
+      if (saldo <= 0.001 || !actual.isAfter(inicioMora)) continue;
+      final rows = await customSelect(
+        'SELECT monto_generado, monto_pagado, fecha_calculo_ms '
+        'FROM moras_cuotas WHERE cuota_id = ?',
+        variables: [Variable.withInt(cuota.id)],
+      ).get();
+      final ledger = rows.isEmpty ? null : rows.first;
+      final fechaBase = ledger == null
+          ? inicioMora
+          : _dia(
+              DateTime.fromMillisecondsSinceEpoch(
+                ledger.read<int>('fecha_calculo_ms'),
+              ),
+            );
+      final dias = actual.difference(fechaBase).inDays.clamp(0, 1000000);
+      final previo = ledger?.read<double>('monto_generado') ?? 0.0;
+      final adicional = moraMensual <= 0 || dias <= 0
+          ? 0.0
+          : _redondearMoneda(saldo * moraMensual / 30 * dias);
+      final generado = _redondearMoneda(previo + adicional);
+      if (generado <= 0.001 && ledger == null) continue;
+      await customStatement(
+        'INSERT INTO moras_cuotas '
+        '(cuenta_cobrar_id, cuota_id, monto_generado, monto_pagado, fecha_calculo_ms) '
+        'VALUES (?, ?, ?, ?, ?) '
+        'ON CONFLICT(cuota_id) DO UPDATE SET '
+        'monto_generado = excluded.monto_generado, '
+        'fecha_calculo_ms = excluded.fecha_calculo_ms',
+        [
+          cuentaId,
+          cuota.id,
+          generado,
+          ledger?.read<double>('monto_pagado') ?? 0.0,
+          actual.millisecondsSinceEpoch,
+        ],
+      );
+    }
+  }
+
+  Future<double> _totalMoraPendiente(int cuentaId) async {
+    final rows = await customSelect(
+      'SELECT COALESCE(SUM(monto_generado - monto_pagado), 0) AS total '
+      'FROM moras_cuotas WHERE cuenta_cobrar_id = ?',
+      variables: [Variable.withInt(cuentaId)],
+    ).get();
+    return rows.first.read<double>('total').clamp(0.0, double.infinity);
+  }
+
+  Future<double> _aplicarPagoAMora(int cuentaId, double monto) async {
+    var restante = monto;
+    var aplicado = 0.0;
+    final rows = await customSelect(
+      'SELECT id, monto_generado, monto_pagado FROM moras_cuotas '
+      'WHERE cuenta_cobrar_id = ? AND monto_generado > monto_pagado '
+      'ORDER BY cuota_id',
+      variables: [Variable.withInt(cuentaId)],
+    ).get();
+    for (final row in rows) {
+      if (restante <= 0.001) break;
+      final pendiente =
+          (row.read<double>('monto_generado') -
+                  row.read<double>('monto_pagado'))
+              .clamp(0.0, double.infinity);
+      final abono = restante >= pendiente ? pendiente : restante;
+      await customStatement(
+        'UPDATE moras_cuotas SET monto_pagado = monto_pagado + ? WHERE id = ?',
+        [abono, row.read<int>('id')],
+      );
+      restante -= abono;
+      aplicado += abono;
+    }
+    return aplicado;
+  }
+
+  DateTime _dia(DateTime fecha) => DateTime(fecha.year, fecha.month, fecha.day);
+
+  double _redondearMoneda(double monto) =>
+      double.parse(monto.toStringAsFixed(2));
 
   Future<double> totalPorCobrar() async {
     final cuentas = await listarCuentas();
@@ -366,6 +610,20 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     return (select(cuotasCuentaTable)
           ..where((t) => t.cuentaCobrarId.equals(cuentaId))
           ..orderBy([(t) => OrderingTerm.asc(t.numero)]))
+        .get();
+  }
+
+  Future<List<CuotaCuentaData>> listarCuotasDeCuentas(
+    Iterable<int> cuentaIds,
+  ) async {
+    final ids = cuentaIds.toList(growable: false);
+    if (ids.isEmpty) return const <CuotaCuentaData>[];
+    return (select(cuotasCuentaTable)
+          ..where((t) => t.cuentaCobrarId.isIn(ids))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.cuentaCobrarId),
+            (t) => OrderingTerm.asc(t.numero),
+          ]))
         .get();
   }
 

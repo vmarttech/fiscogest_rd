@@ -242,7 +242,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                           height: 48,
                           child: ElevatedButton.icon(
                             onPressed: _calcular,
-                            icon: Icon(Icons.play_arrow_rounded),
+                            icon: const Icon(Icons.play_arrow_rounded),
                             label: const Text(
                               'CALCULAR',
                               style: TextStyle(fontWeight: FontWeight.w800),
@@ -282,7 +282,7 @@ class _SimuladorCreditoPageState extends State<SimuladorCreditoPage> {
                             Theme.of(context).colorScheme.primary,
                           ],
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                        borderRadius: const BorderRadius.all(Radius.circular(16)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

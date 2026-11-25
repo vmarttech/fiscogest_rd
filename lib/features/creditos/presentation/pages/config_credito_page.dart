@@ -172,10 +172,11 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 

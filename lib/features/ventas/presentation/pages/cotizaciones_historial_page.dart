@@ -59,7 +59,7 @@ class _CotizacionesHistorialPageState
     return AppScaffold(
       title: 'HISTORIAL DE COTIZACIONES',
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         tooltip: 'Atrás',
         onPressed: () => safeBack(context, fallback: '/ventas'),
       ),
@@ -74,7 +74,7 @@ class _CotizacionesHistorialPageState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                   const SizedBox(height: 12),
                   Text(
                     'Error al cargar cotizaciones:\n$e',
@@ -120,7 +120,7 @@ class _CotizacionesHistorialPageState
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        icon: Icon(Icons.add, size: 20),
+                        icon: const Icon(Icons.add, size: 20),
                         label: const Text('NUEVA COTIZACIÓN'),
                         onPressed: () =>
                             context.push('/ventas/cotizaciones/nueva'),
@@ -235,7 +235,7 @@ class _CotizacionesHistorialPageState
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               children: [
-                Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -254,7 +254,7 @@ class _CotizacionesHistorialPageState
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.grey600),
+                const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.grey600),
                 const SizedBox(width: 6),
                 Text(
                   '${cot.fecha.day.toString().padLeft(2, '0')}/'

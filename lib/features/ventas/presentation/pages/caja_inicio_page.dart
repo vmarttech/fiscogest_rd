@@ -336,7 +336,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Color(0xFFE2E8F0)),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -357,7 +357,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   ),
                 ],
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.point_of_sale_rounded,
                 color: Colors.white,
                 size: 28,
@@ -406,7 +406,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               height: 48,
               child: FilledButton.icon(
                 onPressed: _procesando ? null : _dialogoAbrirCaja,
-                icon: Icon(Icons.lock_open_rounded, size: 18),
+                icon: const Icon(Icons.lock_open_rounded, size: 18),
                 label: Text(
                   _procesando ? 'Abriendo…' : 'Abrir turno',
                   style: const TextStyle(
@@ -471,7 +471,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: Color(0xFFE2E8F0)),
+            side: const BorderSide(color: Color(0xFFE2E8F0)),
           ),
           child: Padding(
             padding: const EdgeInsets.all(18),
@@ -592,7 +592,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Color(0xFFE2E8F0)),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -2021,7 +2021,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
-            icon: Icon(Icons.chat_outlined, size: 18),
+            icon: const Icon(Icons.chat_outlined, size: 18),
             label: const Text('Recibo digital'),
           ),
         ],
@@ -2428,7 +2428,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF0F172A),
-          side: BorderSide(color: Color(0xFF475569), width: 1.3),
+          side: const BorderSide(color: Color(0xFF475569), width: 1.3),
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -2491,7 +2491,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
-                          side: BorderSide(color: Color(0xFFE2E8F0)),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -2959,13 +2959,16 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     } catch (_) {}
     double montoDef = cuenta.saldoPendiente;
     if (acuerdo != null) {
-      montoDef = acuerdo.montoLiquidacion;
+      montoDef = acuerdo.montoLiquidacion + cuenta.moraCalculada;
     } else {
       final plan = cuenta.planPago;
       if (plan != null && plan.cuotas.isNotEmpty) {
         final pend = plan.cuotas.where((q) => !q.pagada).toList();
         if (pend.isNotEmpty) {
-          montoDef = pend.first.montoTotal;
+          final cuota = pend.first;
+          montoDef =
+              cuenta.saldoPendienteCuota(cuota) +
+              cuenta.moraEstimadaCuota(cuota, moraMensual: 0);
         } else if (plan.montoPorCuota > 0) {
           montoDef = plan.montoPorCuota;
         }
@@ -3737,7 +3740,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.receipt_long, size: 16, color: Color(0xFF5EEAD4)),
+              const Icon(
+                Icons.receipt_long,
+                size: 16,
+                color: Color(0xFF5EEAD4),
+              ),
               const SizedBox(width: 6),
               Text(
                 'VISTA PREVIA · EN VIVO',
@@ -4205,13 +4212,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     if (_modoBusquedaCol == 'producto')
                       IconButton(
                         tooltip: 'Escanear código de barras',
-                        icon: Icon(Icons.qr_code_scanner),
+                        icon: const Icon(Icons.qr_code_scanner),
                         color: const Color(0xFF2563EB),
                         onPressed: _escanearCodigoBarrasCaja,
                       ),
                     IconButton(
                       tooltip: 'Buscar',
-                      icon: Icon(Icons.search),
+                      icon: const Icon(Icons.search),
                       onPressed: () {
                         if (_modoBusquedaCol == 'producto') {
                           _buscarProductoCaja(desdeEnter: true);
@@ -4374,32 +4381,35 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (ctx, i) {
                       final v = _resultadosBusqueda[i];
-                      return ListTile(
-                        dense: true,
-                        textColor: const Color(0xFF0F172A),
-                        iconColor: const Color(0xFF0F172A),
-                        title: Text(
-                          v.numeroCotizacion,
-                          style: const TextStyle(
-                            color: Color(0xFF0F172A),
-                            fontWeight: FontWeight.w700,
+                      return Material(
+                        color: Colors.white,
+                        child: ListTile(
+                          dense: true,
+                          textColor: const Color(0xFF0F172A),
+                          iconColor: const Color(0xFF0F172A),
+                          title: Text(
+                            v.numeroCotizacion,
+                            style: const TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        subtitle: Text(
-                          v.nombreCliente ?? 'Consumidor Final',
-                          style: const TextStyle(
-                            color: Color(0xFF1E293B),
-                            fontWeight: FontWeight.w700,
+                          subtitle: Text(
+                            v.nombreCliente ?? 'Consumidor Final',
+                            style: const TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        trailing: Text(
-                          formatRd(v.montoTotal),
-                          style: const TextStyle(
-                            color: Color(0xFF0F172A),
-                            fontWeight: FontWeight.w700,
+                          trailing: Text(
+                            formatRd(v.montoTotal),
+                            style: const TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
+                          onTap: () => _seleccionarTicket(v),
                         ),
-                        onTap: () => _seleccionarTicket(v),
                       );
                     },
                   )
@@ -4561,7 +4571,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                   final sel = cq.numeroCuota == q.numero;
                                   return InkWell(
                                     onTap: () {
-                                      final m = cq.montoTotal;
+                                      final m =
+                                          c.saldoPendienteCuota(cq) +
+                                          c.moraEstimadaCuota(
+                                            cq,
+                                            moraMensual: 0,
+                                          );
                                       _cxcMontoCtrl.text = m.toStringAsFixed(2);
                                       _recibidoCtrl.text = m.toStringAsFixed(2);
                                       setState(() {});
@@ -4727,13 +4742,26 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           ),
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
             ),
             child: Column(
               children: [
                 if (_cxcActiva != null) ...[
-                  _posTotRow('Saldo CxC', formatRd(_cxcActiva!.saldoPendiente)),
+                  _posTotRow(
+                    'Capital e interés',
+                    formatRd(_cxcActiva!.saldoCuotasPendiente),
+                  ),
+                  if (_cxcActiva!.moraCalculada > 0.001)
+                    _posTotRow(
+                      'Mora incluida',
+                      formatRd(_cxcActiva!.moraCalculada),
+                    ),
+                  _posTotRow(
+                    'Saldo total CxC',
+                    formatRd(_cxcActiva!.saldoPendiente),
+                    bold: true,
+                  ),
                   const Divider(height: 14),
                   _posTotRow(
                     'A ABONAR',
@@ -4921,7 +4949,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             minWidth: 32,
                             minHeight: 32,
                           ),
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.delete_outline,
                             size: 18,
                             color: Color(0xFFDC2626),
@@ -5256,7 +5284,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       fillColor: const Color(0xFFF1F5F9),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF1E293B)),
+                        borderSide: const BorderSide(color: Color(0xFF1E293B)),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -5426,7 +5454,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 fillColor: Colors.white,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFF1E293B),
                                     width: 2,
                                   ),
@@ -5535,7 +5563,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF334155),
                             backgroundColor: Colors.white,
-                            side: BorderSide(color: Color(0xFF1E293B)),
+                            side: const BorderSide(color: Color(0xFF1E293B)),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
                               vertical: 6,
@@ -5561,7 +5589,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               height: 56,
               child: FilledButton.icon(
                 onPressed: _irCobrarTicketSeleccionado,
-                icon: Icon(Icons.check_circle_outline, size: 22),
+                icon: const Icon(Icons.check_circle_outline, size: 22),
                 label: const Text(
                   'PROCESAR Y COBRAR (F12)',
                   style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
@@ -5688,7 +5716,7 @@ class _CajaOpTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.grey400,
                 size: 22,

@@ -1,0 +1,1277 @@
+### 0. Raíz y estado
+/home/martin/fiscogest_rd
+ M lib/core/auth/permisos_roles.dart
+ M lib/core/legal/legal_page.dart
+ M lib/core/navigation/app_router.dart
+ M lib/core/presentation/pages/inicio_page.dart
+ M lib/core/presentation/widgets/app_shell.dart
+ M lib/core/sync/supabase/emitir_token.dart
+ M lib/core/sync/supabase/supabase_rest_client.dart
+ M lib/core/ui/app_dashboard_hero.dart
+ M lib/core/ui/app_dropdown.dart
+ M lib/core/ui/app_scaffold.dart
+ M lib/core/ui/app_textfield.dart
+ M lib/core/ui/scanner/barcode_scanner_page.dart
+ M lib/features/ajustes_inventario/presentation/pages/lista_ajustes_page.dart
+ M lib/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart
+ M lib/features/almacenes/presentation/widgets/plan_requerido.dart
+ M lib/features/categorias/presentation/pages/categorias_page.dart
+ M lib/features/clientes/presentation/pages/clientes_gestion_page.dart
+ M lib/features/clientes/presentation/pages/clientes_page.dart
+ M lib/features/clientes/presentation/pages/nuevo_cliente_page.dart
+ M lib/features/clientes/presentation/widgets/seleccionar_cliente_dialog.dart
+--- archivos del módulo campanas:
+campana_oferta_notifier.dart
+campana_oferta_notifier.dart.bak6
+campana_pendiente_aplicador.dart
+campana_pendiente_aplicador.dart.bak7
+campana_pendiente_store.dart
+campanas_remote.dart
+campanas_remote.dart.bak
+campanas_remote.dart.bak7
+oferta_reserva_pago_store.dart
+admin_campana_form_page.dart
+admin_campana_form_page.dart.bak5
+admin_campanas_page.dart
+admin_campanas_page.dart.bak5
+ofertas_disponibles_page.dart
+ofertas_disponibles_page.dart.bak7
+ofertas_disponibles_page.dart.bak8
+--- archivos del módulo notificaciones:
+alertas_leidas_store.dart
+avisos_remote.dart
+campana_notificaciones.dart
+campana_notificaciones.dart.bak
+campana_notificaciones.dart.bak6
+notificaciones_provider.dart
+pages
+providers
+
+### A. Referencias a las RPC y al notificador
+--- admin_enviar_aviso:
+lib/features/notificaciones/data/avisos_remote.dart
+lib/features/campanas/data/campana_oferta_notifier.dart.bak6
+lib/features/campanas/data/campana_oferta_notifier.dart
+lib/core/navigation/app_router.dart
+--- listar_campanas_vigentes:
+lib/features/campanas/data/campanas_remote.dart.bak
+lib/features/campanas/data/campanas_remote.dart.bak7
+lib/features/campanas/data/campanas_remote.dart
+--- CampanaOfertaNotifier / anunciarCreacion / anunciarActivacion:
+lib/features/campanas/presentation/pages/admin_campana_form_page.dart
+lib/features/campanas/presentation/pages/admin_campanas_page.dart
+lib/features/campanas/data/campana_oferta_notifier.dart.bak6
+lib/features/campanas/data/campana_oferta_notifier.dart
+
+### B. campana_oferta_notifier.dart (completo)
+     1	// [CAMPANAS_FASE1] Avisa a los negocios elegibles cuando una campaña nace o
+     2	// se reactiva. Reusa AvisosRemote (RPC admin_enviar_aviso, tipo 'oferta') para
+     3	// que la campana del top bar y el listado de avisos muestren la novedad.
+     4	import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
+     5	import 'package:fiscogest_rd/features/notificaciones/data/avisos_remote.dart';
+     6	
+     7	class CampanaOfertaNotifier {
+     8	  CampanaOfertaNotifier._();
+     9	
+    10	  static final AvisosRemote _api = AvisosRemote();
+    11	
+    12	  /// Las 'nuevas_cuentas' aun no existen como negocio al crearse la campana;
+    13	  /// su descubrimiento es el selector del alta (setup_cuenta_page).
+    14	  static bool _debeAvisar(String segmento) => segmento != 'nuevas_cuentas';
+    15	
+    16	  static Future<void> anunciarCreacion({
+    17	    required String nombre,
+    18	    required String descripcion,
+    19	    required String tipo,
+    20	    required String valor,
+    21	    required String segmento,
+    22	    String? planAplicar,
+    23	  }) async {
+    24	    if (!_debeAvisar(segmento)) return;
+    25	    final esPlan = segmento == 'plan_especifico';
+    26	    final cuerpo = descripcion.trim().isNotEmpty
+    27	        ? descripcion.trim()
+    28	        : 'Nueva oferta disponible (${_tipoTxt(tipo)}: $valor). '
+    29	            'Entra en "Ofertas disponibles" para aprovecharla.';
+    30	    await _enviar(
+    31	      titulo: 'Nueva oferta: $nombre',
+    32	      mensaje: cuerpo,
+    33	      segmento: esPlan ? 'plan' : 'todos',
+    34	      plan: esPlan ? planAplicar : null,
+    35	    );
+    36	  }
+    37	
+    38	  static Future<void> anunciarActivacion(CampanaPromocional c) async {
+    39	    if (!c.activa || !_debeAvisar(c.segmentoObjetivo)) return;
+    40	    final esPlan = c.segmentoObjetivo == 'plan_especifico';
+    41	    final cuerpo = c.descripcion.isNotEmpty
+    42	        ? c.descripcion
+    43	        : 'Ya disponible (${c.tipoEtiqueta}: ${c.valor}). '
+    44	            'Entra en "Ofertas disponibles" para aprovecharla.';
+    45	    await _enviar(
+    46	      titulo: 'Oferta activa: ${c.nombre}',
+    47	      mensaje: cuerpo,
+    48	      segmento: esPlan ? 'plan' : 'todos',
+    49	      plan: esPlan ? c.planAplicar : null,
+    50	    );
+    51	  }
+    52	
+    53	  static Future<void> _enviar({
+    54	    required String titulo,
+    55	    required String mensaje,
+    56	    required String segmento,
+    57	    String? plan,
+    58	  }) async {
+    59	    try {
+    60	      await _api.enviar(
+    61	        tipo: 'oferta',
+    62	        titulo: titulo,
+    63	        mensaje: mensaje,
+    64	        segmento: segmento,
+    65	        plan: plan,
+    66	        prioridad: 'normal',
+    67	      );
+    68	    } catch (_) {
+    69	      // El aviso nunca debe bloquear crear/activar la campana.
+    70	    }
+    71	  }
+    72	
+    73	  static String _tipoTxt(String t) => switch (t) {
+    74	        'descuento' => 'descuento',
+    75	        'meses_gratis' => 'meses gratis',
+    76	        'cuentas_gratis' => 'cuentas gratis',
+    77	        _ => 'beneficio',
+    78	      };
+    79	}
+
+### C. campanas_remote.dart (completo)
+     1	// [CAMPANAS_FASE1] Cliente RPC de campañas promocionales.
+     2	import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+     3	import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
+     4	
+     5	class CampanasRemote {
+     6	  CampanasRemote([SupabaseRestClient? api]) : _api = api ?? SupabaseRestClient();
+     7	  final SupabaseRestClient _api;
+     8	
+     9	  List<CampanaPromocional> _lista(dynamic res) =>
+    10	      (res is List ? res : const [])
+    11	          .whereType<Map>()
+    12	          .map((m) =>
+    13	              CampanaPromocional.fromJson(Map<String, dynamic>.from(m)))
+    14	          .toList(growable: false);
+    15	
+    16	  /// Panel del dueño: todas las campañas (vigentes, próximas, vencidas, pausadas).
+    17	  Future<List<CampanaPromocional>> adminListar() async =>
+    18	      _lista(await _api.rpc('admin_listar_campanas', const {}));
+    19	
+    20	  /// Negocios: solo campañas vigentes que deben mostrarse.
+    21	  Future<List<CampanaPromocional>> vigentes(
+    22	          {bool paraRegistro = false}) async =>
+    23	      _lista(await _api.rpc(
+    24	          'listar_campanas_vigentes', {'p_para_registro': paraRegistro}));
+    25	
+    26	  Future<String> crear({
+    27	    required String nombre,
+    28	    String descripcion = '',
+    29	    required String tipo,
+    30	    required String valor,
+    31	    required String segmento,
+    32	    String? planAplicar,
+    33	    required DateTime inicio,
+    34	    required DateTime fin,
+    35	    int? limiteUsos,
+    36	    bool mostrarRegistro = true,
+    37	    bool mostrarPanel = true,
+    38	  }) async {
+    39	    final res = await _api.rpc('admin_crear_campana', {
+    40	      'p_nombre': nombre,
+    41	      'p_descripcion': descripcion,
+    42	      'p_tipo': tipo,
+    43	      'p_valor': valor,
+    44	      'p_segmento_objetivo': segmento,
+    45	      'p_plan_aplicar': segmento == 'plan_especifico' ? planAplicar : null,
+    46	      'p_fecha_inicio': inicio.toUtc().toIso8601String(),
+    47	      'p_fecha_fin': fin.toUtc().toIso8601String(),
+    48	      'p_limite_usos_total': limiteUsos,
+    49	      'p_mostrar_en_registro': mostrarRegistro,
+    50	      'p_mostrar_en_panel': mostrarPanel,
+    51	    });
+    52	    return '$res';
+    53	  }
+    54	
+    55	  Future<void> alternar(String campanaId, bool activa) =>
+    56	      _api.rpc('admin_alternar_campana', {'p_id': campanaId, 'p_activa': activa});
+    57	
+    58	  static Map<String, dynamic> parseAplicado(dynamic res) {
+    59	    if (res is Map) return Map<String, dynamic>.from(res);
+    60	    if (res == true) return {'aplicado': true};
+    61	    return {'aplicado': false, 'razon': 'RESPUESTA_INVALIDA'};
+    62	  }
+    63	
+    64	  Future<Map<String, dynamic>> aplicar(String campanaId) async {
+    65	    final res = await _api.rpc(
+    66	        'negocio_aplicar_campana', {'p_campana_id': campanaId});
+    67	    return parseAplicado(res);
+    68	  }
+    69	
+    70	  /// IDs de campañas ya aprovechadas por el negocio del usuario.
+    71	  Future<Set<String>> misUsos() async {
+    72	    final res = await _api.rpc('mis_campanas_aplicadas', const {});
+    73	    if (res is List) {
+    74	      return res
+    75	          .whereType<Map>()
+    76	          .map((m) => '${m['campana_id'] ?? ''}')
+    77	          .where((e) => e.isNotEmpty)
+    78	          .toSet();
+    79	    }
+    80	    return const {};
+    81	  }
+    82	}
+
+### D. Definición de AvisosRemote (archivo localizado por clase)
+archivo: lib/features/notificaciones/data/avisos_remote.dart
+     1	// [AVISOS_FASE1] Cliente RPC de avisos (sin service key en el cliente).
+     2	import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+     3	import 'package:fiscogest_rd/features/notificaciones/domain/aviso_remoto.dart';
+     4	
+     5	class AvisosRemote {
+     6	  AvisosRemote({SupabaseRestClient? client})
+     7	      : _client = client ?? SupabaseRestClient();
+     8	
+     9	  final SupabaseRestClient _client;
+    10	
+    11	  List<AvisoRemoto> _filas(dynamic res) {
+    12	    if (res is List) {
+    13	      return res
+    14	          .whereType<Map>()
+    15	          .map((m) => AvisoRemoto.fromJson(Map<String, dynamic>.from(m)))
+    16	          .toList();
+    17	    }
+    18	    if (res is Map && res['data'] is List) {
+    19	      final data = res['data'] as List;
+    20	      return data
+    21	          .whereType<Map>()
+    22	          .map((m) => AvisoRemoto.fromJson(Map<String, dynamic>.from(m)))
+    23	          .toList();
+    24	    }
+    25	    return const [];
+    26	  }
+    27	
+    28	  Future<List<AvisoRemoto>> listar({bool soloNoLeidos = false}) async {
+    29	    final res = await _client.rpc(
+    30	      'avisos_listar',
+    31	      {'p_solo_no_leidos': soloNoLeidos},
+    32	    );
+    33	    return _filas(res);
+    34	  }
+    35	
+    36	  Future<int> noLeidos() async {
+    37	    final res = await _client.rpc('avisos_no_leidos', const {});
+    38	    if (res is num) return res.toInt();
+    39	    if (res is String) return int.tryParse(res) ?? 0;
+    40	    return 0;
+    41	  }
+    42	
+    43	  Future<bool> marcarLeido(String avisoId) async {
+    44	    final res = await _client.rpc(
+    45	      'aviso_marcar_leido',
+    46	      {'p_aviso_id': avisoId},
+    47	    );
+    48	    return res == true;
+    49	  }
+    50	
+    51	  Future<int> marcarTodosLeidos() async {
+    52	    final res = await _client.rpc('aviso_marcar_todos_leidos', const {});
+    53	    if (res is num) return res.toInt();
+    54	    return 0;
+    55	  }
+    56	
+    57	  /// Solo administradores; la autorización real está en admin_enviar_aviso (42501 si no).
+    58	  Future<int> enviar({
+    59	    required String tipo,
+    60	    required String titulo,
+    61	    required String mensaje,
+    62	    String segmento = 'todos',
+    63	    String? negocioId,
+    64	    String? plan,
+    65	    String prioridad = 'normal',
+    66	  }) async {
+    67	    final res = await _client.rpc('admin_enviar_aviso', {
+    68	      'p_tipo': tipo,
+    69	      'p_titulo': titulo,
+    70	      'p_mensaje': mensaje,
+    71	      'p_segmento': segmento,
+    72	      'p_negocio_id': negocioId,
+    73	      'p_plan': plan,
+    74	      'p_prioridad': prioridad,
+    75	    });
+    76	    if (res is num) return res.toInt();
+    77	    return 0;
+    78	  }
+    79	}
+
+### E. Call sites reales del notificador
+lib/features/campanas/presentation/pages/admin_campana_form_page.dart:103:        await CampanaOfertaNotifier.anunciarCreacion(
+lib/features/campanas/presentation/pages/admin_campanas_page.dart:126:                      await CampanaOfertaNotifier.anunciarActivacion(campana);
+lib/features/campanas/data/campana_oferta_notifier.dart.bak6:7:class CampanaOfertaNotifier {
+lib/features/campanas/data/campana_oferta_notifier.dart.bak6:8:  CampanaOfertaNotifier._();
+lib/features/campanas/data/campana_oferta_notifier.dart.bak6:16:  static Future<void> anunciarCreacion({
+lib/features/campanas/data/campana_oferta_notifier.dart.bak6:37:  static Future<void> anunciarActivacion(CampanaPromocional c) async {
+lib/features/campanas/data/campana_oferta_notifier.dart:7:class CampanaOfertaNotifier {
+lib/features/campanas/data/campana_oferta_notifier.dart:8:  CampanaOfertaNotifier._();
+lib/features/campanas/data/campana_oferta_notifier.dart:16:  static Future<void> anunciarCreacion({
+lib/features/campanas/data/campana_oferta_notifier.dart:38:  static Future<void> anunciarActivacion(CampanaPromocional c) async {
+
+### F. admin_campana_form_page.dart (flujo de creación)
+     1	// [CAMPANAS_FASE1] Formulario de creación de campaña (dueño de plataforma).
+     2	import 'package:flutter/material.dart';
+     3	import 'package:flutter_riverpod/flutter_riverpod.dart';
+     4	import 'package:fiscogest_rd/core/ui/app_colors.dart';
+     5	import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+     6	import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+     7	import 'package:fiscogest_rd/features/campanas/presentation/providers/campanas_providers.dart';
+     8	import 'package:fiscogest_rd/features/campanas/data/campana_oferta_notifier.dart';
+     9	
+    10	class AdminCampanaFormPage extends ConsumerStatefulWidget {
+    11	  const AdminCampanaFormPage({super.key});
+    12	  static const routeName = 'admin-campana-form';
+    13	
+    14	  @override
+    15	  ConsumerState<AdminCampanaFormPage> createState() => _FormState();
+    16	}
+    17	
+    18	class _FormState extends ConsumerState<AdminCampanaFormPage> {
+    19	  final _form = GlobalKey<FormState>();
+    20	  final _nombre = TextEditingController();
+    21	  final _descripcion = TextEditingController();
+    22	  final _valor = TextEditingController();
+    23	  final _limite = TextEditingController();
+    24	
+    25	  String _tipo = 'descuento';
+    26	  String _segmento = 'todos';
+    27	  String _plan = 'gratis';
+    28	  DateTime _inicio = DateTime.now();
+    29	  DateTime _fin = DateTime.now().add(const Duration(days: 30));
+    30	  bool _mostrarRegistro = true;
+    31	  bool _mostrarPanel = true;
+    32	  bool _guardando = false;
+    33	
+    34	  static const _tipos = [
+    35	    ('descuento', 'Descuento'),
+    36	    ('meses_gratis', 'Meses gratis'),
+    37	    ('cuentas_gratis', 'Cuentas gratis'),
+    38	    ('personalizado', 'Personalizado'),
+    39	  ];
+    40	  static const _segmentos = [
+    41	    ('todos', 'Todos los negocios'),
+    42	    ('negocios_activos', 'Negocios activos'),
+    43	    ('plan_especifico', 'Un plan específico'),
+    44	    ('nuevas_cuentas', 'Nuevas cuentas (al registrarse)'),
+    45	  ];
+    46	  static const _planes = [
+    47	    'demo', 'gratis', 'basico', 'simplificado', 'pro', 'profesional', 'empresa',
+    48	  ];
+    49	
+    50	  @override
+    51	  void dispose() {
+    52	    _nombre.dispose();
+    53	    _descripcion.dispose();
+    54	    _valor.dispose();
+    55	    _limite.dispose();
+    56	    super.dispose();
+    57	  }
+    58	
+    59	  Future<void> _elegirFecha({required bool esInicio}) async {
+    60	    final f = await showDatePicker(
+    61	      context: context,
+    62	      initialDate: esInicio ? _inicio : _fin,
+    63	      firstDate: DateTime(2025),
+    64	      lastDate: DateTime(2035),
+    65	    );
+    66	    if (f == null) return;
+    67	    setState(() {
+    68	      if (esInicio) {
+    69	        _inicio = f;
+    70	        if (_fin.isBefore(_inicio)) _fin = _inicio.add(const Duration(days: 1));
+    71	      } else {
+    72	        _fin = f;
+    73	      }
+    74	    });
+    75	  }
+    76	
+    77	  Future<void> _guardar() async {
+    78	    if (!_form.currentState!.validate()) return;
+    79	    if (!_fin.isAfter(_inicio)) {
+    80	      FiscoGestNotifications.show(const SnackBar(
+    81	          content: Text('La fecha de fin debe ser posterior al inicio')));
+    82	      return;
+    83	    }
+    84	    setState(() => _guardando = true);
+    85	    try {
+    86	      await ref.read(campanasRemoteProvider).crear(
+    87	            nombre: _nombre.text.trim(),
+    88	            descripcion: _descripcion.text.trim(),
+    89	            tipo: _tipo,
+    90	            valor: _valor.text.trim(),
+    91	            segmento: _segmento,
+    92	            planAplicar: _segmento == 'plan_especifico' ? _plan : null,
+    93	            inicio: _inicio,
+    94	            fin: _fin,
+    95	            limiteUsos: _limite.text.trim().isEmpty
+    96	                ? null
+    97	                : int.tryParse(_limite.text.trim()),
+    98	            mostrarRegistro: _mostrarRegistro,
+    99	            mostrarPanel: _mostrarPanel,
+   100	          );
+   101	      ref.read(campanasTickProvider.notifier).state++;
+   102	      try {
+   103	        await CampanaOfertaNotifier.anunciarCreacion(
+   104	          nombre: _nombre.text.trim(),
+   105	          descripcion: _descripcion.text.trim(),
+   106	          tipo: _tipo,
+   107	          valor: _valor.text.trim(),
+   108	          segmento: _segmento,
+   109	          planAplicar: _segmento == 'plan_especifico' ? _plan : null,
+   110	        );
+   111	      } catch (_) {}
+   112	      if (mounted) {
+   113	        FiscoGestNotifications.show(
+   114	            const SnackBar(content: Text('Campaña creada')));
+   115	        Navigator.of(context).pop();
+   116	      }
+   117	    } catch (e) {
+   118	      if (mounted) {
+   119	        FiscoGestNotifications.show(
+   120	            SnackBar(content: Text('$e'), backgroundColor: AppColors.error));
+   121	      }
+   122	    } finally {
+   123	      if (mounted) setState(() => _guardando = false);
+   124	    }
+   125	  }
+   126	
+   127	  @override
+   128	  Widget build(BuildContext context) {
+   129	    return AppScaffold(
+   130	      title: 'Nueva campaña / oferta',
+   131	      body: Form(
+   132	        key: _form,
+   133	        child: ListView(
+   134	          padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+   135	          children: [
+   136	            TextFormField(
+   137	              controller: _nombre,
+   138	              decoration: const InputDecoration(
+   139	                  labelText: 'Nombre de la oferta',
+   140	                  hintText: 'Ej. Black Friday 50%'),
+   141	              validator: (v) =>
+   142	                  (v == null || v.trim().isEmpty) ? 'Falta el nombre' : null,
+   143	            ),
+   144	            const SizedBox(height: 12),
+   145	            TextFormField(
+   146	              controller: _descripcion,
+   147	              maxLines: 3,
+   148	              decoration: const InputDecoration(
+   149	                  labelText: 'Descripción (visible para el negocio)'),
+   150	            ),
+   151	            const SizedBox(height: 12),
+   152	            DropdownButtonFormField<String>(
+   153	              initialValue: _tipo,
+   154	              decoration: const InputDecoration(labelText: 'Tipo de beneficio'),
+   155	              items: [
+   156	                for (final t in _tipos)
+   157	                  DropdownMenuItem(value: t.$1, child: Text(t.$2)),
+   158	              ],
+   159	              onChanged: (v) => setState(() => _tipo = v ?? _tipo),
+   160	            ),
+   161	            const SizedBox(height: 12),
+   162	            TextFormField(
+   163	              controller: _valor,
+   164	              decoration: const InputDecoration(
+   165	                  labelText: 'Valor del beneficio',
+   166	                  hintText: 'Ej. 50%, 3 meses, 2 cuentas'),
+   167	              validator: (v) =>
+   168	                  (v == null || v.trim().isEmpty) ? 'Falta el valor' : null,
+   169	            ),
+   170	            const SizedBox(height: 12),
+   171	            DropdownButtonFormField<String>(
+   172	              initialValue: _segmento,
+   173	              decoration: const InputDecoration(labelText: '¿A quién va dirigida?'),
+   174	              items: [
+   175	                for (final s in _segmentos)
+   176	                  DropdownMenuItem(value: s.$1, child: Text(s.$2)),
+   177	              ],
+   178	              onChanged: (v) => setState(() => _segmento = v ?? _segmento),
+   179	            ),
+   180	            if (_segmento == 'plan_especifico') ...[
+   181	              const SizedBox(height: 12),
+   182	              DropdownButtonFormField<String>(
+   183	                initialValue: _plan,
+   184	                decoration: const InputDecoration(labelText: 'Plan destino'),
+   185	                items: [
+   186	                  for (final p in _planes)
+   187	                    DropdownMenuItem(value: p, child: Text(p)),
+   188	                ],
+   189	                onChanged: (v) => setState(() => _plan = v ?? _plan),
+   190	              ),
+   191	            ],
+   192	            const SizedBox(height: 12),
+   193	            ListTile(
+   194	              leading: const Icon(Icons.event_outlined),
+   195	              title: Text('Inicio: ${_fechaTxt(_inicio)}'),
+   196	              onTap: () => _elegirFecha(esInicio: true),
+   197	            ),
+   198	            ListTile(
+   199	              leading: const Icon(Icons.event_busy_outlined),
+   200	              title: Text('Fin: ${_fechaTxt(_fin)}'),
+   201	              onTap: () => _elegirFecha(esInicio: false),
+   202	            ),
+   203	            const SizedBox(height: 8),
+   204	            TextFormField(
+   205	              controller: _limite,
+   206	              keyboardType: TextInputType.number,
+   207	              decoration: const InputDecoration(
+   208	                  labelText: 'Límite de usos (vacío = sin límite)'),
+   209	            ),
+   210	            const SizedBox(height: 8),
+   211	            SwitchListTile(
+   212	              title: const Text('Mostrar en el registro de nuevas cuentas'),
+   213	              value: _mostrarRegistro,
+   214	              onChanged: (v) => setState(() => _mostrarRegistro = v),
+   215	            ),
+   216	            SwitchListTile(
+   217	              title: const Text('Mostrar en el panel de ofertas del negocio'),
+   218	              value: _mostrarPanel,
+   219	              onChanged: (v) => setState(() => _mostrarPanel = v),
+   220	            ),
+   221	            const SizedBox(height: 16),
+   222	            FilledButton.icon(
+   223	              onPressed: _guardando ? null : _guardar,
+   224	              icon: _guardando
+   225	                  ? const CircularProgressIndicator(strokeWidth: 2)
+   226	                  : const Icon(Icons.send_outlined),
+   227	              label: Text(_guardando ? 'Guardando...' : 'Publicar campaña'),
+   228	            ),
+   229	          ],
+   230	        ),
+   231	      ),
+   232	    );
+   233	  }
+   234	}
+   235	
+   236	String _fechaTxt(DateTime d) =>
+   237	    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+### G. admin_campana_page.dart (flujo de activación/alternar)
+NO EXISTE ese archivo
+
+### H. ofertas_disponibles_page.dart (lista visible al usuario)
+     1	// [CAMPANAS_FASE1] Panel del negocio: ofertas vigentes que puede aprovechar.
+     2	import 'package:flutter/material.dart';
+     3	import 'package:flutter_riverpod/flutter_riverpod.dart';
+     4	import 'package:fiscogest_rd/core/ui/app_colors.dart';
+     5	import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
+     6	import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+     7	import 'package:fiscogest_rd/features/licencias/domain/licencia_estado.dart';
+     8	import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+     9	import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
+    10	import 'package:fiscogest_rd/features/campanas/presentation/providers/campanas_providers.dart';
+    11	import 'package:go_router/go_router.dart';
+    12	import 'package:fiscogest_rd/features/campanas/data/oferta_reserva_pago_store.dart';
+    13	
+    14	class OfertasDisponiblesPage extends ConsumerWidget {
+    15	  const OfertasDisponiblesPage({super.key});
+    16	  static const routeName = 'ofertas-disponibles';
+    17	
+    18	  bool _aplica(CampanaPromocional c, LicenciaInfo? lic) {
+    19	    switch (c.segmentoObjetivo) {
+    20	      case 'nuevas_cuentas':
+    21	        return false; // solo en el registro de alta nueva
+    22	      case 'negocios_activos':
+    23	        return lic?.estado == 'activa';
+    24	      case 'plan_especifico':
+    25	        return lic != null &&
+    26	            lic.plan.toLowerCase() == (c.planAplicar ?? '').toLowerCase();
+    27	      default:
+    28	        return true;
+    29	    }
+    30	  }
+    31	
+    32	  @override
+    33	  Widget build(BuildContext context, WidgetRef ref) {
+    34	    final lic = ref.watch(licenciaActualProvider).valueOrNull;
+    35	    final vigentes = ref.watch(campanasVigentesProvider).valueOrNull ??
+    36	        const <CampanaPromocional>[];
+    37	    final aplicadas =
+    38	        ref.watch(misCampanasAplicadasProvider).valueOrNull ?? const <String>{};
+    39	
+    40	    elegibles() => vigentes.where((c) => _aplica(c, lic)).toList();
+    41	
+    42	    return AppScaffold(
+    43	      title: 'Ofertas disponibles',
+    44	      actions: [
+    45	        IconButton(
+    46	          tooltip: 'Actualizar',
+    47	          onPressed: () => ref.read(campanasTickProvider.notifier).state++,
+    48	          icon: const Icon(Icons.refresh),
+    49	        ),
+    50	      ],
+    51	      body: ref.watch(campanasVigentesProvider).when(
+    52	            loading: () => const Center(child: CircularProgressIndicator()),
+    53	            error: (e, _) => Center(
+    54	              child: Column(mainAxisSize: MainAxisSize.min, children: [
+    55	                Text('$e', textAlign: TextAlign.center),
+    56	                const SizedBox(height: 12),
+    57	                ElevatedButton(
+    58	                  onPressed: () =>
+    59	                      ref.read(campanasTickProvider.notifier).state++,
+    60	                  child: const Text('Reintentar'),
+    61	                ),
+    62	              ]),
+    63	            ),
+    64	            data: (_) {
+    65	              final lista = elegibles();
+    66	              if (lista.isEmpty) {
+    67	                return const Center(
+    68	                  child: Text('No hay ofertas aplicables a tu negocio ahora mismo.'),
+    69	                );
+    70	              }
+    71	              return ListView(
+    72	                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+    73	                children: lista.map((c) {
+    74	                  final yaAplicada = aplicadas.contains(c.id);
+    75	                  return Card(
+    76	                    margin: const EdgeInsets.only(bottom: 12),
+    77	                    child: Padding(
+    78	                      padding: const EdgeInsets.all(16),
+    79	                      child: Column(
+    80	                          crossAxisAlignment: CrossAxisAlignment.start,
+    81	                          children: [
+    82	                            Row(children: [
+    83	                              const Icon(Icons.local_offer_outlined, size: 20),
+    84	                              const SizedBox(width: 8),
+    85	                              Expanded(
+    86	                                child: Text(c.nombre,
+    87	                                    style: const TextStyle(
+    88	                                        fontSize: 15,
+    89	                                        fontWeight: FontWeight.w800)),
+    90	                              ),
+    91	                              if (yaAplicada)
+    92	                                const Chip(
+    93	                                  label: Text('Aplicada',
+    94	                                      style: TextStyle(fontSize: 11)),
+    95	                                  backgroundColor: Color(0xFFDBEAFE),
+    96	                                ),
+    97	                            ]),
+    98	                            const SizedBox(height: 8),
+    99	                            Text(
+   100	                                '${c.tipoEtiqueta} · ${c.valor.isEmpty ? '—' : c.valor}',
+   101	                                style: const TextStyle(
+   102	                                    fontSize: 12, fontWeight: FontWeight.w600)),
+   103	                            const SizedBox(height: 4),
+   104	                            Text(c.segmentoEtiqueta,
+   105	                                style: const TextStyle(
+   106	                                    fontSize: 12, color: Color(0xFF64748B))),
+   107	                            if (c.descripcion.isNotEmpty) ...[
+   108	                              const SizedBox(height: 6),
+   109	                              Text(c.descripcion,
+   110	                                  style: const TextStyle(
+   111	                                      fontSize: 12, height: 1.35)),
+   112	                            ],
+   113	                            const SizedBox(height: 8),
+   114	                            Text(
+   115	                                'Vigente hasta ${_fecha(c.fechaFin)}'
+   116	                                '${c.diasRestantes != null ? ' · ${c.diasRestantes} días' : ''}',
+   117	                                style: const TextStyle(
+   118	                                    fontSize: 11, color: Color(0xFF94A3B8))),
+   119	                            const SizedBox(height: 10),
+   120	                            SizedBox(
+   121	                              width: double.infinity,
+   122	                              child: FilledButton.icon(
+   123	                                icon: Icon(yaAplicada
+   124	                                    ? Icons.check_circle_outline
+   125	                                    : Icons.card_giftcard_outlined),
+   126	                                label: Text(yaAplicada
+   127	                                    ? 'Oferta aplicada'
+   128	                                    : 'Aprovechar oferta'),
+   129	                                onPressed: yaAplicada
+   130	                                    ? null
+   131	                                    : () async {
+   132	                                        try {
+   133	                                          await OfertaReservaPagoStore.guardar(
+   134	                                            OfertaReserva(
+   135	                                              campanaId: c.id, titulo: c.nombre,
+   136	                                              valor: c.valor, efectoTipo: c.tipo),
+   137	                                          );
+   138	                                          if (context.mounted) {
+   139	                                            FiscoGestNotifications.show(const SnackBar(
+   140	                                              content: Text(
+   141	                                                  'Oferta reservada. Se aplica al confirmar el pago en Planes y pago.')));
+   142	                                            context.push('/licencia/comprar');
+   143	                                          }
+   144	                                        } catch (e) {
+   145	                                          if (context.mounted) {
+   146	                                            FiscoGestNotifications.show(SnackBar(
+   147	                                                content: Text('$e'),
+   148	                                                backgroundColor: AppColors.error));
+   149	                                          }
+   150	                                        }
+   151	                                      },
+   152	                              ),
+   153	                            ),
+   154	                          ]),
+   155	                    ),
+   156	                  );
+   157	                }).toList(),
+   158	              );
+   159	            },
+   160	          ),
+   161	    );
+   162	  }
+   163	}
+   164	
+   165	String _fecha(DateTime? d) => d == null
+   166	    ? '—'
+   167	    : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+### I. Proveedores y llamadas a vigentes()
+lib/features/campanas/presentation/providers/campanas_providers.dart.bak:19:final campanasVigentesProvider =
+lib/features/campanas/presentation/providers/campanas_providers.dart.bak:22:  return ref.read(campanasRemoteProvider).vigentes();
+lib/features/campanas/presentation/providers/campanas_providers.dart:19:final campanasVigentesProvider =
+lib/features/campanas/presentation/providers/campanas_providers.dart:22:  return ref.read(campanasRemoteProvider).vigentes();
+lib/features/campanas/presentation/providers/campanas_providers.dart:27:final misCampanasAplicadasProvider =
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart:35:    final vigentes = ref.watch(campanasVigentesProvider).valueOrNull ??
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart:38:        ref.watch(misCampanasAplicadasProvider).valueOrNull ?? const <String>{};
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart:51:      body: ref.watch(campanasVigentesProvider).when(
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart.bak8:37:    final vigentes = ref.watch(campanasVigentesProvider).valueOrNull ??
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart.bak8:40:        ref.watch(misCampanasAplicadasProvider).valueOrNull ?? const <String>{};
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart.bak8:53:      body: ref.watch(campanasVigentesProvider).when(
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart.bak7:35:    final vigentes = ref.watch(campanasVigentesProvider).valueOrNull ??
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart.bak7:38:        ref.watch(misCampanasAplicadasProvider).valueOrNull ?? const <String>{};
+lib/features/campanas/presentation/pages/ofertas_disponibles_page.dart.bak7:51:      body: ref.watch(campanasVigentesProvider).when(
+
+### J. Pantalla de notificaciones (manejo de tipo 'oferta')
+archivo: lib/features/notificaciones/presentation/campana_notificaciones.dart
+     1	import 'package:flutter/material.dart';
+     2	import 'package:flutter_riverpod/flutter_riverpod.dart';
+     3	import 'package:go_router/go_router.dart';
+     4	import 'package:fiscogest_rd/features/notificaciones/domain/alerta_operativa.dart';
+     5	import 'package:fiscogest_rd/features/notificaciones/domain/aviso_remoto.dart';
+     6	import 'package:fiscogest_rd/features/notificaciones/presentation/notificaciones_provider.dart';
+     7	import 'package:fiscogest_rd/features/notificaciones/presentation/providers/avisos_provider.dart';
+     8	
+     9	/// Envoltorio para distinguir el valor de un aviso remoto en el menú.
+    10	class _AvisoPayload {
+    11	  const _AvisoPayload(this.aviso);
+    12	  final AvisoRemoto aviso;
+    13	}
+    14	
+    15	IconData _iconoAviso(String tipo) {
+    16	  switch (tipo) {
+    17	    case 'oferta':
+    18	      return Icons.card_giftcard_outlined;
+    19	    case 'vencimiento':
+    20	      return Icons.schedule_outlined;
+    21	    case 'suspension':
+    22	      return Icons.block_outlined;
+    23	    case 'renovacion':
+    24	      return Icons.event_repeat_outlined;
+    25	    case 'sistema':
+    26	      return Icons.info_outline;
+    27	    default:
+    28	      return Icons.campaign_outlined;
+    29	  }
+    30	}
+    31	
+    32	Color _colorAviso(String prioridad) {
+    33	  switch (prioridad) {
+    34	    case 'urgente':
+    35	      return const Color(0xFFDC2626);
+    36	    case 'alta':
+    37	      return const Color(0xFFEA580C);
+    38	    default:
+    39	      return const Color(0xFF2563EB);
+    40	  }
+    41	}
+    42	
+    43	/// Campana del top bar: badge combinado (alertas locales + avisos de plataforma).
+    44	class CampanaNotificaciones extends ConsumerWidget {
+    45	  const CampanaNotificaciones({super.key});
+    46	
+    47	  @override
+    48	  Widget build(BuildContext context, WidgetRef ref) {
+    49	    final async = ref.watch(alertasOperativasProvider);
+    50	    final locales = async.valueOrNull ?? const <AlertaOperativa>[];
+    51	    final remotos = ref.watch(avisosRemotosProvider).valueOrNull ??
+    52	        const <AvisoRemoto>[];
+    53	    final remotosNoLeidos =
+    54	        remotos.where((a) => !a.leido).toList(growable: false);
+    55	    final count = locales.length + remotosNoLeidos.length;
+    56	
+    57	    return IconButton(
+    58	      tooltip: count > 0 ? '$count notificación(es)' : 'Notificaciones',
+    59	      onPressed: () => _abrirPanel(context, ref, locales, remotosNoLeidos),
+    60	      icon: Badge(
+    61	        isLabelVisible: count > 0,
+    62	        label: Text(
+    63	          count > 9 ? '9+' : '$count',
+    64	          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+    65	        ),
+    66	        backgroundColor: const Color(0xFFDC2626),
+    67	        child: Icon(
+    68	          count > 0
+    69	              ? Icons.notifications_active_outlined
+    70	              : Icons.notifications_outlined,
+    71	          size: 22,
+    72	          color: const Color(0xFFCBD5E1),
+    73	        ),
+    74	      ),
+    75	    );
+    76	  }
+    77	
+    78	  Future<void> _abrirPanel(
+    79	    BuildContext context,
+    80	    WidgetRef ref,
+    81	    List<AlertaOperativa> alertas,
+    82	    List<AvisoRemoto> avisos,
+    83	  ) async {
+    84	    final box = context.findRenderObject() as RenderBox?;
+    85	    final overlay =
+    86	        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    87	    if (box == null || overlay == null) return;
+    88	
+    89	    final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
+    90	    final position = RelativeRect.fromLTRB(
+    91	      topLeft.dx - 280 + box.size.width,
+    92	      topLeft.dy + box.size.height,
+    93	      overlay.size.width - topLeft.dx - box.size.width,
+    94	      0,
+    95	    );
+    96	
+    97	    final selected = await showMenu<Object?>(
+    98	      context: context,
+    99	      position: position,
+   100	      elevation: 8,
+   101	      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+   102	      color: Colors.white,
+   103	      constraints: const BoxConstraints(minWidth: 340, maxWidth: 360),
+   104	      items: [
+   105	        PopupMenuItem<Object?>(
+   106	          enabled: false,
+   107	          padding: EdgeInsets.zero,
+   108	          child: _Cabecera(
+   109	            count: alertas.length,
+   110	            onMarcarTodas: alertas.isEmpty
+   111	                ? null
+   112	                : () => Navigator.pop(context, '_marcar_todas_local'),
+   113	          ),
+   114	        ),
+   115	        if (alertas.isEmpty && avisos.isEmpty)
+   116	          PopupMenuItem<Object?>(
+   117	            enabled: false,
+   118	            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+   119	            child: Row(
+   120	              children: [
+   121	                Icon(
+   122	                  Icons.check_circle_outline,
+   123	                  size: 20,
+   124	                  color: Colors.green.shade600,
+   125	                ),
+   126	                const SizedBox(width: 10),
+   127	                const Expanded(
+   128	                  child: Text(
+   129	                    'Todo en orden. Sin notificaciones pendientes.',
+   130	                    style: TextStyle(
+   131	                      fontSize: 13,
+   132	                      color: Color(0xFF64748B),
+   133	                      fontWeight: FontWeight.w500,
+   134	                    ),
+   135	                  ),
+   136	                ),
+   137	              ],
+   138	            ),
+   139	          )
+   140	        else ...[
+   141	          ...alertas.map(
+   142	            (a) => PopupMenuItem<Object?>(
+   143	              value: a,
+   144	              padding: EdgeInsets.zero,
+   145	              child: _ItemAlerta(alerta: a),
+   146	            ),
+   147	          ),
+   148	          PopupMenuItem<Object?>(
+   149	            enabled: false,
+   150	            padding: EdgeInsets.zero,
+   151	            child: _CabeceraAvisos(
+   152	              count: avisos.length,
+   153	              onMarcarTodas: avisos.isEmpty
+   154	                  ? null
+   155	                  : () => Navigator.pop(context, '_marcar_todas_avisos'),
+   156	            ),
+   157	          ),
+   158	          ...avisos.map(
+   159	            (a) => PopupMenuItem<Object?>(
+   160	              value: _AvisoPayload(a),
+   161	              padding: EdgeInsets.zero,
+   162	              child: _ItemAviso(aviso: a),
+   163	            ),
+   164	          ),
+   165	        ],
+   166	        PopupMenuItem<Object?>(
+   167	          enabled: false,
+   168	          padding: EdgeInsets.zero,
+   169	          child: InkWell(
+   170	            onTap: () => Navigator.pop(context, '_refresh'),
+   171	            child: const Padding(
+   172	              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+   173	              child: Row(
+   174	                mainAxisAlignment: MainAxisAlignment.center,
+   175	                children: [
+   176	                  Icon(Icons.refresh, size: 16, color: Color(0xFF2563EB)),
+   177	                  SizedBox(width: 6),
+   178	                  Text(
+   179	                    'Actualizar',
+   180	                    style: TextStyle(
+   181	                      fontSize: 12,
+   182	                      fontWeight: FontWeight.w700,
+   183	                      color: Color(0xFF2563EB),
+   184	                    ),
+   185	                  ),
+   186	                ],
+   187	              ),
+   188	            ),
+   189	          ),
+   190	        ),
+   191	      ],
+   192	    );
+   193	
+   194	    if (!context.mounted) return;
+   195	
+   196	    if (selected == '_marcar_todas_local') {
+   197	      await marcarTodasAlertasLeidas(ref, alertas.map((a) => a.id));
+   198	      invalidarAvisos(ref);
+   199	      return;
+   200	    }
+   201	    if (selected == '_marcar_todas_avisos') {
+   202	      await marcarAvisosTodosLeidos(ref);
+   203	      return;
+   204	    }
+   205	    if (selected == '_refresh') {
+   206	      ref.invalidate(alertasActivasProvider);
+   207	      ref.invalidate(alertasOperativasProvider);
+   208	      invalidarAvisos(ref);
+   209	      return;
+   210	    }
+   211	    if (selected is AlertaOperativa) {
+   212	      await marcarAlertaLeida(ref, selected.id);
+   213	      if (context.mounted) await context.push(selected.ruta);
+   214	      return;
+   215	    }
+   216	    if (selected is _AvisoPayload) {
+   217	      final aviso = selected.aviso;
+   218	      await marcarAvisoLeido(ref, aviso.id);
+   219	      if (!context.mounted) return;
+   220	      if (aviso.tipo == 'oferta') {
+   221	        await context.push('/ofertas-disponibles');
+   222	      } else {
+   223	        _mostrarAviso(context, aviso);
+   224	      }
+   225	    }
+   226	  }
+   227	
+   228	  void _mostrarAviso(BuildContext context, AvisoRemoto a) {
+   229	    showDialog<void>(
+   230	      context: context,
+   231	      builder: (dialogContext) => AlertDialog(
+   232	        title: Text(a.titulo),
+   233	        content: SingleChildScrollView(
+   234	          child: Column(
+   235	            crossAxisAlignment: CrossAxisAlignment.start,
+   236	            mainAxisSize: MainAxisSize.min,
+   237	            children: [
+   238	              Text(
+   239	                '${a.tipoEtiqueta} · Prioridad ${a.prioridadEtiqueta}',
+   240	                style: const TextStyle(
+   241	                  fontSize: 12,
+   242	                  color: Color(0xFF64748B),
+   243	                  fontWeight: FontWeight.w600,
+   244	                ),
+   245	              ),
+   246	              const SizedBox(height: 10),
+   247	              Text(
+   248	                a.mensaje,
+   249	                style: const TextStyle(fontSize: 13, height: 1.4),
+   250	              ),
+   251	            ],
+   252	          ),
+   253	        ),
+   254	        actions: [
+   255	          TextButton(
+   256	            onPressed: () => Navigator.of(dialogContext).pop(),
+   257	            child: const Text('Cerrar'),
+   258	          ),
+   259	        ],
+   260	      ),
+   261	    );
+   262	  }
+   263	}
+   264	
+   265	class _Cabecera extends StatelessWidget {
+   266	  const _Cabecera({required this.count, this.onMarcarTodas});
+   267	  final int count;
+   268	  final VoidCallback? onMarcarTodas;
+   269	
+   270	  @override
+   271	  Widget build(BuildContext context) {
+   272	    return Container(
+   273	      width: double.infinity,
+   274	      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+   275	      decoration: const BoxDecoration(
+   276	        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+   277	      ),
+   278	      child: Row(
+   279	        children: [
+   280	          const Text(
+   281	            'Alertas operativas',
+   282	            style: TextStyle(
+   283	              fontSize: 14,
+   284	              fontWeight: FontWeight.w800,
+   285	              color: Color(0xFF0F172A),
+   286	            ),
+   287	          ),
+   288	          const Spacer(),
+   289	          if (count > 0) ...[
+   290	            Container(
+   291	              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+   292	              decoration: BoxDecoration(
+   293	                color: const Color(0xFFFEE2E2),
+   294	                borderRadius: BorderRadius.circular(999),
+   295	              ),
+   296	              child: Text(
+   297	                '$count',
+   298	                style: const TextStyle(
+   299	                  fontSize: 11,
+   300	                  fontWeight: FontWeight.w800,
+   301	                  color: Color(0xFFDC2626),
+   302	                ),
+   303	              ),
+   304	            ),
+   305	            if (onMarcarTodas != null) ...[
+   306	              const SizedBox(width: 8),
+   307	              TextButton(
+   308	                onPressed: onMarcarTodas,
+   309	                style: TextButton.styleFrom(
+   310	                  padding: const EdgeInsets.symmetric(horizontal: 8),
+   311	                  minimumSize: Size.zero,
+   312	                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+   313	                  foregroundColor: const Color(0xFF2563EB),
+   314	                ),
+   315	                child: const Text(
+   316	                  'Marcar leídas',
+   317	                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+   318	                ),
+   319	              ),
+   320	            ],
+   321	          ],
+   322	        ],
+   323	      ),
+   324	    );
+   325	  }
+   326	}
+   327	
+   328	class _CabeceraAvisos extends StatelessWidget {
+   329	  const _CabeceraAvisos({required this.count, this.onMarcarTodas});
+   330	  final int count;
+   331	  final VoidCallback? onMarcarTodas;
+   332	
+   333	  @override
+   334	  Widget build(BuildContext context) {
+   335	    return Container(
+   336	      width: double.infinity,
+   337	      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+   338	      decoration: const BoxDecoration(
+   339	        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+   340	      ),
+   341	      child: Row(
+   342	        children: [
+   343	          const Icon(Icons.campaign_outlined, size: 15, color: Color(0xFF2563EB)),
+   344	          const SizedBox(width: 6),
+   345	          const Text(
+   346	            'Avisos de plataforma',
+   347	            style: TextStyle(
+   348	              fontSize: 13,
+   349	              fontWeight: FontWeight.w800,
+   350	              color: Color(0xFF0F172A),
+   351	            ),
+   352	          ),
+   353	          const Spacer(),
+   354	          if (count > 0) ...[
+   355	            Container(
+   356	              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+   357	              decoration: BoxDecoration(
+   358	                color: const Color(0xFFDBEAFE),
+   359	                borderRadius: BorderRadius.circular(999),
+   360	              ),
+   361	              child: Text(
+   362	                '$count',
+   363	                style: const TextStyle(
+   364	                  fontSize: 11,
+   365	                  fontWeight: FontWeight.w800,
+   366	                  color: Color(0xFF2563EB),
+   367	                ),
+   368	              ),
+   369	            ),
+   370	            if (onMarcarTodas != null) ...[
+   371	              const SizedBox(width: 8),
+   372	              TextButton(
+   373	                onPressed: onMarcarTodas,
+   374	                style: TextButton.styleFrom(
+   375	                  padding: const EdgeInsets.symmetric(horizontal: 8),
+   376	                  minimumSize: Size.zero,
+   377	                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+   378	                  foregroundColor: const Color(0xFF2563EB),
+   379	                ),
+   380	                child: const Text(
+   381	                  'Marcar todos',
+   382	                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+   383	                ),
+   384	              ),
+   385	            ],
+   386	          ],
+   387	        ],
+   388	      ),
+   389	    );
+   390	  }
+   391	}
+   392	
+   393	class _ItemAlerta extends StatelessWidget {
+   394	  const _ItemAlerta({required this.alerta});
+   395	  final AlertaOperativa alerta;
+   396	
+   397	  @override
+   398	  Widget build(BuildContext context) {
+   399	    return Padding(
+   400	      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+   401	      child: Row(
+   402	        crossAxisAlignment: CrossAxisAlignment.start,
+   403	        children: [
+   404	          Container(
+   405	            width: 36,
+   406	            height: 36,
+   407	            decoration: BoxDecoration(
+   408	              color: alerta.color.withValues(alpha: 0.12),
+   409	              borderRadius: BorderRadius.circular(10),
+   410	            ),
+   411	            child: Icon(alerta.icon, size: 18, color: alerta.color),
+   412	          ),
+   413	          const SizedBox(width: 10),
+   414	          Expanded(
+   415	            child: Column(
+   416	              crossAxisAlignment: CrossAxisAlignment.start,
+   417	              children: [
+   418	                Text(
+   419	                  alerta.titulo,
+   420	                  style: const TextStyle(
+   421	                    fontSize: 13,
+   422	                    fontWeight: FontWeight.w700,
+   423	                    color: Color(0xFF0F172A),
+   424	                  ),
+   425	                ),
+   426	                const SizedBox(height: 2),
+   427	                Text(
+   428	                  alerta.cuerpo,
+   429	                  maxLines: 2,
+   430	                  overflow: TextOverflow.ellipsis,
+   431	                  style: const TextStyle(
+   432	                    fontSize: 12,
+   433	                    color: Color(0xFF64748B),
+   434	                    height: 1.3,
+   435	                  ),
+   436	                ),
+   437	              ],
+   438	            ),
+   439	          ),
+   440	          const Icon(Icons.chevron_right, size: 18, color: Color(0xFF94A3B8)),
+   441	        ],
+   442	      ),
+   443	    );
+   444	  }
+   445	}
+   446	
+   447	class _ItemAviso extends StatelessWidget {
+   448	  const _ItemAviso({required this.aviso});
+   449	  final AvisoRemoto aviso;
+   450	
+   451	  @override
+   452	  Widget build(BuildContext context) {
+   453	    final color = _colorAviso(aviso.prioridad);
+   454	    return Padding(
+   455	      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+   456	      child: Row(
+   457	        crossAxisAlignment: CrossAxisAlignment.start,
+   458	        children: [
+   459	          Container(
+   460	            width: 36,
+   461	            height: 36,
+   462	            decoration: BoxDecoration(
+   463	              color: color.withValues(alpha: 0.12),
+   464	              borderRadius: BorderRadius.circular(10),
+   465	            ),
+   466	            child: Icon(_iconoAviso(aviso.tipo), size: 18, color: color),
+   467	          ),
+   468	          const SizedBox(width: 10),
+   469	          Expanded(
+   470	            child: Column(
+   471	              crossAxisAlignment: CrossAxisAlignment.start,
+   472	              children: [
+   473	                Text(
+   474	                  aviso.titulo,
+   475	                  style: const TextStyle(
+   476	                    fontSize: 13,
+   477	                    fontWeight: FontWeight.w700,
+   478	                    color: Color(0xFF0F172A),
+   479	                  ),
+   480	                ),
+   481	                const SizedBox(height: 2),
+   482	                Text(
+   483	                  aviso.mensaje,
+   484	                  maxLines: 2,
+   485	                  overflow: TextOverflow.ellipsis,
+   486	                  style: const TextStyle(
+   487	                    fontSize: 12,
+   488	                    color: Color(0xFF64748B),
+   489	                    height: 1.3,
+   490	                  ),
+   491	                ),
+   492	              ],
+   493	            ),
+   494	          ),
+   495	          if (!aviso.leido)
+   496	            Container(
+   497	              margin: const EdgeInsets.only(top: 4, right: 4),
+   498	              width: 8,
+   499	              height: 8,
+   500	              decoration: const BoxDecoration(
+   501	                color: Color(0xFFDC2626),
+   502	                shape: BoxShape.circle,
+   503	              ),
+   504	            ),
+   505	          const Icon(Icons.chevron_right, size: 18, color: Color(0xFF94A3B8)),
+   506	        ],
+   507	      ),
+   508	    );
+   509	  }
+   510	}
+
+### K. analyze (solo líneas de error)
+conteo de errores: 0
+warning • 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre. Try replacing the use of the deprecated member with the replacement • lib/features/seguridad/presentation/pages/setup_cuenta_page.dart:327:41 • deprecated_member_use
+
+30 issues found. (ran in 18.0s)
+
+### L. tests del módulo campañas
+00:00 +0: /home/martin/fiscogest_rd/test/features/campanas/campana_model_test.dart: mapea campaña vigente de segmento plan_especifico
+00:00 +1: /home/martin/fiscogest_rd/test/features/campanas/campana_model_test.dart: mapea campaña vigente de segmento plan_especifico
+00:00 +2: /home/martin/fiscogest_rd/test/features/campanas/campana_model_test.dart: mapea campaña vigente de segmento plan_especifico
+00:00 +3: /home/martin/fiscogest_rd/test/features/campanas/oferta_reserva_test.dart: OfertaReserva serializa y reconstruye
+00:00 +4: /home/martin/fiscogest_rd/test/features/campanas/campana_model_test.dart: campaña pausada no está vigente
+00:00 +5: All tests passed!

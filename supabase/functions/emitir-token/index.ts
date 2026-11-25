@@ -140,6 +140,33 @@ serve(async (req) => {
       return json({ error: "auth_token", status: tok.status, body: tj }, 502);
     }
 
+    // Dueño de plataforma: registrar/actualizar administradores con service role.
+    if (meta.es_dueno) {
+      try {
+        const uid: string | undefined = tj.user?.id;
+        if (uid) {
+          await fetch(`${url}/rest/v1/administradores`, {
+            method: "POST",
+            headers: {
+              apikey: service,
+              Authorization: `Bearer ${service}`,
+              "Content-Type": "application/json",
+              Prefer: "resolution=merge-duplicates,return=minimal",
+              "on-conflict": "user_id",
+            },
+            body: JSON.stringify({
+              user_id: uid,
+              rol: "owner",
+              activado: true,
+              actualizado_at: new Date().toISOString(),
+            }),
+          });
+        }
+      } catch (syncErr) {
+        console.log("admin_sync_failed", String(syncErr));
+      }
+    }
+
     return json({
       token,
       refresh_token: tj.refresh_token ?? "",

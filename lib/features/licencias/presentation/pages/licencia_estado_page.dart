@@ -29,16 +29,45 @@ class LicenciaEstadoPage extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (lic) {
           if (lic == null) {
-            return const Center(child: Text('Sin licencia'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.verified_user_outlined, size: 42),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'La licencia de este dispositivo está pendiente de validación.',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.h4,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Registra o vincula tu negocio para solicitar la prueba gratuita. La aplicación no concede una prueba automáticamente.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/setup-cuenta'),
+                      icon: const Icon(Icons.person_add_alt_1),
+                      label: const Text('Registrar negocio'),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           final gates = LicenciaGates(lic);
           final sesion = ref.watch(sesionProvider);
           final esDev =
               lic.esDesarrollador && esDuenoPlataforma(sesion?.username);
+          final usoGratis = ref.watch(licenciaUsoGratisProvider);
           final colorEstado = switch (lic.estado) {
             'activa' => Theme.of(context).colorScheme.primary,
             'gracia' => Colors.orange.shade800,
             'vencida' => AppColors.error,
+            'registro_requerido' => AppColors.error,
             _ => AppColors.textSecondary,
           };
 
@@ -63,33 +92,63 @@ class LicenciaEstadoPage extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
 
+              if (gates.esGratis) ...[
+                const _SectionTitle('Uso del plan Gratis este mes'),
+                const SizedBox(height: 10),
+                usoGratis.when(
+                  data: (uso) => _MetricGrid(
+                    children: [
+                      _MetricCard(
+                        icon: Icons.point_of_sale_outlined,
+                        label: 'Ventas',
+                        value: '${uso['ventas'] ?? 0}/15',
+                      ),
+                      _MetricCard(
+                        icon: Icons.inventory_2_outlined,
+                        label: 'Productos registrados',
+                        value: '${uso['productos'] ?? 0}/20',
+                      ),
+                      _MetricCard(
+                        icon: Icons.people_outline,
+                        label: 'Clientes registrados',
+                        value: '${uso['clientes'] ?? 0}/30',
+                      ),
+                    ],
+                  ),
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) =>
+                      const Text('No se pudo cargar el uso mensual.'),
+                ),
+                const SizedBox(height: 16),
+              ],
+
               if (esMovil) ...[
                 _MetricGrid(
                   children: [
-                  _MetricCard(
-                    icon: Icons.event_available_outlined,
-                    label: 'Vigencia',
-                    value: esDev ? 'Vitalicia' : lic.vigenciaTipo,
-                  ),
-                  _MetricCard(
-                    icon: Icons.timer_outlined,
-                    label: esDev ? 'Vence' : 'Días restantes',
-                    value: esDev
-                        ? '—'
-                        : (lic.diasRestantes != null
-                            ? '${lic.diasRestantes}'
-                            : '—'),
-                  ),
-                  _MetricCard(
-                    icon: Icons.devices_outlined,
-                    label: 'Equipos',
-                    value: '${lic.maxDispositivos}',
-                  ),
-                  _MetricCard(
-                    icon: Icons.point_of_sale_outlined,
-                    label: 'Cajas',
-                    value: '${lic.maxCajas}',
-                  ),
+                    _MetricCard(
+                      icon: Icons.event_available_outlined,
+                      label: 'Vigencia',
+                      value: esDev ? 'Vitalicia' : lic.vigenciaTipo,
+                    ),
+                    _MetricCard(
+                      icon: Icons.timer_outlined,
+                      label: esDev ? 'Vence' : 'Días restantes',
+                      value: esDev
+                          ? '—'
+                          : (lic.diasRestantes != null
+                                ? '${lic.diasRestantes}'
+                                : '—'),
+                    ),
+                    _MetricCard(
+                      icon: Icons.devices_outlined,
+                      label: 'Equipos',
+                      value: '${lic.maxDispositivos}',
+                    ),
+                    _MetricCard(
+                      icon: Icons.point_of_sale_outlined,
+                      label: 'Cajas',
+                      value: '${lic.maxCajas}',
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -101,8 +160,8 @@ class LicenciaEstadoPage extends ConsumerWidget {
                       _kv(
                         'Vence',
                         '${lic.fechaFin!.day.toString().padLeft(2, '0')}/'
-                        '${lic.fechaFin!.month.toString().padLeft(2, '0')}/'
-                        '${lic.fechaFin!.year}',
+                            '${lic.fechaFin!.month.toString().padLeft(2, '0')}/'
+                            '${lic.fechaFin!.year}',
                       ),
                     _kv('e-CF', lic.ecfHabilitado ? 'Incluido' : 'No incluido'),
                     if (gates.esSimplificado)
@@ -129,122 +188,124 @@ class LicenciaEstadoPage extends ConsumerWidget {
                               _kv(
                                 'Vence',
                                 '${lic.fechaFin!.day.toString().padLeft(2, '0')}/'
-                                '${lic.fechaFin!.month.toString().padLeft(2, '0')}/'
-                                '${lic.fechaFin!.year}'
-                                '${lic.diasRestantes != null ? '  (${lic.diasRestantes} días)' : ''}',
+                                    '${lic.fechaFin!.month.toString().padLeft(2, '0')}/'
+                                    '${lic.fechaFin!.year}'
+                                    '${lic.diasRestantes != null ? '  (${lic.diasRestantes} días)' : ''}',
                               ),
                             _kv('Máx. equipos', '${lic.maxDispositivos}'),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Dispositivos en este negocio',
-                      style: AppTypography.bodySmall.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Dispositivos en este negocio',
+                              style: AppTypography.bodySmall.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                             ref
                                 .watch(dispositivosListaProvider)
                                 .when(
-                          data: (list) {
-                            if (list.isEmpty) {
-                              return const Text(
-                                'Ningún equipo registrado aún.',
-                                style: AppTypography.bodySmall,
-                              );
-                            }
-                            return Column(
-                              children: [
-                                for (final d in list)
-                                  ListTile(
-                                    dense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      d.tipo == 'movil'
-                                          ? Icons.phone_android
-                                          : Icons.computer,
-                                      color: d.esEsteEquipo
+                                  data: (list) {
+                                    if (list.isEmpty) {
+                                      return const Text(
+                                        'Ningún equipo registrado aún.',
+                                        style: AppTypography.bodySmall,
+                                      );
+                                    }
+                                    return Column(
+                                      children: [
+                                        for (final d in list)
+                                          ListTile(
+                                            dense: true,
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: Icon(
+                                              d.tipo == 'movil'
+                                                  ? Icons.phone_android
+                                                  : Icons.computer,
+                                              color: d.esEsteEquipo
                                                   ? Theme.of(
                                                       context,
                                                     ).colorScheme.primary
-                                          : null,
-                                    ),
-                                    title: Text(
-                                      d.esEsteEquipo
-                                          ? '${d.alias} (este equipo)'
-                                          : d.alias,
-                                    ),
-                                    subtitle: Text(
-                                      '${d.plataforma} · ${d.tipo}'
-                                      '${d.pendienteSync ? ' · pendiente sync' : ''}',
-                                    ),
-                                  ),
-                                Text(
-                                  '${list.length} / ${lic.maxDispositivos} cupos',
-                                  style: AppTypography.bodySmall,
-                                ),
-                              ],
-                            );
-                          },
+                                                  : null,
+                                            ),
+                                            title: Text(
+                                              d.esEsteEquipo
+                                                  ? '${d.alias} (este equipo)'
+                                                  : d.alias,
+                                            ),
+                                            subtitle: Text(
+                                              '${d.plataforma} · ${d.tipo} · '
+                                              '${d.identificacionPersistente ? 'identificación estable' : 'identificación local'} · pendiente de validación'
+                                              '${d.pendienteSync ? ' · pendiente sync' : ''}',
+                                            ),
+                                          ),
+                                        Text(
+                                          '${list.length} / ${lic.maxDispositivos} cupos',
+                                          style: AppTypography.bodySmall,
+                                        ),
+                                      ],
+                                    );
+                                  },
                                   loading: () =>
                                       const LinearProgressIndicator(),
-                          error: (e, _) => Text('Dispositivos: $e'),
-                        ),
+                                  error: (e, _) => Text('Dispositivos: $e'),
+                                ),
 
-                    const SizedBox(height: 12),
-                    Text(
-                      'Dispositivos en este negocio',
-                      style: AppTypography.bodySmall.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Dispositivos en este negocio',
+                              style: AppTypography.bodySmall.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                             ref
                                 .watch(dispositivosListaProvider)
                                 .when(
-                          data: (list) {
-                            if (list.isEmpty) {
-                              return const Text(
-                                'Ningún equipo registrado aún.',
-                                style: AppTypography.bodySmall,
-                              );
-                            }
-                            return Column(
-                              children: [
-                                for (final d in list)
-                                  ListTile(
-                                    dense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      d.tipo == 'movil'
-                                          ? Icons.phone_android
-                                          : Icons.computer,
-                                      color: d.esEsteEquipo
+                                  data: (list) {
+                                    if (list.isEmpty) {
+                                      return const Text(
+                                        'Ningún equipo registrado aún.',
+                                        style: AppTypography.bodySmall,
+                                      );
+                                    }
+                                    return Column(
+                                      children: [
+                                        for (final d in list)
+                                          ListTile(
+                                            dense: true,
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: Icon(
+                                              d.tipo == 'movil'
+                                                  ? Icons.phone_android
+                                                  : Icons.computer,
+                                              color: d.esEsteEquipo
                                                   ? Theme.of(
                                                       context,
                                                     ).colorScheme.primary
-                                          : null,
-                                    ),
-                                    title: Text(
-                                      d.esEsteEquipo
-                                          ? '${d.alias} (este equipo)'
-                                          : d.alias,
-                                    ),
-                                    subtitle: Text(
-                                      '${d.plataforma} · ${d.tipo}'
-                                      '${d.pendienteSync ? ' · pendiente sync' : ''}',
-                                    ),
-                                  ),
-                                Text(
-                                  '${list.length} / ${lic.maxDispositivos} cupos',
-                                  style: AppTypography.bodySmall,
-                                ),
-                              ],
-                            );
-                          },
+                                                  : null,
+                                            ),
+                                            title: Text(
+                                              d.esEsteEquipo
+                                                  ? '${d.alias} (este equipo)'
+                                                  : d.alias,
+                                            ),
+                                            subtitle: Text(
+                                              '${d.plataforma} · ${d.tipo} · '
+                                              '${d.identificacionPersistente ? 'identificación estable' : 'identificación local'} · pendiente de validación'
+                                              '${d.pendienteSync ? ' · pendiente sync' : ''}',
+                                            ),
+                                          ),
+                                        Text(
+                                          '${list.length} / ${lic.maxDispositivos} cupos',
+                                          style: AppTypography.bodySmall,
+                                        ),
+                                      ],
+                                    );
+                                  },
                                   loading: () =>
                                       const LinearProgressIndicator(),
-                          error: (e, _) => Text('Dispositivos: $e'),
-                        ),
+                                  error: (e, _) => Text('Dispositivos: $e'),
+                                ),
                             _kv('Máx. cajas', '${lic.maxCajas}'),
                             _kv(
                               'e-CF',
@@ -262,8 +323,8 @@ class LicenciaEstadoPage extends ConsumerWidget {
                           esDev
                               ? 'Este equipo está autorizado de forma permanente. No requiere código ni pago.'
                               : gates.esSimplificado
-                                  ? 'Plan sin impuestos ni facturación fiscal. Un dispositivo. Pago anual.'
-                                  : 'En modo normal puedes usar 1 celular gratis con las mismas funciones contratadas en la PC.',
+                              ? 'Plan sin impuestos ni facturación fiscal. Un dispositivo. Pago anual.'
+                              : 'En modo normal puedes usar 1 celular gratis con las mismas funciones contratadas en la PC.',
                           style: AppTypography.bodyMedium.copyWith(
                             color: AppColors.textSecondary,
                             height: 1.45,
@@ -289,7 +350,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
                           ? '/licencia/activar'
                           : '/licencia/comprar',
                     ),
-                    icon: Icon(Icons.shopping_cart_outlined),
+                    icon: const Icon(Icons.shopping_cart_outlined),
                     label: Text(
                       storeOcultaCompraTransferencia
                           ? 'Ver planes (activar con código)'
@@ -309,7 +370,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   height: 48,
                   child: OutlinedButton.icon(
                     onPressed: () => context.push('/licencia/activar'),
-                    icon: Icon(Icons.key_outlined),
+                    icon: const Icon(Icons.key_outlined),
                     label: const Text('Activar con código (opcional)'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
@@ -377,11 +438,11 @@ class LicenciaEstadoPage extends ConsumerWidget {
                         }
                       }
                     },
-                    icon: Icon(Icons.cancel_outlined),
+                    icon: const Icon(Icons.cancel_outlined),
                     label: const Text('Cancelar renovación del plan'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFB91C1C),
-                      side: BorderSide(color: Color(0xFFB91C1C)),
+                      side: const BorderSide(color: Color(0xFFB91C1C)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -389,7 +450,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   ),
                 ),
               ],
-                            if (esDuenoPlataforma(ref.watch(sesionProvider)?.username))
+              if (esDuenoPlataforma(ref.watch(sesionProvider)?.username))
                 Center(
                   child: TextButton(
                     onPressed: () => context.push('/licencia/admin'),
@@ -399,11 +460,11 @@ class LicenciaEstadoPage extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 storeOcultaCompraTransferencia
-                    ? 'En esta version de tienda: active con codigo o use el plan gratuito/demo. '
-                      'La compra in-app de la tienda se habilitara cuando este disponible.'
+                    ? 'En esta versión de tienda: active con código o use la prueba gratuita y el plan Gratis. '
+                          'La compra in-app de la tienda se habilitara cuando este disponible.'
                     : 'Planes móviles: Simplificado US\$8.99/mes y Básico US\$15.99/mes con PayPal. '
-                      'Profesional/Empresa: contacte a FiscoGest. '
-                      'No confundir con los cobros del comercio a sus clientes en caja.',
+                          'Profesional/Empresa: contacte a FiscoGest. '
+                          'No confundir con los cobros del comercio a sus clientes en caja.',
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -669,6 +730,14 @@ class _InfoCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(text, style: AppTypography.h4);
 }
 
 class _DesktopPanel extends StatelessWidget {

@@ -284,7 +284,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               ),
             ],
           ),
-          child: Icon(
+          child: const Icon(
             Icons.assignment_outlined,
             color: Colors.white,
             size: 26,
@@ -424,7 +424,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               ? null
               : '${ultimo.nombreConteo} · ${ultimo.estado.etiqueta}',
           trailing: ultimo?.id != null
-              ? Icon(Icons.chevron_right_rounded,
+              ? const Icon(Icons.chevron_right_rounded,
                   color: Color(0xFF94A3B8))
               : null,
           onTap: ultimo?.id == null
@@ -641,7 +641,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                         color: Colors.white,
                       ),
                     )
-                  : Icon(Icons.add_rounded, size: 22),
+                  : const Icon(Icons.add_rounded, size: 22),
               label: Text(
                 _cargando ? 'Creando…' : 'Crear Conteo',
                 style: const TextStyle(
@@ -704,11 +704,11 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: BorderSide(color: _border),
+              borderSide: const BorderSide(color: _border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: BorderSide(color: _border),
+              borderSide: const BorderSide(color: _border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
@@ -888,7 +888,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                 ),
               ),
               if (onTap != null)
-                Icon(Icons.chevron_right,
+                const Icon(Icons.chevron_right,
                     size: 16, color: Color(0xFF94A3B8)),
             ],
           ),

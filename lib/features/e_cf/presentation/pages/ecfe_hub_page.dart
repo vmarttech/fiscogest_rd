@@ -71,7 +71,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Icon(Icons.rule_folder_rounded, size: 23),
+                  child: const Icon(Icons.rule_folder_rounded, size: 23),
                 ),
               ),
             ),
@@ -81,7 +81,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
             padding: const EdgeInsets.only(right: 8),
             child: FilledButton.icon(
               onPressed: () => context.push('/ecfe/spec'),
-              icon: Icon(Icons.rule_folder_rounded, size: 19),
+              icon: const Icon(Icons.rule_folder_rounded, size: 19),
               label: const Text('Especificación'),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -135,7 +135,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
                         ),
                         FilledButton.icon(
                           onPressed: () => context.push('/ecfe/spec'),
-                          icon: Icon(Icons.rule_folder_rounded, size: 19),
+                          icon: const Icon(Icons.rule_folder_rounded, size: 19),
                           label: const Text('Especificación'),
                           style: FilledButton.styleFrom(
                             backgroundColor: Theme.of(
@@ -278,7 +278,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Color(0xFF0F172A),
+                              const Color(0xFF0F172A),
                               Theme.of(context).colorScheme.primary,
                               Theme.of(context).colorScheme.tertiary,
                             ],
@@ -636,7 +636,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.receipt_long_outlined,
                               size: 48,
                               color: AppColors.grey400,
@@ -749,7 +749,7 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                                     ],
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.chevron_right,
                                   color: AppColors.grey400,
                                 ),
@@ -1131,10 +1131,11 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                           DropdownMenuItem(value: a, child: Text(a.etiqueta)),
                       ],
                       onChanged: (v) {
-                        if (v != null)
+                        if (v != null) {
                           setState(() {
                             _ambiente = v;
                           });
+                        }
                       },
                     ),
                     const SizedBox(height: 14),
@@ -1270,7 +1271,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.shield_outlined,
                         color: Color(0xFF008F83),
                         size: 24,
@@ -1433,14 +1434,14 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                     '${s.activo ? '' : ' · INACTIVA'}',
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.edit),
+                    icon: const Icon(Icons.edit),
                     onPressed: () => _editar(context, ref, s),
                   ),
                 ),
               ),
             TextButton.icon(
               onPressed: () => _editar(context, ref, null),
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               label: const Text('Agregar / otro tipo'),
             ),
           ],
@@ -1536,7 +1537,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                             ? 'Sin vencimiento'
                             : 'Vence: ${DateFormat('dd/MM/yyyy').format(venc!)}',
                       ),
-                      trailing: Icon(Icons.calendar_today),
+                      trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final d = await showDatePicker(
                           context: ctx,
@@ -2023,7 +2024,7 @@ class _EcfeAccesoCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: AppColors.grey400),
+              const Icon(Icons.chevron_right, color: AppColors.grey400),
             ],
           ),
         ),

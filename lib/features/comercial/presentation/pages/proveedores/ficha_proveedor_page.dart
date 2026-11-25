@@ -422,7 +422,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 4),
-              Icon(
+              const Icon(
                 Icons.chevron_right,
                 size: 20,
                 color: AppColors.textSecondary,
@@ -510,7 +510,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
-                            icon: Icon(Icons.payments, size: 18),
+                            icon: const Icon(Icons.payments, size: 18),
                             label: const Text('Registrar abono'),
                             style: TextButton.styleFrom(
                               foregroundColor: const Color(0xFF3B82F6),
@@ -546,7 +546,7 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
             ..._pagosRealizados.map((pago) {
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.payments_outlined, size: 22),
+                leading: const Icon(Icons.payments_outlined, size: 22),
                 title: Text(
                   _formatearMonto(pago.monto),
                   style: const TextStyle(fontWeight: FontWeight.w600),

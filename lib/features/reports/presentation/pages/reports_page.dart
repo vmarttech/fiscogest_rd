@@ -98,7 +98,7 @@ class ReportsPage extends StatelessWidget {
                           tooltip: 'Atrás',
                           onPressed: () =>
                               safeBack(context, fallback: '/reports'),
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.arrow_back,
                             color: Color(0xFF0F172A),
                           ),

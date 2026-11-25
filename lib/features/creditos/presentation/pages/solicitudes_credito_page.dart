@@ -89,7 +89,7 @@ class SolicitudesCreditoPage extends ConsumerWidget {
                       alignment: Alignment.topCenter,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxWidth: desktop ? 920 : double.infinity,
+                          maxWidth: desktop ? 1400 : double.infinity,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -124,150 +124,49 @@ class SolicitudesCreditoPage extends ConsumerWidget {
                                         ),
                                       ),
                                     )
-                                  : AppCard(
-                                      padding: EdgeInsets.zero,
-                                      child: RefreshIndicator(
-                                        onRefresh: () async => ref.invalidate(
-                                          solicitudesCreditoProvider,
-                                        ),
-                                        child: ListView.separated(
-                                          itemCount: lista.length,
-                                          separatorBuilder: (_, __) =>
-                                              const Divider(
-                                                height: 1,
-                                                color: AppColors.border,
-                                              ),
-                                          itemBuilder: (_, i) {
-                                            final v = lista[i];
-                                            final pendiente =
-                                                v.estadoDocumento ==
-                                                EstadoDocumento.enCredito;
-                                            return InkWell(
-                                              onTap: () => context.push(
-                                                '/creditos/solicitudes/${v.id}',
-                                              ),
-                                              child: Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: mobile ? 14 : 16,
-                                                  vertical: 12,
+                                  : LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final columns =
+                                            constraints.maxWidth >= 1200
+                                            ? 3
+                                            : constraints.maxWidth >= 680
+                                            ? 2
+                                            : 1;
+                                        return RefreshIndicator(
+                                          onRefresh: () async => ref.invalidate(
+                                            solicitudesCreditoProvider,
+                                          ),
+                                          child: GridView.builder(
+                                            physics:
+                                                const AlwaysScrollableScrollPhysics(),
+                                            padding: const EdgeInsets.only(
+                                              bottom: 12,
+                                            ),
+                                            itemCount: lista.length,
+                                            gridDelegate:
+                                                SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount: columns,
+                                                  crossAxisSpacing: 14,
+                                                  mainAxisSpacing: 14,
+                                                  mainAxisExtent: mobile
+                                                      ? 158
+                                                      : 148,
                                                 ),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            v.numeroCotizacion,
-                                                            style: AppTypography
-                                                                .labelMedium
-                                                                .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w700,
-                                                                  color: AppColors
-                                                                      .textPrimary,
-                                                                ),
-                                                          ),
-                                                          Text(
-                                                            v.nombreCliente?.isNotEmpty ==
-                                                                    true
-                                                                ? v.nombreCliente!
-                                                                : 'Cliente #${v.clienteId}',
-                                                            style: AppTypography
-                                                                .bodySmall
-                                                                .copyWith(
-                                                                  color: AppColors
-                                                                      .grey600,
-                                                                ),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                          if (desktop)
-                                                            Text(
-                                                              _fmtFecha.format(
-                                                                v.fecha,
-                                                              ),
-                                                              style: AppTypography
-                                                                  .bodySmall
-                                                                  .copyWith(
-                                                                    color: AppColors
-                                                                        .textSecondary,
-                                                                    fontSize:
-                                                                        11,
-                                                                  ),
-                                                            ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    if (!desktop)
-                                                      Text(
-                                                        _fmtFecha.format(
-                                                          v.fecha,
-                                                        ),
-                                                        style: AppTypography
-                                                            .bodySmall
-                                                            .copyWith(
-                                                              color: AppColors
-                                                                  .textSecondary,
-                                                              fontSize: 11,
-                                                            ),
-                                                      ),
-                                                    const SizedBox(width: 12),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      children: [
-                                                        Text(
-                                                          formatRd(
-                                                            v.montoTotal,
-                                                          ),
-                                                          style: AppTypography
-                                                              .labelMedium
-                                                              .copyWith(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
-                                                                color: AppColors
-                                                                    .textPrimary,
-                                                              ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 4,
-                                                        ),
-                                                        StatusChip(
-                                                          label: pendiente
-                                                              ? 'EN ANÁLISIS'
-                                                              : v
-                                                                    .estadoDocumento
-                                                                    .name
-                                                                    .toUpperCase(),
-                                                          type: pendiente
-                                                              ? StatusChipType
-                                                                    .warning
-                                                              : StatusChipType
-                                                                    .info,
-                                                          dense: true,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    const Icon(
-                                                      Icons.chevron_right,
-                                                      color: AppColors.grey400,
-                                                    ),
-                                                  ],
+                                            itemBuilder: (context, index) {
+                                              final venta = lista[index];
+                                              return _TarjetaSolicitudCredito(
+                                                venta: venta,
+                                                fecha: _fmtFecha.format(
+                                                  venta.fecha,
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
+                                                onTap: () => context.push(
+                                                  '/creditos/solicitudes/${venta.id}',
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      },
                                     ),
                             ),
                           ],
@@ -280,6 +179,96 @@ class SolicitudesCreditoPage extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _TarjetaSolicitudCredito extends StatelessWidget {
+  const _TarjetaSolicitudCredito({
+    required this.venta,
+    required this.fecha,
+    required this.onTap,
+  });
+
+  final Venta venta;
+  final String fecha;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final enAnalisis = venta.estadoDocumento == EstadoDocumento.enCredito;
+    final cliente = venta.nombreCliente?.trim().isNotEmpty == true
+        ? venta.nombreCliente!.trim()
+        : 'Cliente #${venta.clienteId}';
+
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  venta.numeroCotizacion,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              StatusChip(
+                label: enAnalisis
+                    ? 'EN ANÁLISIS'
+                    : venta.estadoDocumento.name.toUpperCase(),
+                type: enAnalisis ? StatusChipType.warning : StatusChipType.info,
+                dense: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          Text(
+            cliente,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.grey600),
+          ),
+          const Spacer(),
+          const Divider(height: 1, color: AppColors.border),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  fecha,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  formatRd(venta.montoTotal),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right, color: AppColors.grey400),
+            ],
+          ),
+        ],
       ),
     );
   }

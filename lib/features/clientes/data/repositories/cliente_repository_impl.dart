@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/clientes/domain/interfaces/i_cliente_repository.dart';
 import 'package:fiscogest_rd/features/clientes/data/dao/cliente_dao.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
 
 class ClienteRepositoryImpl implements IClienteRepository {
   ClienteRepositoryImpl(this._clienteDao);
@@ -57,7 +58,22 @@ class ClienteRepositoryImpl implements IClienteRepository {
 
   @override
   Future<int> guardarCliente(ClienteEntity cliente) async {
-    return _clienteDao.insertarOActualizar(_mapearTabla(cliente));
+    return _clienteDao.db.transaction(() async {
+      var esNuevo = cliente.id == null;
+      if (!esNuevo) {
+        esNuevo = await _clienteDao.obtenerPorId(cliente.id!) == null;
+      }
+      if (esNuevo) {
+        final porCodigo = await (_clienteDao.select(
+          _clienteDao.clientesTable,
+        )..where((t) => t.codigo.equals(cliente.codigo))).getSingleOrNull();
+        esNuevo = porCodigo == null;
+      }
+      if (esNuevo) {
+        await LicenciaLimitesGuard(_clienteDao.db).registrarClienteNuevo();
+      }
+      return _clienteDao.insertarOActualizar(_mapearTabla(cliente));
+    });
   }
 
   @override

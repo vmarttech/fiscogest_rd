@@ -172,7 +172,7 @@ void main() async {
   await _seedStockAlmacenUnaVez(db);
   await RepositoryInjection.initialize(db);
 
-  // Licencia offline: demo 15 días si no hay fila; limpia pedidos >7 días.
+  // Recupera una licencia concedida y prepara la identidad del dispositivo.
   try {
     final licenciaSvc = LicenciaService(db);
     await licenciaSvc.ensureLicenciaInicial();

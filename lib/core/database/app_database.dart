@@ -134,11 +134,34 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 82;
+  int get schemaVersion => 84;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
+      await m.database.customStatement('''
+        CREATE TABLE IF NOT EXISTS licencia_consumos_mensuales (
+          recurso TEXT NOT NULL,
+          periodo TEXT NOT NULL,
+          cantidad INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (recurso, periodo)
+        );
+      ''');
+      await m.database.customStatement('''
+        CREATE TABLE IF NOT EXISTS moras_cuotas (
+          id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          cuenta_cobrar_id INTEGER NOT NULL REFERENCES cuentas_cobrar_table(id) ON DELETE CASCADE,
+          cuota_id INTEGER NOT NULL REFERENCES cuotas_cuenta_table(id) ON DELETE CASCADE,
+          monto_generado REAL NOT NULL DEFAULT 0,
+          monto_pagado REAL NOT NULL DEFAULT 0,
+          fecha_calculo_ms INTEGER NOT NULL,
+          UNIQUE(cuota_id)
+        );
+      ''');
+      await m.database.customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_moras_cuotas_cuenta '
+        'ON moras_cuotas(cuenta_cobrar_id, cuota_id)',
+      );
 
       await m.database.customStatement('''
         CREATE UNIQUE INDEX IF NOT EXISTS
@@ -178,6 +201,33 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 84) {
+        await m.database.customStatement('''
+          CREATE TABLE IF NOT EXISTS licencia_consumos_mensuales (
+            recurso TEXT NOT NULL,
+            periodo TEXT NOT NULL,
+            cantidad INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY (recurso, periodo)
+          );
+        ''');
+      }
+      if (from < 83) {
+        await m.database.customStatement('''
+          CREATE TABLE IF NOT EXISTS moras_cuotas (
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            cuenta_cobrar_id INTEGER NOT NULL REFERENCES cuentas_cobrar_table(id) ON DELETE CASCADE,
+            cuota_id INTEGER NOT NULL REFERENCES cuotas_cuenta_table(id) ON DELETE CASCADE,
+            monto_generado REAL NOT NULL DEFAULT 0,
+            monto_pagado REAL NOT NULL DEFAULT 0,
+            fecha_calculo_ms INTEGER NOT NULL,
+            UNIQUE(cuota_id)
+          );
+        ''');
+        await m.database.customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_moras_cuotas_cuenta '
+          'ON moras_cuotas(cuenta_cobrar_id, cuota_id)',
+        );
+      }
       if (from < 80) {
         await m.addColumn(productosTable, productosTable.costoPromedio);
       }

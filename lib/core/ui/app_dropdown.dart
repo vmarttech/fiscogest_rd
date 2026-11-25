@@ -61,7 +61,7 @@ class AppDropdown<T> extends StatelessWidget {
         ),
       ),
       isExpanded: isExpanded,
-      icon: Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
+      icon: const Icon(Icons.arrow_drop_down, color: AppColors.grey600, size: 20),
       style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
       items: items,
       onChanged: enabled ? onChanged : null,

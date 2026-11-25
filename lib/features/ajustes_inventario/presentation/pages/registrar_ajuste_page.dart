@@ -79,11 +79,11 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _border),
+        borderSide: const BorderSide(color: _border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _border),
+        borderSide: const BorderSide(color: _border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -180,10 +180,11 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       );
       context.pop();
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 
@@ -199,7 +200,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
       showBackButton: true,
       backgroundColor: _bg,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back_rounded),
+        icon: const Icon(Icons.arrow_back_rounded),
         tooltip: 'Volver',
         onPressed: () {
           if (context.canPop()) {
@@ -397,7 +398,7 @@ class _RegistrarAjustePageState extends ConsumerState<RegistrarAjustePage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : Icon(Icons.save_rounded, size: 20),
+                                  : const Icon(Icons.save_rounded, size: 20),
                               label: Text(
                                 _guardando ? 'Guardando…' : 'Guardar ajuste',
                                 style: const TextStyle(
@@ -556,7 +557,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close_rounded),
+                    icon: const Icon(Icons.close_rounded),
                   ),
                 ],
               ),
@@ -572,7 +573,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF94A3B8),
                   ),
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.search_rounded,
                     color: Color(0xFF94A3B8),
                   ),
@@ -584,11 +585,11 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: _border),
+                    borderSide: const BorderSide(color: _border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: _border),
+                    borderSide: const BorderSide(color: _border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -638,7 +639,7 @@ class _DialogoBusquedaState extends State<_DialogoBusqueda> {
                                 fontSize: 12,
                               ),
                             ),
-                            trailing: Icon(
+                            trailing: const Icon(
                               Icons.chevron_right_rounded,
                               color: Color(0xFF94A3B8),
                             ),

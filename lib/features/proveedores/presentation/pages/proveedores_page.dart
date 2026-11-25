@@ -113,7 +113,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                   color: Color(0xFF1E293B),
                                   fontSize: 13,
                                 ),
-                                prefixIcon: Icon(
+                                prefixIcon: const Icon(
                                   Icons.search_rounded,
                                   size: 20,
                                   color: cMuted,
@@ -127,11 +127,11 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: cBorder),
+                                  borderSide: const BorderSide(color: cBorder),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: cBorder),
+                                  borderSide: const BorderSide(color: cBorder),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -158,7 +158,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                               ),
                               elevation: 0,
                             ),
-                            icon: Icon(Icons.add_rounded, size: 20),
+                            icon: const Icon(Icons.add_rounded, size: 20),
                             label: const Text(
                               'Nuevo Proveedor',
                               style: TextStyle(
@@ -186,7 +186,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             ),
                             elevation: 0,
                           ),
-                          icon: Icon(Icons.add_rounded, size: 20),
+                          icon: const Icon(Icons.add_rounded, size: 20),
                           label: const Text(
                             'Nuevo Proveedor',
                             style: TextStyle(fontWeight: FontWeight.w700),
@@ -205,7 +205,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           color: Color(0xFF1E293B),
                           fontSize: 13,
                         ),
-                        prefixIcon: Icon(Icons.search_rounded, color: cMuted),
+                        prefixIcon: const Icon(Icons.search_rounded, color: cMuted),
                         filled: true,
                         fillColor: cWhite,
                         contentPadding: const EdgeInsets.symmetric(
@@ -214,11 +214,11 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: cBorder),
+                          borderSide: const BorderSide(color: cBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: cBorder),
+                          borderSide: const BorderSide(color: cBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -1053,7 +1053,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             ),
                             IconButton(
                               onPressed: () => Navigator.pop(ctx),
-                              icon: Icon(Icons.close),
+                              icon: const Icon(Icons.close),
                             ),
                           ],
                         ),
@@ -1159,7 +1159,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(ctx),
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
@@ -1333,11 +1333,11 @@ class _ProveedorCardMobile extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onEdit,
-                  icon: Icon(Icons.edit_outlined, size: 16),
+                  icon: const Icon(Icons.edit_outlined, size: 16),
                   label: const Text('Editar'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: cTealDark,
-                    side: BorderSide(color: cBorder),
+                    side: const BorderSide(color: cBorder),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -1352,13 +1352,13 @@ class _ProveedorCardMobile extends StatelessWidget {
                   onPressed: onSettings,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: cMuted,
-                    side: BorderSide(color: cBorder),
+                    side: const BorderSide(color: cBorder),
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Icon(Icons.settings_outlined, size: 18),
+                  child: const Icon(Icons.settings_outlined, size: 18),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1369,13 +1369,13 @@ class _ProveedorCardMobile extends StatelessWidget {
                   onPressed: onDelete,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
-                    side: BorderSide(color: cBorder),
+                    side: const BorderSide(color: cBorder),
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Icon(Icons.delete_outline, size: 18),
+                  child: const Icon(Icons.delete_outline, size: 18),
                 ),
               ),
             ],

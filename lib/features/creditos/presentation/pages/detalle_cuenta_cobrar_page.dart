@@ -210,6 +210,14 @@ class _DetalleCuentaCobrarPageState
     }
   }
 
+  void _volverCuentas() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/creditos/cuentas');
+    }
+  }
+
   Future<void> _dialogoRegistrarPago() async {
     final c = _cuenta;
     if (c == null || c.id == null) return;
@@ -393,16 +401,17 @@ class _DetalleCuentaCobrarPageState
 
   Widget _buildBody(CuentaPorCobrar c) {
     final mobile = AppBreakpoints.isMobile(context);
+    final hoy = DateTime.now();
     final params = ref.watch(parametrosCreditoProvider).valueOrNull;
-    final diasAtraso = c.diasVencido(DateTime.now());
-    final moraEstimada = c.moraEstimada(
-      moraMensual: params?.moraPorcentaje ?? 0.0,
-    );
+    final moraMensual = params?.moraPorcentaje ?? 0.0;
+    final diasAtraso = c.diasVencido(hoy);
+    final moraEstimada = c.moraEstimada(moraMensual: moraMensual);
     final pctPagado = c.totalAPagar > 0
         ? ((c.totalAbonado / c.totalAPagar) * 100).clamp(0.0, 100.0)
         : 0.0;
-    final estadoLabel = c.estado.nombre.toUpperCase();
-    final esAlDia = c.estado == EstadoCredito.alDia || c.estaPagada;
+    final estado = c.estadoActual(hoy: hoy);
+    final estadoLabel = estado.nombre.toUpperCase();
+    final esAlDia = estado == EstadoCredito.alDia || c.estaPagada;
 
     Widget cardShell({required Widget child, EdgeInsetsGeometry? padding}) {
       return Container(
@@ -480,6 +489,23 @@ class _DetalleCuentaCobrarPageState
     final header = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (AppBreakpoints.isDesktop(context)) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _volverCuentas,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: const Color(0xFF475569),
+              ),
+              icon: const Icon(Icons.arrow_back_rounded, size: 18),
+              label: const Text('Volver a cuentas por cobrar'),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         // Breadcrumb
         Row(
           children: [
@@ -723,7 +749,7 @@ class _DetalleCuentaCobrarPageState
                   ),
                 kpi(
                   label: 'Próximo Vencimiento',
-                  value: _fmtFecha.format(c.fechaVencimiento),
+                  value: _fmtFecha.format(c.fechaProximoVencimiento),
                   hint: esAlDia ? 'En plazo' : 'Revisar atraso',
                 ),
                 kpi(
@@ -897,7 +923,12 @@ class _DetalleCuentaCobrarPageState
                                 ),
                               ),
                               const Spacer(),
-                              _chipEstadoCuota(q.pagada),
+                              _chipEstadoCuota(
+                                c,
+                                q,
+                                moraMensual: moraMensual,
+                                hoy: hoy,
+                              ),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -989,7 +1020,15 @@ class _DetalleCuentaCobrarPageState
                               ),
                             ),
                           ),
-                          Expanded(flex: 2, child: _chipEstadoCuota(q.pagada)),
+                          Expanded(
+                            flex: 2,
+                            child: _chipEstadoCuota(
+                              c,
+                              q,
+                              moraMensual: moraMensual,
+                              hoy: hoy,
+                            ),
+                          ),
                           SizedBox(
                             width: 72,
                             child: Align(
@@ -1030,24 +1069,42 @@ class _DetalleCuentaCobrarPageState
             Container(
               color: const Color(0xFFF8FAFC),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Mostrando ${cuotas.length} cuota${cuotas.length == 1 ? '' : 's'}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'Mostrando ${cuotas.length} cuota${cuotas.length == 1 ? '' : 's'}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'Saldo pendiente: ${formatRd(c.saldoPendiente)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF334155),
+                        ),
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  Text(
-                    'Total pendiente: ${formatRd(c.saldoPendiente)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF334155),
+                  if (moraEstimada > 0.009) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      'Mora estimada: ${formatRd(moraEstimada)} · '
+                      'Saldo con mora estimada: '
+                      '${formatRd(c.totalConMora)}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFB45309),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -1415,23 +1472,60 @@ class _DetalleCuentaCobrarPageState
     );
   }
 
-  Widget _chipEstadoCuota(bool pagada) {
+  Widget _chipEstadoCuota(
+    CuentaPorCobrar cuenta,
+    Cuota cuota, {
+    required double moraMensual,
+    required DateTime hoy,
+  }) {
+    final pagada = cuenta.saldoPendienteCuota(cuota) <= 0.001;
+    final diasAtraso = cuenta.diasAtrasoCuota(cuota, hoy: hoy);
+    final vencida = !pagada && diasAtraso > 0;
+    final mora = cuenta.moraEstimadaCuota(
+      cuota,
+      moraMensual: moraMensual,
+      hoy: hoy,
+    );
+    final color = pagada
+        ? const Color(0xFF059669)
+        : vencida
+        ? const Color(0xFFDC2626)
+        : const Color(0xFFD97706);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: pagada ? const Color(0xFFD1FAE5) : const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: pagada ? const Color(0xFF6EE7B7) : const Color(0xFFFDE68A),
-        ),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
-      child: Text(
-        pagada ? 'PAGADA' : 'PENDIENTE',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          color: pagada ? const Color(0xFF065F46) : const Color(0xFF92400E),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            pagada
+                ? 'PAGADA'
+                : vencida
+                ? 'VENCIDA · ${diasAtraso}d'
+                : 'PENDIENTE',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          if (vencida && mora > 0.009)
+            Text(
+              'Mora est. ${formatRd(mora)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+        ],
       ),
     );
   }

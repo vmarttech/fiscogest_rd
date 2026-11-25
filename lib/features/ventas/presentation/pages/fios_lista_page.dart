@@ -45,7 +45,7 @@ class FiosListaPage extends ConsumerWidget {
           return FloatingActionButton.extended(
             onPressed: () =>
                 AvisarAtrasadosButton.avisar(context, ref, atrasados),
-            icon: Icon(Icons.chat_bubble_outline),
+            icon: const Icon(Icons.chat_bubble_outline),
             label: const Text('Avisar atrasados'),
           );
         },
@@ -63,7 +63,7 @@ class FiosListaPage extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.edit_note_rounded,
                       size: 48,
                       color: AppColors.grey300,
@@ -109,7 +109,7 @@ class FiosListaPage extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.account_balance_wallet_outlined,
                       color: AppColors.warning,
                     ),
@@ -287,7 +287,7 @@ class _FioTile extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.person_outline,
                   color: AppColors.warning,
                   size: 22,
@@ -329,7 +329,7 @@ class _FioTile extends StatelessWidget {
               IconButton(
                 tooltip: 'Recordatorio WhatsApp',
                 onPressed: onRecordatorio,
-                icon: Icon(Icons.chat, color: Color(0xFF059669), size: 22),
+                icon: const Icon(Icons.chat, color: Color(0xFF059669), size: 22),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -535,7 +535,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
                       : () => setState(() {
                           _monto.text = saldo.toStringAsFixed(2);
                         }),
-                  icon: Icon(Icons.check_circle_outline, size: 20),
+                  icon: const Icon(Icons.check_circle_outline, size: 20),
                   label: const Text(
                     'SALDAR TODO',
                     style: TextStyle(fontWeight: FontWeight.w800),
@@ -691,7 +691,7 @@ class _RecordatorioWhatsAppDialogState
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _telefonoCtrl.text.trim()),
-          icon: Icon(Icons.chat, size: 18),
+          icon: const Icon(Icons.chat, size: 18),
           label: const Text('Enviar'),
         ),
       ],

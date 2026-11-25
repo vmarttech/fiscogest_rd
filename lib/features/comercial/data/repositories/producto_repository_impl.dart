@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/comercial/domain/repositories/i_producto_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_limites_guard.dart';
 
 class ProductoRepositoryImpl extends IProductoRepository {
   ProductoRepositoryImpl(this.db);
@@ -53,31 +54,34 @@ class ProductoRepositoryImpl extends IProductoRepository {
 
   @override
   Future<int> guardarProducto(Producto producto, int idUsuario) async {
-    return await db
-        .into(db.productosTable)
-        .insert(
-          ProductosTableCompanion.insert(
-            codigo: producto.codigo,
-            codigoBarras: Value(producto.codigoBarras),
-            nombre: producto.nombre,
-            descripcion: Value(producto.descripcion),
-            precioCompra: Value(producto.precioCompra),
-            gastosAsociados: Value(producto.gastosAsociados),
-        costoPromedio: Value(producto.costoPromedio),
-            precioVenta: Value(producto.precioVenta),
-            margenGanancia: Value(producto.margenGanancia),
-            precioMinimo: Value(producto.precioMinimo),
-            precioMayorista: Value(producto.precioMayorista),
-            precioEspecial: Value(producto.precioEspecial),
-            stock: Value(producto.stock),
-            stockMinimo: Value(producto.stockMinimo),
-            stockMaximo: Value(producto.stockMaximo),
-            categoriaId: producto.categoriaId,
-            marcaId: producto.marcaId,
-            unidadMedidaId: producto.unidadMedidaId,
-            activo: Value(producto.activo ? 1 : 0),
-          ),
-        );
+    return db.transaction(() async {
+      await LicenciaLimitesGuard(db).registrarProductoNuevo();
+      return db
+          .into(db.productosTable)
+          .insert(
+            ProductosTableCompanion.insert(
+              codigo: producto.codigo,
+              codigoBarras: Value(producto.codigoBarras),
+              nombre: producto.nombre,
+              descripcion: Value(producto.descripcion),
+              precioCompra: Value(producto.precioCompra),
+              gastosAsociados: Value(producto.gastosAsociados),
+              costoPromedio: Value(producto.costoPromedio),
+              precioVenta: Value(producto.precioVenta),
+              margenGanancia: Value(producto.margenGanancia),
+              precioMinimo: Value(producto.precioMinimo),
+              precioMayorista: Value(producto.precioMayorista),
+              precioEspecial: Value(producto.precioEspecial),
+              stock: Value(producto.stock),
+              stockMinimo: Value(producto.stockMinimo),
+              stockMaximo: Value(producto.stockMaximo),
+              categoriaId: producto.categoriaId,
+              marcaId: producto.marcaId,
+              unidadMedidaId: producto.unidadMedidaId,
+              activo: Value(producto.activo ? 1 : 0),
+            ),
+          );
+    });
   }
 
   @override
@@ -113,7 +117,7 @@ class ProductoRepositoryImpl extends IProductoRepository {
   }
 
   @override
-    Future<void> eliminarProducto(int id) async {
+  Future<void> eliminarProducto(int id) async {
     await (db.update(db.productosTable)..where((t) => t.id.equals(id))).write(
       const ProductosTableCompanion(activo: Value(0)),
     );

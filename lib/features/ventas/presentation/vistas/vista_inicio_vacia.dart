@@ -298,7 +298,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
                     onPressed: _cerrarFormularioCredito,
-                    icon: Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back),
                     label: const Text('Volver'),
                   ),
                 ),
@@ -398,7 +398,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.person_outline,
                         size: 20,
                         color: AppColors.warning,

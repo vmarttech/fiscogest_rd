@@ -100,7 +100,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         child: FilledButton.icon(
                           onPressed: () =>
                               context.push('/sales/emitir-factura'),
-                          icon: Icon(Icons.receipt_long_rounded, size: 20),
+                          icon: const Icon(Icons.receipt_long_rounded, size: 20),
                           label: const Text(
                             'Emitir factura',
                             style: TextStyle(
@@ -126,7 +126,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: () => context.push('/sales/emitir-nc'),
-                          icon: Icon(Icons.note_alt_outlined, size: 20),
+                          icon: const Icon(Icons.note_alt_outlined, size: 20),
                           label: const Text(
                             'Emitir nota de crédito',
                             style: TextStyle(
@@ -136,7 +136,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF4F46E5),
-                            side: BorderSide(color: Color(0xFFC7D2FE)),
+                            side: const BorderSide(color: Color(0xFFC7D2FE)),
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -149,7 +149,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: () => context.push('/sales/historial'),
-                          icon: Icon(Icons.history_rounded, size: 20),
+                          icon: const Icon(Icons.history_rounded, size: 20),
                           label: const Text(
                             'Ver historial',
                             style: TextStyle(
@@ -427,14 +427,14 @@ class FacturacionInicioPage extends ConsumerWidget {
                                   context,
                                 ).colorScheme.primary,
                               ),
-                              _ListaItem(
+                              const _ListaItem(
                                 nombre: 'Nota de crédito',
                                 detalle: 'Vinculada a factura',
                                 valor: '—',
                                 chip: 'NC',
                                 chipColor: Color(0xFF6366F1),
                               ),
-                              _ListaItem(
+                              const _ListaItem(
                                 nombre: 'Comprobante fiscal',
                                 detalle: 'NCF e impacto en inventario',
                                 valor: '—',
@@ -818,11 +818,11 @@ class _ListaItem extends StatelessWidget {
           Container(
             width: 34,
             height: 34,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.grey100,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.receipt_outlined,
               size: 18,
               color: AppColors.grey600,

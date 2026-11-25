@@ -64,6 +64,12 @@ class LicenciaSync {
     final lic = dev.isNotEmpty ? dev.first : locales.first;
     final planLocal = lic.plan.toLowerCase();
 
+    // La concesión remota es autoritativa; el plan Gratis no debe escribirla.
+    if (planLocal == 'gratis' || planLocal == 'demo') {
+      debugPrint('LicenciaSync.push: licencia gratis/prueba solo lectura');
+      return;
+    }
+
     // Protección: no pisar la nube con demo si es reinstalación fresca
     if (planLocal == 'demo' || planLocal == 'gratis') {
       try {

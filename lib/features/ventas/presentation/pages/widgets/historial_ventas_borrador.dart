@@ -90,7 +90,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
               SizedBox(
                 height: esPantallaPequena ? 40 : 44,
                 child: ElevatedButton.icon(
-                  icon: Icon(Icons.add, size: 18),
+                  icon: const Icon(Icons.add, size: 18),
                   label: Text(
                     esPantallaPequena ? 'Nueva' : 'Nueva Cotización',
                     style: TextStyle(
@@ -124,7 +124,7 @@ class HistorialVentasBorrador extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     const SizedBox(height: 12),
                     Text(
                       'Error al cargar cotizaciones: $e',
@@ -414,7 +414,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
                 width: double.infinity,
                 height: esPantallaPequena ? 40 : 44,
                 child: OutlinedButton.icon(
-                  icon: Icon(Icons.send_outlined, size: 18),
+                  icon: const Icon(Icons.send_outlined, size: 18),
                   label: Text(
                     'Enviar a aprobación',
                     style: TextStyle(
@@ -439,7 +439,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
                 width: double.infinity,
                 height: esPantallaPequena ? 40 : 44,
                 child: ElevatedButton.icon(
-                  icon: Icon(Icons.point_of_sale, size: 18),
+                  icon: const Icon(Icons.point_of_sale, size: 18),
                   label: Text(
                     'Ir a Caja / Cobrar',
                     style: TextStyle(
@@ -461,7 +461,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
             else if (convertida)
               Row(
                 children: [
-                  Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                  const Icon(Icons.check_circle, size: 16, color: AppColors.success),
                   const SizedBox(width: 6),
                   Text(
                     'Venta generada',

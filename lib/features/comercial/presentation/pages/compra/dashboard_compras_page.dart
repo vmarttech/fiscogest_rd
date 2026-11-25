@@ -100,7 +100,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               elevation: 0,
             ),
             onPressed: () => context.push('/compras/registrar'),
-            icon: Icon(Icons.add_rounded, size: 20),
+            icon: const Icon(Icons.add_rounded, size: 20),
             label: const Text(
               'Registrar compra',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
@@ -606,7 +606,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                       fontSize: 11,
                                       color: Color(0xFF94A3B8),
                                     ),
-                                    prefixIcon: Icon(
+                                    prefixIcon: const Icon(
                                       Icons.search,
                                       size: 16,
                                       color: Color(0xFF94A3B8),
@@ -620,13 +620,13 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
+                                      borderSide: const BorderSide(
                                         color: Color(0xFFE2E8F0),
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(
+                                      borderSide: const BorderSide(
                                         color: Color(0xFFE2E8F0),
                                       ),
                                     ),
@@ -860,7 +860,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                                             )
                                                           : Colors.transparent,
                                                     ),
-                                                    bottom: BorderSide(
+                                                    bottom: const BorderSide(
                                                       color: Color(0xFFF1F5F9),
                                                     ),
                                                   ),
@@ -1279,7 +1279,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.shopping_cart_outlined,
               size: 20,
               color: Color(0xFF334155),

@@ -7,6 +7,13 @@ import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_admin_pedidos_page.dart';
+// [ADMIN_FASE2]
+import 'package:fiscogest_rd/features/admin_negocios/presentation/pages/admin_negocios_page.dart';
+import 'package:fiscogest_rd/features/admin_negocios/presentation/pages/admin_negocio_detalle_page.dart';
+import 'package:fiscogest_rd/features/notificaciones/presentation/pages/admin_enviar_aviso_page.dart';
+import 'package:fiscogest_rd/features/campanas/presentation/pages/admin_campanas_page.dart';
+import 'package:fiscogest_rd/features/campanas/presentation/pages/admin_campana_form_page.dart';
+import 'package:fiscogest_rd/features/campanas/presentation/pages/ofertas_disponibles_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_activar_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_comprar_page.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/pages/licencia_estado_page.dart';
@@ -165,6 +172,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           !esDuenoPlataforma(sesion.username)) {
         return '/licencia';
       }
+      // [ADMIN_FASE2] Solo el dueño de plataforma administra los negocios.
+      if ((path == '/admin/negocios' || path.startsWith('/admin/negocios/')) &&
+          !esDuenoPlataforma(sesion.username)) {
+        return '/licencia';
+      }
+      if (path == '/admin/avisos/nuevo' &&
+          !esDuenoPlataforma(sesion.username)) {
+        return '/licencia';
+      }
+      if ((path == '/admin/campanas' || path.startsWith('/admin/campanas/')) &&
+          !esDuenoPlataforma(sesion.username)) {
+        return '/licencia';
+      }
       // Tiendas: no checkout de licencia por transferencia dentro de la app
       if (storeOcultaCompraTransferencia &&
           (path == '/licencia/comprar' ||
@@ -257,6 +277,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: LicenciaAdminPedidosPage.routeName,
         builder: (_, __) => const AppShell(child: LicenciaAdminPedidosPage()),
       ),
+      // [ADMIN_FASE2]
+      GoRoute(
+        path: '/admin/negocios',
+        name: AdminNegociosPage.routeName,
+        builder: (_, __) => const AppShell(child: AdminNegociosPage()),
+      ),
+      GoRoute(
+        path: '/admin/negocios/:id',
+        name: AdminNegocioDetallePage.routeName,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return AppShell(child: AdminNegocioDetallePage(negocioId: id));
+        },
+      ),
+      GoRoute(
+        path: '/admin/avisos/nuevo',
+        builder: (_, __) => const AppShell(child: AdminEnviarAvisoPage()),
+      ),
+      GoRoute(
+        path: '/admin/campanas',
+        builder: (_, __) => const AppShell(child: AdminCampanasPage()),
+      ),
+      GoRoute(
+        path: '/admin/campanas/nueva',
+        builder: (_, __) => const AppShell(child: AdminCampanaFormPage()),
+      ),
+      GoRoute(
+        path: '/ofertas-disponibles',
+        builder: (_, __) => const AppShell(child: OfertasDisponiblesPage()),
+      ),
 
       GoRoute(
         path: '/splash',
@@ -271,22 +321,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/legal/privacidad',
         name: LegalPage.routePrivacidad,
-        builder: (_, __) => AppShell(
-          child: const LegalPage(documento: LegalDocumento.privacidad),
+        builder: (_, __) => const AppShell(
+          child: LegalPage(documento: LegalDocumento.privacidad),
         ),
       ),
       GoRoute(
         path: '/legal/terminos',
         name: LegalPage.routeTerminos,
-        builder: (_, __) => AppShell(
-          child: const LegalPage(documento: LegalDocumento.terminos),
+        builder: (_, __) => const AppShell(
+          child: LegalPage(documento: LegalDocumento.terminos),
         ),
       ),
       GoRoute(
         path: '/legal/eliminar-cuenta',
         name: LegalPage.routeEliminarCuenta,
-        builder: (_, __) => AppShell(
-          child: const LegalPage(documento: LegalDocumento.eliminarCuenta),
+        builder: (_, __) => const AppShell(
+          child: LegalPage(documento: LegalDocumento.eliminarCuenta),
         ),
       ),
       GoRoute(

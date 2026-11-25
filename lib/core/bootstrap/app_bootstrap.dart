@@ -37,7 +37,7 @@ Future<ProviderContainer> initializeAppCore({
   final db = AppDatabase();
   await RepositoryInjection.initialize(db);
 
-  // Inicialización de licencia y dispositivo.
+  // Recupera una licencia concedida y prepara la identidad del dispositivo.
   try {
     final licenciaSvc = LicenciaService(db);
     await licenciaSvc.ensureLicenciaInicial();

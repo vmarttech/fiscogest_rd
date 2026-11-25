@@ -334,6 +334,7 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                       moraMensual:
                                           params?.moraPorcentaje ?? 0.0,
                                     );
+                                    final estadoActual = c.estadoActual();
                                     return Card(
                                       margin: EdgeInsets.zero,
                                       color: AppColors.white,
@@ -424,7 +425,7 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                                       diasAtraso > 0
                                                           ? 'Vencida hace $diasAtraso d · Mora ${formatRd(moraLista)}'
                                                           : _fmtFecha.format(
-                                                              c.fechaVencimiento,
+                                                              c.fechaProximoVencimiento,
                                                             ),
                                                       style: AppTypography
                                                           .bodySmall
@@ -450,11 +451,13 @@ class _CuentasCobrarPageState extends ConsumerState<CuentasCobrarPage> {
                                                   StatusChip(
                                                     label: diasAtraso > 0
                                                         ? 'VENCIDA $diasAtraso d'
-                                                        : c.estado.nombre
+                                                        : estadoActual.nombre
                                                               .toUpperCase(),
                                                     type: diasAtraso > 0
                                                         ? StatusChipType.error
-                                                        : _chipType(c.estado),
+                                                        : _chipType(
+                                                            estadoActual,
+                                                          ),
                                                     dense: true,
                                                   ),
                                                 ],

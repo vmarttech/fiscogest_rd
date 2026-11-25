@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/features/campanas/data/campana_pendiente_aplicador.dart';
 
 /// Pide JWT al Edge Function.
 ///
@@ -75,6 +76,9 @@ class EmitirToken {
         expiresInSec: exp,
         refreshToken: map['refresh_token']?.toString(),
       );
+try {
+  await CampanaPendienteAplicador.intentarAplicar();
+} catch (_) {}
       final refreshOk = (map['refresh_token']?.toString() ?? '').isNotEmpty;
       debugPrint(
         'EmitirToken: JWT guardado${refreshOk ? '' : ' SIN refresh'} (${exp}s)',

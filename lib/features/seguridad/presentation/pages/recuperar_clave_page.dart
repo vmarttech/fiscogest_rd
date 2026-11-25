@@ -65,10 +65,11 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         _error = '$e';
       });
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
   }
 
@@ -109,10 +110,11 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         _error = '$e';
       });
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
   }
 
@@ -126,7 +128,7 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         foregroundColor: Colors.white,
         title: const Text('Recuperar contraseña'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
         ),
       ),
@@ -263,7 +265,7 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Color(0xFF2DD4BF)),
+        borderSide: const BorderSide(color: Color(0xFF2DD4BF)),
       ),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );

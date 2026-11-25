@@ -20,7 +20,7 @@ class SecuenciasNcfPage extends ConsumerWidget {
       title: 'SECUENCIAS NCF',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -231,10 +231,11 @@ class _TarjetaSecuenciaState extends State<_TarjetaSecuencia> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 

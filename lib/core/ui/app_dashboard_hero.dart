@@ -37,11 +37,11 @@ class AppDashboardHero extends ConsumerWidget {
         color: scheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.7)),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0x140F172A),
+            color: Color(0x140F172A),
             blurRadius: 18,
-            offset: const Offset(0, 6),
+            offset: Offset(0, 6),
           ),
         ],
       ),

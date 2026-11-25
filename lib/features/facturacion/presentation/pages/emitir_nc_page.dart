@@ -108,7 +108,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
       title: 'EMITIR NOTA DE CRÉDITO',
       showAppBar: !desktop,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -317,7 +317,7 @@ class _NcPanelVacio extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.assignment_return_outlined,
                 size: 48,
                 color: AppColors.grey300,
@@ -366,7 +366,7 @@ class _NcPanelEmitir extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.assignment_return_outlined,
                   color: AppColors.warning,
                 ),
@@ -404,7 +404,7 @@ class _NcPanelEmitir extends StatelessWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Icon(Icons.check, size: 20),
+                : const Icon(Icons.check, size: 20),
             label: Text(busy ? 'Emitiendo…' : 'Emitir B04'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.warning,

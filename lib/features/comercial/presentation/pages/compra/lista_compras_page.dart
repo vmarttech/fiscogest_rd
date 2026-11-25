@@ -916,7 +916,7 @@ class ListaComprasPage extends ConsumerWidget {
                                       size: 15,
                                       color: Theme.of(context).colorScheme.primary,
                                     ),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
                                     Text(
                                       'Ver más',
                                       style: TextStyle(

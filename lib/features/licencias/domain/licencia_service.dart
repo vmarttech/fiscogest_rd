@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
 import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:flutter/foundation.dart';
 
 class LicenciaService {
   LicenciaService(this._db);
@@ -14,8 +15,8 @@ class LicenciaService {
   final AppDatabase _db;
   final _rng = Random.secure();
 
-  /// Crea demo 15 días si no existe ninguna licencia.
-  Future<LicenciaInfo> ensureLicenciaInicial() async {
+  /// Recupera una concesión existente. Nunca crea una prueba desde el cliente.
+  Future<LicenciaInfo?> ensureLicenciaInicial() async {
     final rows = await _db.select(_db.licenciasTable).get();
     if (rows.isNotEmpty) {
       rows.sort((a, b) => b.id.compareTo(a.id));
@@ -23,7 +24,7 @@ class LicenciaService {
       final row = dev.isNotEmpty ? dev.first : rows.first;
       return _mapYActualizarEstado(row);
     }
-    // Equipo vacío pero negocio ya vinculado (reinstalación): restaurar desde nube
+    // Equipo vacío pero negocio ya vinculado (reinstalación): restaurar concesión.
     if (SupabaseConfig.isConfigured) {
       final nid = await NegocioLocal.getId();
       if (nid != null && nid.isNotEmpty) {
@@ -40,28 +41,9 @@ class LicenciaService {
       }
     }
 
-    final ahora = DateTime.now();
-    final fin = ahora.add(const Duration(days: kDiasPrueba));
-    final id = await _db
-        .into(_db.licenciasTable)
-        .insert(
-          LicenciasTableCompanion.insert(
-            plan: 'demo',
-            vigenciaTipo: 'prueba',
-            fechaInicio: ahora.toIso8601String(),
-            fechaFin: Value(fin.toIso8601String()),
-            maxDispositivos: const Value(1),
-            maxCajas: const Value(1),
-            ecfHabilitado: const Value(false),
-            vitalicia: const Value(false),
-            estado: 'activa',
-            actualizadoEn: ahora.toIso8601String(),
-          ),
-        );
-    final row = await (_db.select(
-      _db.licenciasTable,
-    )..where((t) => t.id.equals(id))).getSingle();
-    return _mapYActualizarEstado(row);
+    // Sin contrato remoto todavía no se concede la prueba. El flujo de alta
+    // deberá validar este equipo antes de crear una licencia local.
+    return null;
   }
 
   Future<LicenciaInfo?> obtenerActual() async {
@@ -120,19 +102,38 @@ class LicenciaService {
 
   Future<LicenciaInfo> _mapYActualizarEstado(LicenciasTableData row) async {
     final info = _fromRow(row);
+    if (row.estado == 'registro_requerido') return info;
     final nuevoEstado = _calcularEstado(info);
 
-    // Demo o plan de pago vencido (tras gracia) → gratis automático
-    // (cancelar solo evita renovar; al llegar fechaFin también cae aquí)
     final planLow = row.plan.toLowerCase();
-    final esPagoVencido =
-        planLow == 'basico' ||
-        planLow == 'simplificado' ||
-        planLow == 'pro' ||
-        planLow == 'profesional' ||
-        planLow == 'empresa';
-    if ((planLow == 'demo' || esPagoVencido) && nuevoEstado == 'vencida') {
-      final ahora = DateTime.now();
+    final esPruebaVencida =
+        (planLow == 'demo' || row.vigenciaTipo == 'prueba') &&
+        nuevoEstado == 'vencida';
+    if (esPruebaVencida) {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          estado: const Value('registro_requerido'),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      final updated = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).getSingle();
+      return _fromRow(updated);
+    }
+
+    // Conserva la regla comercial existente: una suscripción pagada vencida
+    // pasa al plan Gratis local; una prueba, en cambio, exige registro.
+    final esPagoVencido = const {
+      'basico',
+      'simplificado',
+      'pro',
+      'profesional',
+      'empresa',
+    }.contains(planLow);
+    if (esPagoVencido && nuevoEstado == 'vencida') {
       await (_db.update(
         _db.licenciasTable,
       )..where((t) => t.id.equals(row.id))).write(
@@ -145,7 +146,7 @@ class LicenciaService {
           maxCajas: const Value(1),
           ecfHabilitado: const Value(false),
           estado: const Value('activa'),
-          actualizadoEn: Value(ahora.toIso8601String()),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
         ),
       );
       final updated = await (_db.select(
@@ -180,12 +181,16 @@ class LicenciaService {
   }
 
   LicenciaInfo _fromRow(LicenciasTableData r) {
+    final inicio = DateTime.tryParse(r.fechaInicio) ?? DateTime.now();
+    final prueba = r.plan.toLowerCase() == 'demo' || r.vigenciaTipo == 'prueba';
     return LicenciaInfo(
       id: r.id,
       plan: r.plan,
       vigenciaTipo: r.vigenciaTipo,
-      fechaInicio: DateTime.tryParse(r.fechaInicio) ?? DateTime.now(),
-      fechaFin: r.fechaFin != null ? DateTime.tryParse(r.fechaFin!) : null,
+      fechaInicio: inicio,
+      fechaFin: r.fechaFin != null
+          ? DateTime.tryParse(r.fechaFin!)
+          : (prueba ? inicio.add(const Duration(days: kDiasPrueba)) : null),
       maxDispositivos: r.maxDispositivos,
       maxCajas: r.maxCajas,
       ecfHabilitado: r.ecfHabilitado,
@@ -321,7 +326,7 @@ class LicenciaService {
 
     final ahora = DateTime.now();
     final dias = _diasVigencia(p.vigenciaTipo);
-    final fin = ahora.add(Duration(days: dias));
+    final fin = await _fechaFinSiguientePeriodo(ahora, dias);
     final id = await _db
         .into(_db.licenciasTable)
         .insert(
@@ -355,7 +360,7 @@ class LicenciaService {
     final p = pedidos.first;
     final ahora = DateTime.now();
     final dias = _diasVigencia(p.vigenciaTipo);
-    final fin = ahora.add(Duration(days: dias));
+    final fin = await _fechaFinSiguientePeriodo(ahora, dias);
 
     await (_db.update(
       _db.pedidosLicenciaTable,
@@ -387,9 +392,23 @@ class LicenciaService {
     return _mapYActualizarEstado(row);
   }
 
+  /// Conserva el tiempo pendiente de la licencia vigente al renovar: el plan
+  /// nuevo queda activo ahora y su vencimiento se calcula después del actual.
+  Future<DateTime> _fechaFinSiguientePeriodo(DateTime ahora, int dias) async {
+    final actual = await obtenerActual();
+    final finActual = actual?.fechaFin;
+    final base =
+        actual != null &&
+            actual.estado == 'activa' &&
+            finActual != null &&
+            finActual.isAfter(ahora)
+        ? finActual
+        : ahora;
+    return base.add(Duration(days: dias));
+  }
+
   /// Cancela la renovación: el plan de pago sigue hasta fechaFin.
-  /// Al vencer (tras gracia), [ _mapYActualizarEstado ] debe pasar a gratis.
-  /// No acorta el periodo ya pagado.
+  /// No acorta el periodo ya pagado ni concede una licencia Gratis local.
   Future<LicenciaInfo> cancelarPlanPagado() async {
     final actual = await obtenerActual();
     if (actual == null) {
@@ -440,11 +459,11 @@ class LicenciaService {
     final ahora = DateTime.now();
     final pendientes =
         await (_db.select(_db.pedidosLicenciaTable)..where(
-            (t) =>
-                t.estado.equals('pendiente_pago') |
-                t.estado.equals('pago_reportado'),
-          ))
-        .get();
+              (t) =>
+                  t.estado.equals('pendiente_pago') |
+                  t.estado.equals('pago_reportado'),
+            ))
+            .get();
     var n = 0;
     for (final p in pendientes) {
       final exp = DateTime.tryParse(p.fechaExpiracionPedido);
@@ -459,21 +478,54 @@ class LicenciaService {
     }
     return n;
   }
+
+  /// [CAMPANAS_FASE1] Extiende la vigencia local tras una oferta 'meses_gratis'.
+  Future<void> aplicarMesesGratisOferta(int meses) async {
+    if (meses <= 0) return;
+    final rows = await (_db.select(_db.licenciasTable)).get();
+    if (rows.isEmpty) return;
+    final row = rows.first;
+    final ahora = DateTime.now();
+    final finActual = row.fechaFin == null
+        ? null
+        : DateTime.tryParse(row.fechaFin!);
+    final base = (finActual != null && finActual.isAfter(ahora))
+        ? finActual
+        : ahora;
+    final nueva = base.add(Duration(days: (30.44 * meses).round()));
+
+    await (_db.update(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(row.id))).write(
+      LicenciasTableCompanion(
+        fechaFin: Value(nueva.toIso8601String()),
+        actualizadoEn: Value(ahora.toIso8601String()),
+      ),
+    );
+
+    final refreshed = await (_db.select(
+      _db.licenciasTable,
+    )..where((t) => t.id.equals(row.id))).getSingle();
+    await _mapYActualizarEstado(refreshed);
+    debugPrint(
+      'Oferta meses_gratis aplicada: +$meses meses, vigente hasta $nueva',
+    );
+  }
 }
 
 extension on LicenciaInfo {
   LicenciaInfo copyWithEstado(String e) => LicenciaInfo(
-        id: id,
-        plan: plan,
-        vigenciaTipo: vigenciaTipo,
-        fechaInicio: fechaInicio,
-        fechaFin: fechaFin,
-        maxDispositivos: maxDispositivos,
-        maxCajas: maxCajas,
-        ecfHabilitado: ecfHabilitado,
-        vitalicia: vitalicia,
-        estado: e,
-        fingerprint: fingerprint,
-        codigoActivacion: codigoActivacion,
-      );
+    id: id,
+    plan: plan,
+    vigenciaTipo: vigenciaTipo,
+    fechaInicio: fechaInicio,
+    fechaFin: fechaFin,
+    maxDispositivos: maxDispositivos,
+    maxCajas: maxCajas,
+    ecfHabilitado: ecfHabilitado,
+    vitalicia: vitalicia,
+    estado: e,
+    fingerprint: fingerprint,
+    codigoActivacion: codigoActivacion,
+  );
 }

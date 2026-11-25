@@ -42,7 +42,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
       showBackButton: false,
       leading: mobile
           ? IconButton(
-              icon: Icon(Icons.menu),
+              icon: const Icon(Icons.menu),
               tooltip: 'Menú',
               onPressed: () => ShellDrawerScope.open(context),
             )
@@ -51,7 +51,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
           ? [
               IconButton(
                 tooltip: 'Reportes operativos',
-                icon: Icon(Icons.folder_open_outlined),
+                icon: const Icon(Icons.folder_open_outlined),
                 onPressed: () => context.push('/reports/hub'),
               ),
             ]
@@ -301,7 +301,7 @@ class _PeriodoChips extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (on) ...[
-                    Icon(Icons.check, size: 14, color: _kInk),
+                    const Icon(Icons.check, size: 14, color: _kInk),
                     const SizedBox(width: 4),
                   ],
                   Text(
@@ -392,7 +392,7 @@ class _PeriodoChips extends ConsumerWidget {
                           : MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.calendar_today_outlined,
                           size: 14,
                           color: Color(0xFF0F172A),
@@ -460,7 +460,7 @@ class _PeriodoChips extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.expand_more, size: 18, color: Color(0xFF0F172A)),
+                  const Icon(Icons.expand_more, size: 18, color: Color(0xFF0F172A)),
                 ],
               ),
             ),
@@ -559,12 +559,12 @@ class _KpiCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF0A1628),
-              Color(0xFF0D1E34),
-              Color(0xFF0F4C4A),
+              const Color(0xFF0A1628),
+              const Color(0xFF0D1E34),
+              const Color(0xFF0F4C4A),
               Theme.of(context).colorScheme.primary,
             ],
-            stops: [0.0, 0.35, 0.7, 1.0],
+            stops: const [0.0, 0.35, 0.7, 1.0],
           ),
           boxShadow: [
             BoxShadow(
@@ -862,8 +862,9 @@ class _ChartCard extends StatelessWidget {
                       interval: (serie.length / 5).clamp(1, 10).toDouble(),
                       getTitlesWidget: (v, _) {
                         final i = v.toInt();
-                        if (i < 0 || i >= serie.length)
+                        if (i < 0 || i >= serie.length) {
                           return const SizedBox.shrink();
+                        }
                         return Padding(
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
@@ -976,7 +977,7 @@ class _ChartCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Ventas vs. Margen - Tendencia de 30 Días',
                   style: TextStyle(
                     fontSize: 15,
@@ -984,16 +985,16 @@ class _ChartCard extends StatelessWidget {
                     color: _kInk,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     _LegendDot(color: Theme.of(context).colorScheme.tertiary, label: 'Ventas'),
-                    SizedBox(width: 14),
-                    _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
+                    const SizedBox(width: 14),
+                    const _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
                 ),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 8),
+                const Text(
                   'Análisis dinámico comparativo',
                   style: TextStyle(fontSize: 12, color: _kMuted),
                 ),
@@ -1002,7 +1003,7 @@ class _ChartCard extends StatelessWidget {
           else
             Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1025,8 +1026,8 @@ class _ChartCard extends StatelessWidget {
                 Row(
                   children: [
                     _LegendDot(color: Theme.of(context).colorScheme.tertiary, label: 'Ventas'),
-                    SizedBox(width: 14),
-                    _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
+                    const SizedBox(width: 14),
+                    const _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
                 ),
               ],

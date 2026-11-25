@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
@@ -23,25 +24,38 @@ class DispositivoSync {
       return;
     }
 
-    final row = <String, dynamic>{
-      if (local.remoteId != null) 'id': local.remoteId,
-      'negocio_id': negocioId,
-      'fingerprint': local.fingerprint,
-      'alias': local.alias,
-      'plataforma': local.plataforma,
-      'tipo': local.tipo,
-      'activo': local.activo,
-      'registrado_en': (local.registradoEn ?? DateTime.now())
-          .toUtc()
-          .toIso8601String(),
-      'ultimo_uso': (local.ultimoUso ?? DateTime.now())
-          .toUtc()
-          .toIso8601String(),
-    };
+    final pendientes =
+        await (_db.select(_db.dispositivosLicenciaTable)..where(
+              (t) =>
+                  t.fingerprint.equals(local.fingerprint) |
+                  (t.activo.equals(false) & t.pendienteSync.equals(true)),
+            ))
+            .get();
+    final rows = pendientes
+        .map(
+          (dispositivo) => <String, dynamic>{
+            if (dispositivo.remoteId != null) 'id': dispositivo.remoteId,
+            'negocio_id': negocioId,
+            'fingerprint': dispositivo.fingerprint,
+            'alias': dispositivo.alias,
+            'plataforma': dispositivo.plataforma,
+            'tipo': dispositivo.tipo,
+            'activo': dispositivo.activo,
+            'registrado_en':
+                (DateTime.tryParse(dispositivo.registradoEn) ?? DateTime.now())
+                    .toUtc()
+                    .toIso8601String(),
+            'ultimo_uso':
+                (DateTime.tryParse(dispositivo.ultimoUso) ?? DateTime.now())
+                    .toUtc()
+                    .toIso8601String(),
+          },
+        )
+        .toList();
 
     await SupabaseRestClient().upsert(
       table: 'dispositivos_licencia',
-      rows: [row],
+      rows: rows,
       onConflict: 'negocio_id,fingerprint',
     );
 

@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/features/creditos/domain/entities/estado_credito.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/plan_pago.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/abono_credito.dart';
+import 'package:fiscogest_rd/features/creditos/domain/entities/cuota.dart';
 
 /// Cuenta por cobrar generada al registrar una venta a crédito / fiao
 /// Según manual sección 5: todos los campos requeridos
@@ -69,7 +70,7 @@ class CuentaPorCobrar {
   final String? observaciones;
   final int? usuarioId;
 
-  /// Mora calculada por días vencidos (lectura; no sustituye la fase de BD).
+  /// Mora pendiente del ledger, más la acumulación desde el último corte.
   final double moraCalculada;
 
   /// Días transcurridos desde la fecha de vencimiento al momento de leer.
@@ -94,35 +95,140 @@ class CuentaPorCobrar {
     return abonos.fold<double>(0.0, (sum, a) => sum + a.monto);
   }
 
-  /// Cuánto le falta pagar
-  double get saldoPendiente {
-    return (totalAPagar - totalAbonado).clamp(0.0, double.infinity);
+  /// Capital e intereses que quedan pendientes en el cronograma.
+  double get saldoCuotasPendiente {
+    final cuotas = planPago?.cuotas;
+    if (cuotas != null && cuotas.isNotEmpty) {
+      return cuotas.fold<double>(
+        0,
+        (sum, cuota) => sum + saldoPendienteCuota(cuota),
+      );
+    }
+    return (totalAPagar -
+            abonos.fold<double>(0, (sum, abono) => sum + abono.monto))
+        .clamp(0.0, double.infinity);
   }
 
+  /// Total listo para cobrar: cuotas pendientes más mora ya calculada.
+  double get saldoPendiente =>
+      (saldoCuotasPendiente + moraCalculada).clamp(0.0, double.infinity);
+
   /// Saldo exigible ahora: principal pendiente + mora calculada.
-  double get totalConMora =>
-      double.parse((saldoPendiente + moraCalculada).toStringAsFixed(2));
+  double get totalConMora => double.parse(saldoPendiente.toStringAsFixed(2));
 
   /// Si ya está totalmente pagada
   bool get estaPagada {
-    return saldoPendiente <= 0.001;
+    return totalConMora <= 0.001;
+  }
+
+  /// Próxima fecha de pago según la cuota pendiente más cercana.
+  DateTime get fechaProximoVencimiento {
+    final pendientes = planPago?.cuotas
+        .where((q) => !q.pagada && saldoPendienteCuota(q) > 0.001)
+        .toList();
+    if (pendientes == null || pendientes.isEmpty) return fechaVencimiento;
+    pendientes.sort((a, b) => a.fechaVencimiento.compareTo(b.fechaVencimiento));
+    return pendientes.first.fechaVencimiento;
+  }
+
+  double saldoPendienteCuota(Cuota cuota) {
+    if (cuota.pagada) return 0;
+    final saldo = cuota.saldoCuotaPendiente;
+    return (saldo ?? cuota.montoTotal).clamp(0.0, double.infinity);
+  }
+
+  /// Saldo de las cuotas ya vencidas, separado del principal futuro.
+  double saldoCuotasVencidas({DateTime? hoy}) {
+    if (estaPagada) return 0;
+    final cuotas = planPago?.cuotas;
+    if (cuotas == null || cuotas.isEmpty) {
+      return diasVencido(hoy ?? DateTime.now()) > 0 ? saldoPendiente : 0;
+    }
+    return cuotas.fold<double>(0, (sum, cuota) {
+      if (diasAtrasoCuota(cuota, hoy: hoy) == 0) return sum;
+      return sum + saldoPendienteCuota(cuota);
+    });
+  }
+
+  int diasAtrasoCuota(Cuota cuota, {DateTime? hoy}) {
+    if (saldoPendienteCuota(cuota) <= 0.001) return 0;
+    final fecha = _dia(cuota.fechaVencimiento);
+    final actual = _dia(hoy ?? DateTime.now());
+    return actual.isAfter(fecha) ? actual.difference(fecha).inDays : 0;
+  }
+
+  double moraEstimadaCuota(
+    Cuota cuota, {
+    required double moraMensual,
+    DateTime? hoy,
+  }) {
+    if (cuota.moraPendiente != null) return cuota.moraPendiente!;
+    final dias = diasAtrasoCuota(cuota, hoy: hoy);
+    final saldo = saldoPendienteCuota(cuota);
+    if (dias == 0 || saldo <= 0.001 || moraMensual <= 0) return 0;
+    final mora = saldo * (moraMensual / 30) * dias;
+    return double.parse(mora.toStringAsFixed(2));
+  }
+
+  EstadoCredito estadoActual({DateTime? hoy}) {
+    if (estaPagada) return EstadoCredito.pagado;
+    final actual = _dia(hoy ?? DateTime.now());
+    final cuotas = planPago?.cuotas;
+    if (cuotas != null && cuotas.isNotEmpty) {
+      final pendientes =
+          cuotas.where((q) => saldoPendienteCuota(q) > 0.001).toList()
+            ..sort((a, b) => a.fechaVencimiento.compareTo(b.fechaVencimiento));
+      if (pendientes.any((q) => diasAtrasoCuota(q, hoy: actual) > 0)) {
+        return EstadoCredito.vencido;
+      }
+      if (pendientes.isNotEmpty) {
+        final diasHasta = _dia(
+          pendientes.first.fechaVencimiento,
+        ).difference(actual).inDays;
+        if (diasHasta <= 3) return EstadoCredito.proximoAVencer;
+      }
+      return EstadoCredito.alDia;
+    }
+
+    final dias = actual.difference(_dia(fechaVencimiento)).inDays;
+    if (dias > 0) return EstadoCredito.vencido;
+    if (dias >= -3) return EstadoCredito.proximoAVencer;
+    return EstadoCredito.alDia;
   }
 
   /// Días de atraso (negativo = al día, positivo = vencido)
   int diasVencido(DateTime hoy) {
     if (estaPagada) return 0;
-    return hoy.difference(fechaVencimiento).inDays;
+    final cuotas = planPago?.cuotas;
+    if (cuotas != null && cuotas.isNotEmpty) {
+      return cuotas
+          .map((q) => diasAtrasoCuota(q, hoy: hoy))
+          .fold<int>(0, (maximo, dias) => dias > maximo ? dias : maximo);
+    }
+    final dias = _dia(hoy).difference(_dia(fechaVencimiento)).inDays;
+    return dias > 0 ? dias : 0;
   }
 
-  /// Mora estimada al mostrar: tasa mensual configurada / 30 por cada día
-  /// vencido, aplicada sobre el saldo pendiente. No se persiste en BD.
+  /// Mora vigente calculada por cuota con la tasa mensual configurada / 30.
   double moraEstimada({required double moraMensual, DateTime? hoy}) {
+    if (moraCalculada > 0.001) return moraCalculada;
+    if (saldoPendiente <= 0.001 || moraMensual <= 0) return 0;
+    final cuotas = planPago?.cuotas;
+    if (cuotas != null && cuotas.isNotEmpty) {
+      final total = cuotas.fold<double>(
+        0,
+        (sum, q) =>
+            sum + moraEstimadaCuota(q, moraMensual: moraMensual, hoy: hoy),
+      );
+      return double.parse(total.toStringAsFixed(2));
+    }
     final dias = diasVencido(hoy ?? DateTime.now());
-    if (dias <= 0 || saldoPendiente <= 0.001 || moraMensual <= 0) return 0.0;
-    final tasaDiaria = moraMensual / 30.0;
-    final monto = saldoPendiente * tasaDiaria * dias;
+    if (dias == 0) return 0;
+    final monto = saldoPendiente * (moraMensual / 30.0) * dias;
     return double.parse(monto.toStringAsFixed(2));
   }
+
+  DateTime _dia(DateTime fecha) => DateTime(fecha.year, fecha.month, fecha.day);
 
   CuentaPorCobrar copyWith({
     int? id,

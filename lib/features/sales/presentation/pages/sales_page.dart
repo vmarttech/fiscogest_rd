@@ -251,14 +251,14 @@ class SalesPage extends ConsumerWidget {
                                   context,
                                 ).colorScheme.primary,
                               ),
-                              _ListaItem(
+                              const _ListaItem(
                                 nombre: 'Nota de crédito',
                                 detalle: 'Vinculada a factura',
                                 valor: '—',
                                 chip: 'NC',
                                 chipColor: Color(0xFF6366F1),
                               ),
-                              _ListaItem(
+                              const _ListaItem(
                                 nombre: 'Comprobante fiscal',
                                 detalle: 'NCF e impacto en inventario',
                                 valor: '—',
@@ -560,7 +560,7 @@ class _OpCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
             ],
           ),
         ),
@@ -651,11 +651,11 @@ class _ListaItem extends StatelessWidget {
           Container(
             width: 34,
             height: 34,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.grey100,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.receipt_outlined,
               size: 18,
               color: AppColors.grey600,

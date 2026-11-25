@@ -396,40 +396,43 @@ class VentasRepositoryImpl implements IVentasRepository {
 
   @override
   Future<Venta> registrarVenta(Venta venta) async {
-    await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
-
     final numero = await _numeroCotizacionLibre(
       preferido: venta.numeroCotizacion,
       esCredito: venta.numeroCotizacion.trim().toUpperCase().startsWith('CR'),
     );
-    final id = await _ventasDao.insertarVenta(
-      VentasTableCompanion(
-        numeroCotizacion: Value(numero),
-        numeroFactura: Value(venta.numeroFactura),
-        clienteId: Value(venta.clienteId),
-        fecha: Value(venta.fecha),
-        montoSubtotal: Value(venta.montoSubtotal),
-        descuentoGlobal: Value(venta.descuentoGlobal),
-        itbis: Value(venta.itbis),
-        montoTotal: Value(venta.montoTotal),
-        formaPago: Value(venta.formaPago),
-        costoEnvio: Value(venta.costoEnvio),
-        abonoInicial: Value(venta.abonoInicial),
-        numeroCuotas: Value(venta.numeroCuotas),
-        plazoDias: Value(venta.plazoDias),
-        tasaInteres: Value(venta.tasaInteres),
-        montoInteres: Value(venta.montoInteres),
-        vencimiento: Value(venta.vencimiento),
-        estadoDocumento: Value(venta.estadoDocumento.name),
-        usuarioId: Value(venta.usuarioId),
-        fechaRegistro: Value(venta.fechaRegistro),
-        descuentoId: Value(venta.descuentoId),
-        descuentoNombre: Value(venta.descuentoNombre),
-        montoDescuento: Value(venta.montoDescuento),
-        almacenId: Value(venta.almacenId),
-      ),
-    );
-    await _guardarDetalles(id, venta.detalles);
+    final id = await _ventasDao.db.transaction(() async {
+      await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
+      final idNueva = await _ventasDao.insertarVenta(
+        VentasTableCompanion(
+          numeroCotizacion: Value(numero),
+          numeroFactura: Value(venta.numeroFactura),
+          clienteId: Value(venta.clienteId),
+          fecha: Value(venta.fecha),
+          montoSubtotal: Value(venta.montoSubtotal),
+          descuentoGlobal: Value(venta.descuentoGlobal),
+          itbis: Value(venta.itbis),
+          montoTotal: Value(venta.montoTotal),
+          formaPago: Value(venta.formaPago),
+          costoEnvio: Value(venta.costoEnvio),
+          abonoInicial: Value(venta.abonoInicial),
+          numeroCuotas: Value(venta.numeroCuotas),
+          plazoDias: Value(venta.plazoDias),
+          tasaInteres: Value(venta.tasaInteres),
+          montoInteres: Value(venta.montoInteres),
+          vencimiento: Value(venta.vencimiento),
+          estadoDocumento: Value(venta.estadoDocumento.name),
+          usuarioId: Value(venta.usuarioId),
+          fechaRegistro: Value(venta.fechaRegistro),
+          descuentoId: Value(venta.descuentoId),
+          descuentoNombre: Value(venta.descuentoNombre),
+          montoDescuento: Value(venta.montoDescuento),
+          almacenId: Value(venta.almacenId),
+        ),
+      );
+      await _guardarDetalles(idNueva, venta.detalles);
+      return idNueva;
+    });
+    LicenciaUsoSignals.notificarCambio();
     final registro = await _ventasDao.obtenerVentaPorId(id);
     final dets = await _mapearDetalles(await _ventasDao.listarDetalles(id));
     final mapped = _mapearDesdeVentasTableData(registro!, detalles: dets);
@@ -540,6 +543,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoDescuento: Value(cotizacion.montoDescuento),
       ),
     );
+    LicenciaUsoSignals.notificarCambio();
 
     await _guardarDetalles(cotizacion.id!, cotizacion.detalles);
 
@@ -561,9 +565,11 @@ class VentasRepositoryImpl implements IVentasRepository {
     int cotizacionId, {
     String? formaPago,
   }) async {
-    await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
     final actual = await _ventasDao.obtenerVentaPorId(cotizacionId);
-    final ya = (actual?.numeroFactura ?? '').trim();
+    if (actual == null) {
+      throw StateError('Cotización $cotizacionId no encontrada');
+    }
+    final ya = (actual.numeroFactura ?? '').trim();
     /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
     final numeroFactura = ya;
     final lineas = await _mapearDetalles(
@@ -573,21 +579,29 @@ class VentasRepositoryImpl implements IVentasRepository {
         ? null
         : _totalesDesdeLineas(
             lineas,
-            costoEnvio: actual?.costoEnvio ?? 0.0,
-            montoDescuento: actual?.montoDescuento ?? 0.0,
+            costoEnvio: actual.costoEnvio,
+            montoDescuento: actual.montoDescuento,
           );
 
-    await _ventasDao.actualizarVenta(
-      cotizacionId,
-      VentasTableCompanion(
-        estadoDocumento: Value(EstadoDocumento.facturado.name),
-        numeroFactura: Value(numeroFactura),
-        formaPago: formaPago != null ? Value(formaPago) : const Value.absent(),
-        montoSubtotal: tot != null ? Value(tot.sub) : const Value.absent(),
-        itbis: tot != null ? Value(tot.itbis) : const Value.absent(),
-        montoTotal: tot != null ? Value(tot.total) : const Value.absent(),
-      ),
-    );
+    await _ventasDao.db.transaction(() async {
+      await LicenciaLimitesGuard(
+        _ventasDao.db,
+      ).assertPuedeRegistrarVenta(excluirVentaId: cotizacionId);
+      await _ventasDao.actualizarVenta(
+        cotizacionId,
+        VentasTableCompanion(
+          estadoDocumento: Value(EstadoDocumento.facturado.name),
+          numeroFactura: Value(numeroFactura),
+          formaPago: formaPago != null
+              ? Value(formaPago)
+              : const Value.absent(),
+          montoSubtotal: tot != null ? Value(tot.sub) : const Value.absent(),
+          itbis: tot != null ? Value(tot.itbis) : const Value.absent(),
+          montoTotal: tot != null ? Value(tot.total) : const Value.absent(),
+        ),
+      );
+    });
+    LicenciaUsoSignals.notificarCambio();
     final registro = await _ventasDao.obtenerVentaPorId(cotizacionId);
     final mapped = _mapearDesdeVentasTableData(registro!, detalles: lineas);
     await _pushVentaAhora();
@@ -624,6 +638,7 @@ class VentasRepositoryImpl implements IVentasRepository {
         montoInteres: Value(montoInteres),
       ),
     );
+    LicenciaUsoSignals.notificarCambio();
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     return _mapearDesdeVentasTableData(registro!);
   }
@@ -636,20 +651,27 @@ class VentasRepositoryImpl implements IVentasRepository {
     String referencia, {
     String? formaPago,
   }) async {
-    await LicenciaLimitesGuard(_ventasDao.db).assertPuedeRegistrarVenta();
     final actual = await _ventasDao.obtenerVentaPorId(ventaId);
-    final ya = (actual?.numeroFactura ?? '').trim();
+    if (actual == null) throw StateError('Venta $ventaId no encontrada');
+    final ya = (actual.numeroFactura ?? '').trim();
     /* NCF lo emite Caja con emitirNcfFiscal antes/durante cobro */
     final numeroFactura = ya;
-    await _ventasDao.actualizarVenta(
-      ventaId,
-      VentasTableCompanion(
-        estadoDocumento: Value(EstadoDocumento.facturado.name),
-        numeroFactura: Value(numeroFactura),
-        abonoInicial: Value(montoAbono),
-        formaPago: formaPago != null ? Value(formaPago) : const Value.absent(),
-      ),
-    );
+    await _ventasDao.db.transaction(() async {
+      await LicenciaLimitesGuard(
+        _ventasDao.db,
+      ).assertPuedeRegistrarVenta(excluirVentaId: ventaId);
+      await _ventasDao.actualizarVenta(
+        ventaId,
+        VentasTableCompanion(
+          estadoDocumento: Value(EstadoDocumento.facturado.name),
+          numeroFactura: Value(numeroFactura),
+          abonoInicial: Value(montoAbono),
+          formaPago: formaPago != null
+              ? Value(formaPago)
+              : const Value.absent(),
+        ),
+      );
+    });
     final registro = await _ventasDao.obtenerVentaPorId(ventaId);
     return _mapearDesdeVentasTableData(registro!);
   }

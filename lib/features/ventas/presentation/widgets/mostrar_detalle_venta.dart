@@ -658,7 +658,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: 'Volver al historial',
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.arrow_back_rounded,
                           color: Color(0xFF0F172A),
                         ),
@@ -716,7 +716,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: 'Volver',
-                        icon: Icon(Icons.arrow_back_rounded),
+                        icon: const Icon(Icons.arrow_back_rounded),
                         onPressed: () {
                           if (context.canPop()) {
                             context.pop();

@@ -19,6 +19,8 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/pedidos_pendientes_provider.dart';
+import 'package:fiscogest_rd/features/campanas/presentation/providers/campanas_providers.dart';
+import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
@@ -27,6 +29,7 @@ class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
   final Widget child;
+  static double _sidebarScrollOffset = 0;
 
   // Ancho del menú fijo en escritorio (Opción 1)
   static const double _sidebarWidth = 200.0;
@@ -51,6 +54,7 @@ class AppShell extends ConsumerWidget {
 
     final esAdmin = sesion?.esAdmin ?? false;
     final pendientesAsync = ref.watch(pedidosPendientesCountProvider);
+
     final pedidosPendientes = pendientesAsync.maybeWhen(
       data: (n) => n,
       orElse: () => 0,
@@ -180,7 +184,7 @@ class AppShell extends ConsumerWidget {
               child: _buildMenu(
                 width: drawerW,
                 currentPath: currentPath,
-                context: context,
+                context: drawerCtx,
                 nombreEmpresa: nombreEmpresa,
                 logoUrl: (cfg?.logoUrl.trim().isNotEmpty == true)
                     ? cfg!.logoUrl.trim()
@@ -270,7 +274,7 @@ class AppShell extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.business_outlined,
                   size: 15,
                   color: Color(0xFF60A5FA),
@@ -321,7 +325,7 @@ class AppShell extends ConsumerWidget {
                       fontSize: 12,
                       color: Color(0xFF94A3B8),
                     ),
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.search,
                       size: 18,
                       color: Color(0xFF94A3B8),
@@ -334,15 +338,15 @@ class AppShell extends ConsumerWidget {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF334155)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Color(0xFF334155)),
+                      borderSide: const BorderSide(color: Color(0xFF334155)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF3B82F6),
                         width: 2,
                       ),
@@ -356,7 +360,7 @@ class AppShell extends ConsumerWidget {
           // Date
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.calendar_today_outlined,
                 size: 15,
                 color: Color(0xFF94A3B8),
@@ -413,10 +417,11 @@ class AppShell extends ConsumerWidget {
             onPressed: () {
               if (!ProviderScope.containerOf(
                 context,
-              ).read(modoSimplificadoProvider))
+              ).read(modoSimplificadoProvider)) {
                 context.push('/reports');
+              }
             },
-            icon: Icon(Icons.download_outlined, size: 16),
+            icon: const Icon(Icons.download_outlined, size: 16),
             label: const Text(
               'Exportar Resumen',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
@@ -466,7 +471,7 @@ class AppShell extends ConsumerWidget {
     bool puede(String permiso) => rolTienePermiso(rolUsuario, permiso);
 
     final primary = Theme.of(context).colorScheme.primary;
-    final sidebarBase = const Color(0xFF111827);
+    const sidebarBase = Color(0xFF111827);
     final menuBg = BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
@@ -539,7 +544,7 @@ class AppShell extends ConsumerWidget {
 
               // ─── ÍTEMS DEL MENÚ ───
               Expanded(
-                child: ListView(
+                child: _SidebarMenuList(
                   key: const PageStorageKey<String>('app-shell-sidebar'),
                   padding: const EdgeInsets.fromLTRB(10, 14, 10, 20),
                   children: [
@@ -819,6 +824,78 @@ class AppShell extends ConsumerWidget {
                         isPermanent,
                         badgeCount: pedidosPendientes,
                       ),
+                    // [ADMIN_FASE2]
+                    if (esDuenoPlataforma(usernameSesion))
+                      _buildNavItem(
+                        context,
+                        '/admin/negocios',
+                        'Negocios registrados',
+                        Icons.business_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (esDuenoPlataforma(usernameSesion))
+                      _buildNavItem(
+                        context,
+                        '/admin/avisos/nuevo',
+                        'Enviar aviso',
+                        Icons.campaign_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (esDuenoPlataforma(usernameSesion))
+                      _buildNavItem(
+                        context,
+                        '/admin/campanas',
+                        'Campañas y ofertas',
+                        Icons.card_giftcard_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    Consumer(
+                      builder: (contextO, refO, _) {
+                        final vig =
+                            refO.watch(campanasVigentesProvider).valueOrNull ??
+                            const <CampanaPromocional>[];
+                        final aplicadas =
+                            refO
+                                .watch(misCampanasAplicadasProvider)
+                                .valueOrNull ??
+                            const <String>{};
+                        final licO = refO
+                            .watch(licenciaActualProvider)
+                            .valueOrNull;
+                        bool elegible(CampanaPromocional c) {
+                          switch (c.segmentoObjetivo) {
+                            case 'negocios_activos':
+                              return licO?.estado == 'activa';
+                            case 'plan_especifico':
+                              return licO != null &&
+                                  licO.plan.toLowerCase() ==
+                                      (c.planAplicar ?? '').toLowerCase();
+                            case 'nuevas_cuentas':
+                              return false;
+                            default:
+                              return true;
+                          }
+                        }
+
+                        final badgeO = vig
+                            .where(
+                              (c) => elegible(c) && !aplicadas.contains(c.id),
+                            )
+                            .length;
+                        return _buildNavItem(
+                          context,
+                          '/ofertas-disponibles',
+                          'Ofertas disponibles',
+                          Icons.local_offer_outlined,
+                          currentPath,
+                          isPermanent,
+                          badgeCount: badgeO,
+                        );
+                      },
+                    ),
                     if (esAdmin || esDuenoPlataforma(usernameSesion))
                       _buildNavItem(
                         context,
@@ -959,7 +1036,7 @@ class AppShell extends ConsumerWidget {
                       hoverColor: const Color(0x33FFFFFF),
                       splashColor: const Color(0x44FFFFFF),
                       focusColor: const Color(0x22FFFFFF),
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.logout,
                         color: AppColors.grey400,
                         size: 20,
@@ -1066,7 +1143,7 @@ class AppShell extends ConsumerWidget {
     int badgeCount = 0,
   }) {
     final primary = Theme.of(context).colorScheme.primary;
-    final sidebarBase = const Color(0xFF111827);
+    const sidebarBase = Color(0xFF111827);
     final sidebarBg = Color.lerp(sidebarBase, primary, 0.48)!;
     final esSeleccionado =
         currentPath == routePath || currentPath.startsWith('$routePath/');
@@ -1084,13 +1161,12 @@ class AppShell extends ConsumerWidget {
           splashColor: const Color(0x44FFFFFF),
           highlightColor: const Color(0x22FFFFFF),
           onTap: () {
-            if (!isPermanent &&
-                (Scaffold.maybeOf(context)?.isDrawerOpen ?? false)) {
-              Navigator.of(context).pop();
+            final router = GoRouter.of(context);
+            final scaffold = Scaffold.maybeOf(context);
+            if (!isPermanent && scaffold?.isDrawerOpen == true) {
+              scaffold!.closeDrawer();
             }
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (currentPath != routePath) context.go(routePath);
-            });
+            if (currentPath != routePath) router.go(routePath);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -1207,6 +1283,63 @@ class AppShell extends ConsumerWidget {
             ),
     );
   }
+}
+
+/// Keeps the sidebar position while GoRouter replaces a top-level route.
+class _SidebarMenuList extends StatefulWidget {
+  const _SidebarMenuList({
+    super.key,
+    required this.padding,
+    required this.children,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final List<Widget> children;
+
+  @override
+  State<_SidebarMenuList> createState() => _SidebarMenuListState();
+}
+
+class _SidebarMenuListState extends State<_SidebarMenuList> {
+  late final ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController(
+      initialScrollOffset: AppShell._sidebarScrollOffset,
+    )..addListener(_saveOffset);
+  }
+
+  void _saveOffset() {
+    final positions = _controller.positions;
+    if (positions.length != 1) return;
+
+    final position = positions.single;
+    if (!position.hasPixels || !position.haveDimensions) return;
+
+    final offset = position.pixels;
+    if (!offset.isFinite) return;
+
+    AppShell._sidebarScrollOffset = offset
+        .clamp(position.minScrollExtent, position.maxScrollExtent)
+        .toDouble();
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_saveOffset);
+    _saveOffset();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    controller: _controller,
+    padding: widget.padding,
+    children: widget.children,
+  );
 }
 
 class _UpdatePromptGate {

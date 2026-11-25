@@ -153,7 +153,7 @@ class _EditarPreciosProductoPageState
                       labelText: 'Margen de ganancia %',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.calculate),
+                        icon: const Icon(Icons.calculate),
                         onPressed: _calcularPrecioDesdeMargen,
                       ),
                     ),
@@ -167,7 +167,7 @@ class _EditarPreciosProductoPageState
                       labelText: 'Precio de Venta',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.sync),
+                        icon: const Icon(Icons.sync),
                         onPressed: _calcularMargenDesdePrecio,
                       ),
                     ),

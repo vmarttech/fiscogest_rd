@@ -11,17 +11,17 @@ class ClienteCompletoRepository {
   final ClienteDao _dao;
 
   ClienteCompleto _map(ClientesTableData r) => ClienteCompleto(
-        id: r.id,
-        nombre: r.nombre,
-        direccion: r.direccion,
-        telefono: r.telefono,
-        correo: r.correo,
-        rncCedula: r.rncCedula,
-        activo: r.activo,
-        ingresoMensual: r.ingresoMensual,
-        limiteCuotaMensual: r.limiteCuotaMensual,
-        saldoPendiente: r.saldoPendiente,
-      );
+    id: r.id,
+    nombre: r.nombre,
+    direccion: r.direccion,
+    telefono: r.telefono,
+    correo: r.correo,
+    rncCedula: r.rncCedula,
+    activo: r.activo,
+    ingresoMensual: r.ingresoMensual,
+    limiteCuotaMensual: r.limiteCuotaMensual,
+    saldoPendiente: r.saldoPendiente,
+  );
 
   Future<List<ClienteCompleto>> obtenerClientes() async {
     final registros = await _dao.obtenerTodos();
@@ -34,22 +34,24 @@ class ClienteCompletoRepository {
   }
 
   Future<void> agregarCliente(ClienteCompleto cliente) async {
-    await LicenciaLimitesGuard(_db).assertPuedeCrearCliente();
-    final codigoUnico = 'CLI-${DateTime.now().millisecondsSinceEpoch}';
-    await _dao.insertarOActualizar(
-      ClientesTableCompanion.insert(
-        codigo: codigoUnico,
-        nombre: cliente.nombre,
-        direccion: cliente.direccion,
-        telefono: cliente.telefono,
-        correo: cliente.correo,
-        rncCedula: cliente.rncCedula,
-        activo: Value(cliente.activo),
-        ingresoMensual: Value(cliente.ingresoMensual),
-        limiteCuotaMensual: Value(cliente.limiteCuotaMensual),
-        saldoPendiente: Value(cliente.saldoPendiente),
-      ),
-    );
+    await _db.transaction(() async {
+      await LicenciaLimitesGuard(_db).registrarClienteNuevo();
+      final codigoUnico = 'CLI-${DateTime.now().millisecondsSinceEpoch}';
+      await _dao.insertarOActualizar(
+        ClientesTableCompanion.insert(
+          codigo: codigoUnico,
+          nombre: cliente.nombre,
+          direccion: cliente.direccion,
+          telefono: cliente.telefono,
+          correo: cliente.correo,
+          rncCedula: cliente.rncCedula,
+          activo: Value(cliente.activo),
+          ingresoMensual: Value(cliente.ingresoMensual),
+          limiteCuotaMensual: Value(cliente.limiteCuotaMensual),
+          saldoPendiente: Value(cliente.saldoPendiente),
+        ),
+      );
+    });
   }
 
   Future<void> actualizarCliente(ClienteCompleto cliente) async {

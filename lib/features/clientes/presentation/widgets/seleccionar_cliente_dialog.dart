@@ -235,10 +235,11 @@ class _NuevoClienteFormDialogState
         );
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 

@@ -331,13 +331,13 @@ class _DetalleCuentaPagarPageState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       TextButton.icon(
-                        icon: Icon(Icons.arrow_back, size: 18),
+                        icon: const Icon(Icons.arrow_back, size: 18),
                         label: const Text('Volver'),
                         onPressed: () => context.pop(),
                       ),
                       if (!esPequena && puedeAbonar)
                         ElevatedButton.icon(
-                          icon: Icon(Icons.payment, size: 18),
+                          icon: const Icon(Icons.payment, size: 18),
                           label: const Text('Registrar Abono'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(
@@ -359,7 +359,7 @@ class _DetalleCuentaPagarPageState
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        icon: Icon(Icons.payment, size: 18),
+                        icon: const Icon(Icons.payment, size: 18),
                         label: const Text('Registrar Abono'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(

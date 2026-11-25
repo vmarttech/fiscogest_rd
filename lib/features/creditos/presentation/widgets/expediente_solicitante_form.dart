@@ -240,10 +240,11 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
     try {
       await widget.onGuardar(_leer());
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _guardando = false;
         });
+      }
     }
   }
 

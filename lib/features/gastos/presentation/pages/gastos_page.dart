@@ -221,7 +221,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 );
                 if (d != null) setLocal(() => fecha = d);
               },
-              icon: Icon(Icons.calendar_today, size: 16),
+              icon: const Icon(Icons.calendar_today, size: 16),
               label: Text('Fecha: ${_fmtCorto.format(fecha)}'),
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
@@ -296,7 +296,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-            child: Icon(Icons.receipt_long_rounded, color: Color(0xFF2563EB)),
+            child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF2563EB)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -320,7 +320,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               ),
               IconButton(
                 onPressed: () => Navigator.pop(ctx),
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close),
               ),
             ],
           ),
@@ -423,7 +423,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                             const Spacer(),
                             FilledButton.icon(
                               onPressed: () => guardar(ctx),
-                              icon: Icon(Icons.check, size: 18),
+                              icon: const Icon(Icons.check, size: 18),
                               label: const Text('Guardar'),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF2563EB),
@@ -550,7 +550,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               elevation: 4,
-              icon: Icon(Icons.add_rounded),
+              icon: const Icon(Icons.add_rounded),
               label: const Text(
                 'Registrar',
                 style: TextStyle(fontWeight: FontWeight.w800),
@@ -558,7 +558,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             )
           : null,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -632,7 +632,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                             ),
                             FilledButton.icon(
                               onPressed: () => _abrirForm(),
-                              icon: Icon(Icons.add, size: 18),
+                              icon: const Icon(Icons.add, size: 18),
                               label: const Text('Registrar Gasto'),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF2563EB),
@@ -742,7 +742,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                   fontSize: 13,
                                   color: Color(0xFF9CA3AF),
                                 ),
-                                prefixIcon: Icon(
+                                prefixIcon: const Icon(
                                   Icons.search,
                                   size: 20,
                                   color: Color(0xFF9CA3AF),
@@ -755,13 +755,13 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFFE5E7EB),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Color(0xFFE5E7EB),
                                   ),
                                 ),
@@ -834,7 +834,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-                                        Icon(
+                                        const Icon(
                                           Icons.keyboard_arrow_down,
                                           size: 16,
                                           color: Color(0xFF6B7280),
@@ -1051,7 +1051,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                 children: [
                                                   IconButton(
                                                     tooltip: 'Editar',
-                                                    icon: Icon(
+                                                    icon: const Icon(
                                                       Icons.edit_outlined,
                                                       size: 18,
                                                       color: Color(0xFF9CA3AF),
@@ -1061,7 +1061,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                   ),
                                                   IconButton(
                                                     tooltip: 'Eliminar',
-                                                    icon: Icon(
+                                                    icon: const Icon(
                                                       Icons.delete_outline,
                                                       size: 18,
                                                       color: Color(0xFF9CA3AF),
@@ -1071,7 +1071,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                                   ),
                                                   IconButton(
                                                     tooltip: 'Ver',
-                                                    icon: Icon(
+                                                    icon: const Icon(
                                                       Icons.visibility_outlined,
                                                       size: 18,
                                                       color: Color(0xFF9CA3AF),
@@ -1163,7 +1163,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               color: Color(0xFF94A3B8),
               fontWeight: FontWeight.w500,
             ),
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.search_rounded,
               color: Color(0xFF94A3B8),
               size: 20,
@@ -1176,11 +1176,11 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -1521,7 +1521,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   IconButton(
                     tooltip: 'Eliminar',
                     onPressed: () => _eliminar(g),
-                    icon: Icon(Icons.delete_outline_rounded, size: 18),
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
                     color: const Color(0xFFEF4444),
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
@@ -1619,7 +1619,7 @@ class _KpiCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Colors.white, Color(0xFFF0FDFA)],

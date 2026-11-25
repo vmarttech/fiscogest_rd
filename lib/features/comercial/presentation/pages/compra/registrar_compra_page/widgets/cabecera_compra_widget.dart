@@ -365,10 +365,11 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                           ),
                       ],
                       onChanged: (v) {
-                        if (v != null)
+                        if (v != null) {
                           setState(() {
                             _sucursal = v;
                           });
+                        }
                       },
                     ),
                   ),

@@ -632,7 +632,7 @@ class _NuevaVentaBorradorPageState
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, true),
-                icon: Icon(Icons.receipt_long_outlined, size: 18),
+                icon: const Icon(Icons.receipt_long_outlined, size: 18),
                 label: const Text('Imprimir / enviar'),
               ),
             ],
@@ -662,7 +662,7 @@ class _NuevaVentaBorradorPageState
                 ),
                 FilledButton.icon(
                   onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
-                  icon: Icon(Icons.chat_outlined, size: 18),
+                  icon: const Icon(Icons.chat_outlined, size: 18),
                   label: const Text('Recibo digital'),
                 ),
               ],
@@ -851,7 +851,7 @@ class _NuevaVentaBorradorPageState
       // En desktop la entrada es directa: atrás → Dashboard
       leading: (_modoFormularioCredito && _estadoFormularioCredito != null)
           ? IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               tooltip: 'Volver al POS',
               onPressed: _cerrarFormularioCredito,
             )
@@ -954,7 +954,7 @@ class _NuevaVentaBorradorPageState
 
     return Container(
       height: 48,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
       ),
@@ -2508,7 +2508,7 @@ class _NuevaVentaBorradorPageState
                               ),
                             ),
                             IconButton(
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.delete_outline,
                                 size: 20,
                                 color: AppColors.error,

@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
 import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync_policy.dart';
 
 /// Baja datos de Supabase → Drift para el negocio actual.
 class SyncPull {
@@ -34,6 +35,12 @@ class SyncPull {
       debugPrint('SyncPull: licencia $e');
     }
     await _pullUsuarios(negocioId);
+    if (!await LicenciaSyncPolicy.puedeSincronizarDatosOperativos(_db)) {
+      await _pullPedidos(negocioId);
+      await _pullDispositivos(negocioId);
+      debugPrint('SyncPull: plan local sin descarga operativa');
+      return;
+    }
     await _pullProductos(negocioId);
     await _pullClientes(negocioId);
     await _pullPedidos(negocioId);

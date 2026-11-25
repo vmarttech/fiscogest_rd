@@ -3,12 +3,14 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync_policy.dart';
 
 class FioSync {
   FioSync(this._db);
   final AppDatabase _db;
 
   Future<void> pushTodos() async {
+    if (!await LicenciaSyncPolicy.puedeSincronizarDatosOperativos(_db)) return;
     if (!SupabaseConfig.isConfigured) return;
     final negocioId = await NegocioLocal.getId();
     if (negocioId == null || negocioId.isEmpty) {
@@ -23,17 +25,17 @@ class FioSync {
     final payload = rows
         .map(
           (f) => <String, dynamic>{
-              'negocio_id': negocioId,
-              'id_local': f.id,
-              'nombre_cliente': f.nombreCliente,
-              'monto_original': f.montoOriginal,
-              'monto_abonado': f.montoAbonado,
-              'saldo_pendiente': f.saldoPendiente,
-              'fecha': f.fecha.toUtc().toIso8601String(),
-              'nota': f.nota,
-              'estado': f.estado,
-              'venta_id_local': f.ventaId,
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            'negocio_id': negocioId,
+            'id_local': f.id,
+            'nombre_cliente': f.nombreCliente,
+            'monto_original': f.montoOriginal,
+            'monto_abonado': f.montoAbonado,
+            'saldo_pendiente': f.saldoPendiente,
+            'fecha': f.fecha.toUtc().toIso8601String(),
+            'nota': f.nota,
+            'estado': f.estado,
+            'venta_id_local': f.ventaId,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           },
         )
         .toList();

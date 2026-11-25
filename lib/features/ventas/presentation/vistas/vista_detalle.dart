@@ -556,7 +556,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.arrow_back,
                         color: AppColors.textSecondary,
                       ),
@@ -1030,11 +1030,11 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     height: 48,
                     child: OutlinedButton.icon(
                       onPressed: () => _rechazarCredito(context, ref),
-                      icon: Icon(Icons.cancel_outlined, size: 18),
+                      icon: const Icon(Icons.cancel_outlined, size: 18),
                       label: const Text('Rechazar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
-                        side: BorderSide(color: AppColors.error),
+                        side: const BorderSide(color: AppColors.error),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1047,7 +1047,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     height: 48,
                     child: ElevatedButton.icon(
                       onPressed: () => _aprobarCredito(context, ref),
-                      icon: Icon(Icons.check_circle_outline, size: 18),
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
                       label: const Text('APROBAR CRÉDITO'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.success,
@@ -1130,7 +1130,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       height: altura,
                       child: OutlinedButton.icon(
                         onPressed: () => _rechazarCredito(context, ref),
-                        icon: Icon(Icons.cancel_outlined, size: 18),
+                        icon: const Icon(Icons.cancel_outlined, size: 18),
                         label: Text(
                           'Rechazar',
                           style: TextStyle(
@@ -1140,7 +1140,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.error,
-                          side: BorderSide(color: AppColors.error),
+                          side: const BorderSide(color: AppColors.error),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1155,7 +1155,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                       height: altura,
                       child: ElevatedButton.icon(
                         onPressed: () => _aprobarCredito(context, ref),
-                        icon: Icon(Icons.check_circle_outline, size: 18),
+                        icon: const Icon(Icons.check_circle_outline, size: 18),
                         label: Text(
                           'APROBAR CRÉDITO',
                           style: TextStyle(

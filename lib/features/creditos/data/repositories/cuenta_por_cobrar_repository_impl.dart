@@ -46,7 +46,9 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       clienteId: row.clienteId,
       ventaId: row.ventaId,
       totalOriginal: row.montoOriginal,
-      abonoInicial: row.montoAbonado,
+      // El capital se guarda neto del abono inicial; montoAbonado es el
+      // acumulado de cobros posteriores.
+      abonoInicial: 0,
       tasaInteres: row.tasaInteres,
       montoInteres: row.montoInteresTotal,
       numeroCuotas: row.numeroCuotas,
@@ -54,6 +56,69 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       fechaVencimiento: row.fechaVencimiento,
       estado: _desdeCobrarEstado(row.estado, row.fechaVencimiento),
       abonos: abonos,
+    );
+  }
+
+  List<Cuota> _mapearCuotas(
+    Iterable<CuotaCuentaData> rows, {
+    Map<int, double> moraPorCuota = const <int, double>{},
+  }) => [
+    for (final q in rows)
+      Cuota(
+        id: q.id,
+        numeroCuota: q.numero,
+        fechaVencimiento: q.fechaVencimiento,
+        montoCapital: q.montoCapital > 0.0001
+            ? q.montoCapital
+            : (q.monto - q.montoInteres),
+        montoInteres: q.montoInteres,
+        montoTotal: q.monto,
+        saldoDespues: (q.monto - q.montoPagado).clamp(0.0, double.infinity),
+        saldoCuotaPendiente: (q.monto - q.montoPagado).clamp(
+          0.0,
+          double.infinity,
+        ),
+        pagada: q.estado == 'pagada' || q.monto - q.montoPagado <= 0.001,
+        fechaPago: q.fechaPago,
+        moraPendiente: moraPorCuota[q.id] ?? 0,
+      ),
+  ];
+
+  Future<CuentaPorCobrar> _mapearConCuotas(
+    CuentaCobrarData row, {
+    required List<AbonoCredito> abonos,
+    required List<CuotaCuentaData> cuotasRows,
+  }) async {
+    final cuenta = _mapear(row, abonos: abonos);
+    final moraMensual = await _dao.obtenerTasaMoraMensual();
+    final moraPorCuota = cuotasRows.isEmpty
+        ? const <int, double>{}
+        : await _dao.moraPendientePorCuota(row.id, moraMensual: moraMensual);
+    final cuotas = _mapearCuotas(cuotasRows, moraPorCuota: moraPorCuota);
+    if (cuotas.isEmpty) return cuenta.copyWith(estado: cuenta.estadoActual());
+    final interesCronograma = cuotas.fold<double>(
+      0,
+      (total, cuota) => total + cuota.montoInteres,
+    );
+    final plan = PlanPago(
+      tasaInteresMensual: row.tasaInteres,
+      numeroCuotas: cuotas.length,
+      montoPorCuota: cuotas.first.montoTotal,
+      fechaPrimerVencimiento: cuotas.first.fechaVencimiento,
+      cuotas: cuotas,
+    );
+    final conPlan = cuenta.copyWith(
+      planPago: plan,
+      numeroCuotas: cuotas.length,
+      tasaInteres: row.tasaInteres,
+      montoInteres: interesCronograma > row.montoInteresTotal
+          ? interesCronograma
+          : row.montoInteresTotal,
+      moraCalculada: moraPorCuota.values.fold<double>(0, (a, b) => a + b),
+    );
+    return conPlan.copyWith(
+      fechaVencimiento: conPlan.fechaProximoVencimiento,
+      estado: conPlan.estadoActual(),
     );
   }
 
@@ -109,6 +174,10 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
       montoOriginal: capital,
       montoAbonado: 0.0,
       fechaVencimiento: cuenta.fechaVencimiento,
+      montoInteresTotal: plan.cuotas.fold<double>(
+        0,
+        (total, cuota) => total + cuota.montoInteres,
+      ),
     );
 
     if (plan.cuotas.isNotEmpty) {
@@ -142,39 +211,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     if (row == null) return null;
     final abonos = await listarAbonos(cuentaId);
     final cuotasRows = await _dao.listarCuotas(cuentaId);
-    final tasa = row.tasaInteres;
-    final cuotas = [
-      for (final q in cuotasRows)
-        Cuota(
-          id: q.id,
-          numeroCuota: q.numero,
-          fechaVencimiento: q.fechaVencimiento,
-          montoCapital: q.montoCapital > 0.0001
-              ? q.montoCapital
-              : (q.monto - q.montoInteres),
-          montoInteres: q.montoInteres,
-          montoTotal: q.monto,
-          saldoDespues: (q.monto - q.montoPagado).clamp(0.0, double.infinity),
-          pagada: q.estado == 'pagada',
-          fechaPago: q.fechaPago,
-        ),
-    ];
-    PlanPago? plan;
-    if (cuotas.isNotEmpty) {
-      plan = PlanPago(
-        tasaInteresMensual: tasa,
-        numeroCuotas: cuotas.length,
-        montoPorCuota: cuotas.first.montoTotal,
-        fechaPrimerVencimiento: cuotas.first.fechaVencimiento,
-        cuotas: cuotas,
-      );
-    }
-    return _mapear(row, abonos: abonos).copyWith(
-      planPago: plan,
-      numeroCuotas: cuotas.isEmpty ? row.numeroCuotas : cuotas.length,
-      tasaInteres: tasa,
-      montoInteres: row.montoInteresTotal,
-    );
+    return _mapearConCuotas(row, abonos: abonos, cuotasRows: cuotasRows);
   }
 
   @override
@@ -189,25 +226,50 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     double? montoMaximo,
     String? busqueda,
   }) async {
-    final CobrarEstado? ce = estado != null ? _aCobrarEstado(estado) : null;
     final rows = await _dao.listarCuentas(
-      estado: ce,
+      // El estado almacenado puede quedar viejo cuando llega una fecha de pago.
+      // Se determina luego usando las cuotas pendientes de cada cuenta.
+      estado: null,
       clienteId: clienteId,
       fechaDesde: desde,
       fechaHasta: hasta,
-      venceDesde: venceDesde,
-      venceHasta: venceHasta,
+      venceDesde: null,
+      venceHasta: null,
       montoMinimo: montoMinimo,
       montoMaximo: montoMaximo,
     );
-    return Future.wait(
-      rows.map((row) async => _mapear(row, abonos: await listarAbonos(row.id))),
+    final cuotasRows = await _dao.listarCuotasDeCuentas(rows.map((r) => r.id));
+    final cuotasPorCuenta = <int, List<CuotaCuentaData>>{};
+    for (final cuota in cuotasRows) {
+      cuotasPorCuenta.putIfAbsent(cuota.cuentaCobrarId, () => []).add(cuota);
+    }
+    final cuentas = await Future.wait(
+      rows.map(
+        (row) async => _mapearConCuotas(
+          row,
+          abonos: await listarAbonos(row.id),
+          cuotasRows: cuotasPorCuenta[row.id] ?? const <CuotaCuentaData>[],
+        ),
+      ),
     );
+    final desdeVence = venceDesde == null ? null : _dia(venceDesde);
+    final hastaVence = venceHasta == null ? null : _dia(venceHasta);
+    return cuentas
+        .where((cuenta) {
+          if (estado != null && cuenta.estadoActual() != estado) return false;
+          final fecha = _dia(cuenta.fechaProximoVencimiento);
+          if (desdeVence != null && fecha.isBefore(desdeVence)) return false;
+          if (hastaVence != null && fecha.isAfter(hastaVence)) return false;
+          return true;
+        })
+        .toList(growable: false);
   }
+
+  DateTime _dia(DateTime fecha) => DateTime(fecha.year, fecha.month, fecha.day);
 
   @override
   Future<int> registrarAbono(AbonoCredito abono) async {
-    final cuenta = await _dao.obtenerCuentaPorId(abono.cuentaId);
+    final cuenta = await obtenerPorId(abono.cuentaId);
     if (cuenta == null) throw StateError('La cuenta por cobrar no existe');
     final saldoAnt = cuenta.saldoPendiente;
     if (abono.monto <= 0) {
@@ -220,6 +282,7 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     return _dao.registrarPago(
       cuentaId: abono.cuentaId,
       montoPago: abono.monto,
+      moraMensual: await _dao.obtenerTasaMoraMensual(),
       cobro: CobrosTableCompanion.insert(
         cuentaCobrarId: abono.cuentaId,
         fecha: abono.fecha,
@@ -268,32 +331,69 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
   }
 
   @override
-  Future<double> totalPorCobrar() => _dao.totalPorCobrar();
+  Future<double> totalPorCobrar() async {
+    final cuentas = await listarCuentas();
+    return cuentas.fold<double>(
+      0,
+      (total, cuenta) => total + cuenta.saldoPendiente,
+    );
+  }
 
   @override
-  Future<double> totalVencido() => _dao.totalVencido();
+  Future<double> totalVencido() async {
+    final cuentas = await listarCuentas();
+    return cuentas.fold<double>(
+      0,
+      (total, cuenta) =>
+          total + cuenta.saldoCuotasVencidas() + cuenta.moraCalculada,
+    );
+  }
 
   @override
-  Future<int> cantidadClientesConDeuda() => _dao.cantidadClientesConDeuda();
+  Future<int> cantidadClientesConDeuda() async {
+    final cuentas = await listarCuentas();
+    return cuentas
+        .where((cuenta) => cuenta.saldoPendiente > 0.001)
+        .map((cuenta) => cuenta.clienteId)
+        .toSet()
+        .length;
+  }
 
   @override
-  Future<int> cantidadClientesVencidos() => _dao.cantidadClientesVencidos();
+  Future<int> cantidadClientesVencidos() async {
+    final cuentas = await listarCuentas();
+    return cuentas
+        .where((cuenta) => cuenta.estadoActual() == EstadoCredito.vencido)
+        .map((cuenta) => cuenta.clienteId)
+        .toSet()
+        .length;
+  }
 
   @override
   Future<double> totalPorVencerEnRango(DateTime desde, DateTime hasta) async {
-    final lista = await _dao.listarCuentas(
-      venceDesde: desde,
-      venceHasta: hasta,
-    );
-    return lista.fold<double>(0.0, (s, c) => s + c.saldoPendiente);
+    final inicio = _dia(desde);
+    final fin = _dia(hasta);
+    final cuentas = await listarCuentas();
+    return cuentas.fold<double>(0, (total, cuenta) {
+      final fecha = _dia(cuenta.fechaProximoVencimiento);
+      if (fecha.isBefore(inicio) || fecha.isAfter(fin)) return total;
+      return total + cuenta.saldoPendiente;
+    });
   }
 
   @override
   Future<List<CuentaPorCobrar>> listarVencidas({int? limite}) async {
-    final rows = await _dao.listarVencidas(limite: limite);
-    return Future.wait(
-      rows.map((row) async => _mapear(row, abonos: await listarAbonos(row.id))),
-    );
+    final cuentas = await listarCuentas();
+    final vencidas =
+        cuentas
+            .where((cuenta) => cuenta.estadoActual() == EstadoCredito.vencido)
+            .toList()
+          ..sort(
+            (a, b) => b
+                .diasVencido(DateTime.now())
+                .compareTo(a.diasVencido(DateTime.now())),
+          );
+    return limite == null ? vencidas : vencidas.take(limite).toList();
   }
 
   @override
@@ -301,13 +401,21 @@ class CuentaPorCobrarRepositoryImpl implements ICuentaPorCobrarRepository {
     required int diasAnticipacion,
     int? limite,
   }) async {
-    final rows = await _dao.listarProximasAVencer(
-      diasAnticipacion: diasAnticipacion,
-      limite: limite,
-    );
-    return Future.wait(
-      rows.map((row) async => _mapear(row, abonos: await listarAbonos(row.id))),
-    );
+    final hoy = _dia(DateTime.now());
+    final limiteFecha = hoy.add(Duration(days: diasAnticipacion));
+    final proximas =
+        (await listarCuentas()).where((cuenta) {
+          if (cuenta.estaPagada ||
+              cuenta.estadoActual(hoy: hoy) == EstadoCredito.vencido) {
+            return false;
+          }
+          final fecha = _dia(cuenta.fechaProximoVencimiento);
+          return !fecha.isBefore(hoy) && !fecha.isAfter(limiteFecha);
+        }).toList()..sort(
+          (a, b) =>
+              a.fechaProximoVencimiento.compareTo(b.fechaProximoVencimiento),
+        );
+    return limite == null ? proximas : proximas.take(limite).toList();
   }
 
   @override

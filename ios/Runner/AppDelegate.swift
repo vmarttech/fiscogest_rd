@@ -14,6 +14,18 @@ import UIKit
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     let mensajero = engineBridge.applicationRegistrar.messenger()
+      let canalIdentidad = FlutterMethodChannel(name: "fiscogest/device_identity", binaryMessenger: mensajero)
+      canalIdentidad.setMethodCallHandler { call, result in
+        guard call.method == "getStableDeviceId" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        do {
+          result(try DeviceIdentity.getOrCreate())
+        } catch {
+          result(FlutterError(code: "device_id_unavailable", message: error.localizedDescription, details: nil))
+        }
+      }
       let canal = FlutterMethodChannel(name: "fiscogest/pkcs12", binaryMessenger: mensajero)
       canal.setMethodCallHandler { call, result in
         guard call.method == "firmar",
@@ -34,6 +46,44 @@ import UIKit
   }
 }
 
+
+enum DeviceIdentity {
+  private static let account = "fiscogest.device.identity.v1"
+
+  static func getOrCreate() throws -> String {
+    var query: [String: Any] = [
+      kSecClass as String: kSecClassGenericPassword,
+      kSecAttrService as String: Bundle.main.bundleIdentifier ?? "fiscogest",
+      kSecAttrAccount as String: account,
+      kSecReturnData as String: true,
+      kSecMatchLimit as String: kSecMatchLimitOne,
+    ]
+    var item: CFTypeRef?
+    let status = SecItemCopyMatching(query as CFDictionary, &item)
+    if status == errSecSuccess,
+       let data = item as? Data,
+       let value = String(data: data, encoding: .utf8) {
+      return value
+    }
+    guard status == errSecItemNotFound else {
+      throw NSError(domain: "DeviceIdentity", code: Int(status), userInfo: [
+        NSLocalizedDescriptionKey: "No se pudo leer la identidad segura del dispositivo.",
+      ])
+    }
+
+    let value = UUID().uuidString
+    query.removeValue(forKey: kSecReturnData as String)
+    query.removeValue(forKey: kSecMatchLimit as String)
+    query[kSecValueData as String] = Data(value.utf8)
+    query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+    let addStatus = SecItemAdd(query as CFDictionary, nil)
+    if addStatus == errSecSuccess { return value }
+    if addStatus == errSecDuplicateItem { return try getOrCreate() }
+    throw NSError(domain: "DeviceIdentity", code: Int(addStatus), userInfo: [
+      NSLocalizedDescriptionKey: "No se pudo guardar la identidad segura del dispositivo.",
+    ])
+  }
+}
 
 enum Pkcs12Movil {
   static func firmar(ruta: String, clave: String, datos: Data) throws -> [String: String] {

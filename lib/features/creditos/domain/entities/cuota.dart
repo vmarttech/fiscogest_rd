@@ -10,6 +10,8 @@ class Cuota {
     required this.saldoDespues,
     this.pagada = false,
     this.fechaPago,
+    this.saldoCuotaPendiente,
+    this.moraPendiente,
   });
 
   final int? id;
@@ -22,6 +24,12 @@ class Cuota {
   final bool pagada;
   final DateTime? fechaPago;
 
+  /// Saldo pendiente de esta cuota; null en planes aún no persistidos.
+  final double? saldoCuotaPendiente;
+
+  /// Mora acumulada pendiente desde el último corte de esta cuota.
+  final double? moraPendiente;
+
   Cuota copyWith({
     int? id,
     int? numeroCuota,
@@ -32,6 +40,8 @@ class Cuota {
     double? saldoDespues,
     bool? pagada,
     DateTime? fechaPago,
+    double? saldoCuotaPendiente,
+    double? moraPendiente,
   }) {
     return Cuota(
       id: id ?? this.id,
@@ -43,6 +53,8 @@ class Cuota {
       saldoDespues: saldoDespues ?? this.saldoDespues,
       pagada: pagada ?? this.pagada,
       fechaPago: fechaPago ?? this.fechaPago,
+      saldoCuotaPendiente: saldoCuotaPendiente ?? this.saldoCuotaPendiente,
+      moraPendiente: moraPendiente ?? this.moraPendiente,
     );
   }
 }

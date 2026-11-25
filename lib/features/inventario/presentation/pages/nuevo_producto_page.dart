@@ -228,7 +228,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         child: IconButton.filledTonal(
           tooltip: tooltip,
           onPressed: onCrear,
-          icon: Icon(Icons.add_rounded),
+          icon: const Icon(Icons.add_rounded),
         ),
       ),
     ],

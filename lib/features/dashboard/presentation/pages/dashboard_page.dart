@@ -90,7 +90,7 @@ class DashboardPage extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.calendar_today_outlined,
                   size: 16,
                   color: AppColors.textSecondary,
@@ -103,7 +103,7 @@ class DashboardPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
+                const Icon(
                   Icons.keyboard_arrow_down,
                   size: 18,
                   color: AppColors.textSecondary,
@@ -237,57 +237,57 @@ class DashboardPage extends ConsumerWidget {
         title: 'VENTAS HOY',
         value: '\$18,392',
         icon: Icons.point_of_sale_outlined,
-        bg: Color(0xFFECFDF5),
+        bg: const Color(0xFFECFDF5),
         iconColor: AppColors.success,
       ),
       _SmallKpi(
         title: 'ALERTAS',
         value: '12',
         icon: Icons.warning_amber_rounded,
-        bg: Color(0xFFFFF7ED),
+        bg: const Color(0xFFFFF7ED),
         iconColor: AppColors.warning,
       ),
       _SmallKpi(
         title: 'VALOR STOCK',
         value: '\$2.8M',
         icon: Icons.account_balance_wallet_outlined,
-        bg: Color(0xFFFEF2F2),
+        bg: const Color(0xFFFEF2F2),
         iconColor: AppColors.error,
       ),
       _SmallKpi(
         title: 'FILL RATE',
         value: '92.6%',
         icon: Icons.trending_up_rounded,
-        bg: Color(0xFFEFF6FF),
+        bg: const Color(0xFFEFF6FF),
         iconColor: AppColors.info,
       ),
       _SmallKpi(
         title: 'CLIENTES',
         value: '—',
         icon: Icons.people_outline,
-        bg: Color(0xFFF5F3FF),
-        iconColor: Color(0xFF7C3AED),
+        bg: const Color(0xFFF5F3FF),
+        iconColor: const Color(0xFF7C3AED),
       ),
       _SmallKpi(
         title: 'PRODUCTOS',
         value: '—',
         icon: Icons.inventory_2_outlined,
-        bg: Color(0xFFECFEFF),
+        bg: const Color(0xFFECFEFF),
         iconColor: Theme.of(context).colorScheme.primary,
       ),
       _SmallKpi(
         title: 'COMPRAS',
         value: '—',
         icon: Icons.shopping_cart_outlined,
-        bg: Color(0xFFF0FDF4),
+        bg: const Color(0xFFF0FDF4),
         iconColor: AppColors.success,
       ),
       _SmallKpi(
         title: 'PENDIENTES',
         value: '—',
         icon: Icons.pending_actions_outlined,
-        bg: Color(0xFFFDF4FF),
-        iconColor: Color(0xFFA855F7),
+        bg: const Color(0xFFFDF4FF),
+        iconColor: const Color(0xFFA855F7),
       ),
     ];
 
@@ -521,7 +521,7 @@ class DashboardPage extends ConsumerWidget {
                       color: AppColors.info.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.notifications_active_outlined,
                       size: 18,
                       color: AppColors.info,

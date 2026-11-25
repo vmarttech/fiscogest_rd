@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/core/sync/supabase/venta_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/compra_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/caja_sync.dart';
 import 'package:fiscogest_rd/core/sync/supabase/fio_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync_policy.dart';
 
 /// Único punto de entrada para sync del negocio + plataforma.
 ///
@@ -29,7 +30,7 @@ class SyncEngine {
       debugPrint('SyncEngine.pushAll: Supabase no configurado');
       return;
     }
-        debugPrint('SyncEngine.pushAll: inicio');
+    debugPrint('SyncEngine.pushAll: inicio');
     Future<void> step(String name, Future<void> Function() fn) async {
       try {
         await fn();
@@ -43,6 +44,10 @@ class SyncEngine {
     await step('dispositivos', () => DispositivoSync(_db).pushEsteEquipo());
     await step('usuarios', () => UsuarioSync(_db).pushTodos());
     await step('pedidos', () => PedidoSync(_db).pushTodos());
+    if (!await LicenciaSyncPolicy.puedeSincronizarDatosOperativos(_db)) {
+      debugPrint('SyncEngine.pushAll: plan local sin sync operativo');
+      return;
+    }
     await step('productos', () => ProductoSync(_db).pushTodos());
     await step('clientes', () => ClienteSync(_db).pushTodos());
     await step('ventas', () => VentaSync(_db).pushTodos());
@@ -58,9 +63,8 @@ class SyncEngine {
       debugPrint('SyncEngine.pullAll: Supabase no configurado');
       return;
     }
-        debugPrint('SyncEngine.pullAll: inicio');
+    debugPrint('SyncEngine.pullAll: inicio');
     try {
-      await ProductoSync(_db).pushTodos();
       await SyncPull(_db).pullTodoElNegocio();
       // Cuando existan pulls de ventas/caja, se llaman aquí o dentro de SyncPull.
       debugPrint('SyncEngine.pullAll: OK');

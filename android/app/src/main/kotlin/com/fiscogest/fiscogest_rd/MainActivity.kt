@@ -7,6 +7,19 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "fiscogest/device_identity")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "getStableDeviceId") {
+                    val id = android.provider.Settings.Secure.getString(
+                        contentResolver,
+                        android.provider.Settings.Secure.ANDROID_ID,
+                    )
+                    if (id.isNullOrBlank()) result.error("device_id_unavailable", "Android no proporcionó una identidad estable", null)
+                    else result.success(id)
+                } else {
+                    result.notImplemented()
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "fiscogest/pkcs12")
             .setMethodCallHandler { call, result ->
                 if (call.method != "firmar") {
