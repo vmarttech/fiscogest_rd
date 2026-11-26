@@ -1,0 +1,1317 @@
+
+============================================================
+FILE: lib/features/licencias/domain/device_fingerprint.dart
+============================================================
+import 'dart:math';
+import 'dart:convert';
+import 'dart:io' show File;
+
+import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class DeviceIdentity {
+  const DeviceIdentity({
+    required this.fingerprint,
+    required this.persistenteTrasReinstalar,
+    required this.metodo,
+    this.legacyFingerprint,
+  });
+
+  final String fingerprint;
+  final bool persistenteTrasReinstalar;
+  final String metodo;
+  final String? legacyFingerprint;
+}
+
+/// Identificador pseudónimo. Nunca lee IMEI ni número de serie.
+class DeviceFingerprint {
+  static const _channel = MethodChannel('fiscogest/device_identity');
+  static const _fallbackKey = 'fiscogest_device_id_v2';
+  static const _legacyFile = 'fiscogest_device_id.txt';
+  static const _secureStorage = FlutterSecureStorage();
+  static DeviceIdentity? _identity;
+
+  static Future<String> obtener() async =>
+      (await obtenerResultado()).fingerprint;
+
+  static Future<DeviceIdentity> obtenerResultado() async {
+    final cached = _identity;
+    if (cached != null) return cached;
+    final legacy = await _leerIdAnterior();
+
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
+      try {
+        final raw = await _channel
+            .invokeMethod<String>('getStableDeviceId')
+            .timeout(const Duration(seconds: 3));
+        if (raw != null && raw.trim().isNotEmpty) {
+          return _identity = DeviceIdentity(
+            fingerprint: _hash(raw.trim()),
+            persistenteTrasReinstalar: true,
+            metodo: defaultTargetPlatform == TargetPlatform.android
+                ? 'android_id'
+                : 'keychain_ios',
+            legacyFingerprint: legacy,
+          );
+        }
+      } catch (_) {
+        // La identidad del dispositivo nunca debe impedir iniciar la app.
+      }
+    }
+
+    if (legacy != null && legacy.isNotEmpty) {
+      return _identity = DeviceIdentity(
+        fingerprint: legacy,
+        persistenteTrasReinstalar: false,
+        metodo: 'identificador_local_anterior',
+      );
+    }
+
+    final stored = await _leerAlmacenamiento();
+    if (stored != null) {
+      return _identity = DeviceIdentity(
+        fingerprint: _hash(stored),
+        persistenteTrasReinstalar: false,
+        metodo: 'almacenamiento_local',
+      );
+    }
+
+    final generated = _randomId();
+    await _guardarAlmacenamiento(generated);
+    return _identity = DeviceIdentity(
+      fingerprint: _hash(generated),
+      persistenteTrasReinstalar: false,
+      metodo: 'temporal',
+    );
+  }
+
+  static Future<String?> _leerIdAnterior() async {
+    if (kIsWeb) return null;
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File(path.join(directory.path, _legacyFile));
+      if (!await file.exists()) return null;
+      final value = (await file.readAsString()).trim();
+      return value.isEmpty ? null : value;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<String?> _leerAlmacenamiento() async {
+    try {
+      final value = await _secureStorage.read(key: _fallbackKey);
+      if (value != null && value.isNotEmpty) return value;
+    } catch (_) {}
+    try {
+      return (await SharedPreferences.getInstance()).getString(_fallbackKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> _guardarAlmacenamiento(String value) async {
+    try {
+      await _secureStorage.write(key: _fallbackKey, value: value);
+      return;
+    } catch (_) {}
+    try {
+      await (await SharedPreferences.getInstance()).setString(
+        _fallbackKey,
+        value,
+      );
+    } catch (_) {}
+  }
+
+  static String _hash(String value) => sha256
+      .convert(utf8.encode('com.fiscogest.fiscogest_rd:v1:$value'))
+      .toString();
+
+  static String _randomId() {
+    final random = Random.secure();
+    return List<int>.generate(
+      32,
+      (_) => random.nextInt(256),
+    ).map((n) => n.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  static String plataformaActual() {
+    if (kIsWeb) return 'web';
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => 'android',
+      TargetPlatform.iOS => 'ios',
+      TargetPlatform.linux => 'linux',
+      TargetPlatform.windows => 'windows',
+      TargetPlatform.macOS => 'macos',
+      TargetPlatform.fuchsia => 'otro',
+    };
+  }
+
+  static String tipoActual() {
+    final plataforma = plataformaActual();
+    if (plataforma == 'android' || plataforma == 'ios') return 'movil';
+    if (plataforma == 'web') return 'otro';
+    return 'pc';
+  }
+
+  static String aliasSugerido() {
+    switch (plataformaActual()) {
+      case 'android':
+        return 'Celular Android';
+      case 'ios':
+        return 'iPhone / iPad';
+      case 'linux':
+        return 'PC Linux';
+      case 'windows':
+        return 'PC Windows';
+      case 'macos':
+        return 'Mac';
+      default:
+        return 'Este equipo';
+    }
+  }
+}
+
+============================================================
+FILE: lib/features/licencias/domain/validacion_dispositivo.dart
+============================================================
+import 'package:fiscogest_rd/features/licencias/domain/device_fingerprint.dart';
+
+/// Estados de dominio para la futura respuesta del validador remoto.
+/// No contienen nombres ni parámetros de RPC ni de tablas.
+enum EstadoValidacionDispositivo {
+  nuevo,
+  registrado,
+  pruebaUtilizada,
+  negocioExistente,
+  concesionPromocional,
+  autorizado,
+  pendiente,
+  rechazado,
+}
+
+class SolicitudValidacionDispositivo {
+  const SolicitudValidacionDispositivo({required this.identidad});
+  final DeviceIdentity identidad;
+}
+
+class ResultadoValidacionDispositivo {
+  const ResultadoValidacionDispositivo({
+    required this.estado,
+    this.mensajeUsuario,
+    this.fechaInicio,
+    this.fechaFin,
+  });
+
+  final EstadoValidacionDispositivo estado;
+  final String? mensajeUsuario;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+
+  bool get puedeContinuar =>
+      estado == EstadoValidacionDispositivo.autorizado ||
+      estado == EstadoValidacionDispositivo.concesionPromocional;
+}
+
+/// Punto de extensión. Se conectará al contrato aprobado de Supabase sin
+/// delegar al cliente la concesión de pruebas ni la edición de fechas.
+abstract interface class ValidadorDispositivoRemoto {
+  Future<ResultadoValidacionDispositivo> validar(
+    SolicitudValidacionDispositivo solicitud,
+  );
+}
+
+============================================================
+FILE: lib/features/licencias/domain/dispositivo_service.dart
+============================================================
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/licencias/domain/device_fingerprint.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:uuid/uuid.dart';
+
+class DispositivoInfo {
+  const DispositivoInfo({
+    required this.id,
+    required this.fingerprint,
+    required this.alias,
+    required this.plataforma,
+    required this.tipo,
+    required this.activo,
+    required this.esEsteEquipo,
+    required this.pendienteSync,
+    this.remoteId,
+    this.registradoEn,
+    this.ultimoUso,
+    this.identificacionPersistente = false,
+    this.metodoIdentificacion = 'desconocido',
+    this.pendienteValidacionRemota = true,
+  });
+
+  final int id;
+  final String fingerprint;
+  final String alias;
+  final String plataforma;
+  final String tipo;
+  final bool activo;
+  final bool esEsteEquipo;
+  final bool pendienteSync;
+  final String? remoteId;
+  final DateTime? registradoEn;
+  final DateTime? ultimoUso;
+  final bool identificacionPersistente;
+  final String metodoIdentificacion;
+  final bool pendienteValidacionRemota;
+}
+
+/// Registro local de equipos. Listo para upsert a Supabase.
+class DispositivoService {
+  DispositivoService(this._db);
+  final AppDatabase _db;
+
+  Future<List<DispositivoInfo>> listar({bool soloActivos = true}) async {
+    final identidad = await DeviceFingerprint.obtenerResultado();
+    final fp = identidad.fingerprint;
+    final q = _db.select(_db.dispositivosLicenciaTable);
+    if (soloActivos) {
+      q.where((t) => t.activo.equals(true));
+    }
+    final rows = await q.get();
+    return rows
+        .map(
+          (r) => DispositivoInfo(
+            id: r.id,
+            fingerprint: r.fingerprint,
+            alias: r.alias,
+            plataforma: r.plataforma,
+            tipo: r.tipo,
+            activo: r.activo,
+            esEsteEquipo: r.fingerprint == fp,
+            pendienteSync: r.pendienteSync,
+            remoteId: r.remoteId,
+            registradoEn: DateTime.tryParse(r.registradoEn),
+            ultimoUso: DateTime.tryParse(r.ultimoUso),
+            identificacionPersistente: identidad.persistenteTrasReinstalar,
+            metodoIdentificacion: identidad.metodo,
+          ),
+        )
+        .toList();
+  }
+
+  /// Al arranque: registra o actualiza este equipo y valida cupo.
+  ///
+  /// Offline: el cupo se aplica sobre la BD local (1 fila = este equipo).
+  /// Con Supabase: la lista vendrá de la nube y [maxDispositivos] será real.
+  Future<DispositivoInfo> ensureDispositivoRegistrado() async {
+    final identidad = await DeviceFingerprint.obtenerResultado();
+    final fp = identidad.fingerprint;
+    final ahora = DateTime.now().toIso8601String();
+    final existentes = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.fingerprint.equals(fp))).get();
+
+    if (existentes.isNotEmpty) {
+      final row = existentes.first;
+      await (_db.update(
+        _db.dispositivosLicenciaTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        DispositivosLicenciaTableCompanion(
+          ultimoUso: Value(ahora),
+          activo: const Value(true),
+          pendienteSync: const Value(true),
+        ),
+      );
+      return (await listar(
+        soloActivos: false,
+      )).firstWhere((d) => d.fingerprint == fp);
+    }
+
+    // Desactiva el fingerprint anterior. El sincronizador mantiene este
+    // registro inactivo y registra el nuevo hash sin colisionar el remoteId.
+    final legacy = identidad.legacyFingerprint;
+    if (legacy != null && legacy.isNotEmpty) {
+      final anterior = await (_db.select(
+        _db.dispositivosLicenciaTable,
+      )..where((t) => t.fingerprint.equals(legacy))).getSingleOrNull();
+      if (anterior != null) {
+        await (_db.update(
+          _db.dispositivosLicenciaTable,
+        )..where((t) => t.id.equals(anterior.id))).write(
+          const DispositivosLicenciaTableCompanion(
+            activo: Value(false),
+            pendienteSync: Value(true),
+          ),
+        );
+      }
+    }
+
+    // Cupo local (cuando haya sync, contar activos remotos + locales)
+    final lic = await LicenciaService(_db).obtenerActual();
+    final max =
+        lic?.maxDispositivos ??
+        maxInstalacionesPermitidas(lic?.plan ?? 'gratis');
+    final activos = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.activo.equals(true))).get();
+
+    if (activos.length >= max && max < 999) {
+      // Desarrollador / vitalicio: max alto. Si cupo lleno, aún registramos
+      // este equipo como pendiente y dejamos que la UI avise.
+      // Política v1 offline: siempre permitir ESTE equipo (BD propia).
+    }
+
+    final id = await _db
+        .into(_db.dispositivosLicenciaTable)
+        .insert(
+          DispositivosLicenciaTableCompanion(
+            fingerprint: Value(fp),
+            alias: Value(DeviceFingerprint.aliasSugerido()),
+            plataforma: Value(DeviceFingerprint.plataformaActual()),
+            tipo: Value(DeviceFingerprint.tipoActual()),
+            registradoEn: Value(ahora),
+            ultimoUso: Value(ahora),
+            remoteId: Value(const Uuid().v4()),
+            pendienteSync: const Value(true),
+            activo: const Value(true),
+          ),
+        );
+
+    final row = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.id.equals(id))).getSingle();
+
+    return DispositivoInfo(
+      id: row.id,
+      fingerprint: row.fingerprint,
+      alias: row.alias,
+      plataforma: row.plataforma,
+      tipo: row.tipo,
+      activo: row.activo,
+      esEsteEquipo: true,
+      pendienteSync: row.pendienteSync,
+      remoteId: row.remoteId,
+      registradoEn: DateTime.tryParse(row.registradoEn),
+      ultimoUso: DateTime.tryParse(row.ultimoUso),
+      identificacionPersistente: identidad.persistenteTrasReinstalar,
+      metodoIdentificacion: identidad.metodo,
+    );
+  }
+
+  /// Payload listo para POST/UPSERT a Supabase.
+  Future<List<Map<String, dynamic>>> toSupabasePayload() async {
+    final rows = await _db.select(_db.dispositivosLicenciaTable).get();
+    return [
+      for (final r in rows)
+        {
+          'id': r.remoteId,
+          'negocio_id': r.negocioId,
+          'fingerprint': r.fingerprint,
+          'alias': r.alias,
+          'plataforma': r.plataforma,
+          'tipo': r.tipo,
+          'activo': r.activo,
+          'registrado_en': r.registradoEn,
+          'ultimo_uso': r.ultimoUso,
+        },
+    ];
+  }
+
+  Future<void> marcarSincronizados() async {
+    final ahora = DateTime.now().toIso8601String();
+    await _db
+        .update(_db.dispositivosLicenciaTable)
+        .write(
+          DispositivosLicenciaTableCompanion(
+            pendienteSync: const Value(false),
+            sincronizadoEn: Value(ahora),
+          ),
+        );
+  }
+
+  Future<int> contarActivos() async {
+    final rows = await (_db.select(
+      _db.dispositivosLicenciaTable,
+    )..where((t) => t.activo.equals(true))).get();
+    return rows.length;
+  }
+}
+
+============================================================
+FILE: lib/core/sync/supabase/dispositivo_sync.dart
+============================================================
+import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/features/licencias/domain/dispositivo_service.dart';
+
+class DispositivoSync {
+  DispositivoSync(this._db);
+  final AppDatabase _db;
+
+  Future<void> pushEsteEquipo() async {
+    if (!SupabaseConfig.isConfigured) {
+      debugPrint('DispositivoSync: Supabase no configurado');
+      return;
+    }
+
+    final svc = DispositivoService(_db);
+    final local = await svc.ensureDispositivoRegistrado();
+    final negocioId = await NegocioLocal.getId();
+    if (negocioId == null || negocioId.isEmpty) {
+      debugPrint('DispositivoSync: sin negocio_id');
+      return;
+    }
+
+    final pendientes =
+        await (_db.select(_db.dispositivosLicenciaTable)..where(
+              (t) =>
+                  t.fingerprint.equals(local.fingerprint) |
+                  (t.activo.equals(false) & t.pendienteSync.equals(true)),
+            ))
+            .get();
+    final rows = pendientes
+        .map(
+          (dispositivo) => <String, dynamic>{
+            if (dispositivo.remoteId != null) 'id': dispositivo.remoteId,
+            'negocio_id': negocioId,
+            'fingerprint': dispositivo.fingerprint,
+            'alias': dispositivo.alias,
+            'plataforma': dispositivo.plataforma,
+            'tipo': dispositivo.tipo,
+            'activo': dispositivo.activo,
+            'registrado_en':
+                (DateTime.tryParse(dispositivo.registradoEn) ?? DateTime.now())
+                    .toUtc()
+                    .toIso8601String(),
+            'ultimo_uso':
+                (DateTime.tryParse(dispositivo.ultimoUso) ?? DateTime.now())
+                    .toUtc()
+                    .toIso8601String(),
+          },
+        )
+        .toList();
+
+    await SupabaseRestClient().upsert(
+      table: 'dispositivos_licencia',
+      rows: rows,
+      onConflict: 'negocio_id,fingerprint',
+    );
+
+    await svc.marcarSincronizados();
+    debugPrint('DispositivoSync: OK → dispositivos_licencia');
+  }
+}
+
+============================================================
+FILE: lib/features/licencias/data/dao/dispositivos_licencia_table.dart
+============================================================
+import 'package:drift/drift.dart';
+
+/// Dispositivos vinculados a la licencia (offline-first).
+///
+/// Mapeo previsto Supabase `dispositivos_licencia`:
+///   id uuid PK, negocio_id uuid, fingerprint text unique,
+///   alias text, plataforma text, tipo text, activo bool,
+///   registrado_en timestamptz, ultimo_uso timestamptz,
+///   updated_at timestamptz
+class DispositivosLicenciaTable extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// UUID remoto (Supabase). Null hasta la primera sync.
+  TextColumn get remoteId => text().nullable()();
+
+  /// Negocio/cuenta en nube (futuro). Localmente puede quedar null.
+  TextColumn get negocioId => text().nullable()();
+
+  /// Huella estable del equipo (uuid persistido en disco).
+  TextColumn get fingerprint => text()();
+
+  TextColumn get alias => text().withDefault(const Constant('Este equipo'))();
+
+  /// android | ios | linux | windows | macos | web
+  TextColumn get plataforma => text()();
+
+  /// pc | movil | tablet | otro
+  TextColumn get tipo => text().withDefault(const Constant('pc'))();
+
+  BoolColumn get activo => boolean().withDefault(const Constant(true))();
+
+  TextColumn get registradoEn => text()();
+  TextColumn get ultimoUso => text()();
+
+  /// ISO última sync exitosa a Supabase (null = pendiente).
+  TextColumn get sincronizadoEn => text().nullable()();
+
+  BoolColumn get pendienteSync => boolean().withDefault(const Constant(true))();
+}
+
+============================================================
+FILE: lib/core/sync/supabase/negocio_remote.dart
+============================================================
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+
+/// Alta y resolución de negocios en Supabase (public.negocios).
+class NegocioRemote {
+  NegocioRemote({http.Client? httpClient})
+      : _http = httpClient ?? http.Client();
+
+  final http.Client _http;
+
+  Uri get _uri => Uri.parse('${SupabaseConfig.url}/rest/v1/negocios');
+
+  Map<String, String> get _headers => {
+        'apikey': SupabaseConfig.anonKey,
+        'Authorization': 'Bearer ${SupabaseConfig.anonKey}',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+      };
+
+  /// Crea un negocio nuevo y devuelve su UUID.
+  Future<String> crear({
+    required String nombre,
+    String plan = 'demo',
+    String estado = 'activa',
+  }) async {
+    if (!SupabaseConfig.isConfigured) {
+      throw StateError('Supabase no configurado');
+    }
+    final body = {
+      'nombre': nombre.trim().isEmpty ? 'Mi negocio' : nombre.trim(),
+      'plan': plan,
+      'estado': estado,
+      'max_dispositivos': 3,
+      'max_cajas': 1,
+      'ecf_habilitado': false,
+      'vitalicia': false,
+    };
+    final res = await _http.post(
+      _uri,
+      headers: _headers,
+      body: jsonEncode(body),
+    );
+    if (res.statusCode >= 300) {
+      throw Exception('NegocioRemote.crear: ${res.statusCode} ${res.body}');
+    }
+    final decoded = jsonDecode(res.body);
+    if (decoded is! List || decoded.isEmpty) {
+      throw Exception('NegocioRemote.crear: respuesta vacía');
+    }
+    final first = decoded.first;
+    if (first is! Map) {
+      throw Exception('NegocioRemote.crear: fila inválida');
+    }
+    final map = Map<String, dynamic>.from(first);
+    final id = map['id']?.toString();
+    if (id == null || id.isEmpty) {
+      throw Exception('NegocioRemote.crear: sin id');
+    }
+    debugPrint('NegocioRemote: creado $id ($nombre)');
+    return id;
+  }
+
+  /// Busca el negocio_id de un username en public.usuarios (sin filtrar por negocio).
+  Future<String?> negocioIdDeUsername(String username) async {
+    if (!SupabaseConfig.isConfigured) return null;
+    final u = username.trim();
+    if (u.isEmpty) return null;
+    final uri = Uri.parse('${SupabaseConfig.url}/rest/v1/usuarios').replace(
+      queryParameters: {
+      'username': 'eq.$u',
+      'select': 'negocio_id,username,activo',
+      'limit': '1',
+      },
+    );
+    final res = await _http.get(
+      uri,
+      headers: {
+      'apikey': SupabaseConfig.anonKey,
+      'Authorization': 'Bearer ${SupabaseConfig.anonKey}',
+      },
+    );
+    if (res.statusCode >= 300) {
+      debugPrint('NegocioRemote.negocioIdDeUsername: ${res.statusCode}');
+      return null;
+    }
+    final decoded = jsonDecode(res.body);
+    if (decoded is! List || decoded.isEmpty) return null;
+    final first = decoded.first;
+    if (first is! Map) return null;
+    final map = Map<String, dynamic>.from(first);
+    final id = map['negocio_id']?.toString();
+    if (id == null || id.isEmpty) return null;
+    return id;
+  }
+}
+
+============================================================
+FILE: lib/features/admin_negocios/data/admin_negocios_remote.dart
+============================================================
+// [ADMIN_FASE2]
+import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+
+String _txt(dynamic v) => v == null ? '' : '$v';
+int _ent(dynamic v) =>
+    v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+bool _flag(dynamic v) => v == true || v == 'true';
+DateTime? _fecha(dynamic v) => v == null ? null : DateTime.tryParse('$v');
+
+/// Fila del listado (RPC admin_listar_negocios).
+class AdminNegocioRow {
+  const AdminNegocioRow({
+    required this.id,
+    required this.nombre,
+    this.rnc = '',
+    this.telefonoContacto = '',
+    this.correoContacto = '',
+    this.plan = '',
+    this.estadoBruto = '',
+    this.estado = '',
+    this.vitalicia = false,
+    this.vigenciaTipo = '',
+    this.fechaInicio,
+    this.fechaFin,
+    this.createdAt,
+    this.usuariosTotales = 0,
+    this.usuariosActivos = 0,
+    this.concesionActiva = '',
+    this.diasRestantes,
+  });
+
+  factory AdminNegocioRow.fromMap(Map<String, dynamic> m) => AdminNegocioRow(
+    id: _txt(m['id']),
+    nombre: _txt(m['nombre']),
+    rnc: _txt(m['rnc']),
+    telefonoContacto: _txt(m['telefono_contacto']),
+    correoContacto: _txt(m['correo_contacto']),
+    plan: _txt(m['plan']),
+    estadoBruto: _txt(m['estado_bruto']),
+    estado: _txt(m['estado_derivado']),
+    vitalicia: _flag(m['vitalicia']),
+    vigenciaTipo: _txt(m['vigencia_tipo']),
+    fechaInicio: _fecha(m['fecha_inicio']),
+    fechaFin: _fecha(m['fecha_fin']),
+    createdAt: _fecha(m['created_at']),
+    usuariosTotales: _ent(m['usuarios_totales']),
+    usuariosActivos: _ent(m['usuarios_activos']),
+    concesionActiva: _txt(m['concesion_activa']),
+    diasRestantes: m['dias_restantes'] == null
+        ? null
+        : _ent(m['dias_restantes']),
+  );
+  final String id;
+  final String nombre;
+  final String rnc;
+  final String telefonoContacto;
+  final String correoContacto;
+  final String plan;
+  final String estadoBruto;
+  final String estado;
+  final bool vitalicia;
+  final String vigenciaTipo;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+  final DateTime? createdAt;
+  final int usuariosTotales;
+  final int usuariosActivos;
+  final String concesionActiva;
+  final int? diasRestantes;
+}
+
+class AdminUsuarioRow {
+  const AdminUsuarioRow({
+    required this.id,
+    required this.username,
+    this.nombre = '',
+    this.rol = '',
+    this.activo = true,
+    this.updatedAt,
+  });
+  factory AdminUsuarioRow.fromMap(Map<String, dynamic> m) => AdminUsuarioRow(
+    id: _txt(m['id']),
+    username: _txt(m['username']),
+    nombre: _txt(m['nombre']),
+    rol: _txt(m['rol']),
+    activo: _flag(m['activo']),
+    updatedAt: _fecha(m['updated_at']),
+  );
+  final String id;
+  final String username;
+  final String nombre;
+  final String rol;
+  final bool activo;
+  final DateTime? updatedAt;
+}
+
+class AdminConcesionRow {
+  const AdminConcesionRow({
+    required this.id,
+    required this.tipo,
+    this.fechaInicio,
+    this.fechaFin,
+    this.origen = '',
+    this.motivo = '',
+    this.createdAt,
+  });
+  factory AdminConcesionRow.fromMap(Map<String, dynamic> m) =>
+      AdminConcesionRow(
+        id: _txt(m['id']),
+        tipo: _txt(m['tipo']),
+        fechaInicio: _fecha(m['fecha_inicio']),
+        fechaFin: _fecha(m['fecha_fin']),
+        origen: _txt(m['origen']),
+        motivo: _txt(m['motivo']),
+        createdAt: _fecha(m['created_at']),
+      );
+  final String id;
+  final String tipo;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+  final String origen;
+  final String motivo;
+  final DateTime? createdAt;
+}
+
+class AdminBitacoraRow {
+  const AdminBitacoraRow({
+    required this.accion,
+    this.actorId = '',
+    this.motivo = '',
+    this.valoresAnteriores,
+    this.valoresNuevos,
+    this.createdAt,
+  });
+  factory AdminBitacoraRow.fromMap(Map<String, dynamic> m) => AdminBitacoraRow(
+    accion: _txt(m['accion']),
+    actorId: _txt(m['actor_id']),
+    motivo: _txt(m['motivo']),
+    valoresAnteriores: m['valores_anteriores'],
+    valoresNuevos: m['valores_nuevos'],
+    createdAt: _fecha(m['created_at']),
+  );
+  final String accion;
+  final String actorId;
+  final String motivo;
+  final dynamic valoresAnteriores;
+  final dynamic valoresNuevos;
+  final DateTime? createdAt;
+}
+
+class AdminNegocioDetalle {
+  const AdminNegocioDetalle({
+    required this.negocio,
+    required this.estadoDerivado,
+    required this.usuarios,
+    required this.concesiones,
+    required this.bitacora,
+  });
+
+  factory AdminNegocioDetalle.fromJson(Map<String, dynamic> json) {
+    final neg = (json['negocio'] as Map?) ?? const {};
+    List<T> mapear<T>(dynamic lista, T Function(Map<String, dynamic>) cb) =>
+        (lista is List ? lista : const <dynamic>[])
+            .map((e) => cb(Map<String, dynamic>.from(e as Map)))
+            .toList();
+    return AdminNegocioDetalle(
+      negocio: Map<String, dynamic>.from(neg),
+      estadoDerivado: _txt(json['estado_derivado']),
+      usuarios: mapear(json['usuarios'], AdminUsuarioRow.fromMap),
+      concesiones: mapear(json['concesiones'], AdminConcesionRow.fromMap),
+      bitacora: mapear(json['bitacora'], AdminBitacoraRow.fromMap),
+    );
+  }
+  final Map<String, dynamic> negocio;
+  final String estadoDerivado;
+  final List<AdminUsuarioRow> usuarios;
+  final List<AdminConcesionRow> concesiones;
+  final List<AdminBitacoraRow> bitacora;
+
+  String get id => _txt(negocio['id']);
+  String get nombre => _txt(negocio['nombre']);
+  String get rnc => _txt(negocio['rnc']);
+  String get plan => _txt(negocio['plan']);
+  String get vigenciaTipo => _txt(negocio['vigencia_tipo']);
+  bool get vitalicia => _flag(negocio['vitalicia']);
+  String get telefono => _txt(negocio['telefono_contacto']);
+  String get correo => _txt(negocio['correo_contacto']);
+  DateTime? get fechaInicio => _fecha(negocio['fecha_inicio']);
+  DateTime? get fechaFin => _fecha(negocio['fecha_fin']);
+}
+
+/// Cliente de las RPC administrativas (autorización en servidor, nunca en app).
+class AdminNegociosRemote {
+  AdminNegociosRemote([SupabaseRestClient? api])
+    : _api = api ?? SupabaseRestClient();
+  final SupabaseRestClient _api;
+
+  Future<List<AdminNegocioRow>> listar({
+    String busqueda = '',
+    String? estado,
+    String? plan,
+    String orden = 'reciente',
+    int limite = 20,
+    int offset = 0,
+  }) async {
+    final res = await _api.rpc('admin_listar_negocios', {
+      'p_busqueda': busqueda.trim().isEmpty ? null : busqueda.trim(),
+      'p_filtro_estado': (estado == null || estado.isEmpty) ? null : estado,
+      'p_filtro_plan': (plan == null || plan.isEmpty) ? null : plan,
+      'p_orden': orden,
+      'p_limite': limite,
+      'p_desplazamiento': offset,
+    });
+    final lista = res is List ? res : const <dynamic>[];
+    return lista
+        .map(
+          (e) => AdminNegocioRow.fromMap(Map<String, dynamic>.from(e as Map)),
+        )
+        .toList();
+  }
+
+  Future<AdminNegocioDetalle> detalle(String negocioId) async {
+    final res = await _api.rpc('admin_detalle_negocio', {
+      'p_negocio_id': negocioId,
+    });
+    if (res is! Map) throw Exception('Respuesta de detalle inválida');
+    return AdminNegocioDetalle.fromJson(Map<String, dynamic>.from(res));
+  }
+
+  Future<void> _accion(String fn, Map<String, dynamic> params) =>
+      _api.rpc(fn, params);
+
+  Future<void> activar(String id, {String? motivo}) => _accion(
+    'admin_activar_negocio',
+    {'p_negocio_id': id, 'p_motivo': motivo},
+  );
+
+  Future<void> suspender(String id, String motivo) => _accion(
+    'admin_suspender_negocio',
+    {'p_negocio_id': id, 'p_motivo': motivo},
+  );
+
+  Future<void> renovar(
+    String id,
+    DateTime fechaFin, {
+    String? plan,
+    String? vigenciaTipo,
+    String? motivo,
+  }) => _accion('admin_renovar_negocio', {
+    'p_negocio_id': id,
+    'p_fecha_fin': fechaFin.toUtc().toIso8601String(),
+    'p_plan': plan,
+    'p_vigencia_tipo': vigenciaTipo,
+    'p_motivo': motivo,
+  });
+
+  Future<void> registrarConcesion({
+    required String id,
+    required String tipo,
+    required DateTime inicio,
+    required DateTime fin,
+    String origen = 'manual',
+    String? motivo,
+  }) => _accion('admin_registrar_concesion', {
+    'p_negocio_id': id,
+    'p_tipo': tipo,
+    'p_fecha_inicio': inicio.toIso8601String().substring(0, 10),
+    'p_fecha_fin': fin.toIso8601String().substring(0, 10),
+    'p_origen': origen,
+    'p_motivo': motivo,
+  });
+
+  Future<void> actualizarContacto(
+    String id, {
+    String? telefono,
+    String? correo,
+  }) => _accion('admin_actualizar_contacto', {
+    'p_negocio_id': id,
+    'p_telefono': telefono,
+    'p_correo': correo,
+  });
+}
+
+============================================================
+FILE: lib/features/licencias/domain/licencia_service.dart
+============================================================
+import 'dart:math';
+
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_estado.dart';
+import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:flutter/foundation.dart';
+
+class LicenciaService {
+  LicenciaService(this._db);
+
+  final AppDatabase _db;
+  final _rng = Random.secure();
+
+  /// Recupera una concesión existente. Nunca crea una prueba desde el cliente.
+  Future<LicenciaInfo?> ensureLicenciaInicial() async {
+    final rows = await _db.select(_db.licenciasTable).get();
+    if (rows.isNotEmpty) {
+      rows.sort((a, b) => b.id.compareTo(a.id));
+      final dev = rows.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+      final row = dev.isNotEmpty ? dev.first : rows.first;
+      return _mapYActualizarEstado(row);
+    }
+    // Equipo vacío pero negocio ya vinculado (reinstalación): restaurar concesión.
+    if (SupabaseConfig.isConfigured) {
+      final nid = await NegocioLocal.getId();
+      if (nid != null && nid.isNotEmpty) {
+        try {
+          final ok = await LicenciaSync(_db).pullDesdeNegocio();
+          if (ok) {
+            final after = await obtenerActual();
+            if (after != null) return after;
+          }
+        } catch (e) {
+          // ignore: avoid_print
+          print('ensureLicenciaInicial pull: $e');
+        }
+      }
+    }
+
+    // Sin contrato remoto todavía no se concede la prueba. El flujo de alta
+    // deberá validar este equipo antes de crear una licencia local.
+    return null;
+  }
+
+  Future<LicenciaInfo?> obtenerActual() async {
+    final rows = await _db.select(_db.licenciasTable).get();
+    if (rows.isEmpty) return null;
+    // Preferir desarrollador / la más reciente
+    rows.sort((a, b) => b.id.compareTo(a.id));
+    final dev = rows.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+    final row = dev.isNotEmpty ? dev.first : rows.first;
+    return _mapYActualizarEstado(row);
+  }
+
+  /// Licencia de plataforma para cuenta de desarrollador autorizado.
+  Future<LicenciaInfo> activarDesarrolladorVitalicio() async {
+    final ahora = DateTime.now();
+    final existentes = await _db.select(_db.licenciasTable).get();
+    for (final r in existentes) {
+      if (r.plan == 'desarrollador' || r.vitalicia) {
+        await (_db.update(
+          _db.licenciasTable,
+        )..where((t) => t.id.equals(r.id))).write(
+          LicenciasTableCompanion(
+            estado: const Value('activa'),
+            vitalicia: const Value(true),
+            plan: const Value('desarrollador'),
+            vigenciaTipo: const Value('vitalicia'),
+            fechaFin: const Value(null),
+            maxCajas: const Value(999),
+            maxDispositivos: const Value(999),
+            ecfHabilitado: const Value(true),
+            actualizadoEn: Value(ahora.toIso8601String()),
+          ),
+        );
+        return (await obtenerActual())!;
+      }
+    }
+
+    await _db
+        .into(_db.licenciasTable)
+        .insert(
+          LicenciasTableCompanion.insert(
+            plan: 'desarrollador',
+            vigenciaTipo: 'vitalicia',
+            fechaInicio: ahora.toIso8601String(),
+            fechaFin: const Value(null),
+            maxDispositivos: const Value(999),
+            maxCajas: const Value(999),
+            ecfHabilitado: const Value(true),
+            vitalicia: const Value(true),
+            estado: 'activa',
+            actualizadoEn: ahora.toIso8601String(),
+          ),
+        );
+    return (await obtenerActual())!;
+  }
+
+  Future<LicenciaInfo> _mapYActualizarEstado(LicenciasTableData row) async {
+    final info = _fromRow(row);
+    if (row.estado == 'registro_requerido') return info;
+    final nuevoEstado = _calcularEstado(info);
+
+    final planLow = row.plan.toLowerCase();
+    final esPruebaVencida =
+        (planLow == 'demo' || row.vigenciaTipo == 'prueba') &&
+        nuevoEstado == 'vencida';
+    if (esPruebaVencida) {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          estado: const Value('registro_requerido'),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      final updated = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).getSingle();
+      return _fromRow(updated);
+    }
+
+    // Conserva la regla comercial existente: una suscripción pagada vencida
+    // pasa al plan Gratis local; una prueba, en cambio, exige registro.
+    final esPagoVencido = const {
+      'basico',
+      'simplificado',
+      'pro',
+      'profesional',
+      'empresa',
+    }.contains(planLow);
+    if (esPagoVencido && nuevoEstado == 'vencida') {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          plan: const Value('gratis'),
+          vigenciaTipo: const Value('permanente_limitada'),
+          fechaFin: const Value(null),
+          vitalicia: const Value(false),
+          maxDispositivos: const Value(1),
+          maxCajas: const Value(1),
+          ecfHabilitado: const Value(false),
+          estado: const Value('activa'),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      final updated = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).getSingle();
+      return _fromRow(updated);
+    }
+
+    if (nuevoEstado != row.estado) {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          estado: Value(nuevoEstado),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      return _fromRow(row).copyWithEstado(nuevoEstado);
+    }
+    return info;
+  }
+
+  String _calcularEstado(LicenciaInfo info) {
+    if (info.esDesarrollador) return 'activa';
+    final fin = info.fechaFin;
+    if (fin == null) return 'activa';
+    final ahora = DateTime.now();
+    if (ahora.isBefore(fin) || ahora.isAtSameMomentAs(fin)) return 'activa';
+    final graciaHasta = fin.add(const Duration(days: kDiasGracia));
+    if (ahora.isBefore(graciaHasta)) return 'gracia';
+    return 'vencida';
+  }
+
+  LicenciaInfo _fromRow(LicenciasTableData r) {
+    final inicio = DateTime.tryParse(r.fechaInicio) ?? DateTime.now();
+    final prueba = r.plan.toLowerCase() == 'demo' || r.vigenciaTipo == 'prueba';
+    return LicenciaInfo(
+      id: r.id,
+      plan: r.plan,
+      vigenciaTipo: r.vigenciaTipo,
+      fechaInicio: inicio,
+      fechaFin: r.fechaFin != null
+          ? DateTime.tryParse(r.fechaFin!)
+          : (prueba ? inicio.add(const Duration(days: kDiasPrueba)) : null),
+      maxDispositivos: r.maxDispositivos,
+      maxCajas: r.maxCajas,
+      ecfHabilitado: r.ecfHabilitado,
+      vitalicia: r.vitalicia,
+      estado: r.estado,
+      fingerprint: r.fingerprint,
+      codigoActivacion: r.codigoActivacion,
+    );
+  }
+
+  /// Genera referencia única FG- + 5 dígitos.
+  Future<String> generarReferenciaUnica() async {
+    for (var i = 0; i < 40; i++) {
+      final n = 10000 + _rng.nextInt(90000);
+      final ref = 'FG-$n';
+      final existe = await (_db.select(
+        _db.pedidosLicenciaTable,
+      )..where((t) => t.referencia.equals(ref))).get();
+      if (existe.isEmpty) return ref;
+    }
+    return 'FG-${DateTime.now().millisecondsSinceEpoch % 100000}';
+  }
+
+  /// Crea el pedido ya como licencia_emitida y emite la licencia.
+  /// Solo debe llamarse DESPUÉS de que PayPal confirme el capture (COMPLETED).
+  Future<LicenciaInfo> crearPedidoTrasPagoExitoso({
+    required String referencia,
+
+============================================================
+FILE: lib/features/licencias/domain/planes_precios.dart
+============================================================
+  final bool permiteAlmacenes;
+  final bool permiteUsuariosExtra;
+  final bool permiteEcf;
+  final bool notificaPagosFiaoWhatsapp;
+}
+
+/// Matriz móvil acordada.
+const kLimitesPorPlan = <String, LimitesPlan>{
+  // Prueba 30 días: acceso amplio.
+  'demo': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: null,
+    maxCuentasFiaoAbiertas: null,
+    permiteFiao: true,
+    permiteCreditoFormal: true,
+    permiteFiscal: true,
+    permiteReportes: true,
+    permiteAlmacenes: true,
+    permiteUsuariosExtra: true,
+    permiteEcf: true,
+  ),
+  // Gratis: contadores mensuales locales; datos operativos no sincronizados.
+  'gratis': LimitesPlan(
+    maxProductos: 20,
+    maxClientes: 30,
+    maxVentasMes: 15,
+    maxCuentasFiaoAbiertas: 25,
+    permiteFiao: true,
+    permiteCreditoFormal: false,
+    permiteFiscal: false,
+    permiteReportes: false,
+    permiteAlmacenes: false,
+    permiteUsuariosExtra: false,
+    permiteEcf: false,
+  ),
+  // Esencial US$4.99 — 300 facturas/mes, reportes basicos, sync nube, 1 equipo.
+  'basico': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: 300,
+    maxCuentasFiaoAbiertas: 300,
+    permiteFiao: true,
+    permiteCreditoFormal: false,
+    permiteFiscal: false,
+    permiteReportes: true,
+    permiteAlmacenes: false,
+    permiteUsuariosExtra: false,
+    permiteEcf: false,
+    notificaPagosFiaoWhatsapp: true,
+  ),
+  // Avanzado US$9.99 — multi-equipo (3), fiao sin tope, reportes avanzados, sin fiscal.
+  'simplificado': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: null,
+    maxCuentasFiaoAbiertas: null,
+    permiteFiao: true,
+    permiteCreditoFormal: false,
+    permiteFiscal: false,
+    permiteReportes: true,
+    permiteAlmacenes: false,
+    permiteUsuariosExtra: false,
+    permiteEcf: false,
+    notificaPagosFiaoWhatsapp: true,
+  ),
+  // Fiscal Pro US$19.99 — credito formal + fiscal DGII + almacenes + equipos.
+  'pro': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: null,
+    maxCuentasFiaoAbiertas: null,
+    permiteFiao: false,
+    permiteCreditoFormal: true,
+    permiteFiscal: true,
+    permiteReportes: true,
+    permiteAlmacenes: true,
+    permiteUsuariosExtra: true,
+    permiteEcf: true,
+  ),
+  // Alias legado PC / admin
+  'profesional': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: null,
+    maxCuentasFiaoAbiertas: null,
+    permiteFiao: false,
+    permiteCreditoFormal: true,
+    permiteFiscal: true,
+    permiteReportes: true,
+    permiteAlmacenes: true,
+    permiteUsuariosExtra: true,
+    permiteEcf: true,
+  ),
+  'empresa': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: null,
+    maxCuentasFiaoAbiertas: null,
+    permiteFiao: false,
+    permiteCreditoFormal: true,
+    permiteFiscal: true,
+    permiteReportes: true,
+    permiteAlmacenes: true,
+    permiteUsuariosExtra: true,
+    permiteEcf: true,
+  ),
+  'desarrollador': LimitesPlan(
+    maxProductos: null,
+    maxClientes: null,
+    maxVentasMes: null,
+    maxCuentasFiaoAbiertas: null,
+    permiteFiao: true,
+    permiteCreditoFormal: true,
+    permiteFiscal: true,
+    permiteReportes: true,
+    permiteAlmacenes: true,
+    permiteUsuariosExtra: true,
+    permiteEcf: true,
+  ),
+};
+
+LimitesPlan limitesDe(String plan) {
+  final p = plan.toLowerCase().trim();
+  return kLimitesPorPlan[p] ?? kLimitesPorPlan['gratis']!;
+}
+
+bool esPlanNormal(String plan) {
+  final p = plan.toLowerCase();
+  return p == 'basico' ||
+      p == 'pro' ||
+      p == 'profesional' ||
+      p == 'empresa' ||
+      p == 'desarrollador' ||
+      p == 'demo'; // Compatibilidad con licencias de prueba históricas.
+}
+
+bool esPlanSimplificado(String plan) => plan.toLowerCase() == 'simplificado';
+bool esPlanGratis(String plan) => plan.toLowerCase() == 'gratis';
+bool esPlanPro(String plan) {
+  final p = plan.toLowerCase();
+
+============================================================
+SECCION 6: identificadores de dispositivo
+============================================================

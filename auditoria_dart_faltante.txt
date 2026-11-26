@@ -1,0 +1,1073 @@
+### 1 admin_negocios_remote COMPLETO -> lib/features/admin_negocios/data/admin_negocios_remote.dart [1-600]
+// [ADMIN_FASE2]
+import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+
+String _txt(dynamic v) => v == null ? '' : '$v';
+int _ent(dynamic v) =>
+    v is int ? v : (v is num ? v.toInt() : int.tryParse('$v') ?? 0);
+bool _flag(dynamic v) => v == true || v == 'true';
+DateTime? _fecha(dynamic v) => v == null ? null : DateTime.tryParse('$v');
+
+/// Fila del listado (RPC admin_listar_negocios).
+class AdminNegocioRow {
+  const AdminNegocioRow({
+    required this.id,
+    required this.nombre,
+    this.rnc = '',
+    this.telefonoContacto = '',
+    this.correoContacto = '',
+    this.plan = '',
+    this.estadoBruto = '',
+    this.estado = '',
+    this.vitalicia = false,
+    this.vigenciaTipo = '',
+    this.fechaInicio,
+    this.fechaFin,
+    this.createdAt,
+    this.usuariosTotales = 0,
+    this.usuariosActivos = 0,
+    this.concesionActiva = '',
+    this.diasRestantes,
+  });
+
+  factory AdminNegocioRow.fromMap(Map<String, dynamic> m) => AdminNegocioRow(
+    id: _txt(m['id']),
+    nombre: _txt(m['nombre']),
+    rnc: _txt(m['rnc']),
+    telefonoContacto: _txt(m['telefono_contacto']),
+    correoContacto: _txt(m['correo_contacto']),
+    plan: _txt(m['plan']),
+    estadoBruto: _txt(m['estado_bruto']),
+    estado: _txt(m['estado_derivado']),
+    vitalicia: _flag(m['vitalicia']),
+    vigenciaTipo: _txt(m['vigencia_tipo']),
+    fechaInicio: _fecha(m['fecha_inicio']),
+    fechaFin: _fecha(m['fecha_fin']),
+    createdAt: _fecha(m['created_at']),
+    usuariosTotales: _ent(m['usuarios_totales']),
+    usuariosActivos: _ent(m['usuarios_activos']),
+    concesionActiva: _txt(m['concesion_activa']),
+    diasRestantes: m['dias_restantes'] == null
+        ? null
+        : _ent(m['dias_restantes']),
+  );
+  final String id;
+  final String nombre;
+  final String rnc;
+  final String telefonoContacto;
+  final String correoContacto;
+  final String plan;
+  final String estadoBruto;
+  final String estado;
+  final bool vitalicia;
+  final String vigenciaTipo;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+  final DateTime? createdAt;
+  final int usuariosTotales;
+  final int usuariosActivos;
+  final String concesionActiva;
+  final int? diasRestantes;
+}
+
+class AdminUsuarioRow {
+  const AdminUsuarioRow({
+    required this.id,
+    required this.username,
+    this.nombre = '',
+    this.rol = '',
+    this.activo = true,
+    this.updatedAt,
+  });
+  factory AdminUsuarioRow.fromMap(Map<String, dynamic> m) => AdminUsuarioRow(
+    id: _txt(m['id']),
+    username: _txt(m['username']),
+    nombre: _txt(m['nombre']),
+    rol: _txt(m['rol']),
+    activo: _flag(m['activo']),
+    updatedAt: _fecha(m['updated_at']),
+  );
+  final String id;
+  final String username;
+  final String nombre;
+  final String rol;
+  final bool activo;
+  final DateTime? updatedAt;
+}
+
+class AdminConcesionRow {
+  const AdminConcesionRow({
+    required this.id,
+    required this.tipo,
+    this.fechaInicio,
+    this.fechaFin,
+    this.origen = '',
+    this.motivo = '',
+    this.createdAt,
+  });
+  factory AdminConcesionRow.fromMap(Map<String, dynamic> m) =>
+      AdminConcesionRow(
+        id: _txt(m['id']),
+        tipo: _txt(m['tipo']),
+        fechaInicio: _fecha(m['fecha_inicio']),
+        fechaFin: _fecha(m['fecha_fin']),
+        origen: _txt(m['origen']),
+        motivo: _txt(m['motivo']),
+        createdAt: _fecha(m['created_at']),
+      );
+  final String id;
+  final String tipo;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+  final String origen;
+  final String motivo;
+  final DateTime? createdAt;
+}
+
+class AdminBitacoraRow {
+  const AdminBitacoraRow({
+    required this.accion,
+    this.actorId = '',
+    this.motivo = '',
+    this.valoresAnteriores,
+    this.valoresNuevos,
+    this.createdAt,
+  });
+  factory AdminBitacoraRow.fromMap(Map<String, dynamic> m) => AdminBitacoraRow(
+    accion: _txt(m['accion']),
+    actorId: _txt(m['actor_id']),
+    motivo: _txt(m['motivo']),
+    valoresAnteriores: m['valores_anteriores'],
+    valoresNuevos: m['valores_nuevos'],
+    createdAt: _fecha(m['created_at']),
+  );
+  final String accion;
+  final String actorId;
+  final String motivo;
+  final dynamic valoresAnteriores;
+  final dynamic valoresNuevos;
+  final DateTime? createdAt;
+}
+
+class AdminNegocioDetalle {
+  const AdminNegocioDetalle({
+    required this.negocio,
+    required this.estadoDerivado,
+    required this.usuarios,
+    required this.concesiones,
+    required this.bitacora,
+  });
+
+  factory AdminNegocioDetalle.fromJson(Map<String, dynamic> json) {
+    final neg = (json['negocio'] as Map?) ?? const {};
+    List<T> mapear<T>(dynamic lista, T Function(Map<String, dynamic>) cb) =>
+        (lista is List ? lista : const <dynamic>[])
+            .map((e) => cb(Map<String, dynamic>.from(e as Map)))
+            .toList();
+    return AdminNegocioDetalle(
+      negocio: Map<String, dynamic>.from(neg),
+      estadoDerivado: _txt(json['estado_derivado']),
+      usuarios: mapear(json['usuarios'], AdminUsuarioRow.fromMap),
+      concesiones: mapear(json['concesiones'], AdminConcesionRow.fromMap),
+      bitacora: mapear(json['bitacora'], AdminBitacoraRow.fromMap),
+    );
+  }
+  final Map<String, dynamic> negocio;
+  final String estadoDerivado;
+  final List<AdminUsuarioRow> usuarios;
+  final List<AdminConcesionRow> concesiones;
+  final List<AdminBitacoraRow> bitacora;
+
+  String get id => _txt(negocio['id']);
+  String get nombre => _txt(negocio['nombre']);
+  String get rnc => _txt(negocio['rnc']);
+  String get plan => _txt(negocio['plan']);
+  String get vigenciaTipo => _txt(negocio['vigencia_tipo']);
+  bool get vitalicia => _flag(negocio['vitalicia']);
+  String get telefono => _txt(negocio['telefono_contacto']);
+  String get correo => _txt(negocio['correo_contacto']);
+  DateTime? get fechaInicio => _fecha(negocio['fecha_inicio']);
+  DateTime? get fechaFin => _fecha(negocio['fecha_fin']);
+}
+
+/// Cliente de las RPC administrativas (autorización en servidor, nunca en app).
+class AdminNegociosRemote {
+  AdminNegociosRemote([SupabaseRestClient? api])
+    : _api = api ?? SupabaseRestClient();
+  final SupabaseRestClient _api;
+
+  Future<List<AdminNegocioRow>> listar({
+    String busqueda = '',
+    String? estado,
+    String? plan,
+    String orden = 'reciente',
+    int limite = 20,
+    int offset = 0,
+  }) async {
+    final res = await _api.rpc('admin_listar_negocios', {
+      'p_busqueda': busqueda.trim().isEmpty ? null : busqueda.trim(),
+      'p_filtro_estado': (estado == null || estado.isEmpty) ? null : estado,
+      'p_filtro_plan': (plan == null || plan.isEmpty) ? null : plan,
+      'p_orden': orden,
+      'p_limite': limite,
+      'p_desplazamiento': offset,
+    });
+    final lista = res is List ? res : const <dynamic>[];
+    return lista
+        .map(
+          (e) => AdminNegocioRow.fromMap(Map<String, dynamic>.from(e as Map)),
+        )
+        .toList();
+  }
+
+  Future<AdminNegocioDetalle> detalle(String negocioId) async {
+    final res = await _api.rpc('admin_detalle_negocio', {
+      'p_negocio_id': negocioId,
+    });
+    if (res is! Map) throw Exception('Respuesta de detalle inválida');
+    return AdminNegocioDetalle.fromJson(Map<String, dynamic>.from(res));
+  }
+
+  Future<void> _accion(String fn, Map<String, dynamic> params) =>
+      _api.rpc(fn, params);
+
+  Future<void> activar(String id, {String? motivo}) => _accion(
+    'admin_activar_negocio',
+    {'p_negocio_id': id, 'p_motivo': motivo},
+  );
+
+  Future<void> suspender(String id, String motivo) => _accion(
+    'admin_suspender_negocio',
+    {'p_negocio_id': id, 'p_motivo': motivo},
+  );
+
+  Future<void> renovar(
+    String id,
+    DateTime fechaFin, {
+    String? plan,
+    String? vigenciaTipo,
+    String? motivo,
+  }) => _accion('admin_renovar_negocio', {
+    'p_negocio_id': id,
+    'p_fecha_fin': fechaFin.toUtc().toIso8601String(),
+    'p_plan': plan,
+    'p_vigencia_tipo': vigenciaTipo,
+    'p_motivo': motivo,
+  });
+
+  Future<void> registrarConcesion({
+    required String id,
+    required String tipo,
+    required DateTime inicio,
+    required DateTime fin,
+    String origen = 'manual',
+    String? motivo,
+  }) => _accion('admin_registrar_concesion', {
+    'p_negocio_id': id,
+    'p_tipo': tipo,
+    'p_fecha_inicio': inicio.toIso8601String().substring(0, 10),
+    'p_fecha_fin': fin.toIso8601String().substring(0, 10),
+    'p_origen': origen,
+    'p_motivo': motivo,
+  });
+
+  Future<void> actualizarContacto(
+    String id, {
+    String? telefono,
+    String? correo,
+  }) => _accion('admin_actualizar_contacto', {
+    'p_negocio_id': id,
+    'p_telefono': telefono,
+    'p_correo': correo,
+  });
+}
+
+### 2 planes_precios INICIO -> lib/features/licencias/domain/planes_precios.dart [1-80]
+/// Precios y reglas por plan — FiscoGest móvil.
+///
+/// Planes self-serve (USD / PayPal, activación automática):
+///   gratis · basico · simplificado · pro
+///
+/// Una prueba autorizada remotamente; al terminar la gracia requiere registro.
+library;
+
+/// Duración de la prueba concedida por la autoridad remota.
+const int kDiasPrueba = 30;
+
+/// Días de gracia luego de la prueba.
+const int kDiasGracia = 3;
+
+/// Días de validez de un pedido FG- sin confirmar (legado transferencia).
+const int kDiasExpiracionPedido = 7;
+
+/// Precios USD — suscripción móvil (PayPal). Solo mensual por ahora.
+const kPreciosLicenciaUsd = <String, Map<String, double>>{
+  'basico': {'mensual': 4.99},
+  'simplificado': {'mensual': 9.99},
+  'pro': {'mensual': 19.99},
+};
+
+/// DOP solo referencia admin / legado (no se muestra en compra móvil).
+const kPreciosLicenciaDop = <String, Map<String, double>>{
+  'basico': {'mensual': 4.99},
+  'simplificado': {'mensual': 9.99},
+  'pro': {'mensual': 19.99},
+  'profesional': {'mensual': 19.99},
+  'empresa': {'mensual': 45.00},
+};
+
+const kMaxCajasPorPlan = <String, int>{
+  'gratis': 1,
+  'basico': 1,
+  'simplificado': 3,
+  'pro': 99,
+  'profesional': 3,
+  'empresa': 99,
+  'desarrollador': 999,
+};
+
+const kMaxDispositivosBase = <String, int>{
+  'gratis': 1,
+  'basico': 1,
+  'simplificado': 3,
+  'pro': 99,
+  'profesional': 3,
+  'empresa': 99,
+  'desarrollador': 999,
+};
+
+class LimitesPlan {
+  const LimitesPlan({
+    required this.maxProductos,
+    required this.maxClientes,
+    required this.maxVentasMes,
+    required this.maxCuentasFiaoAbiertas,
+    required this.permiteFiao,
+    required this.permiteCreditoFormal,
+    required this.permiteFiscal,
+    required this.permiteReportes,
+    required this.permiteAlmacenes,
+    required this.permiteUsuariosExtra,
+    required this.permiteEcf,
+    this.notificaPagosFiaoWhatsapp = false,
+  });
+
+  final int? maxProductos;
+  final int? maxClientes;
+
+  /// null = sin tope práctico.
+  final int? maxVentasMes;
+  final int? maxCuentasFiaoAbiertas;
+  final bool permiteFiao;
+  final bool permiteCreditoFormal;
+  final bool permiteFiscal;
+  final bool permiteReportes;
+  final bool permiteAlmacenes;
+
+### 3 licencia_service INICIO -> lib/features/licencias/domain/licencia_service.dart [1-185]
+import 'dart:math';
+
+import 'package:drift/drift.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_estado.dart';
+import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:flutter/foundation.dart';
+
+class LicenciaService {
+  LicenciaService(this._db);
+
+  final AppDatabase _db;
+  final _rng = Random.secure();
+
+  /// Recupera una concesión existente. Nunca crea una prueba desde el cliente.
+  Future<LicenciaInfo?> ensureLicenciaInicial() async {
+    final rows = await _db.select(_db.licenciasTable).get();
+    if (rows.isNotEmpty) {
+      rows.sort((a, b) => b.id.compareTo(a.id));
+      final dev = rows.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+      final row = dev.isNotEmpty ? dev.first : rows.first;
+      return _mapYActualizarEstado(row);
+    }
+    // Equipo vacío pero negocio ya vinculado (reinstalación): restaurar concesión.
+    if (SupabaseConfig.isConfigured) {
+      final nid = await NegocioLocal.getId();
+      if (nid != null && nid.isNotEmpty) {
+        try {
+          final ok = await LicenciaSync(_db).pullDesdeNegocio();
+          if (ok) {
+            final after = await obtenerActual();
+            if (after != null) return after;
+          }
+        } catch (e) {
+          // ignore: avoid_print
+          print('ensureLicenciaInicial pull: $e');
+        }
+      }
+    }
+
+    // Sin contrato remoto todavía no se concede la prueba. El flujo de alta
+    // deberá validar este equipo antes de crear una licencia local.
+    return null;
+  }
+
+  Future<LicenciaInfo?> obtenerActual() async {
+    final rows = await _db.select(_db.licenciasTable).get();
+    if (rows.isEmpty) return null;
+    // Preferir desarrollador / la más reciente
+    rows.sort((a, b) => b.id.compareTo(a.id));
+    final dev = rows.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+    final row = dev.isNotEmpty ? dev.first : rows.first;
+    return _mapYActualizarEstado(row);
+  }
+
+  /// Licencia de plataforma para cuenta de desarrollador autorizado.
+  Future<LicenciaInfo> activarDesarrolladorVitalicio() async {
+    final ahora = DateTime.now();
+    final existentes = await _db.select(_db.licenciasTable).get();
+    for (final r in existentes) {
+      if (r.plan == 'desarrollador' || r.vitalicia) {
+        await (_db.update(
+          _db.licenciasTable,
+        )..where((t) => t.id.equals(r.id))).write(
+          LicenciasTableCompanion(
+            estado: const Value('activa'),
+            vitalicia: const Value(true),
+            plan: const Value('desarrollador'),
+            vigenciaTipo: const Value('vitalicia'),
+            fechaFin: const Value(null),
+            maxCajas: const Value(999),
+            maxDispositivos: const Value(999),
+            ecfHabilitado: const Value(true),
+            actualizadoEn: Value(ahora.toIso8601String()),
+          ),
+        );
+        return (await obtenerActual())!;
+      }
+    }
+
+    await _db
+        .into(_db.licenciasTable)
+        .insert(
+          LicenciasTableCompanion.insert(
+            plan: 'desarrollador',
+            vigenciaTipo: 'vitalicia',
+            fechaInicio: ahora.toIso8601String(),
+            fechaFin: const Value(null),
+            maxDispositivos: const Value(999),
+            maxCajas: const Value(999),
+            ecfHabilitado: const Value(true),
+            vitalicia: const Value(true),
+            estado: 'activa',
+            actualizadoEn: ahora.toIso8601String(),
+          ),
+        );
+    return (await obtenerActual())!;
+  }
+
+  Future<LicenciaInfo> _mapYActualizarEstado(LicenciasTableData row) async {
+    final info = _fromRow(row);
+    if (row.estado == 'registro_requerido') return info;
+    final nuevoEstado = _calcularEstado(info);
+
+    final planLow = row.plan.toLowerCase();
+    final esPruebaVencida =
+        (planLow == 'demo' || row.vigenciaTipo == 'prueba') &&
+        nuevoEstado == 'vencida';
+    if (esPruebaVencida) {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          estado: const Value('registro_requerido'),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      final updated = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).getSingle();
+      return _fromRow(updated);
+    }
+
+    // Conserva la regla comercial existente: una suscripción pagada vencida
+    // pasa al plan Gratis local; una prueba, en cambio, exige registro.
+    final esPagoVencido = const {
+      'basico',
+      'simplificado',
+      'pro',
+      'profesional',
+      'empresa',
+    }.contains(planLow);
+    if (esPagoVencido && nuevoEstado == 'vencida') {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          plan: const Value('gratis'),
+          vigenciaTipo: const Value('permanente_limitada'),
+          fechaFin: const Value(null),
+          vitalicia: const Value(false),
+          maxDispositivos: const Value(1),
+          maxCajas: const Value(1),
+          ecfHabilitado: const Value(false),
+          estado: const Value('activa'),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      final updated = await (_db.select(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).getSingle();
+      return _fromRow(updated);
+    }
+
+    if (nuevoEstado != row.estado) {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          estado: Value(nuevoEstado),
+          actualizadoEn: Value(DateTime.now().toIso8601String()),
+        ),
+      );
+      return _fromRow(row).copyWithEstado(nuevoEstado);
+    }
+    return info;
+  }
+
+  String _calcularEstado(LicenciaInfo info) {
+    if (info.esDesarrollador) return 'activa';
+    final fin = info.fechaFin;
+    if (fin == null) return 'activa';
+    final ahora = DateTime.now();
+    if (ahora.isBefore(fin) || ahora.isAtSameMomentAs(fin)) return 'activa';
+    final graciaHasta = fin.add(const Duration(days: kDiasGracia));
+    if (ahora.isBefore(graciaHasta)) return 'gracia';
+    return 'vencida';
+  }
+
+  LicenciaInfo _fromRow(LicenciasTableData r) {
+    final inicio = DateTime.tryParse(r.fechaInicio) ?? DateTime.now();
+    final prueba = r.plan.toLowerCase() == 'demo' || r.vigenciaTipo == 'prueba';
+
+### 4 licencia_sync INICIO -> lib/core/sync/supabase/licencia_sync.dart [1-195]
+import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
+import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_rest_client.dart';
+import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+
+/// Licencia del negocio: public.negocios ↔ SQLite local.
+class LicenciaSync {
+  LicenciaSync(this._db);
+  final AppDatabase _db;
+  final _client = SupabaseRestClient();
+
+  Future<bool> pullDesdeNegocio() async {
+    if (!SupabaseConfig.isConfigured) return false;
+    final negocioId = await NegocioLocal.getId();
+    if (negocioId == null || negocioId.isEmpty) {
+      debugPrint('LicenciaSync.pull: sin negocio_id');
+      return false;
+    }
+
+    // PostgREST: "select" es query param de columnas, NO filtro eq.
+    final rows = await _client.select(
+      table: 'negocios',
+      filters: {
+        'id': 'eq.$negocioId',
+        'select':
+            'id,plan,estado,max_dispositivos,max_cajas,ecf_habilitado,'
+            'vitalicia,vigencia_tipo,fecha_inicio,fecha_fin,updated_at',
+        'limit': '1',
+      },
+    );
+    if (rows.isEmpty) {
+      debugPrint('LicenciaSync.pull: negocio no encontrado ($negocioId)');
+      return false;
+    }
+    await _aplicarRemoto(rows.first);
+    final r = rows.first;
+    debugPrint(
+      'LicenciaSync.pull: plan=${r['plan']} estado=${r['estado']} '
+      'vitalicia=${r['vitalicia']} fin=${r['fecha_fin']}',
+    );
+    return true;
+  }
+
+  /// Sube licencia local → negocios.
+  /// Nunca sobrescribe un plan de pago/vitalicia en nube con demo/gratis local.
+  Future<void> pushAlNegocio() async {
+    if (!SupabaseConfig.isConfigured) return;
+    final negocioId = await NegocioLocal.getId();
+    if (negocioId == null || negocioId.isEmpty) {
+      debugPrint('LicenciaSync.push: sin negocio_id');
+      return;
+    }
+
+    final locales = await _db.select(_db.licenciasTable).get();
+    if (locales.isEmpty) {
+      debugPrint('LicenciaSync.push: sin licencia local');
+      return;
+    }
+    locales.sort((a, b) => b.id.compareTo(a.id));
+    final dev = locales.where((r) => r.plan == 'desarrollador' || r.vitalicia);
+    final lic = dev.isNotEmpty ? dev.first : locales.first;
+    final planLocal = lic.plan.toLowerCase();
+
+    // La concesión remota es autoritativa; el plan Gratis no debe escribirla.
+    if (planLocal == 'gratis' || planLocal == 'demo') {
+      debugPrint('LicenciaSync.push: licencia gratis/prueba solo lectura');
+      return;
+    }
+
+    // Protección: no pisar la nube con demo si es reinstalación fresca
+    if (planLocal == 'demo' || planLocal == 'gratis') {
+      try {
+        final remote = await _client.select(
+          table: 'negocios',
+          filters: {
+            'id': 'eq.$negocioId',
+            'select': 'id,plan,vitalicia,estado',
+            'limit': '1',
+          },
+        );
+        if (remote.isNotEmpty) {
+          final rp = (remote.first['plan'] as String?)?.toLowerCase() ?? '';
+          final rv = remote.first['vitalicia'] == true;
+          if (rv || (rp.isNotEmpty && rp != 'demo' && rp != 'gratis')) {
+            debugPrint(
+              'LicenciaSync.push: omitido (local=$planLocal, nube=$rp vitalicia=$rv)',
+            );
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('LicenciaSync.push: check remoto $e');
+      }
+    }
+
+    final body = <String, dynamic>{
+      'plan': lic.plan,
+      'estado': lic.estado,
+      'max_dispositivos': lic.maxDispositivos,
+      'max_cajas': lic.maxCajas,
+      'ecf_habilitado': lic.ecfHabilitado,
+      'vitalicia': lic.vitalicia,
+      'vigencia_tipo': lic.vigenciaTipo,
+      'fecha_inicio': lic.fechaInicio,
+      'fecha_fin': lic.fechaFin,
+    };
+
+    await _client.patch(
+      table: 'negocios',
+      filters: {'id': 'eq.$negocioId'},
+      body: body,
+    );
+    debugPrint('LicenciaSync.push: OK plan=${lic.plan}');
+  }
+
+  Future<void> _aplicarRemoto(Map<String, dynamic> r) async {
+    final plan = (r['plan'] as String?)?.trim().toLowerCase() ?? 'gratis';
+    final estado = (r['estado'] as String?)?.trim() ?? 'activa';
+    final vitalicia = r['vitalicia'] == true;
+    final maxDisp =
+        (r['max_dispositivos'] as num?)?.toInt() ??
+        maxInstalacionesPermitidas(plan);
+    final maxCajas =
+        (r['max_cajas'] as num?)?.toInt() ?? (kMaxCajasPorPlan[plan] ?? 1);
+    final ecf = r['ecf_habilitado'] == true || planIncluyeEcf(plan);
+
+    String fechaInicio;
+    final fi = r['fecha_inicio'];
+    if (fi != null && '$fi'.isNotEmpty) {
+      fechaInicio =
+          DateTime.tryParse('$fi')?.toIso8601String() ??
+          DateTime.now().toIso8601String();
+    } else {
+      fechaInicio = DateTime.now().toIso8601String();
+    }
+
+    String? fechaFin;
+    final ff = r['fecha_fin'];
+    if (ff != null && '$ff'.isNotEmpty) {
+      fechaFin = DateTime.tryParse('$ff')?.toIso8601String();
+    }
+
+    final vigencia = (r['vigencia_tipo'] as String?)?.trim().isNotEmpty == true
+        ? (r['vigencia_tipo'] as String).trim()
+        : (vitalicia ? 'vitalicia' : 'mensual');
+
+    final actualizado = DateTime.now().toIso8601String();
+
+    final locales = await _db.select(_db.licenciasTable).get();
+    locales.sort((a, b) => b.id.compareTo(a.id));
+    final prefer = locales.where(
+      (x) => x.plan == 'desarrollador' || x.vitalicia,
+    );
+    final row = prefer.isNotEmpty
+        ? prefer.first
+        : (locales.isNotEmpty ? locales.first : null);
+
+    if (row == null) {
+      await _db
+          .into(_db.licenciasTable)
+          .insert(
+            LicenciasTableCompanion.insert(
+              plan: plan,
+              vigenciaTipo: vigencia,
+              fechaInicio: fechaInicio,
+              fechaFin: Value(fechaFin),
+              maxDispositivos: Value(maxDisp),
+              maxCajas: Value(maxCajas),
+              ecfHabilitado: Value(ecf),
+              vitalicia: Value(vitalicia),
+              estado: estado,
+              actualizadoEn: actualizado,
+            ),
+          );
+    } else {
+      await (_db.update(
+        _db.licenciasTable,
+      )..where((t) => t.id.equals(row.id))).write(
+        LicenciasTableCompanion(
+          plan: Value(plan),
+          vigenciaTipo: Value(vigencia),
+          fechaInicio: Value(fechaInicio),
+          fechaFin: Value(fechaFin),
+          maxDispositivos: Value(maxDisp),
+          maxCajas: Value(maxCajas),
+          ecfHabilitado: Value(ecf),
+          vitalicia: Value(vitalicia),
+          estado: Value(estado),
+          actualizadoEn: Value(actualizado),
+        ),
+      );
+    }
+
+### 5 supabase_rest_client INICIO -> lib/core/sync/supabase/supabase_rest_client.dart [1-115]
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+
+class SupabaseRestClient {
+  SupabaseRestClient({http.Client? httpClient})
+      : _http = httpClient ?? http.Client();
+
+  final http.Client _http;
+  static const _timeout = Duration(seconds: 3);
+
+  static const _tablasConNegocio = {
+    'productos',
+    'clientes',
+    'ventas',
+    'ventas_detalle',
+    'caja_sesiones',
+    'caja_movimientos',
+    'fios',
+    'usuarios',
+    'dispositivos_licencia',
+  };
+
+  void _assertNegocio(String table, Map<String, String>? filters) {
+    if (!_tablasConNegocio.contains(table.toLowerCase())) return;
+    final f = filters?['negocio_id'] ?? '';
+    if (!f.startsWith('eq.') || f.length < 8) {
+      throw Exception('Sync: $table sin negocio_id');
+    }
+  }
+
+  Uri _uri(String table, [Map<String, String>? query]) {
+    final t = table.toLowerCase();
+    return Uri.parse(
+      '${SupabaseConfig.url}/rest/v1/$t',
+    ).replace(queryParameters: query);
+  }
+
+  Future<Map<String, String>> _headers({
+    required bool upsert,
+    required bool usarJwt,
+  }) async {
+    await RenovarToken.asegurar();
+    var bearer = SupabaseConfig.anonKey;
+    if (usarJwt) {
+            final jwt = await SesionNube.tokenVigente();
+      if (jwt != null && jwt.isNotEmpty) bearer = jwt;
+    }
+    return {
+      'apikey': SupabaseConfig.anonKey,
+      'Authorization': 'Bearer $bearer',
+      'Content-Type': 'application/json',
+      'Prefer': upsert
+          ? 'resolution=merge-duplicates,return=minimal'
+          : 'return=representation',
+    };
+  }
+
+  Future<http.Response> _post(
+    Uri uri,
+    String body, {
+    required bool usarJwt,
+  }) async {
+    final h = await _headers(upsert: true, usarJwt: usarJwt);
+    return _http.post(uri, headers: h, body: body).timeout(_timeout);
+  }
+
+  Future<http.Response> _get(Uri uri, {required bool usarJwt}) async {
+    final h = await _headers(upsert: false, usarJwt: usarJwt);
+    return _http.get(uri, headers: h).timeout(_timeout);
+  }
+
+  Future<void> upsert({
+    required String table,
+    required List<Map<String, dynamic>> rows,
+    required String onConflict,
+  }) async {
+    if (!SupabaseConfig.isConfigured || rows.isEmpty) return;
+    final t = table.toLowerCase();
+    final requiereJwt = _tablasConNegocio.contains(t);
+    for (final row in rows) {
+      final n = row['negocio_id']?.toString() ?? '';
+      if (n.isEmpty && requiereJwt) {
+        throw Exception('Sync upsert $table sin negocio_id');
+      }
+    }
+    // Producción: tablas de negocio solo con JWT de sesión.
+    // Sin JWT no se intenta anon (RLS lo bloquea y genera ruido).
+    if (requiereJwt) {
+      await RenovarToken.asegurar();
+      final jwt = await SesionNube.tokenVigente();
+      if (jwt == null || jwt.isEmpty) {
+        throw Exception(
+          'Sync upsert $table: sin JWT de sesión (inicie sesión con red '
+          'para emitir token). No se usa anon en tablas de negocio.',
+        );
+      }
+    }
+    final uri = _uri(
+      table,
+    ).replace(queryParameters: {'on_conflict': onConflict});
+    final body = jsonEncode(rows);
+    // Solo JWT en tablas de negocio. Anon solo en tablas de plataforma
+    // que no estén en _tablasConNegocio.
+    final res = await _post(uri, body, usarJwt: true);
+    if (res.statusCode >= 300) {
+      throw Exception('Supabase upsert $table: ${res.statusCode} ${res.body}');
+    }
+  }
+
+  /// GET filtrado; obliga negocio_id en tablas de negocio.
+
+
+### 6+ archivo completo: sesion_nube.dart -> lib/core/sync/supabase/sesion_nube.dart [1-67]
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+/// JWT de la nube. Si no hay token vigente, el REST usa la anon key.
+/// No bloquea el uso offline de la app: solo afecta sync/API remota.
+class SesionNube {
+  static const _kToken = 'supabase_access_jwt_v2';
+  static const _kExp = 'supabase_access_exp_v2';
+  static const _kRefresh = 'supabase_refresh_jwt_v2';
+
+  static const _secure = FlutterSecureStorage();
+
+  static Future<void> guardar({
+    required String token,
+    required int expiresInSec,
+    String? refreshToken,
+  }) async {
+    await _secure.write(key: _kToken, value: token);
+    final exp = DateTime.now()
+        .add(Duration(seconds: expiresInSec))
+        .millisecondsSinceEpoch;
+    await _secure.write(key: _kExp, value: '$exp');
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await _secure.write(key: _kRefresh, value: refreshToken);
+    }
+  }
+
+  static Future<int?> segundosRestantes() async {
+    final expStr = await _secure.read(key: _kExp);
+    if (expStr == null || expStr.isEmpty) return null;
+    final exp = int.tryParse(expStr);
+    if (exp == null) return null;
+    return ((exp - DateTime.now().millisecondsSinceEpoch) / 1000).floor();
+  }
+
+  static Future<String?> refreshToken() async {
+    final t = await _secure.read(key: _kRefresh);
+    if (t == null || t.isEmpty) return null;
+    return t;
+  }
+
+  /// Token vigente o null (caduca 60 s antes).
+  static Future<String?> tokenVigente() async {
+    final t = await _secure.read(key: _kToken);
+    if (t == null || t.isEmpty) return null;
+    final expStr = await _secure.read(key: _kExp);
+    final exp = int.tryParse(expStr ?? '') ?? 0;
+    final limite = DateTime.now()
+        .add(const Duration(seconds: 60))
+        .millisecondsSinceEpoch;
+    if (exp <= limite) return null;
+    return t;
+  }
+
+  static Future<DateTime?> expiraEn() async {
+    final s = await segundosRestantes();
+    if (s == null) return null;
+    return DateTime.now().add(Duration(seconds: s));
+  }
+
+  static Future<String?> leerRefresh() => refreshToken();
+
+  static Future<void> clear() async {
+    await _secure.delete(key: _kToken);
+    await _secure.delete(key: _kExp);
+    await _secure.delete(key: _kRefresh);
+  }
+}
+
+### 6+ archivo completo: renovar_token.dart -> lib/core/sync/supabase/renovar_token.dart [1-89]
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
+import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+
+/// Renueva el access token con el refresh de GoTrue. No imprime tokens.
+class RenovarToken {
+  static Future<bool>? _vuelo;
+
+  static Future<bool> asegurar({bool forzar = false}) async {
+    final enCurso = _vuelo;
+    if (enCurso != null) return enCurso;
+    if (!forzar) {
+      final jwt = await SesionNube.tokenVigente();
+      final exp = await SesionNube.expiraEn();
+      final holgado =
+          jwt != null &&
+          jwt.isNotEmpty &&
+          (exp == null ||
+              exp.isAfter(DateTime.now().add(const Duration(minutes: 2))));
+      if (holgado) return true;
+      if (_vuelo != null) return _vuelo!;
+    }
+    final vuelo = _ejecutar();
+    _vuelo = vuelo;
+    try {
+      return await vuelo;
+    } finally {
+      if (identical(_vuelo, vuelo)) _vuelo = null;
+    }
+  }
+
+  static Future<bool> _ejecutar() async {
+    final refresh = await SesionNube.leerRefresh();
+    if (refresh == null || refresh.isEmpty) return false;
+    final base = SupabaseConfig.url;
+    if (base.isEmpty) return false;
+    final anon = SupabaseConfig.anonKey;
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$base/auth/v1/token?grant_type=refresh_token'),
+            headers: {
+              'apikey': anon,
+              'Authorization': 'Bearer $anon',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'refresh_token': refresh}),
+          )
+          .timeout(const Duration(seconds: 4));
+      if (res.statusCode == 400 ||
+          res.statusCode == 401 ||
+          res.statusCode == 403) {
+        debugPrint('RenovarToken: rechazado ${res.statusCode}');
+        await SesionNube.clear();
+        return false;
+      }
+      if (res.statusCode != 200) {
+        debugPrint('RenovarToken: http ${res.statusCode}');
+        return false;
+      }
+      final decoded = jsonDecode(res.body);
+      if (decoded is! Map) return false;
+      final access = decoded['access_token']?.toString() ?? '';
+      final nuevo = decoded['refresh_token']?.toString() ?? '';
+      final raw = decoded['expires_in'];
+      final secs = raw is int
+          ? raw
+          : raw is num
+              ? raw.toInt()
+              : int.tryParse('$raw') ?? 3600;
+      if (access.isEmpty) return false;
+      await SesionNube.guardar(
+        token: access,
+        expiresInSec: secs,
+        refreshToken: nuevo.isEmpty ? null : nuevo,
+      );
+      debugPrint('RenovarToken: renovado (${secs}s)');
+      return true;
+    } catch (e) {
+      debugPrint('RenovarToken: red $e');
+      return false;
+    }
+  }
+}
+
+### 6+ archivo completo: validacion_dispositivo.dart -> lib/features/licencias/domain/validacion_dispositivo.dart [1-45]
+import 'package:fiscogest_rd/features/licencias/domain/device_fingerprint.dart';
+
+/// Estados de dominio para la futura respuesta del validador remoto.
+/// No contienen nombres ni parámetros de RPC ni de tablas.
+enum EstadoValidacionDispositivo {
+  nuevo,
+  registrado,
+  pruebaUtilizada,
+  negocioExistente,
+  concesionPromocional,
+  autorizado,
+  pendiente,
+  rechazado,
+}
+
+class SolicitudValidacionDispositivo {
+  const SolicitudValidacionDispositivo({required this.identidad});
+  final DeviceIdentity identidad;
+}
+
+class ResultadoValidacionDispositivo {
+  const ResultadoValidacionDispositivo({
+    required this.estado,
+    this.mensajeUsuario,
+    this.fechaInicio,
+    this.fechaFin,
+  });
+
+  final EstadoValidacionDispositivo estado;
+  final String? mensajeUsuario;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+
+  bool get puedeContinuar =>
+      estado == EstadoValidacionDispositivo.autorizado ||
+      estado == EstadoValidacionDispositivo.concesionPromocional;
+}
+
+/// Punto de extensión. Se conectará al contrato aprobado de Supabase sin
+/// delegar al cliente la concesión de pruebas ni la edición de fechas.
+abstract interface class ValidadorDispositivoRemoto {
+  Future<ResultadoValidacionDispositivo> validar(
+    SolicitudValidacionDispositivo solicitud,
+  );
+}

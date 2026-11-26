@@ -182,15 +182,14 @@ class LicenciaService {
 
   LicenciaInfo _fromRow(LicenciasTableData r) {
     final inicio = DateTime.tryParse(r.fechaInicio) ?? DateTime.now();
-    final prueba = r.plan.toLowerCase() == 'demo' || r.vigenciaTipo == 'prueba';
     return LicenciaInfo(
       id: r.id,
       plan: r.plan,
       vigenciaTipo: r.vigenciaTipo,
       fechaInicio: inicio,
-      fechaFin: r.fechaFin != null
-          ? DateTime.tryParse(r.fechaFin!)
-          : (prueba ? inicio.add(const Duration(days: kDiasPrueba)) : null),
+      fechaFin: r.fechaFin != null ? DateTime.tryParse(r.fechaFin!) : null,
+      pruebaFin: r.pruebaFin != null ? DateTime.tryParse(r.pruebaFin!) : null,
+      graciaFin: r.graciaFin != null ? DateTime.tryParse(r.graciaFin!) : null,
       maxDispositivos: r.maxDispositivos,
       maxCajas: r.maxCajas,
       ecfHabilitado: r.ecfHabilitado,
@@ -479,37 +478,17 @@ class LicenciaService {
     return n;
   }
 
-  /// [CAMPANAS_FASE1] Extiende la vigencia local tras una oferta 'meses_gratis'.
+  /// [CAMPANAS_FASE1] La extensión de vigencia la concede el backend
+  /// (concesiones_promocionales); el cliente no modifica fechaFin. Tras la
+  /// aplicación remota de la oferta, solo refresca la licencia desde la nube.
   Future<void> aplicarMesesGratisOferta(int meses) async {
     if (meses <= 0) return;
-    final rows = await (_db.select(_db.licenciasTable)).get();
-    if (rows.isEmpty) return;
-    final row = rows.first;
-    final ahora = DateTime.now();
-    final finActual = row.fechaFin == null
-        ? null
-        : DateTime.tryParse(row.fechaFin!);
-    final base = (finActual != null && finActual.isAfter(ahora))
-        ? finActual
-        : ahora;
-    final nueva = base.add(Duration(days: (30.44 * meses).round()));
-
-    await (_db.update(
-      _db.licenciasTable,
-    )..where((t) => t.id.equals(row.id))).write(
-      LicenciasTableCompanion(
-        fechaFin: Value(nueva.toIso8601String()),
-        actualizadoEn: Value(ahora.toIso8601String()),
-      ),
-    );
-
-    final refreshed = await (_db.select(
-      _db.licenciasTable,
-    )..where((t) => t.id.equals(row.id))).getSingle();
-    await _mapYActualizarEstado(refreshed);
-    debugPrint(
-      'Oferta meses_gratis aplicada: +$meses meses, vigente hasta $nueva',
-    );
+    try {
+      await LicenciaSync(_db).pullDesdeNegocio();
+      debugPrint('Oferta meses_gratis $meses: estado refrescado desde el servidor');
+    } catch (e) {
+      debugPrint('aplicarMesesGratisOferta pull: $e');
+    }
   }
 }
 
@@ -520,6 +499,8 @@ extension on LicenciaInfo {
     vigenciaTipo: vigenciaTipo,
     fechaInicio: fechaInicio,
     fechaFin: fechaFin,
+    pruebaFin: pruebaFin,
+    graciaFin: graciaFin,
     maxDispositivos: maxDispositivos,
     maxCajas: maxCajas,
     ecfHabilitado: ecfHabilitado,

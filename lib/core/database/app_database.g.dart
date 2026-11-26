@@ -463,6 +463,39 @@ class $LicenciasTableTable extends LicenciasTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pruebaInicioMeta = const VerificationMeta(
+    'pruebaInicio',
+  );
+  @override
+  late final GeneratedColumn<String> pruebaInicio = GeneratedColumn<String>(
+    'prueba_inicio',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pruebaFinMeta = const VerificationMeta(
+    'pruebaFin',
+  );
+  @override
+  late final GeneratedColumn<String> pruebaFin = GeneratedColumn<String>(
+    'prueba_fin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _graciaFinMeta = const VerificationMeta(
+    'graciaFin',
+  );
+  @override
+  late final GeneratedColumn<String> graciaFin = GeneratedColumn<String>(
+    'gracia_fin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -479,6 +512,9 @@ class $LicenciasTableTable extends LicenciasTable
     codigoActivacion,
     payloadFirma,
     actualizadoEn,
+    pruebaInicio,
+    pruebaFin,
+    graciaFin,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -607,6 +643,27 @@ class $LicenciasTableTable extends LicenciasTable
     } else if (isInserting) {
       context.missing(_actualizadoEnMeta);
     }
+    if (data.containsKey('prueba_inicio')) {
+      context.handle(
+        _pruebaInicioMeta,
+        pruebaInicio.isAcceptableOrUnknown(
+          data['prueba_inicio']!,
+          _pruebaInicioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('prueba_fin')) {
+      context.handle(
+        _pruebaFinMeta,
+        pruebaFin.isAcceptableOrUnknown(data['prueba_fin']!, _pruebaFinMeta),
+      );
+    }
+    if (data.containsKey('gracia_fin')) {
+      context.handle(
+        _graciaFinMeta,
+        graciaFin.isAcceptableOrUnknown(data['gracia_fin']!, _graciaFinMeta),
+      );
+    }
     return context;
   }
 
@@ -672,6 +729,18 @@ class $LicenciasTableTable extends LicenciasTable
         DriftSqlType.string,
         data['${effectivePrefix}actualizado_en'],
       )!,
+      pruebaInicio: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prueba_inicio'],
+      ),
+      pruebaFin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prueba_fin'],
+      ),
+      graciaFin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gracia_fin'],
+      ),
     );
   }
 
@@ -685,7 +754,7 @@ class LicenciasTableData extends DataClass
     implements Insertable<LicenciasTableData> {
   final int id;
 
-  /// demo | basico | profesional | empresa | desarrollador
+  /// gratis | basico | simplificado | pro | aliases históricos
   final String plan;
 
   /// prueba | mensual | trimestral | semestral | anual | vitalicia
@@ -697,12 +766,17 @@ class LicenciasTableData extends DataClass
   final bool ecfHabilitado;
   final bool vitalicia;
 
-  /// activa | gracia | vencida | no_activada
+  /// activa | gracia | vencida | no_activada | registro_requerido
   final String estado;
   final String? fingerprint;
   final String? codigoActivacion;
   final String? payloadFirma;
   final String actualizadoEn;
+
+  /// Fechas de prueba concedidas por el backend (no calculadas en el cliente).
+  final String? pruebaInicio;
+  final String? pruebaFin;
+  final String? graciaFin;
   const LicenciasTableData({
     required this.id,
     required this.plan,
@@ -718,6 +792,9 @@ class LicenciasTableData extends DataClass
     this.codigoActivacion,
     this.payloadFirma,
     required this.actualizadoEn,
+    this.pruebaInicio,
+    this.pruebaFin,
+    this.graciaFin,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -744,6 +821,15 @@ class LicenciasTableData extends DataClass
       map['payload_firma'] = Variable<String>(payloadFirma);
     }
     map['actualizado_en'] = Variable<String>(actualizadoEn);
+    if (!nullToAbsent || pruebaInicio != null) {
+      map['prueba_inicio'] = Variable<String>(pruebaInicio);
+    }
+    if (!nullToAbsent || pruebaFin != null) {
+      map['prueba_fin'] = Variable<String>(pruebaFin);
+    }
+    if (!nullToAbsent || graciaFin != null) {
+      map['gracia_fin'] = Variable<String>(graciaFin);
+    }
     return map;
   }
 
@@ -771,6 +857,15 @@ class LicenciasTableData extends DataClass
           ? const Value.absent()
           : Value(payloadFirma),
       actualizadoEn: Value(actualizadoEn),
+      pruebaInicio: pruebaInicio == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pruebaInicio),
+      pruebaFin: pruebaFin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pruebaFin),
+      graciaFin: graciaFin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(graciaFin),
     );
   }
 
@@ -794,6 +889,9 @@ class LicenciasTableData extends DataClass
       codigoActivacion: serializer.fromJson<String?>(json['codigoActivacion']),
       payloadFirma: serializer.fromJson<String?>(json['payloadFirma']),
       actualizadoEn: serializer.fromJson<String>(json['actualizadoEn']),
+      pruebaInicio: serializer.fromJson<String?>(json['pruebaInicio']),
+      pruebaFin: serializer.fromJson<String?>(json['pruebaFin']),
+      graciaFin: serializer.fromJson<String?>(json['graciaFin']),
     );
   }
   @override
@@ -814,6 +912,9 @@ class LicenciasTableData extends DataClass
       'codigoActivacion': serializer.toJson<String?>(codigoActivacion),
       'payloadFirma': serializer.toJson<String?>(payloadFirma),
       'actualizadoEn': serializer.toJson<String>(actualizadoEn),
+      'pruebaInicio': serializer.toJson<String?>(pruebaInicio),
+      'pruebaFin': serializer.toJson<String?>(pruebaFin),
+      'graciaFin': serializer.toJson<String?>(graciaFin),
     };
   }
 
@@ -832,6 +933,9 @@ class LicenciasTableData extends DataClass
     Value<String?> codigoActivacion = const Value.absent(),
     Value<String?> payloadFirma = const Value.absent(),
     String? actualizadoEn,
+    Value<String?> pruebaInicio = const Value.absent(),
+    Value<String?> pruebaFin = const Value.absent(),
+    Value<String?> graciaFin = const Value.absent(),
   }) => LicenciasTableData(
     id: id ?? this.id,
     plan: plan ?? this.plan,
@@ -849,6 +953,9 @@ class LicenciasTableData extends DataClass
         : this.codigoActivacion,
     payloadFirma: payloadFirma.present ? payloadFirma.value : this.payloadFirma,
     actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    pruebaInicio: pruebaInicio.present ? pruebaInicio.value : this.pruebaInicio,
+    pruebaFin: pruebaFin.present ? pruebaFin.value : this.pruebaFin,
+    graciaFin: graciaFin.present ? graciaFin.value : this.graciaFin,
   );
   LicenciasTableData copyWithCompanion(LicenciasTableCompanion data) {
     return LicenciasTableData(
@@ -882,6 +989,11 @@ class LicenciasTableData extends DataClass
       actualizadoEn: data.actualizadoEn.present
           ? data.actualizadoEn.value
           : this.actualizadoEn,
+      pruebaInicio: data.pruebaInicio.present
+          ? data.pruebaInicio.value
+          : this.pruebaInicio,
+      pruebaFin: data.pruebaFin.present ? data.pruebaFin.value : this.pruebaFin,
+      graciaFin: data.graciaFin.present ? data.graciaFin.value : this.graciaFin,
     );
   }
 
@@ -901,7 +1013,10 @@ class LicenciasTableData extends DataClass
           ..write('fingerprint: $fingerprint, ')
           ..write('codigoActivacion: $codigoActivacion, ')
           ..write('payloadFirma: $payloadFirma, ')
-          ..write('actualizadoEn: $actualizadoEn')
+          ..write('actualizadoEn: $actualizadoEn, ')
+          ..write('pruebaInicio: $pruebaInicio, ')
+          ..write('pruebaFin: $pruebaFin, ')
+          ..write('graciaFin: $graciaFin')
           ..write(')'))
         .toString();
   }
@@ -922,6 +1037,9 @@ class LicenciasTableData extends DataClass
     codigoActivacion,
     payloadFirma,
     actualizadoEn,
+    pruebaInicio,
+    pruebaFin,
+    graciaFin,
   );
   @override
   bool operator ==(Object other) =>
@@ -940,7 +1058,10 @@ class LicenciasTableData extends DataClass
           other.fingerprint == this.fingerprint &&
           other.codigoActivacion == this.codigoActivacion &&
           other.payloadFirma == this.payloadFirma &&
-          other.actualizadoEn == this.actualizadoEn);
+          other.actualizadoEn == this.actualizadoEn &&
+          other.pruebaInicio == this.pruebaInicio &&
+          other.pruebaFin == this.pruebaFin &&
+          other.graciaFin == this.graciaFin);
 }
 
 class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
@@ -958,6 +1079,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
   final Value<String?> codigoActivacion;
   final Value<String?> payloadFirma;
   final Value<String> actualizadoEn;
+  final Value<String?> pruebaInicio;
+  final Value<String?> pruebaFin;
+  final Value<String?> graciaFin;
   const LicenciasTableCompanion({
     this.id = const Value.absent(),
     this.plan = const Value.absent(),
@@ -973,6 +1097,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
     this.codigoActivacion = const Value.absent(),
     this.payloadFirma = const Value.absent(),
     this.actualizadoEn = const Value.absent(),
+    this.pruebaInicio = const Value.absent(),
+    this.pruebaFin = const Value.absent(),
+    this.graciaFin = const Value.absent(),
   });
   LicenciasTableCompanion.insert({
     this.id = const Value.absent(),
@@ -989,6 +1116,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
     this.codigoActivacion = const Value.absent(),
     this.payloadFirma = const Value.absent(),
     required String actualizadoEn,
+    this.pruebaInicio = const Value.absent(),
+    this.pruebaFin = const Value.absent(),
+    this.graciaFin = const Value.absent(),
   }) : plan = Value(plan),
        vigenciaTipo = Value(vigenciaTipo),
        fechaInicio = Value(fechaInicio),
@@ -1009,6 +1139,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
     Expression<String>? codigoActivacion,
     Expression<String>? payloadFirma,
     Expression<String>? actualizadoEn,
+    Expression<String>? pruebaInicio,
+    Expression<String>? pruebaFin,
+    Expression<String>? graciaFin,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1025,6 +1158,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
       if (codigoActivacion != null) 'codigo_activacion': codigoActivacion,
       if (payloadFirma != null) 'payload_firma': payloadFirma,
       if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+      if (pruebaInicio != null) 'prueba_inicio': pruebaInicio,
+      if (pruebaFin != null) 'prueba_fin': pruebaFin,
+      if (graciaFin != null) 'gracia_fin': graciaFin,
     });
   }
 
@@ -1043,6 +1179,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
     Value<String?>? codigoActivacion,
     Value<String?>? payloadFirma,
     Value<String>? actualizadoEn,
+    Value<String?>? pruebaInicio,
+    Value<String?>? pruebaFin,
+    Value<String?>? graciaFin,
   }) {
     return LicenciasTableCompanion(
       id: id ?? this.id,
@@ -1059,6 +1198,9 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
       codigoActivacion: codigoActivacion ?? this.codigoActivacion,
       payloadFirma: payloadFirma ?? this.payloadFirma,
       actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+      pruebaInicio: pruebaInicio ?? this.pruebaInicio,
+      pruebaFin: pruebaFin ?? this.pruebaFin,
+      graciaFin: graciaFin ?? this.graciaFin,
     );
   }
 
@@ -1107,6 +1249,15 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
     if (actualizadoEn.present) {
       map['actualizado_en'] = Variable<String>(actualizadoEn.value);
     }
+    if (pruebaInicio.present) {
+      map['prueba_inicio'] = Variable<String>(pruebaInicio.value);
+    }
+    if (pruebaFin.present) {
+      map['prueba_fin'] = Variable<String>(pruebaFin.value);
+    }
+    if (graciaFin.present) {
+      map['gracia_fin'] = Variable<String>(graciaFin.value);
+    }
     return map;
   }
 
@@ -1126,7 +1277,10 @@ class LicenciasTableCompanion extends UpdateCompanion<LicenciasTableData> {
           ..write('fingerprint: $fingerprint, ')
           ..write('codigoActivacion: $codigoActivacion, ')
           ..write('payloadFirma: $payloadFirma, ')
-          ..write('actualizadoEn: $actualizadoEn')
+          ..write('actualizadoEn: $actualizadoEn, ')
+          ..write('pruebaInicio: $pruebaInicio, ')
+          ..write('pruebaFin: $pruebaFin, ')
+          ..write('graciaFin: $graciaFin')
           ..write(')'))
         .toString();
   }
@@ -39710,6 +39864,9 @@ typedef $$LicenciasTableTableCreateCompanionBuilder =
       Value<String?> codigoActivacion,
       Value<String?> payloadFirma,
       required String actualizadoEn,
+      Value<String?> pruebaInicio,
+      Value<String?> pruebaFin,
+      Value<String?> graciaFin,
     });
 typedef $$LicenciasTableTableUpdateCompanionBuilder =
     LicenciasTableCompanion Function({
@@ -39727,6 +39884,9 @@ typedef $$LicenciasTableTableUpdateCompanionBuilder =
       Value<String?> codigoActivacion,
       Value<String?> payloadFirma,
       Value<String> actualizadoEn,
+      Value<String?> pruebaInicio,
+      Value<String?> pruebaFin,
+      Value<String?> graciaFin,
     });
 
 class $$LicenciasTableTableFilterComposer
@@ -39805,6 +39965,21 @@ class $$LicenciasTableTableFilterComposer
 
   ColumnFilters<String> get actualizadoEn => $composableBuilder(
     column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pruebaInicio => $composableBuilder(
+    column: $table.pruebaInicio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pruebaFin => $composableBuilder(
+    column: $table.pruebaFin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get graciaFin => $composableBuilder(
+    column: $table.graciaFin,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -39887,6 +40062,21 @@ class $$LicenciasTableTableOrderingComposer
     column: $table.actualizadoEn,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pruebaInicio => $composableBuilder(
+    column: $table.pruebaInicio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pruebaFin => $composableBuilder(
+    column: $table.pruebaFin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get graciaFin => $composableBuilder(
+    column: $table.graciaFin,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LicenciasTableTableAnnotationComposer
@@ -39955,6 +40145,17 @@ class $$LicenciasTableTableAnnotationComposer
     column: $table.actualizadoEn,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get pruebaInicio => $composableBuilder(
+    column: $table.pruebaInicio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pruebaFin =>
+      $composableBuilder(column: $table.pruebaFin, builder: (column) => column);
+
+  GeneratedColumn<String> get graciaFin =>
+      $composableBuilder(column: $table.graciaFin, builder: (column) => column);
 }
 
 class $$LicenciasTableTableTableManager
@@ -40008,6 +40209,9 @@ class $$LicenciasTableTableTableManager
                 Value<String?> codigoActivacion = const Value.absent(),
                 Value<String?> payloadFirma = const Value.absent(),
                 Value<String> actualizadoEn = const Value.absent(),
+                Value<String?> pruebaInicio = const Value.absent(),
+                Value<String?> pruebaFin = const Value.absent(),
+                Value<String?> graciaFin = const Value.absent(),
               }) => LicenciasTableCompanion(
                 id: id,
                 plan: plan,
@@ -40023,6 +40227,9 @@ class $$LicenciasTableTableTableManager
                 codigoActivacion: codigoActivacion,
                 payloadFirma: payloadFirma,
                 actualizadoEn: actualizadoEn,
+                pruebaInicio: pruebaInicio,
+                pruebaFin: pruebaFin,
+                graciaFin: graciaFin,
               ),
           createCompanionCallback:
               ({
@@ -40040,6 +40247,9 @@ class $$LicenciasTableTableTableManager
                 Value<String?> codigoActivacion = const Value.absent(),
                 Value<String?> payloadFirma = const Value.absent(),
                 required String actualizadoEn,
+                Value<String?> pruebaInicio = const Value.absent(),
+                Value<String?> pruebaFin = const Value.absent(),
+                Value<String?> graciaFin = const Value.absent(),
               }) => LicenciasTableCompanion.insert(
                 id: id,
                 plan: plan,
@@ -40055,6 +40265,9 @@ class $$LicenciasTableTableTableManager
                 codigoActivacion: codigoActivacion,
                 payloadFirma: payloadFirma,
                 actualizadoEn: actualizadoEn,
+                pruebaInicio: pruebaInicio,
+                pruebaFin: pruebaFin,
+                graciaFin: graciaFin,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

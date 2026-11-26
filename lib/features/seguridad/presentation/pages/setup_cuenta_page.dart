@@ -18,6 +18,10 @@ import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_
 import 'package:fiscogest_rd/features/campanas/data/campanas_remote.dart';
 import 'package:fiscogest_rd/features/campanas/data/campana_pendiente_store.dart';
 import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
+import 'package:fiscogest_rd/features/licencias/domain/device_fingerprint.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/domain/validacion_dispositivo.dart';
+import 'package:fiscogest_rd/features/licencias/domain/validador_dispositivo_remoto_supabase.dart';
 
 /// Configuración de la cuenta al iniciar por primera vez.
 class SetupCuentaPage extends ConsumerStatefulWidget {
@@ -156,9 +160,29 @@ class _SetupCuentaPageState extends ConsumerState<SetupCuentaPage> {
       await DispositivoService(db).ensureDispositivoRegistrado();
       if (!SupabaseConfig.isConfigured) return;
       await DispositivoSync(db).pushEsteEquipo();
+
+      final identity = await DeviceFingerprint.obtenerResultado();
+      final validador = ValidadorDispositivoRemotoSupabase();
+      final validacion = await validador.validar(
+        SolicitudValidacionDispositivo(identidad: identity),
+      );
+      debugPrint('Setup: validación remota = ${validacion.estado.name}'
+          ' ${validacion.errorCodigo ?? ''}');
+
       // Solo recupera el estado que ya concedió el backend. No crea ni extiende
-      // pruebas desde Flutter.
+      // pruebas desde Flutter: las fechas vienen del servidor vía pull.
       await LicenciaSync(db).pullDesdeNegocio();
+
+      // F8: solicita la prueba de 30 días al servidor solo si este negocio aún
+      // no tiene fecha de fin de prueba. La RPC decide (una prueba por negocio
+      // y por equipo); si no aplica responde null y no se toca nada local.
+      final lic = await LicenciaService(db).obtenerActual();
+      if (lic != null && lic.plan == 'gratis' && lic.pruebaFin == null) {
+        final mapa = await validador.iniciarPrueba(identity.fingerprint);
+        if (mapa != null) {
+          await LicenciaSync(db).pullDesdeNegocio();
+        }
+      }
     } catch (e) {
       // El alta de cuenta debe terminar aunque el dispositivo esté offline.
       debugPrint('Validación de dispositivo pendiente: $e');

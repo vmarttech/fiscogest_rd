@@ -27,4 +27,9 @@ class LicenciasTable extends Table {
   TextColumn get codigoActivacion => text().nullable()();
   TextColumn get payloadFirma => text().nullable()();
   TextColumn get actualizadoEn => text()();
+
+  /// Fechas de prueba concedidas por el backend (no calculadas en el cliente).
+  TextColumn get pruebaInicio => text().nullable()();
+  TextColumn get pruebaFin => text().nullable()();
+  TextColumn get graciaFin => text().nullable()();
 }

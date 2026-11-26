@@ -5,6 +5,8 @@ class LicenciaInfo {
     required this.vigenciaTipo,
     required this.fechaInicio,
     this.fechaFin,
+    this.pruebaFin,
+    this.graciaFin,
     required this.maxDispositivos,
     required this.maxCajas,
     required this.ecfHabilitado,
@@ -19,6 +21,8 @@ class LicenciaInfo {
   final String vigenciaTipo;
   final DateTime fechaInicio;
   final DateTime? fechaFin;
+  final DateTime? pruebaFin;
+  final DateTime? graciaFin;
   final int maxDispositivos;
   final int maxCajas;
   final bool ecfHabilitado;
@@ -40,8 +44,9 @@ class LicenciaInfo {
   }
 
   int? get diasGraciaRestantes {
-    if (esDesarrollador || fechaFin == null) return null;
-    final finGracia = fechaFin!.add(const Duration(days: 3));
+    if (esDesarrollador) return null;
+    final finGracia = graciaFin ?? fechaFin?.add(const Duration(days: 3));
+    if (finGracia == null) return null;
     if (DateTime.now().isAfter(finGracia)) return 0;
     return finGracia.difference(DateTime.now()).inDays + 1;
   }

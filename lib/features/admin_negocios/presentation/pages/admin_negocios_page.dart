@@ -1,4 +1,6 @@
 // [ADMIN_FASE2]
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +22,7 @@ class AdminNegociosPage extends ConsumerStatefulWidget {
 
 class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
   final _busquedaCtrl = TextEditingController();
+  Timer? _busquedaDebounce;
 
   static const _estados = [
     MapEntry('', 'Todos'),
@@ -50,8 +53,91 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
 
   @override
   void dispose() {
+    _busquedaDebounce?.cancel();
     _busquedaCtrl.dispose();
     super.dispose();
+  }
+
+  void _aplicarBusqueda([String? valor]) {
+    _busquedaDebounce?.cancel();
+    final filtros = ref.read(adminNegociosFiltrosProvider);
+    ref.read(adminNegociosFiltrosProvider.notifier).state = filtros.copyWith(
+      busqueda: (valor ?? _busquedaCtrl.text).trim(),
+    );
+  }
+
+  void _programarBusqueda(String valor) {
+    _busquedaDebounce?.cancel();
+    _busquedaDebounce = Timer(
+      const Duration(milliseconds: 350),
+      () => _aplicarBusqueda(valor),
+    );
+  }
+
+  Future<void> _mostrarFiltros(AdminNegociosFiltros filtros) async {
+    var plan = filtros.plan;
+    var orden = filtros.orden;
+    final aplicados = await showModalBottomSheet<({String plan, String orden})>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            8,
+            20,
+            20 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Filtros', style: AppTypography.h3),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: plan,
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Plan'),
+                items: _planes
+                    .map(
+                      (e) =>
+                          DropdownMenuItem(value: e.key, child: Text(e.value)),
+                    )
+                    .toList(),
+                onChanged: (value) => setSheetState(() => plan = value ?? ''),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: orden,
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Ordenar por'),
+                items: _ordenes
+                    .map(
+                      (e) =>
+                          DropdownMenuItem(value: e.key, child: Text(e.value)),
+                    )
+                    .toList(),
+                onChanged: (value) =>
+                    setSheetState(() => orden = value ?? 'reciente'),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () =>
+                    Navigator.pop(context, (plan: plan, orden: orden)),
+                child: const Text('Aplicar filtros'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!mounted || aplicados == null) return;
+    ref.read(adminNegociosFiltrosProvider.notifier).state = filtros.copyWith(
+      plan: aplicados.plan,
+      orden: aplicados.orden,
+    );
   }
 
   @override
@@ -64,6 +150,7 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
     return AppScaffold(
       title: 'Negocios registrados',
       showAppBar: !desktop,
+      showBackButton: false,
       body: RefreshIndicator(
         onRefresh: notifier.recargar,
         child: SingleChildScrollView(
@@ -84,8 +171,7 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
                     title: 'Negocios registrados',
                     subtitle:
                         'Consulta y administra el acceso de los negocios en VendiFlux.',
-                    showBack: true,
-                    backFallbackRoute: '/',
+                    showBack: false,
                   ),
                   _ResumenNegocios(filas: lista.filas),
                   const SizedBox(height: 16),
@@ -96,31 +182,32 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
                         Expanded(
                           child: TextField(
                             controller: _busquedaCtrl,
-                            decoration: const InputDecoration(
-                              hintText: 'Buscar por nombre, RNC o teléfono...',
-                              prefixIcon: Icon(Icons.search),
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              hintText: 'Buscar negocio, RNC o teléfono',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _busquedaCtrl.text.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      tooltip: 'Limpiar búsqueda',
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () {
+                                        _busquedaCtrl.clear();
+                                        _aplicarBusqueda('');
+                                        setState(() {});
+                                      },
+                                    ),
                               isDense: true,
                             ),
-                            onSubmitted: (valor) =>
-                                ref
-                                    .read(adminNegociosFiltrosProvider.notifier)
-                                    .state = filtros.copyWith(
-                                  busqueda: valor,
-                                ),
+                            onChanged: (value) {
+                              setState(() {});
+                              _programarBusqueda(value);
+                            },
+                            onSubmitted: _aplicarBusqueda,
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Buscar',
-                          icon: const Icon(Icons.search),
-                          onPressed: () =>
-                              ref
-                                  .read(adminNegociosFiltrosProvider.notifier)
-                                  .state = filtros.copyWith(
-                                busqueda: _busquedaCtrl.text,
-                              ),
-                        ),
-                        IconButton(
-                          tooltip: 'Actualizar',
+                          tooltip: 'Actualizar lista',
                           icon: const Icon(Icons.refresh),
                           onPressed: () => ref
                               .read(adminNegociosTickProvider.notifier)
@@ -129,19 +216,16 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.zero,
-                    child: LayoutBuilder(
+                  if (mobile)
+                    _filtrosRapidosMobile(filtros)
+                  else
+                    LayoutBuilder(
                       builder: (context, constraints) {
-                        final angosto = constraints.maxWidth < 620;
                         final widgets = [
                           _dropEstado(filtros),
                           _dropPlan(filtros),
                           _dropOrden(filtros),
                         ];
-                        if (angosto) {
-                          return Column(spacing: 8, children: widgets);
-                        }
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -154,7 +238,6 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
                         );
                       },
                     ),
-                  ),
                   const SizedBox(height: 8),
                   _cuerpo(lista, notifier),
                 ],
@@ -163,6 +246,43 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _filtrosRapidosMobile(AdminNegociosFiltros filtros) {
+    final activos =
+        (filtros.plan.isNotEmpty ? 1 : 0) +
+        (filtros.orden != 'reciente' ? 1 : 0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final estado in _estados)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(estado.value),
+                    selected: filtros.estado == estado.key,
+                    onSelected: (_) =>
+                        ref.read(adminNegociosFiltrosProvider.notifier).state =
+                            filtros.copyWith(estado: estado.key),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: () => _mostrarFiltros(filtros),
+            icon: const Icon(Icons.tune),
+            label: Text(activos == 0 ? 'Plan y orden' : 'Filtros ($activos)'),
+          ),
+        ),
+      ],
     );
   }
 

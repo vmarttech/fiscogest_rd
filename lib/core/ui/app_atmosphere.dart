@@ -27,7 +27,7 @@ class AppAtmosphere extends StatelessWidget {
                   colors: [
                     Theme.of(
                       context,
-                    ).colorScheme.primary.withValues(alpha: 0.12),
+                    ).colorScheme.primary.withValues(alpha: 0.16),
                     Theme.of(
                       context,
                     ).colorScheme.primary.withValues(alpha: 0.0),
@@ -49,7 +49,7 @@ class AppAtmosphere extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF64748B).withValues(alpha: 0.08),
+                    const Color(0xFF64748B).withValues(alpha: 0.11),
                     const Color(0xFF64748B).withValues(alpha: 0.0),
                   ],
                 ),

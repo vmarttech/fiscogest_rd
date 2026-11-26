@@ -22,12 +22,14 @@ class ResultadoValidacionDispositivo {
   const ResultadoValidacionDispositivo({
     required this.estado,
     this.mensajeUsuario,
+    this.errorCodigo,
     this.fechaInicio,
     this.fechaFin,
   });
 
   final EstadoValidacionDispositivo estado;
   final String? mensajeUsuario;
+  final String? errorCodigo;
   final DateTime? fechaInicio;
   final DateTime? fechaFin;
 

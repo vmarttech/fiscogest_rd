@@ -22,7 +22,7 @@ class NegocioRemote {
   /// Crea un negocio nuevo y devuelve su UUID.
   Future<String> crear({
     required String nombre,
-    String plan = 'demo',
+    String plan = 'gratis',
     String estado = 'activa',
   }) async {
     if (!SupabaseConfig.isConfigured) {
@@ -32,7 +32,7 @@ class NegocioRemote {
       'nombre': nombre.trim().isEmpty ? 'Mi negocio' : nombre.trim(),
       'plan': plan,
       'estado': estado,
-      'max_dispositivos': 3,
+      'max_dispositivos': 1,
       'max_cajas': 1,
       'ecf_habilitado': false,
       'vitalicia': false,

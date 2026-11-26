@@ -7,7 +7,7 @@ enum AppThemeOption {
   blue('Azul', Color(0xFF0057FF)),
   violet('Violeta', Color(0xFF6D28D9)),
   orange('Naranja', Color(0xFFFF7900)),
-  gray('Gris', Color(0xFF374151));
+  gray('Gris', Color(0xFF27364A));
 
   const AppThemeOption(this.label, this.seedColor);
   final String label;

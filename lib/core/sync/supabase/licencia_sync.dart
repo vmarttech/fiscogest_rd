@@ -27,7 +27,8 @@ class LicenciaSync {
         'id': 'eq.$negocioId',
         'select':
             'id,plan,estado,max_dispositivos,max_cajas,ecf_habilitado,'
-            'vitalicia,vigencia_tipo,fecha_inicio,fecha_fin,updated_at',
+            'vitalicia,vigencia_tipo,fecha_inicio,fecha_fin,'
+            'prueba_inicio,prueba_fin,gracia_fin,updated_at',
         'limit': '1',
       },
     );
@@ -147,6 +148,24 @@ class LicenciaSync {
         ? (r['vigencia_tipo'] as String).trim()
         : (vitalicia ? 'vitalicia' : 'mensual');
 
+    String? pruebaInicio;
+    final pIni = r['prueba_inicio'];
+    if (pIni != null && '$pIni'.isNotEmpty) {
+      pruebaInicio = DateTime.tryParse('$pIni')?.toIso8601String();
+    }
+
+    String? pruebaFin;
+    final pFin = r['prueba_fin'];
+    if (pFin != null && '$pFin'.isNotEmpty) {
+      pruebaFin = DateTime.tryParse('$pFin')?.toIso8601String();
+    }
+
+    String? graciaFin;
+    final gFin = r['gracia_fin'];
+    if (gFin != null && '$gFin'.isNotEmpty) {
+      graciaFin = DateTime.tryParse('$gFin')?.toIso8601String();
+    }
+
     final actualizado = DateTime.now().toIso8601String();
 
     final locales = await _db.select(_db.licenciasTable).get();
@@ -167,6 +186,9 @@ class LicenciaSync {
               vigenciaTipo: vigencia,
               fechaInicio: fechaInicio,
               fechaFin: Value(fechaFin),
+            pruebaInicio: Value(pruebaInicio),
+            pruebaFin: Value(pruebaFin),
+            graciaFin: Value(graciaFin),
               maxDispositivos: Value(maxDisp),
               maxCajas: Value(maxCajas),
               ecfHabilitado: Value(ecf),
@@ -184,6 +206,9 @@ class LicenciaSync {
           vigenciaTipo: Value(vigencia),
           fechaInicio: Value(fechaInicio),
           fechaFin: Value(fechaFin),
+          pruebaInicio: Value(pruebaInicio),
+          pruebaFin: Value(pruebaFin),
+          graciaFin: Value(graciaFin),
           maxDispositivos: Value(maxDisp),
           maxCajas: Value(maxCajas),
           ecfHabilitado: Value(ecf),

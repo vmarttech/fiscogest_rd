@@ -134,7 +134,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 84;
+  int get schemaVersion => 85;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -201,6 +201,11 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 85) {
+        try { await m.addColumn(licenciasTable, licenciasTable.pruebaInicio); } catch (_) {}
+        try { await m.addColumn(licenciasTable, licenciasTable.pruebaFin); } catch (_) {}
+        try { await m.addColumn(licenciasTable, licenciasTable.graciaFin); } catch (_) {}
+      }
       if (from < 84) {
         await m.database.customStatement('''
           CREATE TABLE IF NOT EXISTS licencia_consumos_mensuales (

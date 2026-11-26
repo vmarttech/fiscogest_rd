@@ -45,15 +45,89 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   }
 
   Future<void> _cargarOfertaReservada() async {
+    await _actualizarOfertaReservada();
+  }
+
+  /// Una selección local es solo una reserva temporal: la campaña debe seguir
+  /// vigente y conservar los mismos términos antes de mostrar o cobrar un
+  /// precio promocional.
+  Future<bool> _actualizarOfertaReservada() async {
+    OfertaReserva? lectura;
     try {
-      final r = await OfertaReservaPagoStore.leer();
-      if (r == null || r.efectoTipo != 'descuento') return;
-      final m = RegExp(r'(\d+(?:[.,]\d+)?)').firstMatch(r.valor);
-      final v = double.tryParse(m?.group(1)?.replaceAll(',', '.') ?? '');
-      if (v != null && v > 0 && v <= 100 && mounted) {
-        setState(() => _ofertaPct = v);
+      lectura = await OfertaReservaPagoStore.leer();
+    } catch (error) {
+      if (mounted) {
+        setState(() => _ofertaPct = null);
+        _snack(
+          'No se pudo validar la oferta. Se muestran los precios vigentes.',
+        );
       }
-    } catch (_) {}
+      debugPrint('Leer oferta reservada: $error');
+      return false;
+    }
+    final reserva = lectura;
+    if (reserva == null) {
+      if (mounted && _ofertaPct != null) setState(() => _ofertaPct = null);
+      return true;
+    }
+
+    try {
+      final campanas = await ref.read(campanasRemoteProvider).vigentes();
+      final coincidencias = campanas
+          .where((c) => c.id == reserva.campanaId)
+          .toList(growable: false);
+      final campana = coincidencias.isEmpty ? null : coincidencias.first;
+      final coincide =
+          campana != null &&
+          campana.vigente &&
+          campana.nombre == reserva.titulo &&
+          campana.valor == reserva.valor &&
+          campana.tipo == reserva.efectoTipo;
+
+      if (!coincide) {
+        await OfertaReservaPagoStore.limpiar();
+        if (mounted) {
+          setState(() => _ofertaPct = null);
+          _snack(
+            'La oferta ya no está disponible. Se muestran los precios vigentes.',
+          );
+        }
+        return false;
+      }
+
+      double? porcentaje;
+      if (reserva.efectoTipo == 'descuento') {
+        final match = RegExp(r'(\d+(?:[.,]\d+)?)').firstMatch(reserva.valor);
+        final valor = double.tryParse(
+          match?.group(1)?.replaceAll(',', '.') ?? '',
+        );
+        if (valor == null || valor <= 0 || valor > 100) {
+          await OfertaReservaPagoStore.limpiar();
+          if (mounted) {
+            setState(() => _ofertaPct = null);
+            _snack(
+              'La oferta tiene un descuento inválido. Se muestran los precios vigentes.',
+            );
+          }
+          return false;
+        }
+        porcentaje = valor;
+      }
+      if (mounted) setState(() => _ofertaPct = porcentaje);
+      return true;
+    } catch (error) {
+      // Si no se puede confirmar la vigencia, no se permite cobrar con un
+      // descuento guardado que podría pertenecer a una campaña eliminada.
+      await OfertaReservaPagoStore.limpiar();
+      if (mounted) {
+        setState(() => _ofertaPct = null);
+        _snack(
+          'No se pudo validar la oferta. Se muestran los precios vigentes.',
+        );
+      }
+      debugPrint('Validar oferta reservada: $error');
+      return false;
+    }
   }
 
   double _montoConDescuento(String plan) {
@@ -65,6 +139,9 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
   }
 
   Future<void> _pagarPayPal(String plan) async {
+    if (_cargando) return;
+    if (!await _actualizarOfertaReservada()) return;
+    if (!mounted) return;
     if (plan == 'gratis') {
       _snack(
         'El plan Gratis no requiere pago. '
