@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/domain/entities/ajuste_inventario.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/pages/registrar_ajuste_page.dart';
 import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/ajuste_inventario_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Lista de ajustes — mismo diseño que Inventario Físico (KPIs, filtros, cards).
 class ListaAjustesPage extends ConsumerStatefulWidget {
@@ -68,8 +69,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Nuevo',
+              label: Text(
+                ServicioIdioma.t(context, 'Nuevo'),
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
             )
@@ -180,8 +181,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           FilledButton.icon(
                             onPressed: _nuevo,
                             icon: const Icon(Icons.add_rounded, size: 20),
-                            label: const Text(
-                              'Nuevo ajuste',
+                            label: Text(
+                              ServicioIdioma.t(context, 'Nuevo ajuste'),
                               style: TextStyle(fontWeight: FontWeight.w900),
                             ),
                             style: FilledButton.styleFrom(
@@ -207,8 +208,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                         child: FilledButton.icon(
                           onPressed: _nuevo,
                           icon: const Icon(Icons.add_rounded),
-                          label: const Text(
-                            'Nuevo ajuste',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Nuevo ajuste'),
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 15,
@@ -427,8 +428,8 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
 
                     Row(
                       children: [
-                        const Text(
-                          'Ajustes',
+                        Text(
+                          ServicioIdioma.t(context, 'Ajustes'),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w900,

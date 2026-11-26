@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
     show cajaRepositoryProvider;
 import 'package:fiscogest_rd/features/ventas/presentation/pages/cobrar_page.dart'
     show listadoCuentasCobrarProvider;
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Cobro de cuota / abono CXC **desde Caja**.
 /// Misma idea que cobrar cotización: solo monto + forma de pago + confirmar.
@@ -117,7 +118,9 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
     final monto = _monto;
     if (monto <= 0) {
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('Indique un monto válido')),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Indique un monto válido')),
+        ),
       );
       return;
     }
@@ -383,8 +386,8 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text(
-                        'Monto a cobrar',
+                      Text(
+                        ServicioIdioma.t(context, 'Monto a cobrar'),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
@@ -414,8 +417,8 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Forma de pago',
+                      Text(
+                        ServicioIdioma.t(context, 'Forma de pago'),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
@@ -448,8 +451,8 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                       ),
                       if (_formaPago == 'Efectivo') ...[
                         const SizedBox(height: 14),
-                        const Text(
-                          'Efectivo recibido',
+                        Text(
+                          ServicioIdioma.t(context, 'Efectivo recibido'),
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
@@ -471,8 +474,8 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                       ],
                       if (_formaPago != 'Efectivo') ...[
                         const SizedBox(height: 14),
-                        const Text(
-                          'N° referencia',
+                        Text(
+                          ServicioIdioma.t(context, 'N° referencia'),
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,

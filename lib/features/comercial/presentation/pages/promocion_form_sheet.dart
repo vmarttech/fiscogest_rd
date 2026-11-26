@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/promocion.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Formulario de promoción (móvil/desktop).
 /// Controllers propios → evita pantalla roja al cerrar.
@@ -190,8 +191,11 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
               children: [
                 TextFormField(
                   controller: _nombre,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre de la promoción *',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(
+                      context,
+                      'Nombre de la promoción *',
+                    ),
                     border: OutlineInputBorder(),
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
@@ -207,8 +211,8 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 TextFormField(
                   controller: _descripcion,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Descripción',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(context, 'Descripción'),
                     border: OutlineInputBorder(),
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
@@ -220,8 +224,8 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
                   initialValue: _tipo,
-                  decoration: const InputDecoration(
-                    labelText: 'Tipo de promoción',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(context, 'Tipo de promoción'),
                     border: OutlineInputBorder(),
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
@@ -248,8 +252,8 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     _valor.text = _tipo == 'porcentaje'
                         ? '10'
                         : _tipo == 'montoFijo'
-                            ? '100'
-                            : '1';
+                        ? '100'
+                        : '1';
                   }),
                 ),
                 if (_tipo != 'lleve2Pague1') ...[
@@ -291,8 +295,8 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     ),
                   ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Vigencia',
+                Text(
+                  ServicioIdioma.t(context, 'Vigencia'),
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
@@ -326,16 +330,16 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Condiciones mínimas (opcionales)',
+                Text(
+                  ServicioIdioma.t(context, 'Condiciones mínimas (opcionales)'),
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _cantidad,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Cantidad mínima',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(context, 'Cantidad mínima'),
                     border: OutlineInputBorder(),
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
@@ -355,8 +359,11 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Compra mínima (RD\$)',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(
+                      context,
+                      'Compra mínima (RD\$)',
+                    ),
                     border: OutlineInputBorder(),
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
@@ -371,13 +378,16 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   },
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Aplicación de la promoción',
+                Text(
+                  ServicioIdioma.t(context, 'Aplicación de la promoción'),
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Si no eliges productos ni categorías, aplica a todos.',
+                Text(
+                  ServicioIdioma.t(
+                    context,
+                    'Si no eliges productos ni categorías, aplica a todos.',
+                  ),
                   style: TextStyle(fontSize: 12),
                 ),
                 ExpansionTile(
@@ -429,9 +439,14 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   ),
                   children: [
                     if (listaCategorias.isEmpty)
-                      const ListTile(
+                      ListTile(
                         dense: true,
-                        title: Text('No hay categorías disponibles.'),
+                        title: Text(
+                          ServicioIdioma.t(
+                            context,
+                            'No hay categorías disponibles.',
+                          ),
+                        ),
                       )
                     else
                       ...listaCategorias
@@ -460,7 +475,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Promoción activa'),
+                  title: Text(ServicioIdioma.t(context, 'Promoción activa')),
                   value: _activa,
                   onChanged: (v) => setState(() {
                     _activa = v;
@@ -481,7 +496,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 Expanded(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancelar'),
+                    child: Text(ServicioIdioma.t(context, 'Cancelar')),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -489,7 +504,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   flex: 2,
                   child: FilledButton(
                     onPressed: _guardar,
-                    child: const Text('Guardar'),
+                    child: Text(ServicioIdioma.t(context, 'Guardar')),
                   ),
                 ),
               ],

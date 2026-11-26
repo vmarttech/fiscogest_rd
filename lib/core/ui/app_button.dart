@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_sizes.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -53,12 +54,12 @@ class AppButton extends StatelessWidget {
           textStyle: AppTypography.button,
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
-        child: _buildContent(),
+        child: _buildContent(context),
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     if (isLoading) {
       return const SizedBox(
         width: 20,
@@ -74,7 +75,7 @@ class AppButton extends StatelessWidget {
     final iconWidget = icon != null
         ? Icon(icon, size: AppSizes.iconMd)
         : const SizedBox.shrink();
-    final textWidget = Text(text);
+    final textWidget = Text(ServicioIdioma.t(context, text));
 
     final content = Row(
       mainAxisSize: MainAxisSize.min,

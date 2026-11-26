@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 enum ModoOperacionVenta { venta, cotizacion, apartado }
 
@@ -41,7 +42,7 @@ class BotonesAccionVenta extends StatelessWidget {
     final limpiar = OutlinedButton.icon(
       onPressed: alLimpiar,
       icon: const Icon(Icons.refresh),
-      label: const Text('Limpiar'),
+      label: Text(ServicioIdioma.t(context, 'Limpiar')),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),

@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/fios_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class SheetAnotarFiao extends ConsumerStatefulWidget {
   const SheetAnotarFiao({
@@ -308,7 +309,7 @@ class _SheetAnotarFiaoState extends ConsumerState<SheetAnotarFiao> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text('Compromete pago en:'),
+            Text(ServicioIdioma.t(context, 'Compromete pago en:')),
             const SizedBox(height: 6),
             Wrap(
               spacing: 8,

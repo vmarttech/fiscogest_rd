@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AvisarAtrasadosButton extends ConsumerWidget {
   const AvisarAtrasadosButton({super.key, required this.fiosAtrasados});
@@ -87,7 +88,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
     if (fiosAtrasados.isEmpty) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
           width: 320,
           content: Text('No hay fios pendientes de cobro.'),
@@ -177,10 +178,15 @@ class AvisarAtrasadosButton extends ConsumerWidget {
 
     if (porTel.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           behavior: SnackBarBehavior.floating,
           width: 340,
-          content: Text('No se pudo enviar: no hay números válidos.'),
+          content: Text(
+            ServicioIdioma.t(
+              context,
+              'No se pudo enviar: no hay números válidos.',
+            ),
+          ),
         ),
       );
       return;
@@ -223,16 +229,24 @@ class AvisarAtrasadosButton extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    final resumen = <String>['$enviados enviado(s)'];
-    if (fallidos > 0) resumen.add('$fallidos fallido(s)');
+    final resumen = <String>[
+      '${ServicioIdioma.t(context, 'Enviados')}: $enviados',
+    ];
+    if (fallidos > 0) {
+      resumen.add('${ServicioIdioma.t(context, 'Fallidos')}: $fallidos');
+    }
     final quedanSin = sinTelefono.length;
-    if (quedanSin > 0) resumen.add('$quedanSin sin teléfono');
+    if (quedanSin > 0) {
+      resumen.add('${ServicioIdioma.t(context, 'Sin teléfono')}: $quedanSin');
+    }
     // sinTelefono se redujo solo visualmente; contamos los que no entraron a porTel por id sería más exacto
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         width: 360,
-        content: Text('Se completó: ${resumen.join(" · ")}'),
+        content: Text(
+          '${ServicioIdioma.t(context, 'Se completó:')} ${resumen.join(" · ")}',
+        ),
         duration: const Duration(seconds: 5),
       ),
     );
@@ -254,7 +268,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Faltan teléfonos'),
+          title: Text(ServicioIdioma.t(ctx, 'Faltan teléfonos')),
           content: SizedBox(
             width: 360,
             child: SingleChildScrollView(
@@ -277,8 +291,8 @@ class AvisarAtrasadosButton extends ConsumerWidget {
                     TextField(
                       controller: controllers[f.id],
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'WhatsApp / Teléfono',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(ctx, 'WhatsApp / Teléfono'),
                         isDense: true,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.phone, size: 18),
@@ -293,11 +307,11 @@ class AvisarAtrasadosButton extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Omitir'),
+              child: Text(ServicioIdioma.t(ctx, 'Omitir')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Guardar y enviar'),
+              child: Text(ServicioIdioma.t(ctx, 'Guardar y enviar')),
             ),
           ],
         );
@@ -331,7 +345,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
           ? null
           : () => avisar(context, ref, fiosAtrasados),
       icon: const Icon(Icons.chat_bubble_outline),
-      label: const Text('Avisar atrasados'),
+      label: Text(ServicioIdioma.t(context, 'Avisar atrasados')),
     );
   }
 }

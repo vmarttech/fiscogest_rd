@@ -21,6 +21,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 final indicadoresReposicionProvider =
     FutureProvider.autoDispose<
@@ -137,12 +138,12 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
         actions: [
           TextButton(
             onPressed: () => ctx.pop(false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => ctx.pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Eliminar'),
+            child: Text(ServicioIdioma.t(ctx, 'Eliminar')),
           ),
         ],
       ),
@@ -302,7 +303,11 @@ class _ProductosPageState extends ConsumerState<ProductosPage> {
                       onPressed: () =>
                           context.pushNamed(OfertasPromocionesPage.routeName),
                       icon: const Icon(Icons.local_offer_outlined, size: 18),
-                      label: const Text('Ofertas y promociones'),
+                      label: Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(context, 'Ofertas y promociones'),
+                        ),
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.primary,
                         side: BorderSide(
@@ -988,7 +993,7 @@ class _PanelConfigInventario extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'Configuración de inventario',
+            ServicioIdioma.t(context, 'Configuración de inventario'),
             style: AppTypography.h4.copyWith(
               fontWeight: FontWeight.w800,
               fontSize: 15,
@@ -997,7 +1002,7 @@ class _PanelConfigInventario extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Filtros rápidos',
+            ServicioIdioma.t(context, 'Filtros rápidos'),
             style: AppTypography.labelLarge.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1009,21 +1014,21 @@ class _PanelConfigInventario extends StatelessWidget {
             runSpacing: 8,
             children: [
               _FilterChip(
-                label: 'En Stock',
+                label: ServicioIdioma.t(context, 'En Stock'),
                 selected: filtroEstado == 'en_stock',
                 color: AppColors.success,
                 onTap: () =>
                     onFiltro(filtroEstado == 'en_stock' ? 'todos' : 'en_stock'),
               ),
               _FilterChip(
-                label: 'Bajo',
+                label: ServicioIdioma.t(context, 'Bajo'),
                 selected: filtroEstado == 'bajo',
                 color: AppColors.warning,
                 onTap: () =>
                     onFiltro(filtroEstado == 'bajo' ? 'todos' : 'bajo'),
               ),
               _FilterChip(
-                label: 'Agotado',
+                label: ServicioIdioma.t(context, 'Agotado'),
                 selected: filtroEstado == 'agotado',
                 color: AppColors.error,
                 onTap: () =>
@@ -1031,7 +1036,7 @@ class _PanelConfigInventario extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _FilterChip(
-                label: 'Inactivos',
+                label: ServicioIdioma.t(context, 'Inactivos'),
                 selected: filtroEstado == 'inactivo',
                 color: AppColors.textSecondary,
                 onTap: () =>
@@ -1041,7 +1046,7 @@ class _PanelConfigInventario extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Text(
-            'Vista de lista',
+            ServicioIdioma.t(context, 'Vista de lista'),
             style: AppTypography.labelLarge.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1052,7 +1057,7 @@ class _PanelConfigInventario extends StatelessWidget {
             children: [
               Expanded(
                 child: _VistaToggle(
-                  label: 'Normal',
+                  label: ServicioIdioma.t(context, 'Normal'),
                   selected: vistaLista == 'normal',
                   onTap: () => onVista('normal'),
                 ),
@@ -1060,7 +1065,7 @@ class _PanelConfigInventario extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: _VistaToggle(
-                  label: 'Compacta',
+                  label: ServicioIdioma.t(context, 'Compacta'),
                   selected: vistaLista == 'compacta',
                   onTap: () => onVista('compacta'),
                 ),
@@ -1069,25 +1074,28 @@ class _PanelConfigInventario extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Resumen de stock',
+            ServicioIdioma.t(context, 'Resumen de stock'),
             style: AppTypography.labelLarge.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
-          _ResumenFila(label: 'Total Productos', value: '$total'),
           _ResumenFila(
-            label: 'Total Valor (Costo)',
+            label: ServicioIdioma.t(context, 'Total Productos'),
+            value: '$total',
+          ),
+          _ResumenFila(
+            label: ServicioIdioma.t(context, 'Total Valor (Costo)'),
             value: formatRd(valorCosto),
           ),
           _ResumenFila(
-            label: 'Total Valor (Venta)',
+            label: ServicioIdioma.t(context, 'Total Valor (Venta)'),
             value: formatRd(valorVenta),
           ),
           const SizedBox(height: 20),
           Text(
-            'Gestión rápida',
+            ServicioIdioma.t(context, 'Gestión rápida'),
             style: AppTypography.labelLarge.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1099,7 +1107,7 @@ class _PanelConfigInventario extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: onNuevo,
               icon: const Icon(Icons.add_circle_outline, size: 18),
-              label: const Text('[F3] NUEVO PRODUCTO'),
+              label: Text(ServicioIdioma.t(context, '[F3] NUEVO PRODUCTO')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
@@ -1122,7 +1130,12 @@ class _PanelConfigInventario extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onOfertas,
                 icon: const Icon(Icons.local_offer_outlined, size: 18),
-                label: const Text('OFERTAS Y PROMOCIONES'),
+                label: Text(
+                  ServicioIdioma.t(
+                    context,
+                    'Ofertas y promociones',
+                  ).toUpperCase(),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.primary,
                   side: BorderSide(
@@ -1282,7 +1295,7 @@ class _PanelListadoProductos extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Listado de Productos',
+                    ServicioIdioma.t(context, 'Listado de Productos'),
                     style: AppTypography.h4.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
@@ -1290,7 +1303,7 @@ class _PanelListadoProductos extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${productos.length} reg.',
+                  '${productos.length} ${ServicioIdioma.t(context, 'reg.')}',
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -1329,7 +1342,7 @@ class _PanelListadoProductos extends StatelessWidget {
                 Expanded(
                   flex: 4,
                   child: _inventoryHeaderCell(
-                    'PRODUCTO',
+                    ServicioIdioma.t(context, 'PRODUCTO'),
                     Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -1337,7 +1350,7 @@ class _PanelListadoProductos extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: _inventoryHeaderCell(
-                    'CÓDIGO',
+                    ServicioIdioma.t(context, 'CÓDIGO'),
                     AppColors.info,
                     textAlign: TextAlign.center,
                   ),
@@ -1346,7 +1359,7 @@ class _PanelListadoProductos extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: _inventoryHeaderCell(
-                    'STOCK',
+                    ServicioIdioma.t(context, 'STOCK'),
                     AppColors.warning,
                     textAlign: TextAlign.center,
                   ),
@@ -1356,7 +1369,7 @@ class _PanelListadoProductos extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: _inventoryHeaderCell(
-                      'COSTO / VENTA',
+                      ServicioIdioma.t(context, 'COSTO / VENTA'),
                       AppColors.secondary,
                       textAlign: TextAlign.right,
                     ),
@@ -1369,7 +1382,7 @@ class _PanelListadoProductos extends StatelessWidget {
             child: productos.isEmpty
                 ? Center(
                     child: Text(
-                      'No se encontraron productos',
+                      ServicioIdioma.t(context, 'No se encontraron productos'),
                       style: AppTypography.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -1449,7 +1462,7 @@ class _PanelListadoProductos extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        '${stock.toStringAsFixed(stock.truncateToDouble() == stock ? 0 : 1)}  $st',
+                                        '${stock.toStringAsFixed(stock.truncateToDouble() == stock ? 0 : 1)}  ${ServicioIdioma.t(context, st)}',
                                         style: AppTypography.labelSmall
                                             .copyWith(
                                               color: sc,
@@ -1534,7 +1547,10 @@ class _PanelDetalleProducto extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Selecciona un producto\npara ver los detalles.',
+                    ServicioIdioma.t(
+                      context,
+                      'Selecciona un producto\npara ver los detalles.',
+                    ),
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyMedium.copyWith(
                       color: AppColors.textSecondary,
@@ -1609,7 +1625,7 @@ class _PanelDetalleProducto extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'VALOR EN STOCK',
+                ServicioIdioma.t(context, 'VALOR EN STOCK'),
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.textSecondary,
                   letterSpacing: 0.5,
@@ -1628,12 +1644,18 @@ class _PanelDetalleProducto extends StatelessWidget {
         ),
         if (puedeVerCostos) ...[
           const SizedBox(height: 12),
-          _DatoCaja(label: 'Costo unitario', value: formatRd(p.precioCompra)),
-          const SizedBox(height: 8),
-          _DatoCaja(label: 'Precio venta', value: formatRd(p.precioVenta)),
+          _DatoCaja(
+            label: ServicioIdioma.t(context, 'Costo unitario'),
+            value: formatRd(p.precioCompra),
+          ),
           const SizedBox(height: 8),
           _DatoCaja(
-            label: 'Margen unitario',
+            label: ServicioIdioma.t(context, 'Precio venta'),
+            value: formatRd(p.precioVenta),
+          ),
+          const SizedBox(height: 8),
+          _DatoCaja(
+            label: ServicioIdioma.t(context, 'Margen unitario'),
             value: formatRd(p.precioVenta - p.precioCompra),
           ),
         ],
@@ -1648,7 +1670,7 @@ class _PanelDetalleProducto extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: onEditar,
           icon: const Icon(Icons.edit_outlined, size: 18),
-          label: const Text('Editar producto'),
+          label: Text(ServicioIdioma.t(context, 'Editar producto')),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Colors.white,
@@ -1663,7 +1685,7 @@ class _PanelDetalleProducto extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onEliminar,
             icon: const Icon(Icons.delete_outline, size: 18),
-            label: const Text('Eliminar'),
+            label: Text(ServicioIdioma.t(context, 'Eliminar')),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.error,
               side: BorderSide(color: AppColors.error.withValues(alpha: 0.4)),
@@ -1921,7 +1943,7 @@ class _ProductoCardMobile extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: onEditar,
                   icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text('Editar'),
+                  label: Text(ServicioIdioma.t(context, 'Editar')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
                     side: BorderSide(
@@ -1942,7 +1964,7 @@ class _ProductoCardMobile extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onEliminar,
                     icon: const Icon(Icons.delete_outline, size: 18),
-                    label: const Text('Eliminar'),
+                    label: Text(ServicioIdioma.t(context, 'Eliminar')),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.error,
                       side: BorderSide(

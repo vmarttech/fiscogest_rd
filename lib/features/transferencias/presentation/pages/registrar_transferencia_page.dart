@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/transferencias/presentation/providers/tran
 import 'package:fiscogest_rd/features/transferencias/presentation/widgets/selector_almacen_widget.dart';
 import 'package:fiscogest_rd/features/transferencias/presentation/pdf/manifiesto_transferencia_pdf.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Transferencias — UI viva, datos conectados, form + dashboard.
 class RegistrarTransferenciaPage extends ConsumerStatefulWidget {
@@ -130,7 +131,10 @@ class _RegistrarTransferenciaPageState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: focus ?? Theme.of(context).colorScheme.primary, width: 2),
+        borderSide: BorderSide(
+          color: focus ?? Theme.of(context).colorScheme.primary,
+          width: 2,
+        ),
       ),
     );
   }
@@ -189,7 +193,9 @@ class _RegistrarTransferenciaPageState
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -235,14 +241,17 @@ class _RegistrarTransferenciaPageState
                 onPressed: () => Navigator.pop(ctx),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: _header,
-                  side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Cerrar',
+                child: Text(
+                  ServicioIdioma.t(ctx, 'Cerrar'),
                   style: TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
@@ -432,7 +441,11 @@ class _RegistrarTransferenciaPageState
   }) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 20),
-      decoration: _cardDec(accentBorder: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35)),
+      decoration: _cardDec(
+        accentBorder: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.35),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -447,12 +460,14 @@ class _RegistrarTransferenciaPageState
                 ),
               ),
               const SizedBox(width: 10),
-              const Text(
-                'Nueva Transferencia',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  color: _textDark,
+              Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Nueva Transferencia'),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: _textDark,
+                  ),
                 ),
               ),
             ],
@@ -471,7 +486,9 @@ class _RegistrarTransferenciaPageState
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.35),
                 width: 1.5,
               ),
             ),
@@ -485,7 +502,9 @@ class _RegistrarTransferenciaPageState
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.4),
                         blurRadius: 8,
                       ),
                     ],
@@ -567,11 +586,13 @@ class _RegistrarTransferenciaPageState
                 isExpanded: true,
                 isDense: true,
                 style: _bold.copyWith(fontSize: 14),
-                hint: const Text(
-                  'Seleccione producto',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF9CA3AF),
+                hint: Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Seleccione producto'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF9CA3AF),
+                    ),
                   ),
                 ),
                 value: filtrados.any((p) => p.id == form.productoId)
@@ -602,8 +623,10 @@ class _RegistrarTransferenciaPageState
 
           // Stock badges vivos + táctiles
           stockOrigen.when(
-            loading: () =>
-                LinearProgressIndicator(color: Theme.of(context).colorScheme.primary, minHeight: 3),
+            loading: () => LinearProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+              minHeight: 3,
+            ),
             error: (_, __) => const SizedBox.shrink(),
             data: (s) {
               // Sin producto u origen: no mostrar falso 'crítico'
@@ -753,9 +776,13 @@ class _RegistrarTransferenciaPageState
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                disabledBackgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.4),
                 elevation: 2,
-                shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.45),
+                shadowColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -948,12 +975,14 @@ class _RegistrarTransferenciaPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Estado General del Stock',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              color: _textMuted,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Estado General del Stock'),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: _textMuted,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -982,31 +1011,33 @@ class _RegistrarTransferenciaPageState
                 child: Column(
                   children: [
                     _legendTap(_ok, 'Healthy', stats.healthy, () {
-                        FiscoGestNotifications.show(
-                          SnackBar(
-                            content: Text(
-                              '${stats.healthy} producto(s) con stock saludable',
-                            ),
+                      FiscoGestNotifications.show(
+                        SnackBar(
+                          content: Text(
+                            '${stats.healthy} producto(s) con stock saludable',
                           ),
-                        );
+                        ),
+                      );
                     }),
                     _legendTap(_warn, 'Low', stats.low, () {
-                        FiscoGestNotifications.show(
-                          SnackBar(
-                          content: Text('${stats.low} producto(s) bajo mínimo'),
-                            backgroundColor: _warn,
+                      FiscoGestNotifications.show(
+                        SnackBar(
+                          content: Text(
+                            '${ServicioIdioma.t(context, 'Productos bajo mínimo:')} ${stats.low}',
                           ),
-                        );
+                          backgroundColor: _warn,
+                        ),
+                      );
                     }),
                     _legendTap(_danger, 'Critical', stats.critical, () {
-                        FiscoGestNotifications.show(
-                          SnackBar(
-                            content: Text(
-                              '${stats.critical} producto(s) sin stock',
-                            ),
-                            backgroundColor: _danger,
+                      FiscoGestNotifications.show(
+                        SnackBar(
+                          content: Text(
+                            '${stats.critical} producto(s) sin stock',
                           ),
-                        );
+                          backgroundColor: _danger,
+                        ),
+                      );
                     }),
                   ],
                 ),
@@ -1062,7 +1093,10 @@ class _RegistrarTransferenciaPageState
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.white, Theme.of(context).colorScheme.primary.withValues(alpha: 0.04)],
+          colors: [
+            Colors.white,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.04),
+          ],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _border, width: 1.5),
@@ -1070,21 +1104,27 @@ class _RegistrarTransferenciaPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Últimos Movimientos',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              color: _textMuted,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Últimos Movimientos'),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: _textMuted,
+              ),
             ),
           ),
           const SizedBox(height: 10),
           historial.when(
-            loading: () =>
-                LinearProgressIndicator(color: Theme.of(context).colorScheme.primary, minHeight: 3),
-            error: (_, __) => const Text(
-              'Sin datos',
-              style: TextStyle(fontWeight: FontWeight.w800),
+            loading: () => LinearProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+              minHeight: 3,
+            ),
+            error: (_, __) => Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Sin datos'),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
             ),
             data: (rows) {
               if (rows.isEmpty) {
@@ -1136,12 +1176,14 @@ class _RegistrarTransferenciaPageState
                                   ),
                                 ),
                               ),
-                              const Text(
-                                'Completa',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                  color: _ok,
+                              Builder(
+                                builder: (context) => Text(
+                                  ServicioIdioma.t(context, 'Completa'),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    color: _ok,
+                                  ),
                                 ),
                               ),
                               const Icon(
@@ -1222,7 +1264,11 @@ class _RegistrarTransferenciaPageState
           historial.when(
             loading: () => Padding(
               padding: const EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
             error: (e, _) => Text(
               'Error: $e',
@@ -1242,10 +1288,10 @@ class _RegistrarTransferenciaPageState
                 // "completa" / "registrada" ≈ completa
                 if (_filtroEstado == 'completa') {
                   list = rows.where((t) {
-                        final e = t.estado.toLowerCase();
-                        return e.contains('completa') ||
-                            e.contains('registrad') ||
-                            e == 'ok';
+                    final e = t.estado.toLowerCase();
+                    return e.contains('completa') ||
+                        e.contains('registrad') ||
+                        e == 'ok';
                   }).toList();
                 }
               }
@@ -1263,23 +1309,33 @@ class _RegistrarTransferenciaPageState
                         color: Colors.grey.shade300,
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Aún no hay transferencias registradas',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
-                          color: _textMuted,
+                      Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(
+                            context,
+                            'Aún no hay transferencias registradas',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            color: _textMuted,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Las actividades generadas durante el día aparecerán listadas en este panel.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF9CA3AF),
+                      Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(
+                            context,
+                            'Las actividades generadas durante el día aparecerán listadas en este panel.',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF9CA3AF),
+                          ),
                         ),
                       ),
                     ],
@@ -1307,7 +1363,9 @@ class _RegistrarTransferenciaPageState
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(

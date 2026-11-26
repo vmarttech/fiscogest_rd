@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_entity.da
 import 'package:fiscogest_rd/features/clientes/domain/entities/cliente_completo.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_completo_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class SeleccionarClienteDialog extends ConsumerStatefulWidget {
   const SeleccionarClienteDialog._interno();
@@ -85,7 +86,7 @@ class _SeleccionarClienteDialogState
               width: double.infinity,
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.person_add_outlined, size: 18),
-                label: const Text('Nuevo cliente'),
+                label: Text(ServicioIdioma.t(context, 'Nuevo cliente')),
                 onPressed: _abrirNuevoCliente,
               ),
             ),
@@ -150,7 +151,7 @@ class _SeleccionarClienteDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
       ],
     );
@@ -246,7 +247,7 @@ class _NuevoClienteFormDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Nuevo cliente'),
+      title: Text(ServicioIdioma.t(context, 'Nuevo cliente')),
       content: SizedBox(
         width: 420,
         child: Form(
@@ -257,8 +258,11 @@ class _NuevoClienteFormDialogState
               children: [
                 TextFormField(
                   controller: _nombre,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre / Razón Social *',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(
+                      context,
+                      'Nombre / Razón Social *',
+                    ),
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) =>
@@ -267,16 +271,22 @@ class _NuevoClienteFormDialogState
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _rnc,
-                  decoration: const InputDecoration(
-                    labelText: 'RNC o Cédula (opcional)',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(
+                      context,
+                      'RNC o Cédula (opcional)',
+                    ),
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _telefono,
-                  decoration: const InputDecoration(
-                    labelText: 'Teléfono / Celular *',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(
+                      context,
+                      'Teléfono / Celular *',
+                    ),
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) =>
@@ -285,16 +295,19 @@ class _NuevoClienteFormDialogState
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _correo,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico (opcional)',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(
+                      context,
+                      'Correo electrónico (opcional)',
+                    ),
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _direccion,
-                  decoration: const InputDecoration(
-                    labelText: 'Dirección',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(context, 'Dirección'),
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -306,7 +319,7 @@ class _NuevoClienteFormDialogState
       actions: [
         TextButton(
           onPressed: _guardando ? null : () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         FilledButton(
           onPressed: _guardando ? null : _guardar,
@@ -316,7 +329,7 @@ class _NuevoClienteFormDialogState
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Guardar'),
+              : Text(ServicioIdioma.t(context, 'Guardar')),
         ),
       ],
     );

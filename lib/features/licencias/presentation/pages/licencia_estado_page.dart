@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class LicenciaEstadoPage extends ConsumerWidget {
   const LicenciaEstadoPage({super.key});
@@ -37,21 +38,29 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   children: [
                     const Icon(Icons.verified_user_outlined, size: 42),
                     const SizedBox(height: 12),
-                    const Text(
-                      'La licencia de este dispositivo está pendiente de validación.',
+                    Text(
+                      ServicioIdioma.t(
+                        context,
+                        'La licencia de este dispositivo está pendiente de validación.',
+                      ),
                       textAlign: TextAlign.center,
                       style: AppTypography.h4,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Registra o vincula tu negocio para solicitar la prueba gratuita. La aplicación no concede una prueba automáticamente.',
+                    Text(
+                      ServicioIdioma.t(
+                        context,
+                        'Registra o vincula tu negocio para solicitar la prueba gratuita. La aplicación no concede una prueba automáticamente.',
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       onPressed: () => context.push('/setup-cuenta'),
                       icon: const Icon(Icons.person_add_alt_1),
-                      label: const Text('Registrar negocio'),
+                      label: Text(
+                        ServicioIdioma.t(context, 'Registrar negocio'),
+                      ),
                     ),
                   ],
                 ),
@@ -116,8 +125,12 @@ class LicenciaEstadoPage extends ConsumerWidget {
                     ],
                   ),
                   loading: () => const LinearProgressIndicator(),
-                  error: (_, _) =>
-                      const Text('No se pudo cargar el uso mensual.'),
+                  error: (_, _) => Text(
+                    ServicioIdioma.t(
+                      context,
+                      'No se pudo cargar el uso mensual.',
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -206,8 +219,11 @@ class LicenciaEstadoPage extends ConsumerWidget {
                                 .when(
                                   data: (list) {
                                     if (list.isEmpty) {
-                                      return const Text(
-                                        'Ningún equipo registrado aún.',
+                                      return Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Ningún equipo registrado aún.',
+                                        ),
                                         style: AppTypography.bodySmall,
                                       );
                                     }
@@ -263,8 +279,11 @@ class LicenciaEstadoPage extends ConsumerWidget {
                                 .when(
                                   data: (list) {
                                     if (list.isEmpty) {
-                                      return const Text(
-                                        'Ningún equipo registrado aún.',
+                                      return Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Ningún equipo registrado aún.',
+                                        ),
                                         style: AppTypography.bodySmall,
                                       );
                                     }
@@ -337,7 +356,10 @@ class LicenciaEstadoPage extends ConsumerWidget {
               ],
 
               const SizedBox(height: 24),
-              const Text('Acciones', style: AppTypography.labelLarge),
+              Text(
+                ServicioIdioma.t(context, 'Acciones'),
+                style: AppTypography.labelLarge,
+              ),
               const SizedBox(height: 10),
 
               if (!esDev) ...[
@@ -371,7 +393,12 @@ class LicenciaEstadoPage extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => context.push('/licencia/activar'),
                     icon: const Icon(Icons.key_outlined),
-                    label: const Text('Activar con código (opcional)'),
+                    label: Text(
+                      ServicioIdioma.t(
+                        context,
+                        'Activar con código (opcional)',
+                      ),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
                       side: BorderSide(
@@ -397,7 +424,7 @@ class LicenciaEstadoPage extends ConsumerWidget {
                       final ok = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('Cancelar plan'),
+                          title: Text(ServicioIdioma.t(ctx, 'Cancelar plan')),
                           content: const Text(
                             'Seguirás con tu plan actual hasta el último día '
                             'ya pagado. Después pasarás al plan Gratis. '
@@ -406,11 +433,13 @@ class LicenciaEstadoPage extends ConsumerWidget {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text('No'),
+                              child: Text(ServicioIdioma.t(ctx, 'No')),
                             ),
                             FilledButton(
                               onPressed: () => Navigator.pop(ctx, true),
-                              child: const Text('Sí, cancelar'),
+                              child: Text(
+                                ServicioIdioma.t(ctx, 'Sí, cancelar'),
+                              ),
                             ),
                           ],
                         ),
@@ -439,7 +468,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.cancel_outlined),
-                    label: const Text('Cancelar renovación del plan'),
+                    label: Text(
+                      ServicioIdioma.t(context, 'Cancelar renovación del plan'),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFB91C1C),
                       side: const BorderSide(color: Color(0xFFB91C1C)),
@@ -454,7 +485,9 @@ class LicenciaEstadoPage extends ConsumerWidget {
                 Center(
                   child: TextButton(
                     onPressed: () => context.push('/licencia/admin'),
-                    child: const Text('Administrar pedidos de pago'),
+                    child: Text(
+                      ServicioIdioma.t(context, 'Administrar pedidos de pago'),
+                    ),
                   ),
                 ),
               const SizedBox(height: 8),

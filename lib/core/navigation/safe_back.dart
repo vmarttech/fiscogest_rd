@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 String _rutaAnterior(String path, String fallback) {
   if (path.startsWith('/admin/negocios/')) return '/admin/negocios';
@@ -82,16 +83,16 @@ Future<void> handleSystemBack(
   final salir = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Salir'),
-      content: const Text('¿Quieres salir de la app?'),
+      title: Text(ServicioIdioma.t(ctx, 'Salir')),
+      content: Text(ServicioIdioma.t(ctx, '¿Quieres salir de la app?')),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('No'),
+          child: Text(ServicioIdioma.t(ctx, 'No')),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Sí'),
+          child: Text(ServicioIdioma.t(ctx, 'Sí')),
         ),
       ],
     ),

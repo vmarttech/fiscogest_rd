@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_
 import 'package:fiscogest_rd/features/notificaciones/presentation/campana_notificaciones.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar_page.dart'
     show creditoTotalesProvider;
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Home móvil — capas sin solapar:
 /// KPI = consultar | Acciones = crear | Módulos = áreas | Bottom = atajos únicos
@@ -46,7 +47,7 @@ class HomeMobilePage extends ConsumerWidget {
     final n2 = cfg?.razonSocial.trim() ?? '';
     final negocio = n1.isNotEmpty ? n1 : (n2.isNotEmpty ? n2 : 'Mi negocio');
     final direccionStr = (cfg?.direccion ?? '').trim();
-final dash = ref.watch(dashboardSnapshotProvider);
+    final dash = ref.watch(dashboardSnapshotProvider);
     final ventasHoy = dash.when(
       data: (s) => _rd.format(s.hoy.ventas),
       loading: () => '…',
@@ -254,8 +255,8 @@ final dash = ref.watch(dashboardSnapshotProvider);
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Nueva acción',
+              Text(
+                ServicioIdioma.t(ctx, 'Nueva acción'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -264,20 +265,23 @@ final dash = ref.watch(dashboardSnapshotProvider);
               ),
               const SizedBox(height: 8),
               ListTile(
-                leading: Icon(Icons.add_shopping_cart, color: Theme.of(context).colorScheme.primary),
-                title: const Text(
-                  'Nueva venta',
+                leading: Icon(
+                  Icons.add_shopping_cart,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: Text(
+                  ServicioIdioma.t(ctx, 'Nueva venta'),
                   style: TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
-                onTap: () => Navigator.pop(
-                  ctx,
-                  '/ventas/cotizaciones/nueva',
-                ),
+                onTap: () => Navigator.pop(ctx, '/ventas/cotizaciones/nueva'),
               ),
               ListTile(
-                leading: Icon(Icons.add_business_outlined, color: Theme.of(context).colorScheme.primary),
-                title: const Text(
-                  'Nueva compra',
+                leading: Icon(
+                  Icons.add_business_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: Text(
+                  ServicioIdioma.t(ctx, 'Nueva compra'),
                   style: TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
                 onTap: () {
@@ -306,7 +310,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      text,
+      ServicioIdioma.t(context, text),
       style: const TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w700,
@@ -340,9 +344,7 @@ class _Header extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-              color: scheme.onPrimary.withValues(alpha: 0.24),
-            ),
+            bottom: BorderSide(color: scheme.onPrimary.withValues(alpha: 0.24)),
           ),
         ),
         padding: EdgeInsets.only(
@@ -444,7 +446,7 @@ class _Header extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Sistema OK',
+                      ServicioIdioma.t(context, 'Sistema OK'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -749,12 +751,19 @@ class _OutlineBtn extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary,
+              width: 1.5,
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                icon,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
@@ -827,7 +836,11 @@ class _ModulosGrid extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 26, color: Theme.of(context).colorScheme.primary),
+                  Icon(
+                    icon,
+                    size: 26,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     label,
@@ -992,7 +1005,7 @@ class _BottomNav extends StatelessWidget {
                             border: Border.all(
                               color: HomeMobilePage._bg,
                               width: 4,
-                          ),
+                            ),
                           ),
                           child: const Icon(
                             Icons.add,
@@ -1013,7 +1026,13 @@ class _BottomNav extends StatelessWidget {
     );
   }
 
-  Widget _item(BuildContext context, int index, IconData icon, IconData active, String label) {
+  Widget _item(
+    BuildContext context,
+    int index,
+    IconData icon,
+    IconData active,
+    String label,
+  ) {
     final on = currentIndex == index;
     return Expanded(
       child: InkWell(
@@ -1024,7 +1043,9 @@ class _BottomNav extends StatelessWidget {
             Icon(
               on ? active : icon,
               size: 22,
-              color: on ? Theme.of(context).colorScheme.primary : HomeMobilePage._muted,
+              color: on
+                  ? Theme.of(context).colorScheme.primary
+                  : HomeMobilePage._muted,
             ),
             const SizedBox(height: 2),
             Text(
@@ -1032,7 +1053,9 @@ class _BottomNav extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
-                color: on ? Theme.of(context).colorScheme.primary : HomeMobilePage._muted,
+                color: on
+                    ? Theme.of(context).colorScheme.primary
+                    : HomeMobilePage._muted,
               ),
             ),
           ],

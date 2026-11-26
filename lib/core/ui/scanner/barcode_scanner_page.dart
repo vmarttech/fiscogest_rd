@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Escáner comercial (cámara del celular).
 ///
@@ -546,8 +547,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     TextButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close, color: Colors.white70),
-                      label: const Text(
-                        'Cancelar',
+                      label: Text(
+                        ServicioIdioma.t(context, 'Cancelar'),
                         style: TextStyle(
                           color: Colors.white70,
                           fontWeight: FontWeight.w700,
@@ -584,7 +585,11 @@ class _ErrorPanel extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.videocam_off_outlined, color: Colors.white54, size: 48),
+            const Icon(
+              Icons.videocam_off_outlined,
+              color: Colors.white54,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               mensaje,
@@ -599,7 +604,7 @@ class _ErrorPanel extends StatelessWidget {
             FilledButton.icon(
               onPressed: onAjustes,
               icon: const Icon(Icons.settings),
-              label: const Text('Abrir Ajustes'),
+              label: Text(ServicioIdioma.t(context, 'Abrir Ajustes')),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
@@ -607,8 +612,8 @@ class _ErrorPanel extends StatelessWidget {
             const SizedBox(height: 10),
             TextButton(
               onPressed: onReintentar,
-              child: const Text(
-                'Reintentar cámara',
+              child: Text(
+                ServicioIdioma.t(context, 'Reintentar cámara'),
                 style: TextStyle(color: Colors.white70),
               ),
             ),

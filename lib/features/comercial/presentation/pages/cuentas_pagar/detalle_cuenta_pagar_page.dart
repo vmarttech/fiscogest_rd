@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/comercial/domain/entities/cuenta_pagar.dar
 import 'package:fiscogest_rd/features/comercial/domain/entities/abono.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/cuentas_pagar_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/registrar_abono_page.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DetalleCuentaPagarPage extends ConsumerStatefulWidget {
   const DetalleCuentaPagarPage({super.key, required this.cuentaId});
@@ -196,8 +197,8 @@ class _DetalleCuentaPagarPageState
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              const Text(
-                                'Monto Total:',
+                              Text(
+                                ServicioIdioma.t(context, 'Monto Total:'),
                                 style: AppTypography.bodyMedium,
                               ),
                               Text(
@@ -210,8 +211,8 @@ class _DetalleCuentaPagarPageState
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              const Text(
-                                'Total Abonado:',
+                              Text(
+                                ServicioIdioma.t(context, 'Total Abonado:'),
                                 style: AppTypography.bodyMedium,
                               ),
                               Text(
@@ -254,8 +255,8 @@ class _DetalleCuentaPagarPageState
                   const SizedBox(height: 20),
                   const Divider(),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Historial de Abonos',
+                  Text(
+                    ServicioIdioma.t(context, 'Historial de Abonos'),
                     style: AppTypography.labelLarge,
                   ),
                   const SizedBox(height: 12),
@@ -332,13 +333,15 @@ class _DetalleCuentaPagarPageState
                     children: <Widget>[
                       TextButton.icon(
                         icon: const Icon(Icons.arrow_back, size: 18),
-                        label: const Text('Volver'),
+                        label: Text(ServicioIdioma.t(context, 'Volver')),
                         onPressed: () => context.pop(),
                       ),
                       if (!esPequena && puedeAbonar)
                         ElevatedButton.icon(
                           icon: const Icon(Icons.payment, size: 18),
-                          label: const Text('Registrar Abono'),
+                          label: Text(
+                            ServicioIdioma.t(context, 'Registrar Abono'),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(
                               context,
@@ -360,7 +363,9 @@ class _DetalleCuentaPagarPageState
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.payment, size: 18),
-                        label: const Text('Registrar Abono'),
+                        label: Text(
+                          ServicioIdioma.t(context, 'Registrar Abono'),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(
                             context,

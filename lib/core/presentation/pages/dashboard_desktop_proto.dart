@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repositorio_providers.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 final inventoryFilterProvider = StateProvider.autoDispose<String>(
   (ref) => 'all',
@@ -151,9 +152,10 @@ class DashboardDesktopProto extends ConsumerWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Visión general del rendimiento operacional de tu negocio. '
-                          'Monitoriza comprobantes fiscales (e-CF), liquidez en caja '
-                          'y comportamiento crediticio en tiempo real.',
+                          ServicioIdioma.t(
+                            context,
+                            'Visión general del rendimiento operacional de tu negocio. Monitoriza comprobantes fiscales (e-CF), liquidez en caja y comportamiento crediticio en tiempo real.',
+                          ),
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white.withValues(alpha: 0.75),
@@ -195,8 +197,8 @@ class DashboardDesktopProto extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 6),
-                            const Text(
-                              'Sistema Operativo',
+                            Text(
+                              ServicioIdioma.t(context, 'Sistema Operativo'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
@@ -215,7 +217,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                         onPressed: () =>
                             _go(context, '/ventas/cotizaciones/nueva'),
                         icon: const Icon(Icons.add_circle_outline, size: 16),
-                        label: const Text('Nueva Venta'),
+                        label: Text(ServicioIdioma.t(context, 'Nueva Venta')),
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: const Color(0xFF0F172A),
@@ -232,7 +234,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                       OutlinedButton.icon(
                         onPressed: () => _go(context, '/ecfe'),
                         icon: const Icon(Icons.fact_check_outlined, size: 16),
-                        label: const Text('Emitir e-CF'),
+                        label: Text(ServicioIdioma.t(context, 'Emitir e-CF')),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: BorderSide(
@@ -358,12 +360,15 @@ class DashboardDesktopProto extends ConsumerWidget {
                                 color: Color(0xFF2563EB),
                               ),
                               const SizedBox(width: 8),
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Resumen de Ventas',
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Resumen de Ventas',
+                                      ),
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
@@ -371,9 +376,12 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       ),
                                     ),
                                     Text(
-                                      'Comportamiento de ingresos y facturación e-CF',
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Comportamiento de ingresos y facturación e-CF',
+                                      ),
                                       style: TextStyle(
-                                          fontSize: 11,
+                                        fontSize: 11,
                                         color: Color(0xFF64748B),
                                       ),
                                     ),
@@ -447,7 +455,10 @@ class DashboardDesktopProto extends ConsumerWidget {
                                             vertical: 6,
                                           ),
                                           child: Text(
-                                            '30 días',
+                                            ServicioIdioma.t(
+                                              context,
+                                              '30 días',
+                                            ),
                                             style: TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.w700,
@@ -596,13 +607,16 @@ class DashboardDesktopProto extends ConsumerWidget {
                                   children: [
                                     const Icon(
                                       Icons.history,
-                                        size: 16,
+                                      size: 16,
                                       color: Color(0xFF2563EB),
                                     ),
                                     const SizedBox(width: 6),
-                                    const Expanded(
+                                    Expanded(
                                       child: Text(
-                                        'Actividad Reciente',
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Actividad Reciente',
+                                        ),
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
@@ -612,8 +626,11 @@ class DashboardDesktopProto extends ConsumerWidget {
                                     ),
                                     InkWell(
                                       onTap: () => _go(context, '/ventas'),
-                                      child: const Text(
-                                        'Ver todas →',
+                                      child: Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Ver todas →',
+                                        ),
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
@@ -625,10 +642,13 @@ class DashboardDesktopProto extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 10),
                                 if (topActividad.isEmpty)
-                                  const Text(
-                                    'Sin actividad reciente',
-                                      style: TextStyle(
-                                          fontSize: 12,
+                                  Text(
+                                    ServicioIdioma.t(
+                                      context,
+                                      'Sin actividad reciente',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 12,
                                       color: Color(0xFF94A3B8),
                                     ),
                                   )
@@ -744,7 +764,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
                               Icon(
                                 Icons.inventory_2_outlined,
@@ -757,7 +777,10 @@ class DashboardDesktopProto extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Estado del Inventario y Movimientos',
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Estado del Inventario y Movimientos',
+                                      ),
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
@@ -765,9 +788,12 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       ),
                                     ),
                                     Text(
-                                      'Artículos en almacén y estatus comercial',
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Artículos en almacén y estatus comercial',
+                                      ),
                                       style: TextStyle(
-                                          fontSize: 11,
+                                        fontSize: 11,
                                         color: Color(0xFF64748B),
                                       ),
                                     ),
@@ -1098,7 +1124,9 @@ class DashboardDesktopProto extends ConsumerWidget {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () => _go(context, '/inventario'),
-                              child: const Text('Ver inventario →'),
+                              child: Text(
+                                ServicioIdioma.t(context, 'Ver inventario →'),
+                              ),
                             ),
                           ),
                         ],
@@ -1112,7 +1140,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
                               Icon(
                                 Icons.pie_chart_outline,
@@ -1122,7 +1150,10 @@ class DashboardDesktopProto extends ConsumerWidget {
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Resumen Financiero',
+                                  ServicioIdioma.t(
+                                    context,
+                                    'Resumen Financiero',
+                                  ),
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
@@ -1149,14 +1180,14 @@ class DashboardDesktopProto extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           _FinRow(
-                              'Créditos diferidos',
-                              formatRd(porCobrar),
+                            'Créditos diferidos',
+                            formatRd(porCobrar),
                             const Color(0xFFD97706),
                           ),
                           const SizedBox(height: 8),
                           _FinRow(
-                              'Gastos operacionales',
-                              formatRd(snapshot?.hoy.gastos ?? 0),
+                            'Gastos operacionales',
+                            formatRd(snapshot?.hoy.gastos ?? 0),
                             const Color(0xFFDC2626),
                           ),
                           const Spacer(),
@@ -1220,25 +1251,25 @@ class DashboardDesktopProto extends ConsumerWidget {
 final dashCajaProvider =
     FutureProvider.autoDispose<({bool abierta, double efectivo, String label})>(
       (ref) async {
-  final repo = ref.watch(cajaRepositoryProvider);
-  final sesion = await repo.obtenerSesionAbierta();
-  if (sesion == null || !sesion.estaAbierta) {
-    return (abierta: false, efectivo: 0.0, label: 'Caja cerrada');
-  }
-  try {
-    final resumen = await repo.obtenerResumenSesion(sesion.id);
-    return (
-      abierta: true,
-      efectivo: resumen.efectivoEsperado,
-      label: 'Sesión #${sesion.id} • Abierta',
-    );
-  } catch (_) {
-    return (
-      abierta: true,
-      efectivo: sesion.fondoInicial,
-      label: 'Sesión #${sesion.id} • Abierta',
-    );
-  }
+        final repo = ref.watch(cajaRepositoryProvider);
+        final sesion = await repo.obtenerSesionAbierta();
+        if (sesion == null || !sesion.estaAbierta) {
+          return (abierta: false, efectivo: 0.0, label: 'Caja cerrada');
+        }
+        try {
+          final resumen = await repo.obtenerResumenSesion(sesion.id);
+          return (
+            abierta: true,
+            efectivo: resumen.efectivoEsperado,
+            label: 'Sesión #${sesion.id} • Abierta',
+          );
+        } catch (_) {
+          return (
+            abierta: true,
+            efectivo: sesion.fondoInicial,
+            label: 'Sesión #${sesion.id} • Abierta',
+          );
+        }
       },
     );
 
@@ -1480,9 +1511,9 @@ class _FinRow extends StatelessWidget {
           ),
           Text(
             value,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
               color: valueColor,
             ),
           ),
@@ -1608,8 +1639,8 @@ class _EnterpriseChart extends StatelessWidget {
                                 left: puntos.length <= 1
                                     ? c.maxWidth / 2 - 16
                                     : (item.index / (puntos.length - 1)) *
-                                            c.maxWidth -
-                                        16,
+                                              c.maxWidth -
+                                          16,
                                 width: 32,
                                 child: Text(
                                   item.label,

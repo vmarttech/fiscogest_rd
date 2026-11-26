@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/descuentos_ofertas_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class OfertasPage extends ConsumerStatefulWidget {
   const OfertasPage({super.key});
@@ -28,8 +29,8 @@ class _OfertasPageState extends ConsumerState<OfertasPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Configuración y Listado de Ofertas',
+            Text(
+              ServicioIdioma.t(context, 'Configuración y Listado de Ofertas'),
               style: AppTypography.h4,
             ),
             AppLayout.vM,

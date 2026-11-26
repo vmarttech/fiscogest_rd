@@ -27,6 +27,7 @@ import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/core/sync/supabase/negocio_local.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -86,12 +87,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         children: [
           TextButton(
             onPressed: () => context.push('/legal/privacidad'),
-            child: const Text('Privacidad'),
+            child: Text(ServicioIdioma.t(context, 'Privacidad')),
           ),
           const Text('·', style: AppTypography.bodySmall),
           TextButton(
             onPressed: () => context.push('/legal/terminos'),
-            child: const Text('Términos'),
+            child: Text(ServicioIdioma.t(context, 'Términos')),
           ),
         ],
       ),
@@ -279,7 +280,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         final activar = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Desbloqueo rápido'),
+            title: Text(ServicioIdioma.t(ctx, 'Desbloqueo rápido')),
             content: const Text(
               '¿Activar huella, rostro o PIN del dispositivo '
               'para entrar la próxima vez sin escribir la clave?',
@@ -287,11 +288,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Ahora no'),
+                child: Text(ServicioIdioma.t(ctx, 'Ahora no')),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Activar'),
+                child: Text(ServicioIdioma.t(ctx, 'Activar')),
               ),
             ],
           ),
@@ -523,6 +524,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ServicioIdioma.boton(context),
+                        ),
                         Text(
                           'VendiFlux',
                           textAlign: TextAlign.center,
@@ -534,7 +539,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Gestiona. Vende. Crece.',
+                          ServicioIdioma.t(context, 'Gestiona. Vende. Crece.'),
                           textAlign: TextAlign.center,
                           style: AppTypography.bodySmall.copyWith(
                             color: const Color(
@@ -545,7 +550,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Iniciar sesión',
+                          ServicioIdioma.t(context, 'Iniciar sesión'),
                           textAlign: TextAlign.center,
                           style: AppTypography.bodyMedium.copyWith(
                             color: Colors.white.withValues(alpha: 0.55),
@@ -554,14 +559,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         const SizedBox(height: 28),
                         AppTextField(
                           controller: _userCtrl,
-                          label: 'Usuario',
-                          hint: 'Ingrese su usuario',
+                          label: ServicioIdioma.t(context, 'Usuario'),
+                          hint: ServicioIdioma.t(context, 'Ingrese su usuario'),
                           prefixIcon: Icons.person_outline,
                         ),
                         const SizedBox(height: 14),
                         AppTextField(
                           controller: _passCtrl,
-                          label: 'Contraseña',
+                          label: ServicioIdioma.t(context, 'Contraseña'),
                           hint: '••••••••',
                           prefixIcon: Icons.lock_outline,
                           suffixIcon: _ocultar
@@ -590,7 +595,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     ListTileControlAffinity.leading,
                                 activeColor: const Color(0xFF2DD4BF),
                                 title: Text(
-                                  'Recordar usuario',
+                                  ServicioIdioma.t(context, 'Recordar usuario'),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.85),
                                     fontSize: 14,
@@ -600,7 +605,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             if (_bioEnabled && _bioAvailable)
                               IconButton(
-                                tooltip: 'Entrar con huella / PIN',
+                                tooltip: ServicioIdioma.t(
+                                  context,
+                                  'Entrar con huella / PIN',
+                                ),
                                 onPressed: _cargando
                                     ? null
                                     : _entrarConBiometria,
@@ -617,7 +625,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         if (_error != null) ...[
                           const SizedBox(height: 8),
                           Text(
-                            _error!,
+                            ServicioIdioma.t(context, _error!),
                             textAlign: TextAlign.center,
                             style: AppTypography.bodySmall.copyWith(
                               color: const Color(0xFFF87171),
@@ -627,14 +635,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ],
                         const SizedBox(height: 16),
                         AppButton(
-                          text: _cargando ? 'Entrando…' : 'Entrar',
+                          text: ServicioIdioma.t(
+                            context,
+                            _cargando ? 'Entrando…' : 'Entrar',
+                          ),
                           onPressed: _cargando ? null : _entrar,
                         ),
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: () => context.push('/recuperar-clave'),
                           child: Text(
-                            '¿Olvidaste tu clave?',
+                            ServicioIdioma.t(context, '¿Olvidaste tu clave?'),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.65),
                             ),

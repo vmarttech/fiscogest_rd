@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/e_cf/data/repositories/ecfe_repository.dar
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_checklist_item.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_spec_version.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class EcfeSpecPage extends ConsumerWidget {
   const EcfeSpecPage({super.key});
@@ -179,7 +180,9 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
       widget.onChanged();
       if (!mounted) return;
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('Especificación activada')),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Especificación activada')),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -202,30 +205,30 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Nueva versión de especificación'),
+        title: Text(ServicioIdioma.t(ctx, 'Nueva versión de especificación')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: codigo,
-              decoration: const InputDecoration(
-                labelText: 'Código (ej. 1.1)',
+              decoration: InputDecoration(
+                labelText: ServicioIdioma.t(ctx, 'Código (ej. 1.1)'),
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: nombre,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
+              decoration: InputDecoration(
+                labelText: ServicioIdioma.t(ctx, 'Nombre'),
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: circular,
-              decoration: const InputDecoration(
-                labelText: 'Circular / doc. DGII',
+              decoration: InputDecoration(
+                labelText: ServicioIdioma.t(ctx, 'Circular / doc. DGII'),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -234,11 +237,11 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Crear'),
+            child: Text(ServicioIdioma.t(ctx, 'Crear')),
           ),
         ],
       ),
@@ -304,21 +307,21 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
               children: [
                 if (s.activaPrecert)
                   Chip(
-                    label: const Text('TesteCF'),
+                    label: Text(ServicioIdioma.t(context, 'TesteCF')),
                     backgroundColor: Theme.of(
                       context,
                     ).colorScheme.primary.withValues(alpha: 0.15),
                   ),
                 if (s.activaCert)
                   Chip(
-                    label: const Text('CerteCF'),
+                    label: Text(ServicioIdioma.t(context, 'CerteCF')),
                     backgroundColor: Theme.of(
                       context,
                     ).colorScheme.primary.withValues(alpha: 0.15),
                   ),
                 if (s.activaProduccion)
                   Chip(
-                    label: const Text('Producción'),
+                    label: Text(ServicioIdioma.t(context, 'Producción')),
                     backgroundColor: AppColors.success.withValues(alpha: 0.15),
                   ),
                 Text(

@@ -22,6 +22,7 @@ import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_it
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/compra_rapida_page.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class RegistrarCompraPage extends ConsumerStatefulWidget {
   const RegistrarCompraPage({super.key});
@@ -183,7 +184,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
         ],
       ),
@@ -309,14 +310,22 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
       final linea = _lineas[i];
       if (linea.productoId == null) {
         FiscoGestNotifications.show(
-          SnackBar(content: Text('⚠️ Línea ${i + 1}: Seleccione el producto')),
+          SnackBar(
+            content: Text(
+              '⚠️ ${ServicioIdioma.t(context, 'Línea')} ${i + 1}: '
+              '${ServicioIdioma.t(context, 'Seleccione el producto')}',
+            ),
+          ),
         );
         return;
       }
       if (linea.cantidad <= 0) {
         FiscoGestNotifications.show(
           SnackBar(
-            content: Text('⚠️ Línea ${i + 1}: Cantidad debe ser mayor a cero'),
+            content: Text(
+              '⚠️ ${ServicioIdioma.t(context, 'Línea')} ${i + 1}: '
+              '${ServicioIdioma.t(context, 'Cantidad debe ser mayor a cero')}',
+            ),
           ),
         );
         return;
@@ -325,7 +334,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
         FiscoGestNotifications.show(
           SnackBar(
             content: Text(
-              '⚠️ Línea ${i + 1}: Costo unitario debe ser mayor a cero',
+              '⚠️ ${ServicioIdioma.t(context, 'Línea')} ${i + 1}: '
+              '${ServicioIdioma.t(context, 'Costo unitario debe ser mayor a cero')}',
             ),
           ),
         );
@@ -622,8 +632,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        'Registrar Compra',
+                      child: Text(
+                        ServicioIdioma.t(context, 'Registrar Compra'),
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -632,7 +642,9 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                       onPressed: _guardarComoBorrador,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.primary,
-                        side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -641,8 +653,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        'Guardar Borrador',
+                      child: Text(
+                        ServicioIdioma.t(context, 'Guardar Borrador'),
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -671,10 +683,15 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                 Text('Error al cargar almacenes: $e'),
                             data: (almacenes) => DropdownButtonFormField<int>(
                               initialValue: _almacenDestinoId,
-                              decoration: const InputDecoration(
-                                labelText: 'Almacén de Destino *',
-                                hintText:
-                                    'Seleccione a qué almacén ingresarán estos productos',
+                              decoration: InputDecoration(
+                                labelText: ServicioIdioma.t(
+                                  context,
+                                  'Almacén de Destino *',
+                                ),
+                                hintText: ServicioIdioma.t(
+                                  context,
+                                  'Seleccione a qué almacén ingresarán estos productos',
+                                ),
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.warehouse),
                               ),
@@ -714,13 +731,18 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                   child: FilledButton(
                                     onPressed: _registrarCompraDirecta,
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Registrar Compra',
+                                    child: Text(
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Registrar Compra',
+                                      ),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -734,16 +756,23 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                   child: OutlinedButton(
                                     onPressed: _guardarComoBorrador,
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: Theme.of(context).colorScheme.primary,
+                                      foregroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       side: BorderSide(
-                                        color: Theme.of(context).colorScheme.primary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Guardar Borrador',
+                                    child: Text(
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Guardar Borrador',
+                                      ),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -829,8 +858,11 @@ class _SelectorProductoCompraDialogState
               controller: _buscador,
               autofocus: true,
               textInputAction: TextInputAction.search,
-              decoration: const InputDecoration(
-                hintText: 'Buscar por nombre, SKU o barras',
+              decoration: InputDecoration(
+                hintText: ServicioIdioma.t(
+                  context,
+                  'Buscar por nombre, SKU o barras',
+                ),
                 prefixIcon: Icon(Icons.search),
                 isDense: true,
                 border: OutlineInputBorder(),

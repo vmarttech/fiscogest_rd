@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/navigation/rutas_principales.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Título + subtítulo estilo Dashboard / hub.
 /// [showBack]: flecha "Volver" visible en desktop (AppBar suele estar oculto).
@@ -63,8 +64,8 @@ class EnterprisePageHeader extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                label: const Text(
-                  'Volver',
+                label: Text(
+                  ServicioIdioma.t(context, 'Volver'),
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -79,7 +80,7 @@ class EnterprisePageHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      ServicioIdioma.t(context, title),
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
@@ -90,7 +91,7 @@ class EnterprisePageHeader extends StatelessWidget {
                     if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        subtitle!,
+                        ServicioIdioma.t(context, subtitle!),
                         style: const TextStyle(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w500,

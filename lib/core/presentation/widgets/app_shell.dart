@@ -24,6 +24,7 @@ import 'package:fiscogest_rd/features/campanas/domain/campana_promocional.dart';
 import 'package:fiscogest_rd/core/auth/dueno_plataforma.dart';
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
@@ -246,10 +247,10 @@ class AppShell extends ConsumerWidget {
     required VoidCallback onLogout,
   }) {
     final rnc = rncEmpresa;
-    final fecha = DateFormat(
-      "EEEE, d 'de' MMMM yyyy",
-      'es',
-    ).format(DateTime.now());
+    final ingles = ServicioIdioma.actual(context) == IdiomaApp.en;
+    final fecha = ingles
+        ? DateFormat('EEEE, MMMM d, yyyy', 'en_US').format(DateTime.now())
+        : DateFormat("EEEE, d 'de' MMMM yyyy", 'es').format(DateTime.now());
     final fechaCap = fecha.isEmpty
         ? fecha
         : '${fecha[0].toUpperCase()}${fecha.substring(1)}';
@@ -357,6 +358,8 @@ class AppShell extends ConsumerWidget {
             ),
           ),
           const Spacer(),
+          ServicioIdioma.boton(context),
+          const SizedBox(width: 8),
           // Date
           Row(
             children: [
@@ -397,9 +400,9 @@ class AppShell extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Text(
-                  'Sistema Operativo',
-                  style: TextStyle(
+                Text(
+                  ServicioIdioma.t(context, 'Sistema Operativo'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF047857),
@@ -422,9 +425,9 @@ class AppShell extends ConsumerWidget {
               }
             },
             icon: const Icon(Icons.download_outlined, size: 16),
-            label: const Text(
-              'Exportar Resumen',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            label: Text(
+              ServicioIdioma.t(context, 'Exportar Resumen'),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
             ),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
@@ -524,7 +527,10 @@ class AppShell extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Gestiona. Vende. Crece.',
+                              ServicioIdioma.t(
+                                context,
+                                'Gestiona. Vende. Crece.',
+                              ),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.72),
                                 fontSize: 10.5,
@@ -537,6 +543,10 @@ class AppShell extends ConsumerWidget {
                           ],
                         ),
                       ),
+                      if (!isPermanent) ...[
+                        const SizedBox(width: 4),
+                        ServicioIdioma.boton(context),
+                      ],
                     ],
                   ),
                 ),
@@ -548,7 +558,7 @@ class AppShell extends ConsumerWidget {
                   key: const PageStorageKey<String>('app-shell-sidebar'),
                   padding: const EdgeInsets.fromLTRB(10, 14, 10, 20),
                   children: [
-                    _buildSectionTitle('OPERACIONES'),
+                    _buildSectionTitle(context, 'OPERACIONES'),
                     if (usernameSesion.isEmpty ||
                         usernameSesion.toLowerCase() == 'invitado') ...[
                       _buildNavItem(
@@ -650,7 +660,7 @@ class AppShell extends ConsumerWidget {
                       ),
 
                     const SizedBox(height: 16),
-                    _buildSectionTitle('INVENTARIO'),
+                    _buildSectionTitle(context, 'INVENTARIO'),
                     if (puede(Permiso.inventarioVer))
                       _buildNavItem(
                         context,
@@ -696,7 +706,7 @@ class AppShell extends ConsumerWidget {
                     ],
 
                     const SizedBox(height: 16),
-                    _buildSectionTitle('CATÁLOGOS'),
+                    _buildSectionTitle(context, 'CATÁLOGOS'),
                     if (puede(Permiso.clientesVer))
                       _buildNavItem(
                         context,
@@ -764,7 +774,7 @@ class AppShell extends ConsumerWidget {
                       ),
 
                     const SizedBox(height: 16),
-                    _buildSectionTitle('SISTEMA'),
+                    _buildSectionTitle(context, 'SISTEMA'),
                     if (!modoSimplificado &&
                         (puede(Permiso.reportesVer) || esAdmin))
                       _buildNavItem(
@@ -941,10 +951,12 @@ class AppShell extends ConsumerWidget {
                           );
                           if (!ok && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'No hay una app de correo configurada. '
-                                  'Escríbenos a fiscogestrd@gmail.com',
+                                  ServicioIdioma.t(
+                                    context,
+                                    'No hay una app de correo configurada. Escríbenos a fiscogestrd@gmail.com',
+                                  ),
                                 ),
                               ),
                             );
@@ -952,10 +964,12 @@ class AppShell extends ConsumerWidget {
                         } catch (_) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'No se pudo abrir el correo. '
-                                  'Escríbenos a fiscogestrd@gmail.com',
+                                  ServicioIdioma.t(
+                                    context,
+                                    'No se pudo abrir el correo. Escríbenos a fiscogestrd@gmail.com',
+                                  ),
                                 ),
                               ),
                             );
@@ -1001,9 +1015,12 @@ class AppShell extends ConsumerWidget {
                           );
                           if (!ok && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'No se pudo abrir el sitio. Revisa la conexión o el navegador.',
+                                  ServicioIdioma.t(
+                                    context,
+                                    'No se pudo abrir el sitio. Revisa la conexión o el navegador.',
+                                  ),
                                 ),
                               ),
                             );
@@ -1042,7 +1059,7 @@ class AppShell extends ConsumerWidget {
                         size: 20,
                       ),
                       title: Text(
-                        'Cerrar sesión',
+                        ServicioIdioma.t(context, 'Cerrar sesión'),
                         style: AppTypography.bodyMedium.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -1061,11 +1078,11 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 4, 10, 7),
       child: Text(
-        title,
+        ServicioIdioma.t(context, title),
         style: AppTypography.labelSmall.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w700,
@@ -1113,7 +1130,7 @@ class AppShell extends ConsumerWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    title,
+                    ServicioIdioma.t(context, title),
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
@@ -1182,7 +1199,7 @@ class AppShell extends ConsumerWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    title,
+                    ServicioIdioma.t(context, title),
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,

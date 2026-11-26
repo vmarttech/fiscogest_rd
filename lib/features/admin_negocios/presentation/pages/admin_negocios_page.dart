@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/enterprise_page_header.dart';
 import 'package:fiscogest_rd/features/admin_negocios/data/admin_negocios_remote.dart';
 import 'package:fiscogest_rd/features/admin_negocios/presentation/providers/admin_negocios_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AdminNegociosPage extends ConsumerStatefulWidget {
   const AdminNegociosPage({super.key});
@@ -94,7 +95,10 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Filtros', style: AppTypography.h3),
+              Text(
+                ServicioIdioma.t(context, 'Filtros'),
+                style: AppTypography.h3,
+              ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: plan,
@@ -126,7 +130,7 @@ class _AdminNegociosPageState extends ConsumerState<AdminNegociosPage> {
               FilledButton(
                 onPressed: () =>
                     Navigator.pop(context, (plan: plan, orden: orden)),
-                child: const Text('Aplicar filtros'),
+                child: Text(ServicioIdioma.t(context, 'Aplicar filtros')),
               ),
             ],
           ),
@@ -630,7 +634,7 @@ class _Pie extends StatelessWidget {
             TextButton.icon(
               onPressed: onCargarMas,
               icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
+              label: Text(ServicioIdioma.t(context, 'Reintentar')),
             ),
           ],
         ),
@@ -653,7 +657,7 @@ class _Pie extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: onCargarMas,
           icon: const Icon(Icons.add),
-          label: const Text('Cargar más'),
+          label: Text(ServicioIdioma.t(context, 'Cargar más')),
         ),
       ),
     );
@@ -690,7 +694,10 @@ class _ErrorRetry extends StatelessWidget {
           const SizedBox(height: 12),
           Text(mensaje, textAlign: TextAlign.center),
           const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRetry, child: const Text('Reintentar')),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: Text(ServicioIdioma.t(context, 'Reintentar')),
+          ),
         ],
       ),
     ),

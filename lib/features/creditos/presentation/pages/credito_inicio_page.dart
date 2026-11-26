@@ -14,6 +14,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/pages/cuentas_cobrar
 import 'package:fiscogest_rd/features/creditos/presentation/pages/solicitudes_credito_page.dart'
     show solicitudesCreditoProvider;
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Hub de Crédito — diseño mockup + datos reales (CXC + solicitudes).
 class CreditoInicioPage extends ConsumerWidget {
@@ -462,9 +463,9 @@ class _CxcPanel extends StatelessWidget {
                     flex: 4,
                     child: Text(
                       'Cliente',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -474,9 +475,9 @@ class _CxcPanel extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       'RNC',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -486,9 +487,9 @@ class _CxcPanel extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       'Vence',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -498,10 +499,10 @@ class _CxcPanel extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       'Cuota',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -511,10 +512,10 @@ class _CxcPanel extends StatelessWidget {
                     flex: 3,
                     child: Text(
                       'Límite / Uso',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF64748B),
                       ),
                     ),
@@ -537,8 +538,8 @@ class _CxcPanel extends StatelessWidget {
             data: (lista) {
               final activas =
                   lista
-                  .where((x) => x.cuenta.estado != EstadoCredito.pagado)
-                  .toList()
+                      .where((x) => x.cuenta.estado != EstadoCredito.pagado)
+                      .toList()
                     ..sort(
                       (a, b) => a.cuenta.fechaVencimiento.compareTo(
                         b.cuenta.fechaVencimiento,
@@ -606,8 +607,8 @@ class _CxcPanel extends StatelessWidget {
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text(
-                  'Ver todos los vencimientos →',
+                child: Text(
+                  ServicioIdioma.t(context, 'Ver todos los vencimientos →'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -935,8 +936,8 @@ class _SolicitudesPanel extends StatelessWidget {
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text(
-                  'Ver todas',
+                child: Text(
+                  ServicioIdioma.t(context, 'Ver todas'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -1113,8 +1114,8 @@ class _AccionesRapidas extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Acciones Rápidas',
+          Text(
+            ServicioIdioma.t(context, 'Acciones Rápidas'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,

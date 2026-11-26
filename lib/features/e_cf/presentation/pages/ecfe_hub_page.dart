@@ -18,6 +18,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/entities/ecfe_config.dart';
 import 'package:fiscogest_rd/features/e_cf/domain/enums/ambiente_dgii.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Hub del módulo e-CF. No interviene en ventas ni caja.
 class EcfeHubPage extends ConsumerStatefulWidget {
@@ -82,7 +83,7 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
             child: FilledButton.icon(
               onPressed: () => context.push('/ecfe/spec'),
               icon: const Icon(Icons.rule_folder_rounded, size: 19),
-              label: const Text('Especificación'),
+              label: Text(ServicioIdioma.t(context, 'Especificación')),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Theme.of(context).colorScheme.primary,
@@ -136,7 +137,9 @@ class _EcfeHubPageState extends ConsumerState<EcfeHubPage>
                         FilledButton.icon(
                           onPressed: () => context.push('/ecfe/spec'),
                           icon: const Icon(Icons.rule_folder_rounded, size: 19),
-                          label: const Text('Especificación'),
+                          label: Text(
+                            ServicioIdioma.t(context, 'Especificación'),
+                          ),
                           style: FilledButton.styleFrom(
                             backgroundColor: Theme.of(
                               context,
@@ -545,8 +548,11 @@ class _ColaTabState extends ConsumerState<_ColaTab> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    subtitle: const Text(
-                      'Renueva el certificado del PSC antes de firmar/enviar.',
+                    subtitle: Text(
+                      ServicioIdioma.t(
+                        context,
+                        'Renueva el certificado del PSC antes de firmar/enviar.',
+                      ),
                     ),
                   ),
                 );
@@ -903,7 +909,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Entendido'),
+              child: Text(ServicioIdioma.t(ctx, 'Entendido')),
             ),
           ],
         );
@@ -1106,12 +1112,15 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: const Color(0xFF008F83),
-                      title: const Text(
-                        'Habilitar módulo e-CF',
+                      title: Text(
+                        ServicioIdioma.t(context, 'Habilitar módulo e-CF'),
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      subtitle: const Text(
-                        'Controla la habilitación del módulo fiscal electrónico.',
+                      subtitle: Text(
+                        ServicioIdioma.t(
+                          context,
+                          'Controla la habilitación del módulo fiscal electrónico.',
+                        ),
                       ),
                       value: _habilitado,
                       onChanged: (v) => setState(() {
@@ -1122,8 +1131,8 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                     DropdownButtonFormField<AmbienteDgii>(
                       initialValue: _ambiente,
                       isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Ambiente DGII',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Ambiente DGII'),
                         border: OutlineInputBorder(),
                       ),
                       items: [
@@ -1442,7 +1451,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
             TextButton.icon(
               onPressed: () => _editar(context, ref, null),
               icon: const Icon(Icons.add),
-              label: const Text('Agregar / otro tipo'),
+              label: Text(ServicioIdioma.t(context, 'Agregar / otro tipo')),
             ),
           ],
         );
@@ -1487,8 +1496,11 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                   children: [
                     TextField(
                       controller: tipoCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Tipo e-CF (31, 32, 34…)',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(
+                          ctx,
+                          'Tipo e-CF (31, 32, 34…)',
+                        ),
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
@@ -1496,37 +1508,58 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                     const SizedBox(height: 8),
                     TextField(
                       controller: actualCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Último usado (actual)',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(
+                          ctx,
+                          'Último usado (actual)',
+                        ),
                         border: OutlineInputBorder(),
-                        helperText: 'El próximo será actual+1',
+                        helperText: ServicioIdioma.t(
+                          ctx,
+                          'El próximo será actual+1',
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: desdeCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Desde (autorizado DGII)',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(
+                          ctx,
+                          'Desde (autorizado DGII)',
+                        ),
                         border: OutlineInputBorder(),
-                        helperText: 'Inicio del rango asignado por la DGII',
+                        helperText: ServicioIdioma.t(
+                          ctx,
+                          'Inicio del rango asignado por la DGII',
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: hastaCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Hasta (autorizado DGII)',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(
+                          ctx,
+                          'Hasta (autorizado DGII)',
+                        ),
                         border: OutlineInputBorder(),
-                        helperText: 'Fin del rango asignado por la DGII',
+                        helperText: ServicioIdioma.t(
+                          ctx,
+                          'Fin del rango asignado por la DGII',
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                     SwitchListTile(
-                      title: const Text('Activa para emisión'),
-                      subtitle: const Text(
-                        'Solo active cuando el rango coincida con la autorización DGII',
+                      title: Text(ServicioIdioma.t(ctx, 'Activa para emisión')),
+                      subtitle: Text(
+                        ServicioIdioma.t(
+                          ctx,
+                          'Solo active cuando el rango coincida con la autorización DGII',
+                        ),
                       ),
                       value: activo,
                       onChanged: (v) => setSt(() => activo = v),
@@ -1554,11 +1587,11 @@ class _SecuenciasEncfSection extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
+                  child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Guardar'),
+                  child: Text(ServicioIdioma.t(ctx, 'Guardar')),
                 ),
               ],
             );

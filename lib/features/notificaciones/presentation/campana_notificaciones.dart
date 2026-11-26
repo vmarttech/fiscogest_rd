@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/notificaciones/domain/alerta_operativa.dar
 import 'package:fiscogest_rd/features/notificaciones/domain/aviso_remoto.dart';
 import 'package:fiscogest_rd/features/notificaciones/presentation/notificaciones_provider.dart';
 import 'package:fiscogest_rd/features/notificaciones/presentation/providers/avisos_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Envoltorio para distinguir el valor de un aviso remoto en el menú.
 class _AvisoPayload {
@@ -263,7 +264,7 @@ class CampanaNotificaciones extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cerrar'),
+            child: Text(ServicioIdioma.t(dialogContext, 'Cerrar')),
           ),
         ],
       ),
@@ -286,8 +287,8 @@ class _Cabecera extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Text(
-            'Alertas operativas',
+          Text(
+            ServicioIdioma.t(context, 'Alertas operativas'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -321,8 +322,8 @@ class _Cabecera extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   foregroundColor: const Color(0xFF2563EB),
                 ),
-                child: const Text(
-                  'Marcar leídas',
+                child: Text(
+                  ServicioIdioma.t(context, 'Marcar leídas'),
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -355,8 +356,8 @@ class _CabeceraAvisos extends StatelessWidget {
             color: Color(0xFF2563EB),
           ),
           const SizedBox(width: 6),
-          const Text(
-            'Avisos de plataforma',
+          Text(
+            ServicioIdioma.t(context, 'Avisos de plataforma'),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
@@ -390,8 +391,8 @@ class _CabeceraAvisos extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   foregroundColor: const Color(0xFF2563EB),
                 ),
-                child: const Text(
-                  'Marcar todos',
+                child: Text(
+                  ServicioIdioma.t(context, 'Marcar todos'),
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                 ),
               ),

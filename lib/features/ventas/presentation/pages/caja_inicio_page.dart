@@ -56,6 +56,7 @@ import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_activo_provider.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/widgets/selector_almacen_activo.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Hub de la estación de Caja — responsive PC / tablet / móvil.
 class CajaInicioPage extends ConsumerStatefulWidget {
@@ -364,12 +365,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Caja unificada',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Caja unificada'),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -380,24 +383,31 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: const Color(0xFFA7F3D0)),
               ),
-              child: const Text(
-                'Sin turno activo',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF047857),
+              child: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Sin turno activo'),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF047857),
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Abre el turno para comenzar.\nLa estación inicia vacía.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.35,
-                color: Color(0xFF64748B),
-                fontWeight: FontWeight.w500,
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(
+                  context,
+                  'Abre el turno para comenzar.\nLa estación inicia vacía.',
+                ),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.35,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -478,8 +488,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Resumen último Turno',
+                Text(
+                  ServicioIdioma.t(context, 'Resumen último Turno'),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -636,12 +646,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Resumen de Ventas Diarias',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E293B),
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Resumen de Ventas Diarias'),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1E293B),
+                    ),
                   ),
                 ),
                 Text(
@@ -673,11 +685,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Hoy',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF64748B),
+                          Builder(
+                            builder: (context) => Text(
+                              ServicioIdioma.t(context, 'Hoy'),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF64748B),
+                              ),
                             ),
                           ),
                           Text(
@@ -695,11 +709,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Últimos 7 días',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF64748B),
+                          Builder(
+                            builder: (context) => Text(
+                              ServicioIdioma.t(context, 'Últimos 7 días'),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF64748B),
+                              ),
                             ),
                           ),
                           Text(
@@ -728,8 +744,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final uid = _usuarioActual?.id;
     if (uid == null) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('No hay sesión de usuario. Vuelva a iniciar sesión.'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(
+              context,
+              'No hay sesión de usuario. Vuelva a iniciar sesión.',
+            ),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -746,7 +767,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             vertical: 16,
           ),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-          title: const Text('Abrir caja', style: AppTypography.h4),
+          title: Text(
+            ServicioIdioma.t(ctx, 'Abrir caja'),
+            style: AppTypography.h4,
+          ),
           content: SizedBox(
             width: ancho >= AppBreakpoints.tablet ? 420 : null,
             child: Column(
@@ -765,8 +789,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Fondo inicial',
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(ctx, 'Fondo inicial'),
                     prefixText: 'RD\$ ',
                     border: OutlineInputBorder(),
                   ),
@@ -780,7 +804,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
 
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar'),
+              child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
             ),
             ElevatedButton(
               onPressed: () {
@@ -804,7 +828,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 backgroundColor: AppColors.success,
                 foregroundColor: AppColors.white,
               ),
-              child: const Text('Abrir'),
+              child: Text(ServicioIdioma.t(ctx, 'Abrir')),
             ),
           ],
         );
@@ -920,8 +944,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 vertical: 16,
               ),
               shape: RoundedRectangleBorder(borderRadius: AppRadius.allL),
-              title: const Text(
-                'Arqueo y cierre de caja',
+              title: Text(
+                ServicioIdioma.t(ctx, 'Arqueo y cierre de caja'),
                 style: AppTypography.h4,
               ),
               content: SizedBox(
@@ -969,8 +993,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Efectivo esperado',
+                              Text(
+                                ServicioIdioma.t(ctx, 'Efectivo esperado'),
                                 style: AppTypography.labelMedium,
                               ),
                               Text(
@@ -986,11 +1010,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          decoration: const InputDecoration(
-                            labelText: 'Efectivo contado en cajón',
+                          decoration: InputDecoration(
+                            labelText: ServicioIdioma.t(
+                              ctx,
+                              'Efectivo contado en cajón',
+                            ),
                             prefixText: 'RD\$ ',
                             border: OutlineInputBorder(),
-                            helperText: 'Cuente billetes y monedas del cajón',
+                            helperText: ServicioIdioma.t(
+                              ctx,
+                              'Cuente billetes y monedas del cajón',
+                            ),
                           ),
                           autofocus: true,
                           onChanged: (_) => setLocal(() {}),
@@ -1026,10 +1056,16 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                         AppLayout.vM,
                         TextField(
                           controller: obsController,
-                          decoration: const InputDecoration(
-                            labelText: 'Observación (opcional)',
+                          decoration: InputDecoration(
+                            labelText: ServicioIdioma.t(
+                              ctx,
+                              'Observación (opcional)',
+                            ),
                             border: OutlineInputBorder(),
-                            hintText: 'Ej. faltante por cambio, billete roto…',
+                            hintText: ServicioIdioma.t(
+                              ctx,
+                              'Ej. faltante por cambio, billete roto…',
+                            ),
                           ),
                           maxLines: 2,
                         ),
@@ -1041,7 +1077,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar'),
+                  child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -1082,7 +1118,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     backgroundColor: AppColors.warning,
                     foregroundColor: AppColors.white,
                   ),
-                  child: const Text('Confirmar cierre'),
+                  child: Text(ServicioIdioma.t(ctx, 'Confirmar cierre')),
                 ),
               ],
             );
@@ -1169,8 +1205,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     if (!DgiiRncConsultaService.esFormatoValido(raw)) {
       if (!mounted) return;
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Ingrese RNC (9) o cédula (11 dígitos)'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Ingrese RNC (9) o cédula (11 dígitos)'),
+          ),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -1752,8 +1790,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           double.tryParse(_cxcMontoCtrl.text.trim().replaceAll(',', '.')) ?? 0;
       if (monto <= 0) {
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('Indique un monto válido'),
+          SnackBar(
+            content: Text(ServicioIdioma.t(context, 'Indique un monto válido')),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -1858,7 +1896,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
           if (mounted) {
             FiscoGestNotifications.show(
               SnackBar(
-                content: Text('Abono OK. Impresión: $e'),
+                content: Text(
+                  ServicioIdioma.t(context, 'Abono OK. Impresión: $e'),
+                ),
                 backgroundColor: AppColors.warning,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -1898,8 +1938,13 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     // ── Ticket / cotización → cobro EN ESTA pantalla (sin CobroVentaPage) ──
     if (_ticketSeleccionado?.id == null) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Busque y seleccione un ticket / cotización (F2)'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(
+              context,
+              'Busque y seleccione un ticket / cotización (F2)',
+            ),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1974,7 +2019,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       if (mounted) {
         FiscoGestNotifications.show(
           SnackBar(
-            content: Text('e-CF no quedó listo: $errorEcfe'),
+            content: Text(
+              ServicioIdioma.t(context, 'e-CF no quedó listo: $errorEcfe'),
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2009,20 +2056,20 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'imprimir'),
-            child: const Text('Imprimir'),
+            child: Text(ServicioIdioma.t(ctx, 'Imprimir')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'enviar'),
-            child: const Text('Enviar PDF'),
+            child: Text(ServicioIdioma.t(ctx, 'Enviar PDF')),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
             icon: const Icon(Icons.chat_outlined, size: 18),
-            label: const Text('Recibo digital'),
+            label: Text(ServicioIdioma.t(ctx, 'Recibo digital')),
           ),
         ],
       ),
@@ -2075,8 +2122,10 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
     final ticket = _ticketSeleccionado;
     if (ticket == null || ticket.id == null) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Seleccione un ticket / cotización'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Seleccione un ticket / cotización'),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -2457,7 +2506,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               const SizedBox(height: 12),
               FilledButton(
                 onPressed: _refrescar,
-                child: const Text('Reintentar'),
+                child: Text(ServicioIdioma.t(context, 'Reintentar')),
               ),
             ],
           ),
@@ -2501,8 +2550,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Notificaciones Rápidas',
+                              Text(
+                                ServicioIdioma.t(ctx, 'Notificaciones Rápidas'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
@@ -2523,8 +2572,8 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                         strokeWidth: 2,
                                       ),
                                     ),
-                                    error: (_, __) => const Text(
-                                      'Sin alertas',
+                                    error: (_, __) => Text(
+                                      ServicioIdioma.t(context, 'Sin alertas'),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFF94A3B8),
@@ -2532,8 +2581,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     ),
                                     data: (alertas) {
                                       if (alertas.isEmpty) {
-                                        return const Text(
-                                          'Todo en orden · sin alertas pendientes',
+                                        return Text(
+                                          ServicioIdioma.t(
+                                            context,
+                                            'Todo en orden · sin alertas pendientes',
+                                          ),
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Color(0xFF64748B),
@@ -2769,8 +2821,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   controller: qCtrl,
                   onChanged: filtrar,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: 'N° Cotización o Cliente...',
+                  decoration: InputDecoration(
+                    hintText: ServicioIdioma.t(
+                      dialogContext,
+                      'N° Cotización o Cliente...',
+                    ),
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
@@ -2820,7 +2875,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cerrar'),
+          child: Builder(
+            builder: (context) => Text(ServicioIdioma.t(context, 'Cerrar')),
+          ),
         ),
       ],
     );
@@ -2886,8 +2943,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   controller: qCtrl,
                   onChanged: filtrar,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: 'RNC, Cédula o Nombre...',
+                  decoration: InputDecoration(
+                    hintText: ServicioIdioma.t(
+                      dialogContext,
+                      'RNC, Cédula o Nombre...',
+                    ),
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
@@ -2938,7 +2998,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cerrar'),
+          child: Builder(
+            builder: (context) => Text(ServicioIdioma.t(context, 'Cerrar')),
+          ),
         ),
       ],
     );
@@ -3104,7 +3166,12 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       final okObs = await showDialog<bool>(
                         context: dialogContext,
                         builder: (c2) => AlertDialog(
-                          title: const Text('Diferencia en cuadre'),
+                          title: Text(
+                            ServicioIdioma.t(
+                              dialogContext,
+                              'Diferencia en cuadre',
+                            ),
+                          ),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -3117,8 +3184,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               TextField(
                                 controller: obsCtrl,
                                 maxLines: 2,
-                                decoration: const InputDecoration(
-                                  labelText: 'Explique faltante/sobrante',
+                                decoration: InputDecoration(
+                                  labelText: ServicioIdioma.t(
+                                    dialogContext,
+                                    'Explique faltante/sobrante',
+                                  ),
                                   border: OutlineInputBorder(),
                                 ),
                               ),
@@ -3127,14 +3197,18 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(c2, false),
-                              child: const Text('Cancelar'),
+                              child: Text(
+                                ServicioIdioma.t(dialogContext, 'Cancelar'),
+                              ),
                             ),
                             FilledButton(
                               onPressed: () {
                                 if (obsCtrl.text.trim().isEmpty) return;
                                 Navigator.pop(c2, true);
                               },
-                              child: const Text('Continuar'),
+                              child: Text(
+                                ServicioIdioma.t(dialogContext, 'Continuar'),
+                              ),
                             ),
                           ],
                         ),
@@ -3259,7 +3333,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+          child: Builder(
+            builder: (context) => Text(ServicioIdioma.t(context, 'Cancelar')),
+          ),
         ),
       ],
     );
@@ -3423,12 +3499,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Caja unificada',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+                          Builder(
+                            builder: (context) => Text(
+                              ServicioIdioma.t(context, 'Caja unificada'),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                           Text(
@@ -3477,12 +3555,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'FiscoGest · CAJA UNIFICADA',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                      Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(
+                            context,
+                            'FiscoGest · CAJA UNIFICADA',
+                          ),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       Text(
@@ -3602,7 +3685,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
         if (!mounted) return;
         FiscoGestNotifications.show(
           SnackBar(
-            content: Text('No se pudo cargar cotización: $e'),
+            content: Text(
+              ServicioIdioma.t(context, 'No se pudo cargar cotización: $e'),
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -4340,12 +4425,17 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                       ? const NeverScrollableScrollPhysics()
                                       : null,
                                   children: [
-                                    const Text(
-                                      'Productos en factura',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF2563EB),
+                                    Builder(
+                                      builder: (context) => Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Productos en factura',
+                                        ),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF2563EB),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -4452,7 +4542,9 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                   const Spacer(),
                                   TextButton(
                                     onPressed: _limpiarTicket,
-                                    child: const Text('Limpiar'),
+                                    child: Text(
+                                      ServicioIdioma.t(context, 'Limpiar'),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -4557,8 +4649,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               ),
                               if (pend.isNotEmpty) ...[
                                 const SizedBox(height: 8),
-                                const Text(
-                                  'Cuotas pendientes',
+                                Text(
+                                  ServicioIdioma.t(
+                                    context,
+                                    'Cuotas pendientes',
+                                  ),
                                   style: TextStyle(
                                     fontSize: 11,
 
@@ -4638,8 +4733,11 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                 }),
                               ],
                               const SizedBox(height: 12),
-                              const Text(
-                                'Monto a abonar (esta cuota)',
+                              Text(
+                                ServicioIdioma.t(
+                                  context,
+                                  'Monto a abonar (esta cuota)',
+                                ),
                                 style: TextStyle(
                                   fontSize: 11,
 
@@ -4682,19 +4780,26 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       children: [
                         Row(
                           children: [
-                            const Text(
-                              'Ticket seleccionado',
-                              style: TextStyle(
-                                fontSize: 11,
-
-                                color: Color(0xFF2563EB),
-                                fontWeight: FontWeight.w700,
+                            Builder(
+                              builder: (context) => Text(
+                                ServicioIdioma.t(
+                                  context,
+                                  'Ticket seleccionado',
+                                ),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF2563EB),
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             const Spacer(),
                             TextButton(
                               onPressed: _limpiarTicket,
-                              child: const Text('Limpiar'),
+                              child: Builder(
+                                builder: (context) =>
+                                    Text(ServicioIdioma.t(context, 'Limpiar')),
+                              ),
                             ),
                           ],
                         ),
@@ -5531,13 +5636,14 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                     runSpacing: 6,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const Text(
-                        'Rápido:',
-                        style: TextStyle(
-                          fontSize: 11,
-
-                          color: Color(0xFF334155),
-                          fontWeight: FontWeight.w700,
+                      Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(context, 'Rápido:'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF334155),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       for (final label in ['Exacto', '500', '1000', '2000'])
@@ -5625,7 +5731,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 fontWeight: FontWeight.w700,
               ),
               children: [
-                const TextSpan(text: 'Cajón: '),
+                TextSpan(text: '${ServicioIdioma.t(context, 'Cajón:')} '),
                 TextSpan(
                   text: formatRd(_saldo ?? 0),
                   style: const TextStyle(

@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Hub de reportes operativos y DGII (606 / 607).
 class ReportsPage extends StatelessWidget {
@@ -103,8 +104,8 @@ class ReportsPage extends StatelessWidget {
                             color: Color(0xFF0F172A),
                           ),
                         ),
-                        const Text(
-                          'Reportes operativos',
+                        Text(
+                          ServicioIdioma.t(context, 'Reportes operativos'),
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 18,

@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/apartados/presentation/providers/apartado_provider.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ApartadosPage extends ConsumerStatefulWidget {
   const ApartadosPage({super.key});
@@ -240,19 +241,19 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Registrar Abono'),
+        title: Text(ServicioIdioma.t(ctx, 'Registrar Abono')),
         content: TextField(
           controller: ctrlMonto,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(
-            labelText: 'Monto del abono',
+          decoration: InputDecoration(
+            labelText: ServicioIdioma.t(ctx, 'Monto del abono'),
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           FilledButton(
             onPressed: () async {
@@ -268,7 +269,7 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
                 );
               }
             },
-            child: const Text('Confirmar'),
+            child: Text(ServicioIdioma.t(ctx, 'Confirmar')),
           ),
         ],
       ),
@@ -285,18 +286,18 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancelar Apartado'),
+        title: Text(ServicioIdioma.t(ctx, 'Cancelar Apartado')),
         content: TextField(
           controller: ctrlMotivo,
-          decoration: const InputDecoration(
-            labelText: 'Motivo de cancelación',
+          decoration: InputDecoration(
+            labelText: ServicioIdioma.t(ctx, 'Motivo de cancelación'),
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Volver'),
+            child: Text(ServicioIdioma.t(ctx, 'Volver')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
@@ -313,7 +314,7 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
                 );
               }
             },
-            child: const Text('Cancelar Apartado'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar Apartado')),
           ),
         ],
       ),

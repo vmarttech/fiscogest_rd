@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 typedef AgregarProductoCallback =
     Future<void> Function(Producto producto, double cantidad);
@@ -138,7 +139,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar'),
+              child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -150,7 +151,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                     double.tryParse(controller.text.replaceAll(',', '.')) ?? 0;
                 Navigator.pop(ctx, v > 0 ? v : null);
               },
-              child: const Text('Agregar'),
+              child: Text(ServicioIdioma.t(ctx, 'Agregar')),
             ),
           ],
         );
@@ -245,14 +246,17 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
           data: (_) {
             final lista = _resultados;
             if (_buscador.text.trim().isEmpty) {
-              return const Text(
-                'Escriba o escanee el código de barras del producto',
+              return Text(
+                ServicioIdioma.t(
+                  context,
+                  'Escriba o escanee el código de barras del producto',
+                ),
                 style: AppTypography.bodySmall,
               );
             }
             if (lista.isEmpty) {
-              return const Text(
-                'No se encontraron productos',
+              return Text(
+                ServicioIdioma.t(context, 'No se encontraron productos'),
                 style: AppTypography.bodySmall,
               );
             }
@@ -276,7 +280,7 @@ class _PanelProductosState extends ConsumerState<PanelProductos> {
                       ),
                       trailing: ElevatedButton(
                         onPressed: () => _pedirCantidadYAgregar(prod),
-                        child: const Text('Agregar'),
+                        child: Text(ServicioIdioma.t(context, 'Agregar')),
                       ),
                     ),
                   );

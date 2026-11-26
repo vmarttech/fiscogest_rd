@@ -20,6 +20,7 @@ import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/detall
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/registrar_abono_page.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/detalle_cuenta_pagar_page.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class FichaProveedorPage extends ConsumerStatefulWidget {
   const FichaProveedorPage({super.key, required this.proveedorId});
@@ -511,7 +512,11 @@ class _FichaProveedorPageState extends ConsumerState<FichaProveedorPage>
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
                             icon: const Icon(Icons.payments, size: 18),
-                            label: const Text('Registrar abono'),
+                            label: Builder(
+                              builder: (context) => Text(
+                                ServicioIdioma.t(context, 'Registrar abono'),
+                              ),
+                            ),
                             style: TextButton.styleFrom(
                               foregroundColor: const Color(0xFF3B82F6),
                             ),

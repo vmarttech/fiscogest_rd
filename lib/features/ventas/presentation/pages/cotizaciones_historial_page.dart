@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class CotizacionesHistorialPage extends ConsumerStatefulWidget {
   const CotizacionesHistorialPage({super.key});
@@ -74,7 +75,11 @@ class _CotizacionesHistorialPageState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: AppColors.error,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'Error al cargar cotizaciones:\n$e',
@@ -121,7 +126,9 @@ class _CotizacionesHistorialPageState
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.add, size: 20),
-                        label: const Text('NUEVA COTIZACIÓN'),
+                        label: Text(
+                          ServicioIdioma.t(context, 'NUEVA COTIZACIÓN'),
+                        ),
                         onPressed: () =>
                             context.push('/ventas/cotizaciones/nueva'),
                         style: ElevatedButton.styleFrom(
@@ -167,10 +174,8 @@ class _CotizacionesHistorialPageState
                       mainAxisExtent: esPantallaPequena ? 174 : 178,
                     ),
                     itemCount: lista.length,
-                    itemBuilder: (context, i) => _buildTarjetaCotizacion(
-                      lista[i],
-                      esPantallaPequena,
-                    ),
+                    itemBuilder: (context, i) =>
+                        _buildTarjetaCotizacion(lista[i], esPantallaPequena),
                   );
                 },
               ),
@@ -185,7 +190,8 @@ class _CotizacionesHistorialPageState
     final numero = cot.numeroCotizacion;
     final estado = cot.estadoDocumento;
     final esCotizacionActiva =
-        estado != EstadoDocumento.facturado && estado != EstadoDocumento.anulado;
+        estado != EstadoDocumento.facturado &&
+        estado != EstadoDocumento.anulado;
     final tamanoEtiqueta = esPantallaPequena ? 11.0 : 12.0;
     final tamanoTotal = esPantallaPequena ? 16.0 : 18.0;
 
@@ -214,7 +220,10 @@ class _CotizacionesHistorialPageState
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _colorFondoEstado(estado),
                     borderRadius: BorderRadius.circular(6),
@@ -235,7 +244,11 @@ class _CotizacionesHistorialPageState
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               children: [
-                const Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.person_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -254,7 +267,11 @@ class _CotizacionesHistorialPageState
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
             child: Row(
               children: [
-                const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.grey600),
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 13,
+                  color: AppColors.grey600,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '${cot.fecha.day.toString().padLeft(2, '0')}/'
@@ -295,7 +312,8 @@ class _CotizacionesHistorialPageState
                   label: 'Enviar por correo',
                   onTap: () => _enviarPorCorreo(numero),
                 ),
-                if (estado == EstadoDocumento.aprobado || estado == EstadoDocumento.cotizado)
+                if (estado == EstadoDocumento.aprobado ||
+                    estado == EstadoDocumento.cotizado)
                   _iconoAccion(
                     icon: Icons.shopping_cart_checkout,
                     label: 'Convertir en venta',
@@ -319,7 +337,9 @@ class _CotizacionesHistorialPageState
     return Padding(
       padding: const EdgeInsets.only(left: 5),
       child: Material(
-        color: destacado ? AppColors.success.withValues(alpha: 0.12) : AppColors.grey50,
+        color: destacado
+            ? AppColors.success.withValues(alpha: 0.12)
+            : AppColors.grey50,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
@@ -331,7 +351,9 @@ class _CotizacionesHistorialPageState
               child: Icon(
                 icon,
                 size: 18,
-                color: destacado ? AppColors.success : Theme.of(context).colorScheme.primary,
+                color: destacado
+                    ? AppColors.success
+                    : Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -343,7 +365,9 @@ class _CotizacionesHistorialPageState
   void _imprimirCotizacion(String numero) {
     FiscoGestNotifications.show(
       SnackBar(
-        content: Text('Imprimiendo cotización N° $numero...'),
+        content: Text(
+          ServicioIdioma.t(context, 'Imprimiendo cotización N° $numero...'),
+        ),
         backgroundColor: AppColors.info,
         behavior: SnackBarBehavior.floating,
       ),
@@ -365,7 +389,10 @@ class _CotizacionesHistorialPageState
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Convertir a Venta', style: AppTypography.h4),
+        title: Text(
+          ServicioIdioma.t(context, 'Convertir a Venta'),
+          style: AppTypography.h4,
+        ),
         content: Text(
           '¿Cómo deseas convertir la cotización N° $numero?\n\n'
           'Se descontará inventario y generará el documento.',
@@ -375,11 +402,11 @@ class _CotizacionesHistorialPageState
           TextButton(
             onPressed: () => Navigator.pop(context, null),
             style: TextButton.styleFrom(foregroundColor: AppColors.grey600),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, 'credito'),
-            child: const Text('A Crédito'),
+            child: Text(ServicioIdioma.t(context, 'A Crédito')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, 'contado'),
@@ -387,7 +414,7 @@ class _CotizacionesHistorialPageState
               backgroundColor: AppColors.success,
               foregroundColor: AppColors.white,
             ),
-            child: const Text('De Contado'),
+            child: Text(ServicioIdioma.t(context, 'De Contado')),
           ),
         ],
       ),

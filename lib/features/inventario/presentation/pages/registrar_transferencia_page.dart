@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_button.dart';
 import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class RegistrarTransferenciaPage extends ConsumerStatefulWidget {
   const RegistrarTransferenciaPage({super.key});
@@ -70,8 +71,8 @@ class _RegistrarTransferenciaPageState
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                 children: [
-                  const Text(
-                    'Seleccionar Producto',
+                  Text(
+                    ServicioIdioma.t(context, 'Seleccionar Producto'),
                     style: AppTypography.labelMedium,
                   ),
                   AppLayout.vM,

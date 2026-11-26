@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/presentation/widgets/app_shell.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
 import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/core/navigation/rutas_principales.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
@@ -173,7 +174,7 @@ class AppScaffold extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  title!,
+                  ServicioIdioma.t(context, title!),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.h4.copyWith(
@@ -185,7 +186,7 @@ class AppScaffold extends StatelessWidget {
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    subtitle!,
+                    ServicioIdioma.t(context, subtitle!),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodySmall.copyWith(

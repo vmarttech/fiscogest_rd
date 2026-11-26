@@ -23,6 +23,7 @@ import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class VistaDetalle extends ConsumerWidget {
   const VistaDetalle({super.key});
@@ -58,27 +59,29 @@ class _MostrarDetalleVenta extends ConsumerWidget {
     _ => 'Borrador',
   };
 
-  Color _colorEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
-    EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
-    EstadoDocumento.enCredito => const Color(0xFFE65100),
-    EstadoDocumento.aprobado => AppColors.success,
-    EstadoDocumento.anulado => AppColors.error,
-    EstadoDocumento.facturado => AppColors.success,
-    _ => AppColors.textSecondary,
-  };
+  Color _colorEstado(EstadoDocumento estado, BuildContext context) =>
+      switch (estado) {
+        EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
+        EstadoDocumento.enCredito => const Color(0xFFE65100),
+        EstadoDocumento.aprobado => AppColors.success,
+        EstadoDocumento.anulado => AppColors.error,
+        EstadoDocumento.facturado => AppColors.success,
+        _ => AppColors.textSecondary,
+      };
 
-  Color _colorFondoEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
-    EstadoDocumento.cotizado => Theme.of(
-      context,
-    ).colorScheme.primary.withValues(alpha: 0.12),
-    EstadoDocumento.enCredito => const Color(
-      0xFFE65100,
-    ).withValues(alpha: 0.12),
-    EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
-    EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
-    EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
-    _ => AppColors.textSecondary.withValues(alpha: 0.12),
-  };
+  Color _colorFondoEstado(EstadoDocumento estado, BuildContext context) =>
+      switch (estado) {
+        EstadoDocumento.cotizado => Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.12),
+        EstadoDocumento.enCredito => const Color(
+          0xFFE65100,
+        ).withValues(alpha: 0.12),
+        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+        _ => AppColors.textSecondary.withValues(alpha: 0.12),
+      };
 
   String get _ncf {
     return (venta.numeroFactura ?? '').trim();
@@ -150,8 +153,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         );
       } else {
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('No se pudo registrar (¿ya impreso o no facturada?)'),
+          SnackBar(
+            content: Text(
+              ServicioIdioma.t(
+                context,
+                'No se pudo registrar (¿ya impreso o no facturada?)',
+              ),
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -277,8 +285,13 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       if (v.detalles.isEmpty) {
         if (context.mounted) {
           FiscoGestNotifications.show(
-            const SnackBar(
-              content: Text('Esta venta no tiene líneas de producto.'),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'Esta venta no tiene líneas de producto.',
+                ),
+              ),
               backgroundColor: AppColors.warning,
               behavior: SnackBarBehavior.floating,
             ),
@@ -323,14 +336,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Enviar a Aprobación'),
+        title: Text(ServicioIdioma.t(context, 'Enviar a Aprobación')),
         content: Text(
           '¿Enviar la Cotización N° ${venta.numero} a aprobación de crédito?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -338,7 +351,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
             ),
-            child: const Text('Enviar'),
+            child: Text(ServicioIdioma.t(context, 'Enviar')),
           ),
         ],
       ),
@@ -350,7 +363,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       if (context.mounted) {
         FiscoGestNotifications.show(
           SnackBar(
-            content: Text('Cotización ${venta.numero} enviada a aprobación'),
+            content: Text(
+              '${ServicioIdioma.t(context, 'Cotización')} ${venta.numero} ${ServicioIdioma.t(context, 'enviada a aprobación')}',
+            ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
@@ -375,14 +390,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Aprobar Crédito'),
+        title: Text(ServicioIdioma.t(context, 'Aprobar Crédito')),
         content: Text(
           '¿Aprobar la cotización N° ${venta.numero}?\nPasará a estado Aprobado.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -390,7 +405,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Aprobar'),
+            child: Text(ServicioIdioma.t(context, 'Aprobar')),
           ),
         ],
       ),
@@ -430,14 +445,14 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Rechazar Crédito'),
+        title: Text(ServicioIdioma.t(context, 'Rechazar Crédito')),
         content: Text(
           '¿Rechazar la cotización N° ${venta.numero}? Quedará anulada.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -445,7 +460,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Rechazar'),
+            child: Text(ServicioIdioma.t(context, 'Rechazar')),
           ),
         ],
       ),
@@ -457,7 +472,9 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       if (context.mounted) {
         FiscoGestNotifications.show(
           SnackBar(
-            content: Text('Cotización ${venta.numero} rechazada y anulada'),
+            content: Text(
+              '${ServicioIdioma.t(context, 'Cotización')} ${venta.numero} ${ServicioIdioma.t(context, 'rechazada y anulada')}',
+            ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
@@ -485,7 +502,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Ir a Caja'),
+        title: Text(ServicioIdioma.t(ctx, 'Ir a Caja')),
         content: Text(
           '¿Cobrar la cotización N° ${venta.numero} en Caja?\n\n'
           'Allí se generará el número de factura fiscal.',
@@ -493,7 +510,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -501,7 +518,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
               backgroundColor: AppColors.success,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Ir a Caja'),
+            child: Text(ServicioIdioma.t(ctx, 'Ir a Caja')),
           ),
         ],
       ),
@@ -911,7 +928,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                         esPantallaPequena: esPantallaPequena,
                       ),
                     _chipAccion(
-                        context: context,
+                      context: context,
                       icon: Icons.receipt_long_outlined,
                       label: 'Devolución',
                       onTap: () {
@@ -1031,7 +1048,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => _rechazarCredito(context, ref),
                       icon: const Icon(Icons.cancel_outlined, size: 18),
-                      label: const Text('Rechazar'),
+                      label: Text(ServicioIdioma.t(context, 'Rechazar')),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
                         side: const BorderSide(color: AppColors.error),
@@ -1048,7 +1065,7 @@ class _MostrarDetalleVenta extends ConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _aprobarCredito(context, ref),
                       icon: const Icon(Icons.check_circle_outline, size: 18),
-                      label: const Text('APROBAR CRÉDITO'),
+                      label: Text(ServicioIdioma.t(context, 'APROBAR CRÉDITO')),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.success,
                         foregroundColor: AppColors.white,

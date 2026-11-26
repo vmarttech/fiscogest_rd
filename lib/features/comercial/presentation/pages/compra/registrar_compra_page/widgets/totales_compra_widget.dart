@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class TotalesCompraWidget extends StatelessWidget {
   const TotalesCompraWidget({
@@ -120,8 +121,8 @@ class TotalesCompraWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Total',
+                Text(
+                  ServicioIdioma.t(context, 'Total'),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,

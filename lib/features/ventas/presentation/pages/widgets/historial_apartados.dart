@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/apartado.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class HistorialApartados extends ConsumerWidget {
   const HistorialApartados({super.key});
@@ -27,7 +28,7 @@ class HistorialApartados extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Apartados', style: AppTypography.h4),
+          Text(ServicioIdioma.t(context, 'Apartados'), style: AppTypography.h4),
           const SizedBox(height: AppSpacing.xs),
           Text(
             'Reservas de productos con control de pagos',
@@ -43,7 +44,11 @@ class HistorialApartados extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: AppSpacing.m),
                     Text(
                       'Error al cargar apartados: $e',

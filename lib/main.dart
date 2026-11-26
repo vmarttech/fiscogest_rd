@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/sync/supabase/roles_acceso_sync.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:drift/drift.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:fiscogest_rd/core/navigation/app_router.dart';
@@ -31,6 +32,7 @@ import 'package:fiscogest_rd/features/ajustes_inventario/presentation/providers/
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_theme.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 import 'package:fiscogest_rd/core/services/update_checker.dart';
 import 'package:fiscogest_rd/core/services/usb_barcode_scanner_service.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
@@ -160,6 +162,7 @@ class _InventarioRepositoryAdapter implements InventarioRepositoryInterface {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ServicioIdioma.preparar();
   // Catálogo de roles: caché local inmediata; pull nube tras login.
   await RolesAccesoSync.cargarDesdePrefsOFallback();
 
@@ -168,6 +171,7 @@ void main() async {
   }
 
   await initializeDateFormatting('es_DO', null);
+  await initializeDateFormatting('en_US', null);
   final db = AppDatabase();
   await _seedStockAlmacenUnaVez(db);
   await RepositoryInjection.initialize(db);
@@ -268,6 +272,8 @@ class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
   @override
   Widget build(BuildContext context) {
     final appTheme = ref.watch(appThemeProvider);
+    final idioma = ref.watch(idiomaProvider);
+    Intl.defaultLocale = idioma == IdiomaApp.en ? 'en_US' : 'es_DO';
     final baseTheme = ThemeData(
       useMaterial3: true,
       colorSchemeSeed: appTheme.seedColor,
@@ -289,29 +295,32 @@ class _FiscoGestAppState extends ConsumerState<FiscoGestApp> {
       debugShowCheckedModeBanner: false,
       routerConfig: ref.watch(appRouterProvider),
       theme: baseTheme.copyWith(colorScheme: appColorScheme),
+      locale: ServicioIdioma.localeDe(idioma),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('es', 'DO'), Locale('en', 'US')],
-      locale: const Locale('es', 'DO'),
       builder: (context, child) {
         // context AQUÍ sí tiene Navigator → diálogos de update OK
         final media = MediaQuery.of(context);
         final desktop = AppBreakpoints.useWideChrome(context);
         final systemScale = media.textScaler.scale(1.0);
         final desktopScale = (systemScale * 1.12).clamp(1.0, 1.4);
-        return _UpdateGate(
-          child: MediaQuery(
-            data: desktop
-                ? media.copyWith(textScaler: TextScaler.linear(desktopScale))
-                : media,
-            child: Stack(
-              children: [
-                if (child != null) child,
-                const FiscoGestNotificationOverlay(),
-              ],
+        return ServicioIdioma.envolver(
+          context,
+          _UpdateGate(
+            child: MediaQuery(
+              data: desktop
+                  ? media.copyWith(textScaler: TextScaler.linear(desktopScale))
+                  : media,
+              child: Stack(
+                children: [
+                  if (child != null) child,
+                  const FiscoGestNotificationOverlay(),
+                ],
+              ),
             ),
           ),
         );

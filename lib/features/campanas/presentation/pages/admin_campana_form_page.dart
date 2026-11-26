@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/ui/enterprise_page_header.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/campanas/presentation/providers/campanas_providers.dart';
 import 'package:fiscogest_rd/features/campanas/data/campana_oferta_notifier.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AdminCampanaFormPage extends ConsumerStatefulWidget {
   const AdminCampanaFormPage({super.key});
@@ -126,7 +127,7 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
       } catch (_) {}
       if (mounted) {
         FiscoGestNotifications.show(
-          const SnackBar(content: Text('Campaña creada')),
+          SnackBar(content: Text(ServicioIdioma.t(context, 'Campaña creada'))),
         );
         if (context.canPop()) {
           context.pop();
@@ -177,9 +178,15 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _nombre,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre de la oferta',
-                      hintText: 'Ej. Black Friday 50%',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        'Nombre de la oferta',
+                      ),
+                      hintText: ServicioIdioma.t(
+                        context,
+                        'Ej. Black Friday 50%',
+                      ),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
                         ? 'Falta el nombre'
@@ -189,15 +196,18 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                   TextFormField(
                     controller: _descripcion,
                     maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Descripción (visible para el negocio)',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        'Descripción (visible para el negocio)',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: _tipo,
-                    decoration: const InputDecoration(
-                      labelText: 'Tipo de beneficio',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(context, 'Tipo de beneficio'),
                     ),
                     items: [
                       for (final t in _tipos)
@@ -208,9 +218,15 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _valor,
-                    decoration: const InputDecoration(
-                      labelText: 'Valor del beneficio',
-                      hintText: 'Ej. 50%, 3 meses, 2 cuentas',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        'Valor del beneficio',
+                      ),
+                      hintText: ServicioIdioma.t(
+                        context,
+                        'Ej. 50%, 3 meses, 2 cuentas',
+                      ),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
                         ? 'Falta el valor'
@@ -228,8 +244,11 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: _segmento,
-                    decoration: const InputDecoration(
-                      labelText: '¿A quién va dirigida?',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        '¿A quién va dirigida?',
+                      ),
                     ),
                     items: [
                       for (final s in _segmentos)
@@ -242,8 +261,8 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _plan,
-                      decoration: const InputDecoration(
-                        labelText: 'Plan destino',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Plan destino'),
                       ),
                       items: [
                         for (final p in _planes)
@@ -269,8 +288,11 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                   TextFormField(
                     controller: _limite,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Límite de usos (vacío = sin límite)',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        'Límite de usos (vacío = sin límite)',
+                      ),
                     ),
                   ),
                 ],
@@ -285,16 +307,22 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
                   const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'Mostrar en el registro de nuevas cuentas',
+                    title: Text(
+                      ServicioIdioma.t(
+                        context,
+                        'Mostrar en el registro de nuevas cuentas',
+                      ),
                     ),
                     value: _mostrarRegistro,
                     onChanged: (v) => setState(() => _mostrarRegistro = v),
                   ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'Mostrar en el panel de ofertas del negocio',
+                    title: Text(
+                      ServicioIdioma.t(
+                        context,
+                        'Mostrar en el panel de ofertas del negocio',
+                      ),
                     ),
                     value: _mostrarPanel,
                     onChanged: (v) => setState(() => _mostrarPanel = v),
@@ -308,7 +336,12 @@ class _FormState extends ConsumerState<AdminCampanaFormPage> {
               icon: _guardando
                   ? const CircularProgressIndicator(strokeWidth: 2)
                   : const Icon(Icons.send_outlined),
-              label: Text(_guardando ? 'Guardando...' : 'Publicar campaña'),
+              label: Text(
+                ServicioIdioma.t(
+                  context,
+                  _guardando ? 'Guardando...' : 'Publicar campaña',
+                ),
+              ),
             ),
           ],
         ),

@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DetalleSolicitudCreditoPage extends ConsumerStatefulWidget {
   const DetalleSolicitudCreditoPage({super.key, required this.ventaId});
@@ -235,8 +236,13 @@ class _DetalleSolicitudCreditoPageState
         }
         if (abono < 0 || abono > total + 0.01) {
           FiscoGestNotifications.show(
-            const SnackBar(
-              content: Text('Abono inicial inválido respecto al total'),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'Abono inicial inválido respecto al total',
+                ),
+              ),
               backgroundColor: AppColors.warning,
               behavior: SnackBarBehavior.floating,
             ),
@@ -538,8 +544,8 @@ class _DetalleSolicitudCreditoPageState
       }
       if (abono < 0 || abono > v.montoTotal + 0.01) {
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('Abono inicial inválido'),
+          SnackBar(
+            content: Text(ServicioIdioma.t(context, 'Abono inicial inválido')),
             backgroundColor: AppColors.warning,
             behavior: SnackBarBehavior.floating,
           ),
@@ -856,9 +862,9 @@ class _DetalleSolicitudCreditoPageState
                               .catchError((_) => 0.30);
                           final sugerido =
                               CapacidadPagoService.limiteCuotaSugerido(
-                            ingresoMensual: exp.ingresoMensual,
-                            porcentaje: pct > 0 ? pct : 0.30,
-                          );
+                                ingresoMensual: exp.ingresoMensual,
+                                porcentaje: pct > 0 ? pct : 0.30,
+                              );
                           // Solo autocompleta límite si el depto. aún no lo fijó
                           final nuevoLimite = cli.limiteCuotaMensual > 0
                               ? cli.limiteCuotaMensual
@@ -1019,8 +1025,8 @@ class _DetalleSolicitudCreditoPageState
                 _primerVencimiento != null
                     ? _fmtFecha.format(_primerVencimiento!)
                     : (v.vencimiento != null
-                        ? _fmtFecha.format(v.vencimiento!)
-                        : '—'),
+                          ? _fmtFecha.format(v.vencimiento!)
+                          : '—'),
               ),
               const SizedBox(height: 10),
               SizedBox(
@@ -1030,9 +1036,14 @@ class _DetalleSolicitudCreditoPageState
                       ? _abrirFormularioCondiciones
                       : null,
                   icon: const Icon(Icons.edit_outlined, size: 16),
-                  label: const Text(
-                    'EDITAR ABONO, PLAZO Y CUOTAS',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  label: Builder(
+                    builder: (context) => Text(
+                      ServicioIdioma.t(context, 'EDITAR ABONO, PLAZO Y CUOTAS'),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1049,13 +1060,15 @@ class _DetalleSolicitudCreditoPageState
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: const Color(0xFF6EE7B7)),
             ),
-            child: const Text(
-              'Score: — (complete expediente)',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF065F46),
+            child: Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Score: — (complete expediente)'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF065F46),
+                ),
               ),
             ),
           ),
@@ -1074,9 +1087,11 @@ class _DetalleSolicitudCreditoPageState
                         size: 16,
                         color: Color(0xFFDC2626),
                       ),
-                      label: const Text(
-                        'SOLICITUD',
-                        style: TextStyle(fontSize: 11),
+                      label: Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(context, 'SOLICITUD'),
+                          style: const TextStyle(fontSize: 11),
+                        ),
                       ),
                     ),
                   ),
@@ -1089,9 +1104,11 @@ class _DetalleSolicitudCreditoPageState
                         size: 16,
                         color: Color(0xFF2563EB),
                       ),
-                      label: const Text(
-                        'CONTRATO',
-                        style: TextStyle(fontSize: 11),
+                      label: Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(context, 'CONTRATO'),
+                          style: const TextStyle(fontSize: 11),
+                        ),
                       ),
                     ),
                   ),
@@ -1104,9 +1121,11 @@ class _DetalleSolicitudCreditoPageState
                     child: OutlinedButton.icon(
                       onPressed: _procesando ? null : _enviarSolicitud,
                       icon: const Icon(Icons.send_outlined, size: 16),
-                      label: const Text(
-                        'ENVIAR SOLICITUD',
-                        style: TextStyle(fontSize: 10),
+                      label: Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(context, 'ENVIAR SOLICITUD'),
+                          style: const TextStyle(fontSize: 10),
+                        ),
                       ),
                     ),
                   ),
@@ -1115,9 +1134,11 @@ class _DetalleSolicitudCreditoPageState
                     child: OutlinedButton.icon(
                       onPressed: _procesando ? null : _enviarContrato,
                       icon: const Icon(Icons.mail_outline, size: 16),
-                      label: const Text(
-                        'ENVIAR CONTRATO',
-                        style: TextStyle(fontSize: 10),
+                      label: Builder(
+                        builder: (context) => Text(
+                          ServicioIdioma.t(context, 'ENVIAR CONTRATO'),
+                          style: const TextStyle(fontSize: 10),
+                        ),
                       ),
                     ),
                   ),
@@ -1141,9 +1162,14 @@ class _DetalleSolicitudCreditoPageState
                       ? null
                       : () => _cambiarEstado(EstadoDocumento.aprobado),
                   icon: const Icon(Icons.check_circle, size: 18),
-                  label: const Text(
-                    'APROBAR CRÉDITO',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                  label: Builder(
+                    builder: (context) => Text(
+                      ServicioIdioma.t(context, 'APROBAR CRÉDITO'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1199,31 +1225,31 @@ class _DetalleSolicitudCreditoPageState
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/creditos/solicitudes');
-                  }
-                },
-                icon: const Icon(Icons.arrow_back, size: 18),
-                label: const Text(
-                  'Volver',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/creditos/solicitudes');
+                      }
+                    },
+                    icon: const Icon(Icons.arrow_back, size: 18),
+                    label: Text(
+                      ServicioIdioma.t(context, 'Volver'),
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.grey700,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
                 ),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.grey700,
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            cardDocumento,
+                const SizedBox(height: 8),
+                cardDocumento,
                 AppLayout.vL,
                 LayoutBuilder(
                   builder: (context, constraints) {

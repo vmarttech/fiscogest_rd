@@ -9,6 +9,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// URL del manifiesto de versión (público en GitHub).
 const String kUpdateJsonUrl =
@@ -109,12 +110,12 @@ class UpdateChecker {
       barrierDismissible: !update.forceUpdate,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Nueva versión disponible'),
+          title: Text(ServicioIdioma.t(ctx, 'Nueva versión disponible')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Versión ${update.versionName}'),
+              Text('${ServicioIdioma.t(ctx, 'Versión')} ${update.versionName}'),
               const SizedBox(height: 8),
               if (update.changelog.isNotEmpty) Text(update.changelog),
             ],
@@ -123,14 +124,14 @@ class UpdateChecker {
             if (!update.forceUpdate)
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Más tarde'),
+                child: Text(ServicioIdioma.t(ctx, 'Más tarde')),
               ),
             FilledButton(
               onPressed: () async {
                 Navigator.of(ctx).pop();
                 await _downloadAndInstall(context, update);
               },
-              child: const Text('Actualizar'),
+              child: Text(ServicioIdioma.t(ctx, 'Actualizar')),
             ),
           ],
         );
@@ -171,36 +172,36 @@ class UpdateChecker {
 
     unawaited(
       showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      useRootNavigator: true,
-      builder: (_) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          content: ValueListenableBuilder<double?>(
-            valueListenable: progress,
-            builder: (_, value, __) {
-              final pct = value;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (pct == null)
-                    const CircularProgressIndicator()
-                  else
-                    LinearProgressIndicator(value: pct.clamp(0.0, 1.0)),
-                  const SizedBox(height: 16),
-                  Text(
-                    pct == null
-                        ? 'Descargando actualización...'
-                        : 'Descargando... ${(pct * 100).toStringAsFixed(0)}%',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              );
-            },
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (_) => PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: ValueListenableBuilder<double?>(
+              valueListenable: progress,
+              builder: (_, value, __) {
+                final pct = value;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (pct == null)
+                      const CircularProgressIndicator()
+                    else
+                      LinearProgressIndicator(value: pct.clamp(0.0, 1.0)),
+                    const SizedBox(height: 16),
+                    Text(
+                      pct == null
+                          ? 'Descargando actualización...'
+                          : 'Descargando... ${(pct * 100).toStringAsFixed(0)}%',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
-      ),
       ),
     );
 
@@ -302,7 +303,7 @@ class UpdateChecker {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Descarga lenta o interrumpida'),
+            title: Text(ServicioIdioma.t(ctx, 'Descarga lenta o interrumpida')),
             content: const Text(
               'No se completó la descarga dentro de la app.\n\n'
               'Puedes abrir el enlace en el navegador e instalar el APK desde Descargas.',
@@ -310,14 +311,14 @@ class UpdateChecker {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cerrar'),
+                child: Text(ServicioIdioma.t(ctx, 'Cerrar')),
               ),
               FilledButton(
                 onPressed: () async {
                   Navigator.pop(ctx);
                   await openInBrowser();
                 },
-                child: const Text('Abrir en navegador'),
+                child: Text(ServicioIdioma.t(ctx, 'Abrir en navegador')),
               ),
             ],
           ),
@@ -331,7 +332,7 @@ class UpdateChecker {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('No se pudo actualizar'),
+            title: Text(ServicioIdioma.t(ctx, 'No se pudo actualizar')),
             content: Text(
               '$e\n\n'
               'Usa el navegador para descargar e instalar manualmente.',
@@ -339,14 +340,14 @@ class UpdateChecker {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cerrar'),
+                child: Text(ServicioIdioma.t(ctx, 'Cerrar')),
               ),
               FilledButton(
                 onPressed: () async {
                   Navigator.pop(ctx);
                   await openInBrowser();
                 },
-                child: const Text('Abrir en navegador'),
+                child: Text(ServicioIdioma.t(ctx, 'Abrir en navegador')),
               ),
             ],
           ),

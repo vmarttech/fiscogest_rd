@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart'
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/promocion_form_sheet.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class OfertasPromocionesPage extends ConsumerStatefulWidget {
   const OfertasPromocionesPage({super.key});
@@ -326,18 +327,18 @@ class _OfertasPromocionesPageState
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar promoción'),
+        title: Text(ServicioIdioma.t(context, 'Eliminar promoción')),
         content: Text(
           '¿Seguro que deseas eliminar "${p.nombre}"? Esta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar'),
+            child: Text(ServicioIdioma.t(context, 'Eliminar')),
           ),
         ],
       ),
@@ -348,9 +349,11 @@ class _OfertasPromocionesPageState
       await ref.read(promocionRepositoryProvider).eliminar(p.id);
       _recargar();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Promoción eliminada.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ServicioIdioma.t(context, 'Promoción eliminada.')),
+          ),
+        );
       }
     } catch (error) {
       if (mounted) {

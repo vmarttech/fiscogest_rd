@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferencia_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DiferenciasConteoPage extends ConsumerStatefulWidget {
   const DiferenciasConteoPage({super.key, required this.conteoId});
@@ -36,19 +37,22 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(
-          'Aprobar ajustes',
+        title: Text(
+          ServicioIdioma.t(ctx, 'Aprobar ajustes'),
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
-        content: const Text(
-          'Se actualizará el stock de cada producto al valor físico contado. ¿Continuar?',
+        content: Text(
+          ServicioIdioma.t(
+            ctx,
+            'Se actualizará el stock de cada producto al valor físico contado. ¿Continuar?',
+          ),
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              ServicioIdioma.t(ctx, 'Cancelar'),
               style: TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
@@ -57,8 +61,8 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
-            child: const Text(
-              'Aprobar',
+            child: Text(
+              ServicioIdioma.t(ctx, 'Aprobar'),
               style: TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
@@ -271,8 +275,11 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                           color: _textPrimary,
                                         ),
                                       ),
-                                      const Text(
-                                        'Sistema vs físico',
+                                      Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Sistema vs físico',
+                                        ),
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700,
@@ -288,8 +295,8 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                     Icons.picture_as_pdf_outlined,
                                     size: 18,
                                   ),
-                                  label: const Text(
-                                    'Exportar PDF',
+                                  label: Text(
+                                    ServicioIdioma.t(context, 'Exportar PDF'),
                                     style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -317,7 +324,10 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : const Icon(Icons.check_rounded, size: 18),
+                                      : const Icon(
+                                          Icons.check_rounded,
+                                          size: 18,
+                                        ),
                                   label: Text(
                                     _aprobando
                                         ? 'Aplicando…'

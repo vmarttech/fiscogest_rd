@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 final facturasParaNcProvider = FutureProvider.autoDispose<List<Venta>>((
   ref,
@@ -62,7 +63,7 @@ class _EmitirNcPageState extends ConsumerState<EmitirNcPage> {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Nota de crédito emitida'),
+          title: Text(ServicioIdioma.t(ctx, 'Nota de crédito emitida')),
           content: Text(
             'NC: ${r.ncfNc}\n'
             'Factura origen: ${r.ncfFacturaOrigen}\n'

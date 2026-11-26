@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 import 'package:fiscogest_rd/features/seguridad/data/dao/usuarios_dao.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 final _usuariosListaProvider = FutureProvider.autoDispose<List<UsuarioData>>((
   ref,
@@ -344,7 +345,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
             await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Text('¿Asignar rol Admin?'),
+                title: Text(ServicioIdioma.t(ctx, '¿Asignar rol Admin?')),
                 content: const Text(
                   'Un usuario Admin puede ver casi todo el menú, gestionar '
                   'configuración y crear otros usuarios.\n\n'
@@ -355,11 +356,11 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancelar'),
+                    child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Sí, crear Admin'),
+                    child: Text(ServicioIdioma.t(ctx, 'Sí, crear Admin')),
                   ),
                 ],
               ),
@@ -463,8 +464,8 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
               const SizedBox(height: 14),
               TextField(
                 controller: _userCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Usuario *',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(context, 'Usuario *'),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -472,8 +473,8 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
               TextField(
                 controller: _nombreCtrl,
                 maxLength: 80,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre *',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(context, 'Nombre *'),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -503,8 +504,8 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                 initialValue: rolesPermitidos.contains(_rol)
                     ? _rol
                     : 'Vendedor',
-                decoration: const InputDecoration(
-                  labelText: 'Rol *',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(context, 'Rol *'),
                   border: OutlineInputBorder(),
                 ),
                 items: rolesPermitidos
@@ -521,8 +522,8 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
                 initialValue: _estado,
-                decoration: const InputDecoration(
-                  labelText: 'Estado',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(context, 'Estado'),
                   border: OutlineInputBorder(),
                 ),
                 items: const [

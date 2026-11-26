@@ -23,6 +23,7 @@ import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracion_entity.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class EcfeDetallePage extends ConsumerStatefulWidget {
   const EcfeDetallePage({super.key, required this.documentoId});
@@ -435,23 +436,26 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('e-NCF de referencia (NC)'),
+        title: Text(ServicioIdioma.t(ctx, 'e-NCF de referencia (NC)')),
         content: TextField(
           controller: ctrl,
-          decoration: const InputDecoration(
-            labelText: 'e-NCF modificado (E31… / E32…)',
+          decoration: InputDecoration(
+            labelText: ServicioIdioma.t(ctx, 'e-NCF modificado (E31… / E32…)'),
             border: OutlineInputBorder(),
-            helperText: 'Obligatorio para nota de crédito electrónica (34)',
+            helperText: ServicioIdioma.t(
+              ctx,
+              'Obligatorio para nota de crédito electrónica (34)',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Guardar'),
+            child: Text(ServicioIdioma.t(ctx, 'Guardar')),
           ),
         ],
       ),
@@ -480,24 +484,27 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Anular documento e-CF'),
+        title: Text(ServicioIdioma.t(ctx, 'Anular documento e-CF')),
         content: TextField(
           controller: ctrl,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Motivo',
+          decoration: InputDecoration(
+            labelText: ServicioIdioma.t(ctx, 'Motivo'),
             border: OutlineInputBorder(),
-            helperText: 'Queda registrado en el historial del documento',
+            helperText: ServicioIdioma.t(
+              ctx,
+              'Queda registrado en el historial del documento',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Anular'),
+            child: Text(ServicioIdioma.t(ctx, 'Anular')),
           ),
         ],
       ),
@@ -642,7 +649,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
                               );
                             },
                             icon: const Icon(Icons.copy, size: 18),
-                            label: const Text('Copiar'),
+                            label: Text(ServicioIdioma.t(context, 'Copiar')),
                           ),
                         ],
                       ),

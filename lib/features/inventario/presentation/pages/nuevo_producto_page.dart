@@ -27,6 +27,7 @@ import 'package:fiscogest_rd/core/ui/app_action_bar.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class NuevoProductoPage extends ConsumerStatefulWidget {
   const NuevoProductoPage({super.key, this.producto});
@@ -249,8 +250,13 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         _catSel = existente.first.id;
       });
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('La categoría ya existía y fue seleccionada'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(
+              context,
+              'La categoría ya existía y fue seleccionada',
+            ),
+          ),
         ),
       );
       return;
@@ -267,7 +273,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       FiscoGestNotifications.show(
         SnackBar(
           content: Text(
-            'No se pudo crear la categoría: ${estado.error ?? 'verifica los datos'}',
+            '${ServicioIdioma.t(context, 'No se pudo crear la categoría:')} ${estado.error ?? ServicioIdioma.t(context, 'verifica los datos')}',
           ),
           backgroundColor: AppColors.error,
         ),
@@ -278,7 +284,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       _catSel = creada.first.id;
     });
     FiscoGestNotifications.show(
-      const SnackBar(content: Text('Categoría creada y seleccionada')),
+      SnackBar(
+        content: Text(
+          ServicioIdioma.t(context, 'Categoría creada y seleccionada'),
+        ),
+      ),
     );
   }
 
@@ -297,7 +307,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         _marcaSel = existente.first.id;
       });
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('La marca ya existía y fue seleccionada')),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'La marca ya existía y fue seleccionada'),
+          ),
+        ),
       );
       return;
     }
@@ -324,7 +338,9 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       _marcaSel = creada.first.id;
     });
     FiscoGestNotifications.show(
-      const SnackBar(content: Text('Marca creada y seleccionada')),
+      SnackBar(
+        content: Text(ServicioIdioma.t(context, 'Marca creada y seleccionada')),
+      ),
     );
   }
 
@@ -344,8 +360,13 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
         _unidadSel = existente.first.id;
       });
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('La unidad ya existía y fue seleccionada'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(
+              context,
+              'La unidad ya existía y fue seleccionada',
+            ),
+          ),
         ),
       );
       return;
@@ -368,7 +389,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       FiscoGestNotifications.show(
         SnackBar(
           content: Text(
-            'No se pudo crear la unidad: ${estado.error ?? 'verifica los datos'}',
+            '${ServicioIdioma.t(context, 'No se pudo crear la unidad:')} ${estado.error ?? ServicioIdioma.t(context, 'verifica los datos')}',
           ),
           backgroundColor: AppColors.error,
         ),
@@ -379,7 +400,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       _unidadSel = creada.first.id;
     });
     FiscoGestNotifications.show(
-      const SnackBar(content: Text('Unidad creada y seleccionada')),
+      SnackBar(
+        content: Text(
+          ServicioIdioma.t(context, 'Unidad creada y seleccionada'),
+        ),
+      ),
     );
   }
 
@@ -470,8 +495,8 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     );
     if (categoriaId == null) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Seleccione una categoría'),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Seleccione una categoría')),
           backgroundColor: AppColors.error,
         ),
       );
@@ -479,8 +504,10 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     }
     if (unidadId == null) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Seleccione unidad de medida'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Seleccione unidad de medida'),
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -491,8 +518,10 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
     final stockMinVal = double.tryParse(_stockMinCtrl.text) ?? 0.0;
     if (stockVal < 0.0 || stockMinVal < 0.0) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Las cantidades no pueden ser negativas'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Las cantidades no pueden ser negativas'),
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -512,7 +541,7 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       FiscoGestNotifications.show(
         SnackBar(
           content: Text(
-            'El precio de venta (${formatRd(precioVenta)}) no puede ser menor al mínimo (${formatRd(precioMin)})',
+            '${ServicioIdioma.t(context, 'El precio de venta (')}${formatRd(precioVenta)}) ${ServicioIdioma.t(context, 'no puede ser menor al mínimo')} (${formatRd(precioMin)})',
           ),
           backgroundColor: AppColors.error,
         ),
@@ -540,8 +569,13 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
 
     if (skuDuplicado) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Ese SKU ya está asignado a otro producto.'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(
+              context,
+              'Ese SKU ya está asignado a otro producto.',
+            ),
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -570,7 +604,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       ref.read(productoControllerProvider.notifier).guardar(actualizado);
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('¡Producto actualizado correctamente!')),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, '¡Producto actualizado correctamente!'),
+          ),
+        ),
       );
     } else {
       final nuevoProd = Producto(
@@ -594,7 +632,11 @@ class _NuevoProductoPageState extends ConsumerState<NuevoProductoPage> {
       );
       ref.read(productoControllerProvider.notifier).guardar(nuevoProd);
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('¡Producto registrado correctamente!')),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, '¡Producto registrado correctamente!'),
+          ),
+        ),
       );
     }
     if (!mounted) return;
@@ -1236,8 +1278,11 @@ class _CatalogoRapidoDialogState extends State<_CatalogoRapidoDialog> {
               TextFormField(
                 controller: _abreviaturaCtrl,
                 maxLength: 12,
-                decoration: const InputDecoration(
-                  labelText: 'Abreviatura (opcional)',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(
+                    context,
+                    'Abreviatura (opcional)',
+                  ),
                   border: OutlineInputBorder(),
                   counterText: '',
                 ),
@@ -1249,11 +1294,11 @@ class _CatalogoRapidoDialogState extends State<_CatalogoRapidoDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         FilledButton(
           onPressed: _confirmar,
-          child: const Text('Crear y seleccionar'),
+          child: Text(ServicioIdioma.t(context, 'Crear y seleccionar')),
         ),
       ],
     );

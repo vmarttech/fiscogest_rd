@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class LineaProductoWidget extends StatefulWidget {
   const LineaProductoWidget({
@@ -38,7 +39,7 @@ class LineaProductoWidget extends StatefulWidget {
   final ValueChanged<String> onDescuentoChanged;
   final bool esPequena;
   final Widget Function({required Widget child1, required Widget child2})
-      filaResponsiva;
+  filaResponsiva;
   final bool modoSimplificado;
 
   @override
@@ -258,12 +259,14 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Costos adicionales por unidad',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF666666),
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Costos adicionales por unidad'),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF666666),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -412,7 +415,12 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
               ),
             ),
             AppLayout.vS,
-            const Text('Costos', style: AppTypography.labelMedium),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Costos'),
+                style: AppTypography.labelMedium,
+              ),
+            ),
             AppLayout.vXs,
             widget.filaResponsiva(
               child1: AppTextField(

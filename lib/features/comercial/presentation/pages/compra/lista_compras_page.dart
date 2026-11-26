@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class _FiltrosCompras {
   const _FiltrosCompras({
@@ -153,40 +154,40 @@ class ListaComprasPage extends ConsumerWidget {
     }
     return switch (estado) {
       EstadoCompra.pagada => (
-          'Pagada',
-          const Color(0xFFE8F5E9),
-          const Color(0xFF2E7D32),
-        ),
+        'Pagada',
+        const Color(0xFFE8F5E9),
+        const Color(0xFF2E7D32),
+      ),
       EstadoCompra.confirmada => (
-          'Confirmada',
-          const Color(0xFFE3F2FD),
-          const Color(0xFF1565C0),
-        ),
+        'Confirmada',
+        const Color(0xFFE3F2FD),
+        const Color(0xFF1565C0),
+      ),
       EstadoCompra.registrada => (
-          'Registrada',
-          const Color(0xFFE3F2FD),
-          const Color(0xFF1565C0),
-        ),
+        'Registrada',
+        const Color(0xFFE3F2FD),
+        const Color(0xFF1565C0),
+      ),
       EstadoCompra.recibida => (
-          'Recibida',
-          const Color(0xFFF3E5F5),
-          const Color(0xFF7B1FA2),
-        ),
+        'Recibida',
+        const Color(0xFFF3E5F5),
+        const Color(0xFF7B1FA2),
+      ),
       EstadoCompra.borrador => (
-          'Borrador',
-          const Color(0xFFFFF8E1),
-          const Color(0xFFF9A825),
-        ),
+        'Borrador',
+        const Color(0xFFFFF8E1),
+        const Color(0xFFF9A825),
+      ),
       EstadoCompra.anulada => (
-          'Anulada',
-          const Color(0xFFFFEBEE),
-          const Color(0xFFC62828),
-        ),
+        'Anulada',
+        const Color(0xFFFFEBEE),
+        const Color(0xFFC62828),
+      ),
       EstadoCompra.vencida => (
-          'Vencida',
-          const Color(0xFFFFEBEE),
-          const Color(0xFFC62828),
-        ),
+        'Vencida',
+        const Color(0xFFFFEBEE),
+        const Color(0xFFC62828),
+      ),
     };
   }
 
@@ -265,10 +266,19 @@ class ListaComprasPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         SegmentedButton<bool?>(
-                          segments: const [
-                            ButtonSegment(value: null, label: Text('Todos')),
-                            ButtonSegment(value: false, label: Text('Contado')),
-                            ButtonSegment(value: true, label: Text('Crédito')),
+                          segments: [
+                            ButtonSegment(
+                              value: null,
+                              label: Text(ServicioIdioma.t(context, 'Todos')),
+                            ),
+                            ButtonSegment(
+                              value: false,
+                              label: Text(ServicioIdioma.t(context, 'Contado')),
+                            ),
+                            ButtonSegment(
+                              value: true,
+                              label: Text(ServicioIdioma.t(context, 'Crédito')),
+                            ),
                           ],
                           selected: {creditoSel},
                           onSelectionChanged: (s) =>
@@ -406,14 +416,16 @@ class ListaComprasPage extends ConsumerWidget {
                                       const _FiltrosCompras();
                                   Navigator.pop(ctx);
                                 },
-                                child: const Text('Limpiar'),
+                                child: Text(ServicioIdioma.t(ctx, 'Limpiar')),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: FilledButton(
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                 ),
                                 onPressed: () {
                                   ref
@@ -434,7 +446,7 @@ class ListaComprasPage extends ConsumerWidget {
                                   );
                                   Navigator.pop(ctx);
                                 },
-                                child: const Text('Aplicar'),
+                                child: Text(ServicioIdioma.t(ctx, 'Aplicar')),
                               ),
                             ),
                           ],
@@ -528,11 +540,11 @@ class ListaComprasPage extends ConsumerWidget {
                 }
                 ref.read(_filtrosComprasProvider.notifier).state = filtros
                     .copyWith(
-                  estado: estado,
-                  soloCredito: credito,
-                  clearEstado: estado == null && credito == null,
-                  clearCredito: credito == null && estado != null,
-                );
+                      estado: estado,
+                      soloCredito: credito,
+                      clearEstado: estado == null && credito == null,
+                      clearCredito: credito == null && estado != null,
+                    );
               }
 
               Widget compraCard(Compra compra) {
@@ -559,7 +571,7 @@ class ListaComprasPage extends ConsumerWidget {
                   final ok = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Confirmar Compra'),
+                      title: Text(ServicioIdioma.t(ctx, 'Confirmar Compra')),
                       content: const Text(
                         '¿Confirmar esta compra?\n\n'
                         'Se actualizará inventario, Kardex, costos y saldo del proveedor.',
@@ -567,7 +579,7 @@ class ListaComprasPage extends ConsumerWidget {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Cancelar'),
+                          child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -575,7 +587,7 @@ class ListaComprasPage extends ConsumerWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text('Sí, Confirmar'),
+                          child: Text(ServicioIdioma.t(ctx, 'Sí, Confirmar')),
                         ),
                       ],
                     ),
@@ -673,7 +685,7 @@ class ListaComprasPage extends ConsumerWidget {
                   final ok = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Anular Compra'),
+                      title: Text(ServicioIdioma.t(ctx, 'Anular Compra')),
                       content: const Text(
                         '¿Anular esta compra?\n\n'
                         'Se revertirá el impacto en inventario, costos y saldo.',
@@ -681,7 +693,7 @@ class ListaComprasPage extends ConsumerWidget {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Cancelar'),
+                          child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -689,7 +701,7 @@ class ListaComprasPage extends ConsumerWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text('Sí, Anular'),
+                          child: Text(ServicioIdioma.t(ctx, 'Sí, Anular')),
                         ),
                       ],
                     ),
@@ -726,7 +738,9 @@ class ListaComprasPage extends ConsumerWidget {
                         EstadoCompra.recibida => const Color(0xFF7B1FA2),
                         EstadoCompra.borrador => const Color(0xFFF9A825),
                         EstadoCompra.anulada => const Color(0xFFC62828),
-                        EstadoCompra.vencida => Theme.of(context).colorScheme.primary,
+                        EstadoCompra.vencida => Theme.of(
+                          context,
+                        ).colorScheme.primary,
                       };
                 return Material(
                   color: Colors.white,
@@ -914,14 +928,18 @@ class ListaComprasPage extends ConsumerWidget {
                                     Icon(
                                       Icons.visibility_outlined,
                                       size: 15,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       'Ver más',
                                       style: TextStyle(
                                         fontSize: 12.5,
-                                        color: Theme.of(context).colorScheme.primary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                       ),
                                     ),
                                   ],
@@ -945,7 +963,9 @@ class ListaComprasPage extends ConsumerWidget {
                 Color? accent,
               }) {
                 final accentColor =
-                    valueColor ?? accent ?? Theme.of(context).colorScheme.primary;
+                    valueColor ??
+                    accent ??
+                    Theme.of(context).colorScheme.primary;
                 return Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -1045,8 +1065,8 @@ class ListaComprasPage extends ConsumerWidget {
               final aside = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Vistas Rápidas',
+                  Text(
+                    ServicioIdioma.t(context, 'Vistas Rápidas'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -1081,8 +1101,8 @@ class ListaComprasPage extends ConsumerWidget {
                     () => setVistaRapida(estado: EstadoCompra.confirmada),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Acciones Rápidas',
+                  Text(
+                    ServicioIdioma.t(context, 'Acciones Rápidas'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -1097,7 +1117,7 @@ class ListaComprasPage extends ConsumerWidget {
                       foregroundColor: const Color(0xFF1E293B),
                       side: const BorderSide(color: Color(0xFFE2E8F0)),
                     ),
-                    child: const Text('Filtros avanzados'),
+                    child: Text(ServicioIdioma.t(context, 'Filtros avanzados')),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton(
@@ -1108,7 +1128,7 @@ class ListaComprasPage extends ConsumerWidget {
                       foregroundColor: const Color(0xFF1E293B),
                       side: const BorderSide(color: Color(0xFFE2E8F0)),
                     ),
-                    child: const Text('Cuentas por pagar'),
+                    child: Text(ServicioIdioma.t(context, 'Cuentas por pagar')),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -1123,7 +1143,9 @@ class ListaComprasPage extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text('Nueva Compra / Gasto'),
+                      label: Text(
+                        ServicioIdioma.t(context, 'Nueva Compra / Gasto'),
+                      ),
                       style: FilledButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
@@ -1207,7 +1229,9 @@ class ListaComprasPage extends ConsumerWidget {
                         const SizedBox(width: 12),
                         OutlinedButton(
                           onPressed: mostrarFiltros,
-                          child: const Text('Rango Personalizado'),
+                          child: Text(
+                            ServicioIdioma.t(context, 'Rango Personalizado'),
+                          ),
                         ),
                       ],
                     ),
@@ -1216,113 +1240,118 @@ class ListaComprasPage extends ConsumerWidget {
                     const SizedBox(height: 12),
                     Expanded(
                       child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
                               padding: const EdgeInsets.only(
                                 right: 8,
                                 bottom: 16,
                               ),
-                            child: Column(
-                            children: [
-                              Row(
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                    child: kpi(
-                                      title: 'Resumen del Mes ($mesLabel)',
-                                      value: formatRd(totalMes),
-                                      sub: 'Total Compras',
-                                      accent: Theme.of(context).colorScheme.primary,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: kpi(
+                                          title: 'Resumen del Mes ($mesLabel)',
+                                          value: formatRd(totalMes),
+                                          sub: 'Total Compras',
+                                          accent: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: kpi(
+                                          title: 'Pendiente de Pago',
+                                          value: formatRd(porPagar),
+                                          sub: 'Cuentas por pagar (crédito)',
+                                          icon: Icons.description_outlined,
+                                          accent: const Color(0xFFC62828),
+                                          valueColor: const Color(0xFFC62828),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: kpi(
+                                          title: 'Proveedores Activos',
+                                          value: '$proveedores',
+                                          sub: 'Total Proveedores',
+                                          icon: Icons.people_outline,
+                                          accent: const Color(0xFF1565C0),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: kpi(
+                                          title: 'Filtradas',
+                                          value: '${compras.length}',
+                                          sub: 'de ${todas.length} totales',
+                                          icon: Icons.filter_list,
+                                          accent: const Color(0xFF5B21B6),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: kpi(
-                                      title: 'Pendiente de Pago',
-                                      value: formatRd(porPagar),
-                                      sub: 'Cuentas por pagar (crédito)',
-                                      icon: Icons.description_outlined,
-                                      accent: const Color(0xFFC62828),
-                                      valueColor: const Color(0xFFC62828),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: kpi(
-                                      title: 'Proveedores Activos',
-                                      value: '$proveedores',
-                                      sub: 'Total Proveedores',
-                                      icon: Icons.people_outline,
-                                      accent: const Color(0xFF1565C0),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: kpi(
-                                      title: 'Filtradas',
-                                      value: '${compras.length}',
-                                      sub: 'de ${todas.length} totales',
-                                      icon: Icons.filter_list,
-                                      accent: const Color(0xFF5B21B6),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              if (compras.isEmpty)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(40),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: const Color(0xFFE2E8F0),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Ninguna compra coincide con los filtros',
-                                    textAlign: TextAlign.center,
+                                  const SizedBox(height: 16),
+                                  if (compras.isEmpty)
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(40),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: const Color(0xFFE2E8F0),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Ninguna compra coincide con los filtros',
+                                        ),
+                                        textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Color(0xFF64748B),
                                         ),
-                                  ),
-                                )
-                              else
-                                LayoutBuilder(
-                                  builder: (context, c) {
-                                    // 2 pares por fila en desktop: [compra|notas] [compra|notas]
+                                      ),
+                                    )
+                                  else
+                                    LayoutBuilder(
+                                      builder: (context, c) {
+                                        // 2 pares por fila en desktop: [compra|notas] [compra|notas]
                                         const cols =
                                             2; // HTML: grid-template-columns: repeat(2, 1fr)
-                                    return GridView.builder(
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: compras.length,
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: cols,
-                                        mainAxisExtent: 220,
-                                        crossAxisSpacing: 12,
-                                        mainAxisSpacing: 12,
-                                      ),
-                                      itemBuilder: (_, i) =>
-                                          compraCard(compras[i]),
-                                    );
-                                  },
-                                ),
-                            ],
-                            ), // Column (scroll izq)
-                          ), // SingleChildScrollView izq
-                        ), // Expanded izq
-                        const SizedBox(width: 20),
-                        SizedBox(
-                          width: 200,
-                          child: aside, // fijo: no va dentro del scroll
-                        ),
-                      ], // Row children
-                    ), // Row
+                                        return GridView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: compras.length,
+                                          gridDelegate:
+                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: cols,
+                                                mainAxisExtent: 220,
+                                                crossAxisSpacing: 12,
+                                                mainAxisSpacing: 12,
+                                              ),
+                                          itemBuilder: (_, i) =>
+                                              compraCard(compras[i]),
+                                        );
+                                      },
+                                    ),
+                                ],
+                              ), // Column (scroll izq)
+                            ), // SingleChildScrollView izq
+                          ), // Expanded izq
+                          const SizedBox(width: 20),
+                          SizedBox(
+                            width: 200,
+                            child: aside, // fijo: no va dentro del scroll
+                          ),
+                        ], // Row children
+                      ), // Row
                     ), // Expanded body
                   ], // Column padding
                 ), // Column
@@ -1344,8 +1373,8 @@ class ListaComprasPage extends ConsumerWidget {
               },
               backgroundColor: Theme.of(context).colorScheme.primary,
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'Nueva Compra',
+              label: Text(
+                ServicioIdioma.t(context, 'Nueva Compra'),
                 style: TextStyle(color: Colors.white),
               ),
             )

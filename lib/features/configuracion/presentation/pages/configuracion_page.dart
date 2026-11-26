@@ -19,6 +19,7 @@ import 'package:fiscogest_rd/features/configuracion/domain/entities/configuracio
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_theme.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 enum _SeccionConfig {
   empresa,
@@ -261,7 +262,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
-          content: const Text('Configuración de empresa guardada'),
+          content: Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Configuración de empresa guardada'),
+            ),
+          ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.allM),
@@ -818,8 +823,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                     TextButton.icon(
                       onPressed: _elegirLogo,
                       icon: const Icon(Icons.image_outlined, size: 16),
-                      label: const Text(
-                        'Cambiar logo',
+                      label: Text(
+                        ServicioIdioma.t(context, 'Cambiar logo'),
                         style: TextStyle(
                           fontSize: 15,
                           color: Color(0xFF315A58),
@@ -1165,8 +1170,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Vista previa (ticket)',
+                    Text(
+                      ServicioIdioma.t(context, 'Vista previa (ticket)'),
                       style: AppTypography.h4,
                     ),
                     const Divider(),
@@ -1211,8 +1216,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                       ),
                     const Divider(),
                     if (_docCliente)
-                      const Text(
-                        'Cliente: Consumidor Final',
+                      Text(
+                        ServicioIdioma.t(context, 'Cliente: Consumidor Final'),
                         style: AppTypography.bodySmall,
                       ),
                     if (_docNcf)
@@ -1221,15 +1226,15 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                         style: AppTypography.bodySmall,
                       ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Producto ejemplo × 1',
+                    Text(
+                      ServicioIdioma.t(context, 'Producto ejemplo × 1'),
                       style: AppTypography.bodySmall,
                     ),
                     const Text('RD\$ 1,000.00', style: AppTypography.bodySmall),
                     const Divider(),
                     if (_docItbisDesglose) ...[
-                      const Text(
-                        'Subtotal  RD\$ 847.46',
+                      Text(
+                        ServicioIdioma.t(context, 'Subtotal  RD\$ 847.46'),
                         style: AppTypography.bodySmall,
                       ),
                       const Text(
@@ -1259,8 +1264,8 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Campos del comprobante',
+                    Text(
+                      ServicioIdioma.t(context, 'Campos del comprobante'),
                       style: AppTypography.h4,
                     ),
                     switchCampo(
@@ -1352,25 +1357,42 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
           const SizedBox(height: 20),
           const Divider(),
           const SizedBox(height: 12),
-          const Text(
-            'Manifiesto de transferencia (packing list)',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'Manifiesto de transferencia (packing list)',
+              ),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Edita el contenido del PDF que se genera al transferir entre almacenes.',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'Edita el contenido del PDF que se genera al transferir entre almacenes.',
+              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
           ),
           const SizedBox(height: 8),
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
-            title: const Text(
-              'Imprimir manifiesto al transferir',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+            title: Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Imprimir manifiesto al transferir'),
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
             ),
-            subtitle: const Text(
-              'Si está activo, al completar una transferencia se abre el PDF.',
-              style: TextStyle(fontSize: 12),
+            subtitle: Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(
+                  context,
+                  'Si está activo, al completar una transferencia se abre el PDF.',
+                ),
+                style: TextStyle(fontSize: 12),
+              ),
             ),
             value: _transfImprimirManifiesto,
             activeTrackColor: Theme.of(
@@ -1425,13 +1447,20 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             ),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
-              title: const Text(
-                'Mostrar bloque de firmas',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              title: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Mostrar bloque de firmas'),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
-              subtitle: const Text(
-                'Despachado / Transportista / Recibido',
-                style: TextStyle(fontSize: 11),
+              subtitle: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(
+                    context,
+                    'Despachado / Transportista / Recibido',
+                  ),
+                  style: TextStyle(fontSize: 11),
+                ),
               ),
               value: _transfMostrarFirmas,
               activeTrackColor: Theme.of(
@@ -1441,9 +1470,14 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 _transfMostrarFirmas = v;
               }),
             ),
-            const Text(
-              'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(
+                  context,
+                  'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
+                ),
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              ),
             ),
           ],
         ],
@@ -1481,11 +1515,16 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Formas de pago y reglas al cobrar en caja.',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF64748B),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'Formas de pago y reglas al cobrar en caja.',
+              ),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF64748B),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -1493,9 +1532,11 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Forma de pago por defecto',
-                  style: AppTypography.h4,
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Forma de pago por defecto'),
+                    style: AppTypography.h4,
+                  ),
                 ),
                 AppLayout.vM,
                 Wrap(
@@ -1523,7 +1564,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Métodos habilitados', style: AppTypography.h4),
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Métodos habilitados'),
+                    style: AppTypography.h4,
+                  ),
+                ),
                 AppLayout.vS,
                 filaSwitch('Tarjeta', _cajaPermitirTarjeta, (v) {
                   setState(() {
@@ -1548,7 +1594,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Sesión de caja', style: AppTypography.h4),
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Sesión de caja'),
+                    style: AppTypography.h4,
+                  ),
+                ),
                 AppLayout.vS,
                 filaSwitch(
                   'Exigir sesión abierta para cobrar',
@@ -1572,11 +1623,16 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Prefijos del número de cotización (Contado / Crédito).',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF64748B),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'Prefijos del número de cotización (Contado / Crédito).',
+              ),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF64748B),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -1584,7 +1640,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Numeración', style: AppTypography.h4),
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Numeración'),
+                    style: AppTypography.h4,
+                  ),
+                ),
                 AppLayout.vM,
                 AppTextField(
                   label: 'Prefijo contado',
@@ -1619,7 +1680,12 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Modo simplificado', style: AppTypography.h4),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Modo simplificado'),
+              style: AppTypography.h4,
+            ),
+          ),
           AppLayout.vS,
           Text(
             'Oculta NCF e ITBIS en pantallas y documentos. '
@@ -1657,6 +1723,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
 
   Widget _seccionSistema() {
     final temaActual = ref.watch(appThemeProvider);
+    final idiomaActual = ref.watch(idiomaProvider);
     Widget tile({
       required IconData icon,
       required String title,
@@ -1729,7 +1796,34 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 )
                 .toList(),
           ),
-          const SizedBox(height: 18),
+          if (ServicioIdioma.cambioIdiomaHabilitado) ...[
+            const SizedBox(height: 18),
+            Text(
+              ServicioIdioma.t(context, 'Idioma de la aplicación'),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: Text(ServicioIdioma.t(context, 'Español')),
+                  selected: idiomaActual == IdiomaApp.es,
+                  onSelected: (_) =>
+                      ServicioIdioma.seleccionar(context, IdiomaApp.es),
+                ),
+                ChoiceChip(
+                  label: Text(ServicioIdioma.t(context, 'Inglés')),
+                  selected: idiomaActual == IdiomaApp.en,
+                  onSelected: (_) =>
+                      ServicioIdioma.seleccionar(context, IdiomaApp.en),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+          ],
           Material(
             color: Theme.of(
               context,

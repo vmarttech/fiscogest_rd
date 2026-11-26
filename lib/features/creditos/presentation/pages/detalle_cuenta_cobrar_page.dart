@@ -20,6 +20,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/auth/sesion_provider.dart';
 import 'package:fiscogest_rd/core/services/bitacora_operaciones_service.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DetalleCuentaCobrarPage extends ConsumerStatefulWidget {
   const DetalleCuentaCobrarPage({super.key, required this.cuentaId});
@@ -501,7 +502,11 @@ class _DetalleCuentaCobrarPageState
                 foregroundColor: const Color(0xFF475569),
               ),
               icon: const Icon(Icons.arrow_back_rounded, size: 18),
-              label: const Text('Volver a cuentas por cobrar'),
+              label: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Volver a cuentas por cobrar'),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -523,7 +528,12 @@ class _DetalleCuentaCobrarPageState
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 foregroundColor: const Color(0xFF64748B),
               ),
-              child: const Text('Crédito', style: TextStyle(fontSize: 12)),
+              child: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Crédito'),
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
             ),
             const Text(
               '  ›  ',
@@ -537,21 +547,25 @@ class _DetalleCuentaCobrarPageState
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 foregroundColor: const Color(0xFF64748B),
               ),
-              child: const Text(
-                'Cuentas por Cobrar',
-                style: TextStyle(fontSize: 12),
+              child: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Cuentas por Cobrar'),
+                  style: TextStyle(fontSize: 12),
+                ),
               ),
             ),
             const Text(
               '  ›  ',
               style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
             ),
-            const Text(
-              'Detalle de cuenta',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Detalle de cuenta'),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
               ),
             ),
           ],
@@ -613,9 +627,14 @@ class _DetalleCuentaCobrarPageState
           ],
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Gestión integral de cuotas, saldos pendientes y registro inmediato de cobros.',
-          style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+        Builder(
+          builder: (context) => Text(
+            ServicioIdioma.t(
+              context,
+              'Gestión integral de cuotas, saldos pendientes y registro inmediato de cobros.',
+            ),
+            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          ),
         ),
         const SizedBox(height: 12),
         // Acciones globales
@@ -628,9 +647,11 @@ class _DetalleCuentaCobrarPageState
                   ? null
                   : () => _enviarRecordatorioWhatsApp(c),
               icon: const Icon(Icons.chat, size: 16, color: Color(0xFF059669)),
-              label: const Text(
-                'Enviar Recordatorio',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              label: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Enviar Recordatorio'),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF334155),
@@ -649,9 +670,11 @@ class _DetalleCuentaCobrarPageState
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.print_outlined, size: 16),
-              label: const Text(
-                'Estado de Cuenta',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              label: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Estado de Cuenta'),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF334155),
@@ -795,12 +818,14 @@ class _DetalleCuentaCobrarPageState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Acuerdo de pronto pago activo',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF047857),
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Acuerdo de pronto pago activo'),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF047857),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -855,9 +880,11 @@ class _DetalleCuentaCobrarPageState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.print_outlined, size: 16),
-                  label: const Text(
-                    'Imprimir Tabla',
-                    style: TextStyle(fontSize: 12),
+                  label: Builder(
+                    builder: (context) => Text(
+                      ServicioIdioma.t(context, 'Imprimir Tabla'),
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
                 ),
               ],
@@ -881,14 +908,50 @@ class _DetalleCuentaCobrarPageState
                   horizontal: 16,
                   vertical: 10,
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Expanded(flex: 2, child: Text('CUOTA #', style: _th)),
-                    Expanded(flex: 2, child: Text('VENCIMIENTO', style: _th)),
-                    Expanded(flex: 2, child: Text('CAPITAL', style: _th)),
-                    Expanded(flex: 2, child: Text('INTERÉS', style: _th)),
-                    Expanded(flex: 2, child: Text('TOTAL', style: _th)),
-                    Expanded(flex: 2, child: Text('ESTADO', style: _th)),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'CUOTA #'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'VENCIMIENTO'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'CAPITAL'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'INTERÉS'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'TOTAL'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'ESTADO'),
+                        style: _th,
+                      ),
+                    ),
                     SizedBox(
                       width: 72,
                       child: Text(
@@ -955,10 +1018,12 @@ class _DetalleCuentaCobrarPageState
                                   onPressed: _pagando
                                       ? null
                                       : _dialogoRegistrarPago,
-                                  child: const Text(
-                                    'Cobrar',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                  child: Builder(
+                                    builder: (context) => Text(
+                                      ServicioIdioma.t(context, 'Cobrar'),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1053,11 +1118,13 @@ class _DetalleCuentaCobrarPageState
                                         tapTargetSize:
                                             MaterialTapTargetSize.shrinkWrap,
                                       ),
-                                      child: const Text(
-                                        'Cobrar',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
+                                      child: Builder(
+                                        builder: (context) => Text(
+                                          ServicioIdioma.t(context, 'Cobrar'),
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -1174,13 +1241,43 @@ class _DetalleCuentaCobrarPageState
                   horizontal: 16,
                   vertical: 10,
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Expanded(flex: 2, child: Text('FECHA', style: _th)),
-                    Expanded(flex: 2, child: Text('MÉTODO', style: _th)),
-                    Expanded(flex: 2, child: Text('MONTO', style: _th)),
-                    Expanded(flex: 2, child: Text('NOTA', style: _th)),
-                    Expanded(flex: 1, child: Text('ESTADO', style: _th)),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'FECHA'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'MÉTODO'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'MONTO'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        ServicioIdioma.t(context, 'NOTA'),
+                        style: _th,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        ServicioIdioma.t(context, 'ESTADO'),
+                        style: _th,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1424,12 +1521,14 @@ class _DetalleCuentaCobrarPageState
         children: [
           Row(
             children: [
-              const Text(
-                'Progreso de Pago',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF475569),
+              Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Progreso de Pago'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF475569),
+                  ),
                 ),
               ),
               const Spacer(),
@@ -1607,8 +1706,8 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
     final calc = _calc;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text(
-        'Pronto pago (descuento sobre intereses)',
+      title: Text(
+        ServicioIdioma.t(context, 'Pronto pago (descuento sobre intereses)'),
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
       ),
       content: SingleChildScrollView(
@@ -1671,11 +1770,17 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: '% descuento sobre intereses',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(
+                    context,
+                    '% descuento sobre intereses',
+                  ),
                   hintText: '0 – 100',
                   border: OutlineInputBorder(),
-                  helperText: 'Ej: 50 = condona la mitad de los intereses',
+                  helperText: ServicioIdioma.t(
+                    context,
+                    'Ej: 50 = condona la mitad de los intereses',
+                  ),
                 ),
                 onChanged: (_) => setState(() {}),
               ),
@@ -1683,8 +1788,11 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
               TextField(
                 controller: _notaCtrl,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Nota del acuerdo (opcional)',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(
+                    context,
+                    'Nota del acuerdo (opcional)',
+                  ),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -1705,14 +1813,14 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         FilledButton(
           onPressed: calc.elegible ? _confirmar : null,
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF047857),
           ),
-          child: const Text('Aprobar acuerdo'),
+          child: Text(ServicioIdioma.t(context, 'Aprobar acuerdo')),
         ),
       ],
     );

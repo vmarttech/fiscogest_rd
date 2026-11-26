@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/reportes/domain/kpi_models.dart';
 import 'package:fiscogest_rd/features/reportes/presentation/providers/dashboard_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DashboardEconomicoPage extends ConsumerWidget {
   const DashboardEconomicoPage({super.key});
@@ -69,8 +70,8 @@ class DashboardEconomicoPage extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'No se pudo cargar el dashboard',
+                  Text(
+                    ServicioIdioma.t(context, 'No se pudo cargar el dashboard'),
                     style: AppTypography.h4,
                   ),
                   const SizedBox(height: 8),
@@ -84,7 +85,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => ref.invalidate(dashboardSnapshotProvider),
-                    child: const Text('Reintentar'),
+                    child: Text(ServicioIdioma.t(context, 'Reintentar')),
                   ),
                 ],
               ),
@@ -127,7 +128,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
                                 selected: periodo,
                                 onChanged: (p) =>
                                     ref
-                                    .read(periodoDashProvider.notifier)
+                                            .read(periodoDashProvider.notifier)
                                             .state =
                                         p,
                               ),
@@ -145,7 +146,9 @@ class DashboardEconomicoPage extends ConsumerWidget {
                                   child: Icon(
                                     Icons.folder_open_outlined,
                                     size: 22,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                 ),
                               ),
@@ -174,7 +177,7 @@ class DashboardEconomicoPage extends ConsumerWidget {
                             Expanded(
                               child: _TopProductosCard(
                                 items: snap.topProductos,
-                                      ),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(child: _SaludCard(kpi: kpi)),
@@ -418,8 +421,8 @@ class _PeriodoChips extends ConsumerWidget {
               );
             },
           ),
-          const Text(
-            'Comparar con',
+          Text(
+            ServicioIdioma.t(context, 'Comparar con'),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
@@ -460,7 +463,11 @@ class _PeriodoChips extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.expand_more, size: 18, color: Color(0xFF0F172A)),
+                  const Icon(
+                    Icons.expand_more,
+                    size: 18,
+                    color: Color(0xFF0F172A),
+                  ),
                 ],
               ),
             ),
@@ -582,7 +589,11 @@ class _KpiCard extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 height: 40,
-                child: CustomPaint(painter: _SparklinePainter(Theme.of(context).colorScheme.tertiary)),
+                child: CustomPaint(
+                  painter: _SparklinePainter(
+                    Theme.of(context).colorScheme.tertiary,
+                  ),
+                ),
               ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -765,10 +776,7 @@ class _SparklinePainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            color.withValues(alpha: 0.25),
-            color.withValues(alpha: 0.0),
-          ],
+          colors: [color.withValues(alpha: 0.25), color.withValues(alpha: 0.0)],
         ).createShader(Rect.fromLTWH(0, 0, w, h)),
     );
   }
@@ -916,8 +924,12 @@ class _ChartCard extends StatelessWidget {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.3),
-                          Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.02),
+                          Theme.of(
+                            context,
+                          ).colorScheme.tertiary.withValues(alpha: 0.3),
+                          Theme.of(
+                            context,
+                          ).colorScheme.tertiary.withValues(alpha: 0.02),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -977,8 +989,11 @@ class _ChartCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Ventas vs. Margen - Tendencia de 30 Días',
+                Text(
+                  ServicioIdioma.t(
+                    context,
+                    'Ventas vs. Margen - Tendencia de 30 Días',
+                  ),
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -988,14 +1003,17 @@ class _ChartCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _LegendDot(color: Theme.of(context).colorScheme.tertiary, label: 'Ventas'),
+                    _LegendDot(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      label: 'Ventas',
+                    ),
                     const SizedBox(width: 14),
                     const _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Análisis dinámico comparativo',
+                Text(
+                  ServicioIdioma.t(context, 'Análisis dinámico comparativo'),
                   style: TextStyle(fontSize: 12, color: _kMuted),
                 ),
               ],
@@ -1025,7 +1043,10 @@ class _ChartCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    _LegendDot(color: Theme.of(context).colorScheme.tertiary, label: 'Ventas'),
+                    _LegendDot(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      label: 'Ventas',
+                    ),
                     const SizedBox(width: 14),
                     const _LegendDot(color: _kKhaki, label: 'Margen Bruto'),
                   ],
@@ -1124,8 +1145,8 @@ class _PrevisionPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        const Text(
-          'Histórica vendida vs. previsión',
+        Text(
+          ServicioIdioma.t(context, 'Histórica vendida vs. previsión'),
           style: TextStyle(fontSize: 10, color: _kMuted2),
         ),
         const SizedBox(height: 12),
@@ -1236,21 +1257,24 @@ class _MixPagoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Formas de pago',
+          Text(
+            ServicioIdioma.t(context, 'Formas de pago'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: _kInk,
             ),
           ),
-          const Text(
-            'Mes en curso',
+          Text(
+            ServicioIdioma.t(context, 'Mes en curso'),
             style: TextStyle(fontSize: 11, color: _kMuted2),
           ),
           const SizedBox(height: 16),
           if (entries.isEmpty)
-            const Text('Sin datos', style: TextStyle(color: _kMuted))
+            Text(
+              ServicioIdioma.t(context, 'Sin datos'),
+              style: TextStyle(color: _kMuted),
+            )
           else
             for (final e in entries)
               Padding(
@@ -1323,21 +1347,24 @@ class _TopProductosCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Top productos',
+          Text(
+            ServicioIdioma.t(context, 'Top productos'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: _kInk,
             ),
           ),
-          const Text(
-            'Mes en curso',
+          Text(
+            ServicioIdioma.t(context, 'Mes en curso'),
             style: TextStyle(fontSize: 11, color: _kMuted2),
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
-            const Text('Sin datos', style: TextStyle(color: _kMuted))
+            Text(
+              ServicioIdioma.t(context, 'Sin datos'),
+              style: TextStyle(color: _kMuted),
+            )
           else
             for (var i = 0; i < items.length && i < 5; i++) ...[
               if (i > 0) const SizedBox(height: 10),
@@ -1447,16 +1474,16 @@ class _SaludCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Salud del negocio',
+          Text(
+            ServicioIdioma.t(context, 'Salud del negocio'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: _kInk,
             ),
           ),
-          const Text(
-            'Periodo seleccionado',
+          Text(
+            ServicioIdioma.t(context, 'Periodo seleccionado'),
             style: TextStyle(fontSize: 11, color: _kMuted2),
           ),
           const SizedBox(height: 16),

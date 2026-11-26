@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/app_dropdown.dart';
 import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ClientesPage extends ConsumerStatefulWidget {
   const ClientesPage({super.key});
@@ -176,8 +177,8 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                               size: 22,
                             ),
                             AppLayout.hS,
-                            const Text(
-                              'Información General',
+                            Text(
+                              ServicioIdioma.t(context, 'Información General'),
                               style: AppTypography.h3,
                             ),
                           ],
@@ -242,8 +243,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                                 size: 22,
                               ),
                               AppLayout.hS,
-                              const Text(
-                                'Información Fiscal y Tributaria (DGII)',
+                              Text(
+                                ServicioIdioma.t(
+                                  context,
+                                  'Información Fiscal y Tributaria (DGII)',
+                                ),
                                 style: AppTypography.h3,
                               ),
                             ],
@@ -262,19 +266,32 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                                       hint: 'Tipo de Comprobante',
                                       initialValue:
                                           _tipoComprobanteSeleccionado,
-                                      items: const [
+                                      items: [
                                         DropdownMenuItem(
                                           value: 'B01 - Crédito Fiscal',
-                                          child: Text('B01 - Crédito Fiscal'),
+                                          child: Text(
+                                            ServicioIdioma.t(
+                                              context,
+                                              'B01 - Crédito Fiscal',
+                                            ),
+                                          ),
                                         ),
                                         DropdownMenuItem(
                                           value: 'B02 - Consumidor Final',
-                                          child: Text('B02 - Consumidor Final'),
+                                          child: Text(
+                                            ServicioIdioma.t(
+                                              context,
+                                              'B02 - Consumidor Final',
+                                            ),
+                                          ),
                                         ),
                                         DropdownMenuItem(
                                           value: 'B14 - Regímenes Especiales',
                                           child: Text(
-                                            'B14 - Regímenes Especiales',
+                                            ServicioIdioma.t(
+                                              context,
+                                              'B14 - Regímenes Especiales',
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -304,21 +321,32 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                                         hint: 'Tipo de Comprobante',
                                         initialValue:
                                             _tipoComprobanteSeleccionado,
-                                        items: const [
+                                        items: [
                                           DropdownMenuItem(
                                             value: 'B01 - Crédito Fiscal',
-                                            child: Text('B01 - Crédito Fiscal'),
+                                            child: Text(
+                                              ServicioIdioma.t(
+                                                context,
+                                                'B01 - Crédito Fiscal',
+                                              ),
+                                            ),
                                           ),
                                           DropdownMenuItem(
                                             value: 'B02 - Consumidor Final',
                                             child: Text(
-                                              'B02 - Consumidor Final',
+                                              ServicioIdioma.t(
+                                                context,
+                                                'B02 - Consumidor Final',
+                                              ),
                                             ),
                                           ),
                                           DropdownMenuItem(
                                             value: 'B14 - Regímenes Especiales',
                                             child: Text(
-                                              'B14 - Regímenes Especiales',
+                                              ServicioIdioma.t(
+                                                context,
+                                                'B14 - Regímenes Especiales',
+                                              ),
                                             ),
                                           ),
                                         ],

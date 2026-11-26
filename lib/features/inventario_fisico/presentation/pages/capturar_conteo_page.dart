@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferencia_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class CapturarConteoPage extends ConsumerStatefulWidget {
   const CapturarConteoPage({super.key, required this.conteoId});
@@ -224,8 +225,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                                 color: _textPrimary,
                               ),
                             ),
-                            const Text(
-                              'Registre cantidades físicas por producto',
+                            Text(
+                              ServicioIdioma.t(
+                                context,
+                                'Registre cantidades físicas por producto',
+                              ),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -240,8 +244,8 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                           '/diferencias-conteo-fisico/${widget.conteoId}',
                         ),
                         icon: const Icon(Icons.difference_outlined, size: 18),
-                        label: const Text(
-                          'Ver diferencias',
+                        label: Text(
+                          ServicioIdioma.t(context, 'Ver diferencias'),
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -379,12 +383,14 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Agregar producto',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w900,
-              color: _textPrimary,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Agregar producto'),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                color: _textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -400,7 +406,10 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF94A3B8),
               ),
-              prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: Color(0xFF94A3B8),
+              ),
               filled: true,
               fillColor: const Color(0xFFF8FAFC),
               border: OutlineInputBorder(
@@ -438,11 +447,11 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                   : lista
                         .where(
                           (p) =>
-                          p.codigo.toLowerCase().contains(_filtro) ||
+                              p.codigo.toLowerCase().contains(_filtro) ||
                               p.nombre.toLowerCase().contains(_filtro),
                         )
-                      .take(12)
-                      .toList();
+                        .take(12)
+                        .toList();
               if (filtrados.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -615,12 +624,14 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Líneas registradas',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w900,
-              color: _textPrimary,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Líneas registradas'),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                color: _textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -682,8 +693,8 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
     final color = d.diferencia == 0
         ? const Color(0xFF64748B)
         : (d.diferencia > 0
-            ? const Color(0xFF16A34A)
-            : const Color(0xFFDC2626));
+              ? const Color(0xFF16A34A)
+              : const Color(0xFFDC2626));
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

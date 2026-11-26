@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AppTextField extends StatelessWidget {
   const AppTextField({
@@ -82,18 +83,20 @@ class AppTextField extends StatelessWidget {
           ),
           label: label != null
               ? Text(
-                  label!,
+                  ServicioIdioma.t(context, label!),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: AppTypography.labelMedium.copyWith(color: labelColor),
                 )
               : null,
-          hintText: hint,
+          hintText: hint == null ? null : ServicioIdioma.t(context, hint!),
           hintStyle: AppTypography.bodyMedium.copyWith(
             color: hintColor,
             overflow: TextOverflow.ellipsis,
           ),
-          errorText: errorText,
+          errorText: errorText == null
+              ? null
+              : ServicioIdioma.t(context, errorText!),
           errorStyle: AppTypography.bodySmall.copyWith(color: AppColors.error),
           prefixIcon: prefixIcon != null
               ? Icon(prefixIcon, size: 20, color: iconColor)

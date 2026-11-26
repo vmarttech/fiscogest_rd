@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_borrador_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class SelectorDescuentoDialog extends ConsumerStatefulWidget {
   const SelectorDescuentoDialog({super.key, this.esParaCotizacion = false});
@@ -27,7 +28,7 @@ class _SelectorDescuentoDialogState
         : estadoVenta.montoDescuento;
 
     return AlertDialog(
-      title: const Text('Descuento Aplicado'),
+      title: Text(ServicioIdioma.t(context, 'Descuento Aplicado')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +41,7 @@ class _SelectorDescuentoDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cerrar'),
+          child: Text(ServicioIdioma.t(context, 'Cerrar')),
         ),
       ],
     );

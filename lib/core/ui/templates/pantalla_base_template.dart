@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_spacing.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 ///== PLANTILLA BASE — PANTALLA ESTÁNDAR FiscoGest RD ==
 /// Cumplimiento automático:
@@ -94,7 +95,12 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Contenido Izquierda', style: AppTypography.labelMedium),
+        Builder(
+          builder: (context) => Text(
+            ServicioIdioma.t(context, 'Contenido Izquierda'),
+            style: AppTypography.labelMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.s),
         // === Tus widgets aquí: formularios, listas, etc. ===
         Container(
@@ -103,9 +109,11 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
             border: Border.all(color: Colors.grey.shade400),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
-            'Ejemplo de contenido',
-            style: AppTypography.bodyMedium,
+          child: Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Ejemplo de contenido'),
+              style: AppTypography.bodyMedium,
+            ),
           ),
         ),
       ],
@@ -117,7 +125,12 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Contenido Derecha', style: AppTypography.labelMedium),
+        Builder(
+          builder: (context) => Text(
+            ServicioIdioma.t(context, 'Contenido Derecha'),
+            style: AppTypography.labelMedium,
+          ),
+        ),
         const SizedBox(height: AppSpacing.s),
         // === Tus widgets aquí: resúmenes, totales, acciones ===
         Container(
@@ -126,9 +139,11 @@ class _PantallaBaseTemplateState extends State<PantallaBaseTemplate> {
             border: Border.all(color: Colors.grey.shade400),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
-            'Ejemplo de contenido',
-            style: AppTypography.bodyMedium,
+          child: Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Ejemplo de contenido'),
+              style: AppTypography.bodyMedium,
+            ),
           ),
         ),
       ],

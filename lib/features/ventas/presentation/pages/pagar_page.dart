@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class PagarPage extends ConsumerStatefulWidget {
   const PagarPage({super.key});
@@ -16,7 +17,7 @@ class PagarPage extends ConsumerStatefulWidget {
 class _PagarPageState extends ConsumerState<PagarPage> {
   @override
   Widget build(BuildContext context) {
-    return const AppScaffold(
+    return AppScaffold(
       backgroundColor: AppColors.pageBackground,
 
       // design system
@@ -26,10 +27,16 @@ class _PagarPageState extends ConsumerState<PagarPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Gestión de Pagos y Compromisos', style: AppTypography.h4),
+            Text(
+              ServicioIdioma.t(context, 'Gestión de Pagos y Compromisos'),
+              style: AppTypography.h4,
+            ),
             SizedBox(height: 16),
             Text(
-              'Pantalla en desarrollo. Aquí se mostrarán las cuentas por pagar a proveedores.',
+              ServicioIdioma.t(
+                context,
+                'Pantalla en desarrollo. Aquí se mostrarán las cuentas por pagar a proveedores.',
+              ),
               style: AppTypography.bodyMedium,
             ),
           ],

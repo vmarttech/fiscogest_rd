@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/referencia_solicitante.dart';
 import 'package:fiscogest_rd/features/creditos/domain/entities/solicitud_credito_expediente.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Expediente único — layout fiel al mockup HTML (5 secciones).
 class ExpedienteSolicitanteForm extends StatefulWidget {
@@ -503,8 +504,8 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                             padding: const EdgeInsets.only(top: 6),
                             child: Row(
                               children: [
-                                const Text(
-                                  'Sexo:',
+                                Text(
+                                  ServicioIdioma.t(context, 'Sexo:'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
@@ -630,11 +631,11 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   child: Text('Propia'),
                                 ),
                                 DropdownMenuItem(
-                                    value: 'Alquilada',
+                                  value: 'Alquilada',
                                   child: Text('Alquilada'),
                                 ),
                                 DropdownMenuItem(
-                                    value: 'Familiar',
+                                  value: 'Familiar',
                                   child: Text('Familiar'),
                                 ),
                               ],
@@ -717,7 +718,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                                   child: Text('Semanal'),
                                 ),
                                 DropdownMenuItem(
-                                    value: 'Quincenal',
+                                  value: 'Quincenal',
                                   child: Text('Quincenal'),
                                 ),
                                 DropdownMenuItem(
@@ -727,8 +728,8 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                               ],
                               onChanged: widget.editable
                                   ? (v) => setState(
-                                        () => _frecuenciaPago = v ?? 'Mensual',
-                                      )
+                                      () => _frecuenciaPago = v ?? 'Mensual',
+                                    )
                                   : null,
                             ),
                           ),
@@ -791,8 +792,8 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Notas del analista',
+              Text(
+                ServicioIdioma.t(context, 'Notas del analista'),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,

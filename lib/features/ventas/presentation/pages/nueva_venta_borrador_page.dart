@@ -31,6 +31,7 @@ import 'package:fiscogest_rd/features/inventario/presentation/providers/producto
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class NuevaVentaBorradorPage extends ConsumerStatefulWidget {
   const NuevaVentaBorradorPage({super.key});
@@ -514,8 +515,13 @@ class _NuevaVentaBorradorPageState
       if (numeroGuardado == null) {
         if (mounted) {
           FiscoGestNotifications.show(
-            const SnackBar(
-              content: Text('Agregue productos antes de generar la cotización'),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'Agregue productos antes de generar la cotización',
+                ),
+              ),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
             ),
@@ -623,17 +629,17 @@ class _NuevaVentaBorradorPageState
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text('Cobro completado'),
+            title: Text(ServicioIdioma.t(ctx, 'Cobro completado')),
             content: Text('N° $nFactura · ${formatRd(montoTotal)}'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Más tarde'),
+                child: Text(ServicioIdioma.t(ctx, 'Más tarde')),
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, true),
                 icon: const Icon(Icons.receipt_long_outlined, size: 18),
-                label: const Text('Imprimir / enviar'),
+                label: Text(ServicioIdioma.t(ctx, 'Imprimir / enviar')),
               ),
             ],
           ),
@@ -643,27 +649,30 @@ class _NuevaVentaBorradorPageState
           final accion = await showDialog<String>(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('Comprobante'),
-              content: const Text(
-                'Elija cómo entregar el comprobante al cliente.',
+              title: Text(ServicioIdioma.t(ctx, 'Comprobante')),
+              content: Text(
+                ServicioIdioma.t(
+                  ctx,
+                  'Elija cómo entregar el comprobante al cliente.',
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar'),
+                  child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, 'imprimir'),
-                  child: const Text('Imprimir'),
+                  child: Text(ServicioIdioma.t(ctx, 'Imprimir')),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, 'enviar'),
-                  child: const Text('Enviar PDF'),
+                  child: Text(ServicioIdioma.t(ctx, 'Enviar PDF')),
                 ),
                 FilledButton.icon(
                   onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
                   icon: const Icon(Icons.chat_outlined, size: 18),
-                  label: const Text('Recibo digital'),
+                  label: Text(ServicioIdioma.t(ctx, 'Recibo digital')),
                 ),
               ],
             ),
@@ -720,7 +729,9 @@ class _NuevaVentaBorradorPageState
       if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
-          content: Text('Error al generar cotización: $e'),
+          content: Text(
+            ServicioIdioma.t(context, 'Error al generar cotización: $e'),
+          ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -771,8 +782,13 @@ class _NuevaVentaBorradorPageState
       if (numeroGuardado == null) {
         if (mounted) {
           FiscoGestNotifications.show(
-            const SnackBar(
-              content: Text('Agregue productos antes de generar la cotización'),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'Agregue productos antes de generar la cotización',
+                ),
+              ),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
             ),
@@ -819,7 +835,9 @@ class _NuevaVentaBorradorPageState
       if (!mounted) return;
       FiscoGestNotifications.show(
         SnackBar(
-          content: Text('Error al generar cotización: $e'),
+          content: Text(
+            ServicioIdioma.t(context, 'Error al generar cotización: $e'),
+          ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -998,38 +1016,45 @@ class _NuevaVentaBorradorPageState
               showDialog<void>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Atajos de teclado'),
-                  content: const Column(
+                  title: Text(ServicioIdioma.t(ctx, 'Atajos de teclado')),
+                  content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('F3  Descuento general'),
-                      Text('F4  Stock'),
-                      Text('F5 / F10  Cotización'),
-                      Text('F7  Historial cotizaciones'),
-                      Text('F8  Historial ventas'),
-                      Text('F9  Crédito'),
-                      Text('F11 Finalizar'),
+                      Text(ServicioIdioma.t(ctx, 'F3  Descuento general')),
+                      Text(ServicioIdioma.t(ctx, 'F4  Stock')),
+                      Text(ServicioIdioma.t(ctx, 'F5 / F10  Cotización')),
+                      Text(ServicioIdioma.t(ctx, 'F7  Historial cotizaciones')),
+                      Text(ServicioIdioma.t(ctx, 'F8  Historial ventas')),
+                      Text(ServicioIdioma.t(ctx, 'F9  Crédito')),
+                      Text(ServicioIdioma.t(ctx, 'F11 Finalizar')),
                     ],
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cerrar'),
+                      child: Text(ServicioIdioma.t(ctx, 'Cerrar')),
                     ),
                   ],
                 ),
               );
             },
-            child: const Text(
-              'Atajos de teclado',
-              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            child: Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Atajos de teclado'),
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
             ),
           ),
           const SizedBox(width: 8),
-          const Text(
-            'F9 Crédito · F10 Cotización · F11 Finalizar',
-            style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'F9 Crédito · F10 Cotización · F11 Finalizar',
+              ),
+              style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+            ),
           ),
         ],
       ),
@@ -1669,11 +1694,13 @@ class _NuevaVentaBorradorPageState
                                       }
                                     },
                               icon: const Icon(Icons.credit_card, size: 18),
-                              label: const Text(
-                                'Contado',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                              label: Builder(
+                                builder: (context) => Text(
+                                  ServicioIdioma.t(context, 'Contado'),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
@@ -1824,22 +1851,29 @@ class _NuevaVentaBorradorPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (AppBreakpoints.isDesktop(context)) ...[
-          const Text(
-            'Punto de venta',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF0F172A),
-              letterSpacing: -0.4,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Punto de venta'),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF0F172A),
+                letterSpacing: -0.4,
+              ),
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Capture la venta: cliente · productos · delivery · contado o crédito',
-            style: TextStyle(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF64748B),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'Capture la venta: cliente · productos · delivery · contado o crédito',
+              ),
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF64748B),
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -2927,7 +2961,7 @@ class _NuevaVentaBorradorPageState
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Descuento de línea'),
+          title: Text(ServicioIdioma.t(ctx, 'Descuento de línea')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -2971,7 +3005,7 @@ class _NuevaVentaBorradorPageState
                 notifier.aplicarDescuentoLinea(productoId, 0);
                 Navigator.pop(ctx);
               },
-              child: const Text('Sin descuento'),
+              child: Text(ServicioIdioma.t(ctx, 'Sin descuento')),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -2998,7 +3032,7 @@ class _NuevaVentaBorradorPageState
                   Navigator.pop(ctx);
                 }
               },
-              child: const Text('Aplicar'),
+              child: Text(ServicioIdioma.t(ctx, 'Aplicar')),
             ),
           ],
         ),
@@ -3038,7 +3072,7 @@ class _NuevaVentaBorradorPageState
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Descuento general'),
+          title: Text(ServicioIdioma.t(ctx, 'Descuento general')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3082,7 +3116,7 @@ class _NuevaVentaBorradorPageState
                 notifier.aplicarDescuento(0);
                 Navigator.pop(ctx);
               },
-              child: const Text('Sin descuento'),
+              child: Text(ServicioIdioma.t(ctx, 'Sin descuento')),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -3109,7 +3143,7 @@ class _NuevaVentaBorradorPageState
                   Navigator.pop(ctx);
                 }
               },
-              child: const Text('Aplicar'),
+              child: Text(ServicioIdioma.t(ctx, 'Aplicar')),
             ),
           ],
         ),

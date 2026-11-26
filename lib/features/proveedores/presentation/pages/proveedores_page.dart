@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/proveedores/presentation/providers/proveedor_providers.dart';
 import 'package:fiscogest_rd/features/proveedores/domain/entities/proveedor.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ProveedoresPage extends ConsumerStatefulWidget {
   const ProveedoresPage({super.key});
@@ -159,8 +160,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                               elevation: 0,
                             ),
                             icon: const Icon(Icons.add_rounded, size: 20),
-                            label: const Text(
-                              'Nuevo Proveedor',
+                            label: Text(
+                              ServicioIdioma.t(context, 'Nuevo Proveedor'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -187,8 +188,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             elevation: 0,
                           ),
                           icon: const Icon(Icons.add_rounded, size: 20),
-                          label: const Text(
-                            'Nuevo Proveedor',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Nuevo Proveedor'),
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
@@ -205,7 +206,10 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           color: Color(0xFF1E293B),
                           fontSize: 13,
                         ),
-                        prefixIcon: const Icon(Icons.search_rounded, color: cMuted),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: cMuted,
+                        ),
                         filled: true,
                         fillColor: cWhite,
                         contentPadding: const EdgeInsets.symmetric(
@@ -527,11 +531,11 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                         ? proveedor.telefono!
                                                         : (proveedor
                                                                       .celular
-                                                                    ?.isNotEmpty ==
-                                                                true
-                                                            ? proveedor
-                                                                .celular!
-                                                            : '—'),
+                                                                      ?.isNotEmpty ==
+                                                                  true
+                                                              ? proveedor
+                                                                    .celular!
+                                                              : '—'),
                                                     style: const TextStyle(
                                                       fontSize: 12,
                                                       fontWeight:
@@ -564,9 +568,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                     AppColors.error,
                                                     () =>
                                                         _confirmarEliminarProveedor(
-                                                      context,
-                                                      proveedor,
-                                                    ),
+                                                          context,
+                                                          proveedor,
+                                                        ),
                                                   ),
                                                   const SizedBox(width: 4),
                                                   _ProvActionIcon(
@@ -574,9 +578,9 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                                                     cMuted,
                                                     () =>
                                                         _abrirConfiguracionProveedor(
-                                                      context,
-                                                      proveedor,
-                                                    ),
+                                                          context,
+                                                          proveedor,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -612,7 +616,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         AppButton(
           text: 'Eliminar',
@@ -685,8 +689,11 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Límite de crédito, días y condiciones',
+                    Text(
+                      ServicioIdioma.t(
+                        ctx,
+                        'Límite de crédito, días y condiciones',
+                      ),
                       style: TextStyle(fontSize: 12, color: Color(0xFF1E293B)),
                     ),
                     const SizedBox(height: 16),
@@ -782,8 +789,8 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        'Guardar configuración',
+                      child: Text(
+                        ServicioIdioma.t(ctx, 'Guardar configuración'),
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
@@ -1073,7 +1080,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             Expanded(
                               child: TextButton(
                                 onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancelar'),
+                                child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -1180,7 +1187,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancelar'),
+                        child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                       ),
                       const SizedBox(width: 12),
                       AppButton(
@@ -1307,8 +1314,8 @@ class _ProveedorCardMobile extends StatelessWidget {
           _mRow(
             Icons.person_outline,
             'Contacto',
-              proveedor.nombreContacto?.isNotEmpty == true
-                  ? proveedor.nombreContacto!
+            proveedor.nombreContacto?.isNotEmpty == true
+                ? proveedor.nombreContacto!
                 : '—',
           ),
           const SizedBox(height: 8),
@@ -1324,8 +1331,8 @@ class _ProveedorCardMobile extends StatelessWidget {
             proveedor.telefono?.isNotEmpty == true
                 ? proveedor.telefono!
                 : (proveedor.celular?.isNotEmpty == true
-                    ? proveedor.celular!
-                    : '—'),
+                      ? proveedor.celular!
+                      : '—'),
           ),
           const SizedBox(height: 14),
           Row(
@@ -1334,7 +1341,7 @@ class _ProveedorCardMobile extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_outlined, size: 16),
-                  label: const Text('Editar'),
+                  label: Text(ServicioIdioma.t(context, 'Editar')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: cTealDark,
                     side: const BorderSide(color: cBorder),

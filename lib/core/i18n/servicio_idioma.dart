@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +18,10 @@ class _IdiomaHeredado extends InheritedWidget {
 
 class ServicioIdioma {
   static const _clave = 'fiscogest.idioma';
+  // Mantener ocultos los controles hasta completar la traducción global.
+  static const bool cambioIdiomaHabilitado = false;
   static IdiomaApp inicial = IdiomaApp.es;
+  static final Set<String> _faltantesRegistrados = <String>{};
 
   static Future<void> preparar() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -58,15 +62,24 @@ class ServicioIdioma {
       : const Locale('es', 'DO');
 
   static String t(BuildContext context, String? texto) {
-    final idioma = actual(context);
+    return traducirParaIdioma(texto, idioma: actual(context));
+  }
+
+  /// Traduce contenido generado fuera del árbol de widgets, como reportes PDF.
+  /// Usa el mismo diccionario central y el idioma activo de la aplicación.
+  static String traducirParaIdioma(String? texto, {IdiomaApp? idioma}) {
+    final idiomaActivo = idioma ?? inicial;
     if (texto == null) return '';
-    if (idioma != IdiomaApp.en) return texto;
+    if (idiomaActivo != IdiomaApp.en) return texto;
     final traduccion = _en[texto];
     if (traduccion != null) return traduccion;
     for (final entrada in _prefijosDinamicos.entries) {
       if (texto.startsWith(entrada.key)) {
         return '${entrada.value}${texto.substring(entrada.key.length)}';
       }
+    }
+    if (kDebugMode && _faltantesRegistrados.add(texto)) {
+      debugPrint('i18n: falta traducción al inglés para "$texto"');
     }
     return texto;
   }
@@ -76,6 +89,17 @@ class ServicioIdioma {
     final next = caja.read(idiomaProvider) == IdiomaApp.es
         ? IdiomaApp.en
         : IdiomaApp.es;
+    await seleccionar(context, next);
+  }
+
+  static Future<void> seleccionar(
+    BuildContext context,
+    IdiomaApp idioma,
+  ) async {
+    final caja = ProviderScope.containerOf(context);
+    if (caja.read(idiomaProvider) == idioma) return;
+    final next = idioma;
+    inicial = next;
     caja.read(idiomaProvider.notifier).state = next;
 
     final p = await SharedPreferences.getInstance();
@@ -83,6 +107,7 @@ class ServicioIdioma {
   }
 
   static Widget boton(BuildContext context) {
+    if (!cambioIdiomaHabilitado) return const SizedBox.shrink();
     final en = actual(context) == IdiomaApp.en;
     return Tooltip(
       message: en ? 'Language' : 'Idioma',
@@ -123,6 +148,40 @@ class ServicioIdioma {
   }
 
   static const Map<String, String> _en = {
+    'OPERACIONES': 'OPERATIONS',
+    'INVENTARIO': 'INVENTORY',
+    'CATÁLOGOS': 'CATALOGS',
+    'SISTEMA': 'SYSTEM',
+    'Sistema Operativo': 'System online',
+    'Idioma de la aplicación': 'Application language',
+    'English': 'English',
+    'Usuario': 'Username',
+    'Contraseña': 'Password',
+    'Entrar': 'Sign in',
+    'Entrando…': 'Signing in…',
+    'Exportar Resumen': 'Export summary',
+    'Gestiona. Vende. Crece.': 'Manage. Sell. Grow.',
+    'Registro': 'Sign up',
+    'Transferencias': 'Transfers',
+    'Categorías': 'Categories',
+    'Marcas': 'Brands',
+    'Unidades': 'Units',
+    'Almacenes': 'Warehouses',
+    'Presentaciones': 'Pack sizes',
+    'Importar / Exportar': 'Import / Export',
+    'Pedidos licencia': 'License orders',
+    'Negocios registrados': 'Registered businesses',
+    'Enviar aviso': 'Send notice',
+    'Campañas y ofertas': 'Campaigns and offers',
+    'Ofertas disponibles': 'Available offers',
+    'Planes y pago': 'Plans and payment',
+    'Mi licencia': 'My license',
+    'Contactar': 'Contact us',
+    'Términos y\ncondiciones': 'Terms and conditions',
+    'Eliminar cuenta': 'Delete account',
+    'Acerca de la App': 'About the app',
+    'Buscar clientes, facturas, e-CF, créditos...':
+        'Search customers, invoices, e-CF, credit...',
     'Inicio': 'Home',
     'Buenos días': 'Good morning',
     'Buenas tardes': 'Good afternoon',
@@ -183,9 +242,6 @@ class ServicioIdioma {
     'Buscar': 'Search',
     'Entendido': 'Got it',
     'Todos': 'All',
-    'En Stock': 'In stock',
-    'Bajo': 'Low',
-    'Agotado': 'Out of stock',
     'Buscar por código, nombre...': 'Search by code or name...',
     'e-CF · DGII': 'e-CF · DGII',
     'Especificación e-CF': 'e-CF specification',
@@ -233,6 +289,33 @@ class ServicioIdioma {
     'No': 'No',
     'Nombre': 'Name',
     'Código': 'Code',
+    'REPORTE CONTEO FÍSICO #': 'PHYSICAL COUNT REPORT #',
+    'Fecha:': 'Date:',
+    'Obs:': 'Notes:',
+    'Físico': 'Counted',
+    'Dif': 'Diff',
+    'Total líneas:': 'Total lines:',
+    'Con diferencia:': 'With differences:',
+    'COMPROBANTE DE ENTREGA': 'DELIVERY RECEIPT',
+    'Uso: despacho / delivery — no es comprobante fiscal':
+        'For dispatch / delivery use — not a tax receipt',
+    'Ref. cotización:': 'Quote ref.:',
+    'Ref. factura:': 'Invoice ref.:',
+    'ENTREGAR A': 'DELIVER TO',
+    'WhatsApp:': 'WhatsApp:',
+    'Dirección de entrega:': 'Delivery address:',
+    '(Sin dirección registrada — completar a mano)':
+        '(No address registered — fill in by hand)',
+    'ARTÍCULOS A ENTREGAR': 'ITEMS TO DELIVER',
+    'Cantidad de líneas:': 'Number of lines:',
+    'Cant.': 'Qty.',
+    'Unidad': 'Unit',
+    'Recibí conforme la mercancía descrita, en buen estado.':
+        'I acknowledge receipt of the goods described in good condition.',
+    'Firma del cliente': 'Customer signature',
+    'Firma quien entrega': 'Delivered by',
+    'Fecha/hora entrega: ____ / ____ / ________   Hora: ____ : ____':
+        'Delivery date/time: ____ / ____ / ________   Time: ____ : ____',
     'Descripción': 'Description',
     'Cantidad': 'Quantity',
     'Precio': 'Price',
@@ -351,11 +434,11 @@ class ServicioIdioma {
     'Configuración de crédito guardada': 'Credit settings saved',
     'Contraseña actualizada. Inicie sesión.': 'Password updated. Sign in.',
     'Especificación activada': 'Specification enabled',
+    'Versión': 'Version',
+    '¿Imprimir comprobante?': 'Print the receipt?',
     'Nueva versión de especificación': 'New specification version',
     'Cantidad física inválida': 'Invalid physical quantity',
     'Seleccione una categoría': 'Select a category',
-    'Seleccione unidad de medida': 'Select a unit of measure',
-    'Las cantidades no pueden ser negativas': 'Quantities cannot be negative',
     'Ingrese una cantidad válida mayor a cero':
         'Enter a valid quantity greater than zero',
     'Descripción y monto válidos son requeridos':
@@ -367,7 +450,6 @@ class ServicioIdioma {
         'Add products before creating the quote',
     'Ya realicé el pago': 'I have made the payment',
     'Activar con código (opcional)': 'Activate with code (optional)',
-    'Operaciones': 'Operations',
     'Historial': 'History',
     'Cliente': 'Customer',
     'Nota (opcional)': 'Note (optional)',
@@ -466,6 +548,8 @@ class ServicioIdioma {
     'Abrir': 'Open',
     'Pendientes': 'Pending',
     'Enviados': 'Sent',
+    'Fallidos': 'Failed',
+    'Sin teléfono': 'No phone number',
     'Errores': 'Errors',
     'Aceptados': 'Accepted',
     'Registre el egreso de su negocio': 'Record your business expense',
@@ -534,7 +618,6 @@ class ServicioIdioma {
     'Marcar Pagada': 'Mark as paid',
     'Detalle de Compra': 'Purchase details',
     'Seleccionar Proveedor': 'Select supplier',
-    'Datos de la compra': 'Purchase details',
     'Actividad reciente': 'Recent activity',
     'Centro de compras': 'Purchasing center',
     'Cuentas pendientes': 'Outstanding accounts',
@@ -851,7 +934,611 @@ class ServicioIdioma {
     'No hay conteos registrados. Cree el primero.':
         'No counts recorded. Create the first one.',
     'CONTEO': 'COUNT',
+    'Enviar PDF': 'Send PDF',
+    'Recibo digital': 'Digital receipt',
+    'Ejemplo de contenido': 'Sample content',
+    'Acciones Rápidas': 'Quick actions',
+    'Registrar Compra': 'Record purchase',
+    'Guardar Borrador': 'Save draft',
+    'Nueva categoría': 'New category',
+    'B14 · Regímenes especiales': 'B14 · Special regimes',
+    'Añadir Nuevo Almacén': 'Add new warehouse',
+    'Avisar atrasados': 'Notify overdue customers',
+    'Nuevo': 'New',
+    'Renovar': 'Renew',
+    'Editar contacto': 'Edit contact',
+    'Activar': 'Activate',
+    'Nueva unidad': 'New unit',
+    'Nuevo Proveedor': 'New supplier',
+    'Especificación': 'Specification',
+    'Nuevo conteo': 'New count',
+    'Cobro completado': 'Payment completed',
+    'Imprimir / enviar': 'Print / send',
+    'Atajos de teclado': 'Keyboard shortcuts',
+    'Caja unificada': 'Unified cash register',
+    'Nueva presentación': 'New package size',
+    'Nueva marca': 'New brand',
+    'WebView no disponible en esta plataforma':
+        'WebView is unavailable on this platform',
+    'Se abrirá en el navegador del sistema':
+        'It will open in the system browser',
+    'Abrir en el navegador': 'Open in browser',
+    'Abrir en navegador': 'Open in browser',
+    'Composición de Crédito': 'Credit breakdown',
+    'Agregar otra línea': 'Add another line',
+    'Elige el plan. Se generará tu referencia FG- y verás las cuentas para depositar.':
+        'Choose a plan. We will generate your FG reference and show the bank accounts for your deposit.',
+    'Tu referencia de pago': 'Your payment reference',
+    'Ver todo': 'View all',
+    'Métricas Consolidadas': 'Consolidated metrics',
+    'Filtros de actividad': 'Activity filters',
+    'ACTIVIDAD RECIENTE  (↑ ↓ para navegar)':
+        'RECENT ACTIVITY  (↑ ↓ to navigate)',
+    'Operaciones sobre fila activa:': 'Actions for selected row:',
+    '[F2] Pagar': '[F2] Pay',
+    '[F3] Abono': '[F3] Payment',
+    'Total Pendientes': 'Total outstanding',
+    'Comprobante Fiscal NCF': 'Tax receipt NCF',
+    'Balance Liquidado': 'Settled balance',
+    'Condiciones mínimas (opcionales)': 'Minimum conditions (optional)',
+    'Aplicación de la promoción': 'Promotion settings',
+    'Si no eliges productos ni categorías, aplica a todos.':
+        'If no products or categories are selected, it applies to all.',
+    'Promoción activa': 'Active promotion',
+    'Eliminar promoción': 'Delete promotion',
+    'Alertas operativas': 'Operational alerts',
+    'Marcar leídas': 'Mark as read',
+    'Avisos de plataforma': 'Platform notices',
+    'Marcar todos': 'Mark all',
+    'Destinatarios': 'Recipients',
+    'Contenido del aviso': 'Notice content',
+    'Cuentas para depositar': 'Deposit accounts',
+    'Copiar dato': 'Copy detail',
+    'Emitir nota de crédito': 'Issue credit note',
+    'Ver historial': 'View history',
+    'Función de plan superior': 'Feature available on a higher plan',
+    'Ver planes y pagar': 'View plans and pay',
+    'Ya pagué · Activar con mi FG-': 'I have paid · Activate with my FG-',
+    'view details': 'View details',
+    'Ver detalles': 'View details',
+    'Editar almacén': 'Edit warehouse',
+    'Mostrar en el registro de nuevas cuentas':
+        'Show during new account registration',
+    'Mostrar en el panel de ofertas del negocio':
+        'Show in the business offers panel',
+    'Nueva campaña': 'New campaign',
+    'Sexo:': 'Gender:',
+    'Notas del analista': 'Analyst notes',
+    'Faltan teléfonos': 'Missing phone numbers',
+    'Omitir': 'Skip',
+    'Guardar y enviar': 'Save and send',
+    'Tras el pago, la licencia se activa sola. No hace falta enviar comprobantes.':
+        'Your license activates automatically after payment. You do not need to send receipts.',
+    'Volver a cuentas por cobrar': 'Back to accounts receivable',
+    'Cuentas por Cobrar': 'Accounts receivable',
+    'Detalle de cuenta': 'Account details',
+    'Gestión integral de cuotas, saldos pendientes y registro inmediato de cobros.':
+        'Manage installments and outstanding balances, and record payments right away.',
+    'Enviar Recordatorio': 'Send reminder',
+    'Estado de Cuenta': 'Account statement',
+    'Acuerdo de pronto pago activo': 'Early payment agreement active',
+    'Imprimir Tabla': 'Print table',
+    'Progreso de Pago': 'Payment progress',
+    'Pronto pago (descuento sobre intereses)':
+        'Early payment (interest discount)',
+    'Aprobar acuerdo': 'Approve agreement',
+    'Ver todos los vencimientos →': 'View all due dates →',
+    'Ver todas': 'View all',
+    'Score: — (complete expediente)': 'Score: — (complete the application)',
+    'Datos personales, fiscales y contacto':
+        'Personal, tax, and contact details',
+    'Historial de Pagos': 'Payment history',
+    '¿Prefieres depósito o transferencia? Generar código FG-':
+        'Prefer a deposit or bank transfer? Generate an FG code',
+    'Últimas Acciones': 'Latest actions',
+    'Ver Detalles Completos': 'View full details',
+    'Generar Reporte': 'Generate report',
+    'Composición de crédito': 'Credit breakdown',
+    'Últimas acciones': 'Latest actions',
+    'Detalle del cliente': 'Customer details',
+    'Volver a la cartera': 'Back to customer list',
+    'Renovar licencia': 'Renew license',
+    'Registrar beneficio / promoción': 'Add benefit / promotion',
+    'Tu plan actual': 'Your current plan',
+    'Sin usuarios registrados.': 'No users registered.',
+    'Beneficio no determinado.': 'Benefit not specified.',
+    'Sin acciones registradas.': 'No actions recorded.',
+    'La licencia de este dispositivo está pendiente de validación.':
+        'The license on this device is pending validation.',
+    'Suspender': 'Suspend',
+    'Beneficio': 'Benefit',
+    'Aplicar filtros': 'Apply filters',
+    'Cargar más': 'Load more',
+    'Registra o vincula tu negocio para solicitar la prueba gratuita. La aplicación no concede una prueba automáticamente.':
+        'Register or link your business to request a free trial. The app does not grant a trial automatically.',
+    'Comparar con': 'Compare with',
+    'Ventas vs. Margen - Tendencia de 30 Días':
+        'Sales vs. margin - 30-day trend',
+    'Análisis dinámico comparativo': 'Dynamic comparative analysis',
+    'Histórica vendida vs. previsión': 'Historical sales vs. forecast',
+    'Registrar negocio': 'Register business',
+    'Límite de crédito, días y condiciones': 'Credit limit, days, and terms',
+    'Guardar configuración': 'Save settings',
+    '¿Asignar rol Admin?': 'Assign the Admin role?',
+    'Sí, crear Admin': 'Yes, create Admin',
+    'Nueva Transferencia': 'New transfer',
+    'Estado General del Stock': 'Overall stock status',
+    'Últimos Movimientos': 'Latest transactions',
+    'Completa': 'Complete',
+    'Aún no hay transferencias registradas': 'No transfers recorded yet',
+    'Las actividades generadas durante el día aparecerán listadas en este panel.':
+        'Activities generated during the day will appear in this panel.',
+    'No se pudo cargar el uso mensual.': 'Could not load monthly usage.',
+    'Habilitar módulo e-CF': 'Enable the e-CF module',
+    'Controla la habilitación del módulo fiscal electrónico.':
+        'Control whether the electronic tax module is enabled.',
+    'Activa para emisión': 'Enabled for issuance',
+    'Solo active cuando el rango coincida con la autorización DGII':
+        'Enable only when the range matches the DGII authorization',
+    'e-NCF de referencia (NC)': 'Reference e-NCF (credit note)',
+    'TesteCF': 'e-CF test',
+    'CerteCF': 'e-CF certification',
+    'Egreso operativo del negocio': 'Business operating expense',
+    'Detalle del gasto': 'Expense details',
+    'Registrar Gasto': 'Record expense',
+    'No hay gastos con estos filtros': 'No expenses match these filters',
+    'Use «Registrar Gasto» arriba para agregar uno.':
+        'Use “Record expense” above to add one.',
+    'Movimientos': 'Transactions',
+    'Monto': 'Amount',
+    'Cambiar logo': 'Change logo',
+    'Cliente: Consumidor Final': 'Customer: Final consumer',
+    'Producto ejemplo × 1': 'Sample product × 1',
+    'Subtotal  RD\$ 847.46': 'Subtotal  RD\$ 847.46',
+    'Manifiesto de transferencia (packing list)':
+        'Transfer manifest (packing list)',
+    'Edita el contenido del PDF que se genera al transferir entre almacenes.':
+        'Edit the PDF generated when transferring between warehouses.',
+    'Imprimir manifiesto al transferir': 'Print transfer manifest',
+    'Si está activo, al completar una transferencia se abre el PDF.':
+        'When enabled, the PDF opens after a transfer is completed.',
+    'Mostrar bloque de firmas': 'Show signature block',
+    'Despachado / Transportista / Recibido': 'Dispatched / Carrier / Received',
+    'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.':
+        'Save with this section’s button to apply changes to the next manifest.',
+    'Formas de pago y reglas al cobrar en caja.':
+        'Payment methods and checkout rules.',
+    'Prefijos del número de cotización (Contado / Crédito).':
+        'Quote number prefixes (Cash / Credit).',
+    'Registre cantidades físicas por producto':
+        'Record physical quantities by product',
+    'Cancelar plan': 'Cancel plan',
+    'Conteos': 'Counts',
+    'Aprobar ajustes': 'Approve adjustments',
+    'Se actualizará el stock de cada producto al valor físico contado. ¿Continuar?':
+        'Each product’s stock will be updated to its counted quantity. Continue?',
+    'Sistema vs físico': 'System vs. physical count',
+    'Exportar PDF': 'Export PDF',
+    'Datos de Sesión': 'Session details',
+    'Guías Operativas': 'Operations guide',
+    'Estadísticas Rápidas': 'Quick statistics',
+    'Vaciar': 'Clear',
+    'Compromete pago en:': 'Payment due in:',
+    'Sí, cancelar': 'Yes, cancel',
+    'Descuento Aplicado': 'Discount applied',
+    'Enviar al cliente': 'Send to customer',
+    'Listo': 'Done',
+    'Cancelar renovación del plan': 'Cancel plan renewal',
+    '¡GRACIAS POR SU COMPRA!': 'THANK YOU FOR YOUR PURCHASE!',
+    'Escriba o escanee el código de barras del producto':
+        'Type or scan the product barcode',
+    'Selecciona una opción o ingresa el monto manualmente:':
+        'Select an option or enter the amount manually:',
+    'Monto a cobrar': 'Amount due',
+    'Forma de pago': 'Payment method',
+    'Efectivo recibido': 'Cash received',
+    'N° referencia': 'Reference no.',
+    'Configuración y Listado de Descuentos': 'Discount settings and list',
+    'Contenido Derecha': 'Right content',
+    'Guardar Precios': 'Save prices',
+    'Pagar con PayPal': 'Pay with PayPal',
+    'Sí, Confirmar': 'Yes, confirm',
+    'Comprobante': 'Receipt',
+    'Elija cómo entregar el comprobante al cliente.':
+        'Choose how to deliver the receipt to the customer.',
+    'Sí, Anular': 'Yes, void',
+    'Vistas Rápidas': 'Quick views',
+    'Pago por depósito o transferencia': 'Pay by deposit or bank transfer',
+    'F9 Crédito · F10 Cotización · F11 Finalizar':
+        'F9 Credit · F10 Quote · F11 Complete',
+    'Punto de venta': 'Point of sale',
+    'Capture la venta: cliente · productos · delivery · contado o crédito':
+        'Enter the sale: customer · products · delivery · cash or credit',
+    'De Contado': 'Cash sale',
+    'La devolucion emite una nota de credito y no borra la factura. Puede devolver una parte de las cantidades. En una venta a credito, la devolucion tiene que ser completa.':
+        'A return issues a credit note and does not delete the invoice. You can return part of the quantities. For a credit sale, the return must be complete.',
+    'Buscar factura': 'Search invoice',
+    'Emitir nota de credito': 'Issue credit note',
+    'Esperado en Caja': 'Expected in register',
+    'Conteo Físico': 'Physical count',
+    'Denominaciones (RD\$)': 'Denominations (RD\$)',
+    'Filtros avanzados': 'Advanced filters',
+    'Cambiar ticket (Esc)': 'Switch ticket (Esc)',
+    'Cambiar cuenta (Esc)': 'Switch account (Esc)',
+    'Nueva Compra / Gasto': 'New purchase / expense',
+    '1 cuota': '1 installment',
+    'Liquidar PP': 'Settle early payment',
+    'Saldo total': 'Total balance',
+    'Exacto': 'Exact',
+    'Atajos: F2 Buscar · F3 Cotiz · F6 CxC · F4 Arqueo · F12 Cobrar · Esc Limpiar':
+        'Shortcuts: F2 Search · F3 Quote · F6 Receivables · F4 Cash count · F12 Charge · Esc Clear',
+    'Sesión abierta': 'Session open',
+    'Arqueo (F4)': 'Cash count (F4)',
+    'Sin plan de cuotas — abono libre al saldo.':
+        'No installment plan — enter any payment toward the balance.',
+    'Configuración y Listado de Ofertas': 'Offer settings and list',
+    'Rango Personalizado': 'Custom range',
+    'Sin turno activo': 'No active shift',
+    'Abre el turno para comenzar.\nLa estación inicia vacía.':
+        'Open the shift to begin.\nThe register starts empty.',
+    'Resumen último Turno': 'Last shift summary',
+    'Resumen de Ventas Diarias': 'Daily sales summary',
+    'Últimos 7 días': 'Last 7 days',
+    'Abrir caja': 'Open register',
+    'Arqueo y cierre de caja': 'Cash count and register close',
+    'Efectivo esperado': 'Expected cash',
+    'Confirmar cierre': 'Confirm close',
+    'Notificaciones Rápidas': 'Quick notifications',
+    'Sin alertas': 'No alerts',
+    'Todo en orden · sin alertas pendientes': 'All clear · no pending alerts',
+    'Diferencia en cuadre': 'Cash count difference',
+    'Continuar': 'Continue',
+    'FiscoGest · CAJA UNIFICADA': 'FiscoGest · UNIFIED REGISTER',
+    'Productos en factura': 'Products on invoice',
+    'Cuotas pendientes': 'Outstanding installments',
+    'Monto a abonar (esta cuota)': 'Payment amount (this installment)',
+    'Ticket seleccionado': 'Selected ticket',
+    'Rápido:': 'Quick:',
+    'Mitad': 'Half',
+    'Todo': 'All',
+    'Recordatorio WhatsApp': 'WhatsApp reminder',
+    'Error al cargar la compra': 'Error loading purchase',
+    'Ingreso de mercancía': 'Goods received',
+    'Abrir documento relacionado': 'Open related document',
+    'Todas': 'All',
+    'Ofertas y promociones': 'Offers and promotions',
+    'VALOR EN STOCK': 'STOCK VALUE',
+    'Costo unitario': 'Unit cost',
+    'Precio venta': 'Sales price',
+    'Margen unitario': 'Unit margin',
+    'Code, name, category or barcode...': 'Code, name, category or barcode...',
+    'Gestión de Crédito y Cuentas por Cobrar':
+        'Credit and Accounts Receivable Management',
+    'Solicitudes de crédito': 'Credit applications',
+    'Pendientes de análisis y aprobación': 'Pending review and approval',
+    'Editar Producto': 'Edit product',
+    'Registrar Producto': 'Register product',
+    'Nombre del Producto': 'Product name',
+    'Nombre comercial del producto': 'Product display name',
+    'SKU / Código de Barra': 'SKU / Barcode',
+    'Código único del producto': 'Unique product code',
+    'Costo de Compra': 'Purchase cost',
+    'Gastos Asociados': 'Associated expenses',
+    'Margen de Ganancia %': 'Profit margin %',
+    'Precio Especial / Oferta': 'Special price / sale',
+    'Existencia Actual': 'Current stock',
+    'Stock Mínimo (Alerta)': 'Minimum stock (alert)',
+    'Costo Real Total:': 'Total actual cost:',
+    '(Compra + Gastos = Base para margen)':
+        '(Purchase + expenses = margin basis)',
+    'Correcciones de stock y mermas': 'Stock corrections and write-offs',
+    'No hay ajustes con estos filtros': 'No adjustments match these filters',
+    'Indique el motivo del ajuste': 'Enter the reason for the adjustment',
+    'Consultando tasa DOP…': 'Checking DOP exchange rate…',
+    'Equivalente DOP no disponible (sin red ni tasa guardada)':
+        'DOP equivalent unavailable (no connection or saved rate)',
+    'Referencia copiada': 'Reference copied',
+    'Incluye esta referencia en el concepto del depósito o transferencia. ':
+        'Include this reference in the deposit or transfer description.',
+    'Elige tu plan: Solo PayPal en USD. Tu plan queda activo al instante.':
+        'Choose your plan: PayPal in USD only. Your plan activates immediately.',
+    'Seguirás con tu plan actual hasta el último día ':
+        'Your current plan remains active through its last day ',
+    'Renovación cancelada. Tu plan sigue hasta la fecha de fin.':
+        'Renewal cancelled. Your plan remains active until its end date.',
+    'Solo si te confirmamos una referencia FG- ya pagada. ':
+        'Only if we confirm an FG reference that has already been paid. ',
+    'WebView no disponible en esta plataforma.\\n':
+        'WebView is unavailable on this platform.\\n',
+    'La fecha final no puede ser anterior a la inicial.':
+        'The end date cannot be earlier than the start date.',
+    'Descuento por porcentaje': 'Percentage discount',
+    'Lleve 2 y pague 1': 'Buy 2, pay for 1',
+    'Descuento de monto fijo': 'Fixed amount discount',
+    'El descuento se calcula por cada línea: dos unidades del mismo producto y una gratis.':
+        'The discount is calculated per line: two units of the same product, one free.',
+    'No hay productos disponibles.': 'No products available.',
+    'No hay categorías disponibles.': 'No categories available.',
+    'Promoción eliminada.': 'Promotion deleted.',
+    'Compra duplicada como borrador ✅': 'Purchase duplicated as a draft ✅',
+    'Sin compras con estos filtros': 'No purchases match these filters',
+    'Panel de Analítica de Compras': 'Purchase analytics dashboard',
+    'ID de compra no válido': 'Invalid purchase ID',
+    'Registrando recepción...': 'Registering receipt...',
+    'Compra marcada como Recibida ✅': 'Purchase marked as received ✅',
+    'Registrando pago...': 'Registering payment...',
+    'No hay productos en inventario': 'There are no products in inventory',
+    'Registrar y confirmar': 'Register and confirm',
+    'Crear producto nuevo': 'Create new product',
+    '⚠️ No hay proveedores registrados': '⚠️ No suppliers registered',
+    '⚠️ No hay productos registrados': '⚠️ No products registered',
+    '⚠️ Debe agregar al menos un producto': '⚠️ Add at least one product',
+    '⚠️ Seleccione un proveedor': '⚠️ Select a supplier',
+    'Sin compras en este filtro': 'No purchases match this filter',
+    'No hay registros': 'No records found',
+    'Ninguna orden seleccionada': 'No order selected',
+    'Registra compras, revisa actividad y controla tus cuentas por pagar':
+        'Record purchases, review activity, and manage accounts payable',
+    'Editar producto': 'Edit product',
+    'Retiro de mercancía': 'Goods withdrawal',
+    'Compra marcada como Pagada ✅': 'Purchase marked as paid ✅',
+    'Nueva acción': 'New action',
+    'Nueva compra': 'New purchase',
+    'Emitir e-CF': 'Issue e-CF',
+    'Ver todas →': 'View all →',
+    'Sin actividad reciente': 'No recent activity',
+    'Ver inventario →': 'View inventory →',
+    'Agregar Producto': 'Add product',
+    'Nueva versión disponible': 'New version available',
+    'Descarga lenta o interrumpida': 'Download is slow or interrupted',
+    'Costos adicionales por unidad': 'Additional costs per unit',
+    'No se pudo actualizar': 'Could not update',
+    'Abrir Ajustes': 'Open settings',
+    'Reintentar cámara': 'Retry camera',
+    'Contenido Izquierda': 'Left content',
+    'Registro express': 'Quick registration',
+    'Apartados': 'Layaway orders',
+    'Almacén de Destino *': 'Destination warehouse *',
+    'Seleccione a qué almacén ingresarán estos productos':
+        'Select the warehouse where these products will be received',
+    'Buscar por nombre, SKU o barras': 'Search by name, SKU, or barcode',
+    'Nombre de la promoción *': 'Promotion name *',
+    'Tipo de promoción': 'Promotion type',
+    'Cantidad mínima': 'Minimum quantity',
+    'Compra mínima (RD\$)': 'Minimum purchase (RD\$)',
+    'Segmento destino': 'Target segment',
+    'ID del negocio': 'Business ID',
+    'Plan destino': 'Target plan',
+    'Prioridad': 'Priority',
+    'Título': 'Title',
+    'Mensaje': 'Message',
+    'Categoría padre (opcional)': 'Parent category (optional)',
+    'Nombre de la oferta': 'Offer name',
+    'Ej. Black Friday 50%': 'E.g., Black Friday 50%',
+    'Descripción (visible para el negocio)':
+        'Description (visible to the business)',
+    'Tipo de beneficio': 'Benefit type',
+    'Valor del beneficio': 'Benefit value',
+    'Ej. 50%, 3 meses, 2 cuentas': 'E.g., 50%, 3 months, 2 accounts',
+    '¿A quién va dirigida?': 'Who is this for?',
+    'Límite de usos (vacío = sin límite)': 'Usage limit (blank = unlimited)',
+    'Fecha primer vencimiento': 'First due date',
+    'WhatsApp / Teléfono': 'WhatsApp / Phone',
+    '% descuento sobre intereses': '% discount on interest',
+    'Ej: 50 = condona la mitad de los intereses':
+        'E.g.: 50 = waives half of the interest',
+    'Nota del acuerdo (opcional)': 'Agreement note (optional)',
+    'Nombre / Razón Social *': 'Name / Legal name *',
+    'RNC o Cédula (opcional)': 'Tax ID or national ID (optional)',
+    'Teléfono / Celular *': 'Phone / Mobile *',
+    'Correo electrónico (opcional)': 'Email (optional)',
+    'Motivo obligatorio': 'Reason is required',
+    'Plan (opcional)': 'Plan (optional)',
+    'Vigencia: mensual / semestral / anual':
+        'Term: monthly / semiannual / annual',
+    'Motivo / nota': 'Reason / note',
+    'Usuario *': 'Username *',
+    'Nombre *': 'Name *',
+    'Rol *': 'Role *',
+    'Ambiente DGII': 'DGII environment',
+    'Tipo e-CF (31, 32, 34…)': 'e-CF type (31, 32, 34…)',
+    'Último usado (actual)': 'Last used (current)',
+    'El próximo será actual+1': 'Next will be current+1',
+    'Desde (autorizado DGII)': 'From (DGII authorized)',
+    'Inicio del rango asignado por la DGII':
+        'Start of the range assigned by DGII',
+    'Hasta (autorizado DGII)': 'To (DGII authorized)',
+    'Fin del rango asignado por la DGII': 'End of the range assigned by DGII',
+    'e-NCF modificado (E31… / E32…)': 'Modified e-NCF (E31… / E32…)',
+    'Obligatorio para nota de crédito electrónica (34)':
+        'Required for electronic credit notes (34)',
+    'Queda registrado en el historial del documento':
+        'This is recorded in the document history',
+    'Código (ej. 1.1)': 'Code (e.g., 1.1)',
+    'Circular / doc. DGII': 'DGII circular / document',
+    'Título del documento': 'Document title',
+    'Subtítulo': 'Subtitle',
+    'Transportista / Operador (por defecto)': 'Carrier / Operator (default)',
+    'Ej. TransLogística S.A.': 'E.g., TransLogistica Inc.',
+    'Observaciones / instrucciones de carga': 'Notes / loading instructions',
+    'Correo del cliente': 'Customer email',
+    'Monto personalizado (RD\$)': 'Custom amount (RD\$)',
+    'Costo (solo lectura)': 'Cost (read-only)',
+    'Precio Especial': 'Special price',
+    'Numero de cotizacion': 'Quote number',
+    'Cantidad a devolver': 'Quantity to return',
+    'Efectivo contado en cajón': 'Cash counted in drawer',
+    'Cuente billetes y monedas del cajón':
+        'Count the bills and coins in the drawer',
+    'Observación (opcional)': 'Note (optional)',
+    'Ej. faltante por cambio, billete roto…':
+        'E.g., change shortage, damaged bill…',
+    'N° Cotización o Cliente...': 'Quote no. or customer...',
+    'RNC, Cédula o Nombre...': 'Tax ID, national ID, or name...',
+    'Explique faltante/sobrante': 'Explain the shortage/overage',
+    'Monto del abono': 'Payment amount',
+    'Motivo de cancelación': 'Cancellation reason',
+    'WhatsApp del cliente': 'Customer WhatsApp',
+    'Abreviatura (opcional)': 'Abbreviation (optional)',
+    'Línea': 'Line',
+    'Seleccione el producto': 'Select the product',
+    'Cantidad debe ser mayor a cero': 'Quantity must be greater than zero',
+    'Indica el producto': 'Enter the product',
+    'Cantidad > 0': 'Quantity > 0',
+    'Costo > 0': 'Cost > 0',
+    'Costo unitario debe ser mayor a cero':
+        'Unit cost must be greater than zero',
+    'Configuración de inventario': 'Inventory settings',
+    'Filtros rápidos': 'Quick filters',
+    'En Stock': 'In stock',
+    'Bajo': 'Low',
+    'Agotado': 'Out of stock',
+    'Inactivos': 'Inactive',
+    'Vista de lista': 'List view',
+    'Normal': 'Standard',
+    'Compacta': 'Compact',
+    'Resumen de stock': 'Stock summary',
+    'Total Productos': 'Total products',
+    'Total Valor (Costo)': 'Total value (cost)',
+    'Total Valor (Venta)': 'Total value (sales)',
+    'Gestión rápida': 'Quick actions',
+    '[F3] NUEVO PRODUCTO': '[F3] NEW PRODUCT',
+    'Listado de Productos': 'Product list',
+    'reg.': 'items',
+    'Código, nombre, categoría o barras...':
+        'Code, name, category or barcode...',
+    'PRODUCTO': 'PRODUCT',
+    'CÓDIGO': 'CODE',
+    'STOCK': 'STOCK',
+    'COSTO / VENTA': 'COST / PRICE',
+    'Selecciona un producto\npara ver los detalles.':
+        'Select a product\nto see its details.',
+    'No se pudo registrar el abono. ¿Caja abierta?':
+        'Could not record the payment. Is the register open?',
+    'Campaña creada': 'Campaign created',
+    'Guardando...': 'Saving...',
+    'No se pudo enviar: no hay números válidos.':
+        'Could not send: no valid phone numbers.',
+    'INTERÉS': 'INTEREST',
+    'MÉTODO': 'METHOD',
+    'ICONO': 'ICON',
+    'MÉTODO DE PAGO': 'PAYMENT METHOD',
+    'VENCIMIENTO': 'DUE DATE',
+    'CAPITAL': 'PRINCIPAL',
+    'TOTAL': 'TOTAL',
+    'ESTADO': 'STATUS',
+    'CUOTA #': 'INSTALLMENT #',
     'FECHA': 'DATE',
+    'MONTO': 'AMOUNT',
+    'NOTA': 'NOTE',
+    'ACCIÓN': 'ACTION',
+    'DATOS DEL CLIENTE Y PAGO': 'CUSTOMER AND PAYMENT DETAILS',
+    'DETALLE DE ARTÍCULOS': 'ITEM DETAILS',
+    'RESUMEN': 'SUMMARY',
+    'Abono inicial inválido respecto al total':
+        'Initial payment is invalid for the total amount',
+    'Abono inicial inválido': 'Invalid initial payment',
+    'Reporte del cliente: próximamente': 'Customer report: coming soon',
+    'Prueba 30 días': '30-day trial',
+    '6 meses gratis': '6 months free',
+    '¿Eliminar a “': 'Delete “',
+    '”?': '”?',
+    'Todas las categorías': 'All categories',
+    'DESCRIPCIÓN': 'DESCRIPTION',
+    'No se pudo registrar (¿ya impreso o no facturada?)':
+        'Could not register (already printed or not invoiced?)',
+    'Esta venta no tiene líneas de producto.':
+        'This sale has no product lines.',
+    'Sin líneas de producto.': 'No product lines.',
+    'Indique un correo válido': 'Enter a valid email address',
+    'Indique un monto válido': 'Enter a valid amount',
+    'F3  Descuento general': 'F3  Overall discount',
+    'F4  Stock': 'F4  Stock',
+    'F7  Historial cotizaciones': 'F7  Quote history',
+    'F8  Historial ventas': 'F8  Sales history',
+    'F11 Finalizar': 'F11 Finish',
+    'F5 / F10  Cotización': 'F5 / F10  Quote',
+    'F9  Crédito': 'F9  Credit',
+    'No hay sesión de caja abierta.': 'No cash register session is open.',
+    'No se pudo cerrar la sesión.': 'Could not close the session.',
+    'No hay sesión de usuario. Vuelva a iniciar sesión.':
+        'No user session. Please sign in again.',
+    'Busque y seleccione un ticket / cotización (F2)':
+        'Search for and select a receipt / quote (F2)',
+    'Seleccione un ticket / cotización': 'Select a receipt / quote',
+    'Gestión de Pagos y Compromisos': 'Payments and Commitments',
+    'Pantalla en desarrollo. Aquí se mostrarán las cuentas por pagar a proveedores.':
+        'This screen is in development. Accounts payable to suppliers will appear here.',
+    '10 / pág': '10 / page',
+    '15 / pág': '15 / page',
+    '25 / pág': '25 / page',
+    '50 / pág': '50 / page',
+    'Publicar campaña': 'Publish campaign',
+    'La categoría ya existía y fue seleccionada':
+        'The category already existed and was selected',
+    'Categoría creada y seleccionada': 'Category created and selected',
+    'La marca ya existía y fue seleccionada':
+        'The brand already existed and was selected',
+    'La unidad ya existía y fue seleccionada':
+        'The unit already existed and was selected',
+    'Ese SKU ya está asignado a otro producto.':
+        'This SKU is already assigned to another product.',
+    '¡Producto actualizado correctamente!': 'Product updated successfully!',
+    '¡Producto registrado correctamente!': 'Product registered successfully!',
+    'Seleccione unidad de medida': 'Select a unit of measure',
+    'Las cantidades no pueden ser negativas': 'Quantities cannot be negative',
+    'Marca creada y seleccionada': 'Brand created and selected',
+    'El precio de venta no puede ser menor al mínimo':
+        'The sales price cannot be below the minimum',
+    'El precio de venta (': 'The sales price (',
+    'no puede ser menor al mínimo': 'cannot be below the minimum',
+    'verifica los datos': 'check the information',
+    'Operación del día': 'Today’s operations',
+    'Lo esencial, al alcance': 'Everything you need, within reach',
+    'Más acciones': 'More actions',
+    'Accesos del día': 'Today’s shortcuts',
+    'Todo lo que usas en el mostrador': 'Everything you use at the counter',
+    'Cotiza, facture con NCF, cobre en caja y gestione crédito desde un solo lugar.':
+        'Create quotes and NCF invoices, take payments, and manage credit in one place.',
+    'Visión general del rendimiento operacional de tu negocio. Monitoriza comprobantes fiscales (e-CF), liquidez en caja y comportamiento crediticio en tiempo real.':
+        'An overview of your business operations. Monitor e-CF tax documents, cash flow, and credit activity in real time.',
+    'Resumen de Ventas': 'Sales summary',
+    'Comportamiento de ingresos y facturación e-CF':
+        'Revenue and e-CF invoicing trends',
+    '30 días': '30 days',
+    'Actividad Reciente': 'Recent activity',
+    'Estado del Inventario y Movimientos': 'Inventory status and movements',
+    'Artículos en almacén y estatus comercial':
+        'Warehouse items and sales status',
+    'Resumen Financiero': 'Financial summary',
+    'No hay una app de correo configurada. Escríbenos a fiscogestrd@gmail.com':
+        'No email app is configured. Contact us at fiscogestrd@gmail.com',
+    'No se pudo abrir el correo. Escríbenos a fiscogestrd@gmail.com':
+        'Could not open email. Contact us at fiscogestrd@gmail.com',
+    'No se pudo abrir el sitio. Revisa la conexión o el navegador.':
+        'Could not open the website. Check your connection or browser.',
+    'Sistema OK': 'System OK',
+    'Módulos': 'Modules',
+    'Hoy a simple vista': 'Today at a glance',
+    'Acciones rápidas': 'Quick actions',
+    'Hoy en el negocio': 'Today at your business',
+    'Indicadores en vivo': 'Live indicators',
+    'Centro de datos': 'Data center',
+    'Exporta catálogos a CSV e importa lotes de productos con validación y registro de errores.':
+        'Export catalogs to CSV and import product batches with validation and error reporting.',
+    'Operaciones': 'Operations',
+    'Exportar e importar': 'Export and import',
+    'Registro de errores': 'Error log',
+    'Última importación': 'Last import',
+    'Datos de la compra': 'Purchase details',
+    'Proveedor, recibo y forma de pago':
+        'Supplier, receipt, and payment method',
+    'Proveedor, comprobante y forma de pago':
+        'Supplier, document, and payment method',
+    'Líneas de la compra': 'Purchase lines',
+    'Totales de la compra': 'Purchase totals',
+    'enviada a aprobación': 'sent for approval',
+    'rechazada y anulada': 'rejected and voided',
   };
 
   static const Map<String, String> _prefijosDinamicos = {
@@ -881,5 +1568,21 @@ class ServicioIdioma {
     'Venta:': 'Sale:',
     'Límite de crédito:': 'Credit limit:',
     'Saldo pendiente:': 'Outstanding balance:',
+    'Se completó:': 'Completed:',
+    'e-CF no quedó listo:': 'e-CF was not ready:',
+    'Ref. Cotización:': 'Quote ref.:',
+    'N° Factura:': 'Invoice no.:',
+    'Abono:': 'Payment:',
+    'No se pudo cargar cotización:': 'Could not load quote:',
+    'Abono OK. Impresión:': 'Payment recorded. Print error:',
+    'Cajón:': 'Drawer:',
+    'Productos bajo mínimo:': 'Low stock items:',
+    'No se pudo crear la categoría:': 'Could not create the category:',
+    'No se pudo crear la unidad:': 'Could not create the unit:',
+    'No se reconoció el documento:': 'Could not identify the document:',
+    'No se encontró la factura ': 'Invoice not found: ',
+    'No se encontró la venta ': 'Sale not found: ',
+    'No se encontró el documento ': 'Document not found: ',
+    'Imprimiendo cotización N° ': 'Printing quote no. ',
   };
 }

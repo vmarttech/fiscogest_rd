@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/features/almacenes/domain/entities/almacen.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/widgets/plan_requerido.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AlmacenesPage extends ConsumerStatefulWidget {
   const AlmacenesPage({super.key});
@@ -78,7 +79,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                   ),
                   child: async.when(
                     loading: () => Center(
-                      child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                      child: CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     error: (e, _) => Center(
                       child: Text(
@@ -120,7 +123,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                               child: FilledButton.icon(
                                 onPressed: () => _formulario(context),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(6),
@@ -128,8 +133,11 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                   elevation: 0,
                                 ),
                                 icon: const Icon(Icons.add, size: 20),
-                                label: const Text(
-                                  'Añadir Nuevo Almacén',
+                                label: Text(
+                                  ServicioIdioma.t(
+                                    context,
+                                    'Añadir Nuevo Almacén',
+                                  ),
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                               ),
@@ -162,7 +170,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                   FilledButton.icon(
                                     onPressed: () => _formulario(context),
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       foregroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 20,
@@ -177,8 +187,11 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                       Icons.warehouse_outlined,
                                       size: 18,
                                     ),
-                                    label: const Text(
-                                      'Añadir Nuevo Almacén',
+                                    label: Text(
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Añadir Nuevo Almacén',
+                                      ),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
@@ -340,7 +353,10 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1.5,
+          ),
         ),
       ),
     );
@@ -448,7 +464,10 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.tertiary],
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.tertiary,
+          ],
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -660,7 +679,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     ),
                     child: Icon(
                       Icons.warehouse_outlined,
-                      color: a.activo ? Theme.of(context).colorScheme.primary : _muted2,
+                      color: a.activo
+                          ? Theme.of(context).colorScheme.primary
+                          : _muted2,
                       size: 22,
                     ),
                   ),
@@ -772,8 +793,8 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                       foregroundColor: Theme.of(context).colorScheme.primary,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
-                    child: const Text(
-                      'view details',
+                    child: Text(
+                      ServicioIdioma.t(context, 'view details'),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -822,7 +843,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                           child: OutlinedButton(
                             onPressed: () => _verDetalle(context, a),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               side: const BorderSide(
                                 color: Color(0xFFCBD5E1),
                                 width: 1.5,
@@ -832,8 +855,8 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text(
-                              'Ver detalles',
+                            child: Text(
+                              ServicioIdioma.t(context, 'Ver detalles'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,
@@ -947,7 +970,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                       ),
                       child: Icon(
                         Icons.warehouse_outlined,
-                        color: a.activo ? Theme.of(context).colorScheme.primary : _muted2,
+                        color: a.activo
+                            ? Theme.of(context).colorScheme.primary
+                            : _muted2,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -1014,8 +1039,8 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     ),
                   ),
                   icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text(
-                    'Editar almacén',
+                  label: Text(
+                    ServicioIdioma.t(ctx, 'Editar almacén'),
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -1096,7 +1121,9 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                       ),
                       const SizedBox(height: 10),
                       InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Tipo'),
+                        decoration: InputDecoration(
+                          labelText: ServicioIdioma.t(ctx, 'Tipo'),
+                        ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<TipoAlmacen>(
                             isExpanded: true,
@@ -1131,7 +1158,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                       ),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Activo'),
+                        title: Text(ServicioIdioma.t(ctx, 'Activo')),
                         value: activo,
                         onChanged: (v) => setLocal(() => activo = v),
                       ),
@@ -1142,11 +1169,11 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
+                  child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Guardar'),
+                  child: Text(ServicioIdioma.t(ctx, 'Guardar')),
                 ),
               ],
             );
@@ -1159,7 +1186,11 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
     final nombre = nombreCtrl.text.trim();
     if (codigo.isEmpty || nombre.isEmpty) {
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('Código y nombre son obligatorios')),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Código y nombre son obligatorios'),
+          ),
+        ),
       );
       return;
     }
@@ -1185,7 +1216,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
             ),
           );
       FiscoGestNotifications.show(
-        const SnackBar(content: Text('Almacén guardado')),
+        SnackBar(content: Text(ServicioIdioma.t(context, 'Almacén guardado'))),
       );
     } catch (e) {
       FiscoGestNotifications.show(

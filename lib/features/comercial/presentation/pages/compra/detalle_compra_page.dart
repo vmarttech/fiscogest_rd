@@ -19,6 +19,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/historial_costos_page.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DetalleCompraPage extends ConsumerStatefulWidget {
   const DetalleCompraPage({super.key, required this.compraId});
@@ -112,13 +113,16 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       body: SafeArea(
         bottom: true,
         child: _compraId == 0
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.error_outline, size: 48, color: AppColors.error),
                     SizedBox(height: 16),
-                    Text('ID de compra no válido', style: AppTypography.h4Bold),
+                    Text(
+                      ServicioIdioma.t(context, 'ID de compra no válido'),
+                      style: AppTypography.h4Bold,
+                    ),
                   ],
                 ),
               )
@@ -136,8 +140,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                           color: AppColors.error,
                         ),
                         const SizedBox(height: AppSpacing.m),
-                        const Text(
-                          'Error al cargar la compra',
+                        Text(
+                          ServicioIdioma.t(
+                            context,
+                            'Error al cargar la compra',
+                          ),
                           style: AppTypography.h4Bold,
                         ),
                         const SizedBox(height: AppSpacing.s),
@@ -284,12 +291,14 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  'Vencida',
-                  style: TextStyle(
-                    color: AppColors.error,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                child: Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Vencida'),
+                    style: const TextStyle(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -364,9 +373,14 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
             const SizedBox(height: 12),
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: 8),
-            const Text(
-              'Observaciones',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Observaciones'),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
             ),
             const SizedBox(height: 2),
             Text(
@@ -662,7 +676,7 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
               onPressed: () {
                 Navigator.of(ctx).pop(false);
               },
-              child: const Text('Cancelar'),
+              child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -733,7 +747,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
       try {
         if (mounted) {
           FiscoGestNotifications.show(
-            const SnackBar(content: Text('Registrando recepción...')),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(context, 'Registrando recepción...'),
+              ),
+            ),
           );
         }
         await marcarComoRecibida(compra.id);
@@ -782,7 +800,11 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
         if (mounted) {
           FiscoGestNotifications.show(
             SnackBar(
-              content: const Text('Compra marcada como Pagada ✅'),
+              content: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Compra marcada como Pagada ✅'),
+                ),
+              ),
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
@@ -848,7 +870,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           width: esPequena ? double.infinity : 160,
           child: ElevatedButton.icon(
             icon: const Icon(Icons.check_circle, size: 18),
-            label: const Text('Confirmar'),
+            label: Builder(
+              builder: (context) =>
+                  Text(ServicioIdioma.t(context, 'Confirmar')),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
               foregroundColor: AppColors.white,
@@ -865,7 +890,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           width: esPequena ? double.infinity : 160,
           child: ElevatedButton.icon(
             icon: const Icon(Icons.inventory, size: 18),
-            label: const Text('Marcar Recibida'),
+            label: Builder(
+              builder: (context) =>
+                  Text(ServicioIdioma.t(context, 'Marcar Recibida')),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: AppColors.white,
@@ -883,7 +911,10 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           width: esPequena ? double.infinity : 160,
           child: ElevatedButton.icon(
             icon: const Icon(Icons.payment, size: 18),
-            label: const Text('Marcar Pagada'),
+            label: Builder(
+              builder: (context) =>
+                  Text(ServicioIdioma.t(context, 'Marcar Pagada')),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
@@ -901,7 +932,9 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
           width: esPequena ? double.infinity : 160,
           child: OutlinedButton.icon(
             icon: const Icon(Icons.cancel, size: 18),
-            label: const Text('Anular'),
+            label: Builder(
+              builder: (context) => Text(ServicioIdioma.t(context, 'Anular')),
+            ),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.error,
               side: const BorderSide(color: AppColors.error),

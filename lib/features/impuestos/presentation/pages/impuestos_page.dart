@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/impuestos/presentation/providers/impuesto_providers.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/entities/impuesto_entity.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ImpuestosPage extends ConsumerStatefulWidget {
   const ImpuestosPage({super.key});
@@ -169,8 +170,8 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                     ),
                                   ),
                                   icon: const Icon(Icons.add_rounded, size: 20),
-                                  label: const Text(
-                                    'NUEVO IMPUESTO',
+                                  label: Text(
+                                    ServicioIdioma.t(context, 'NUEVO IMPUESTO'),
                                     style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -221,8 +222,8 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                     ),
                                   ),
                                   icon: const Icon(Icons.add_rounded, size: 18),
-                                  label: const Text(
-                                    'Nuevo impuesto',
+                                  label: Text(
+                                    ServicioIdioma.t(context, 'Nuevo impuesto'),
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -363,8 +364,8 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              ServicioIdioma.t(ctx, 'Cancelar'),
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -377,7 +378,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
               ),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar'),
+            child: Text(ServicioIdioma.t(ctx, 'Eliminar')),
           ),
         ],
       ),
@@ -538,9 +539,14 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
 
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Predeterminado para ventas'),
-                          subtitle: const Text(
-                            'Solo un ITBIS puede ser el de la caja',
+                          title: Text(
+                            ServicioIdioma.t(ctx, 'Predeterminado para ventas'),
+                          ),
+                          subtitle: Text(
+                            ServicioIdioma.t(
+                              ctx,
+                              'Solo un ITBIS puede ser el de la caja',
+                            ),
                           ),
                           value: esDefault,
                           onChanged: tipoSeleccionado == 'ITBIS'
@@ -549,7 +555,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                         ),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Activo'),
+                          title: Text(ServicioIdioma.t(ctx, 'Activo')),
                           value: activo,
                           onChanged: (v) => setModal(() => activo = v),
                         ),

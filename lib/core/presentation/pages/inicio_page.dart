@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
 import 'package:fiscogest_rd/features/home/presentation/pages/home_mobile_page.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Caja del dashboard: sesión abierta + efectivo esperado del turno.
 final dashboardCajaProvider =
@@ -195,7 +196,7 @@ class InicioPage extends ConsumerWidget {
                       const DashboardDesktopProto()
                     else ...[
                       Text(
-                        'Operación del día',
+                        ServicioIdioma.t(context, 'Operación del día'),
                         style: AppTypography.h4.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
@@ -203,7 +204,7 @@ class InicioPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Lo esencial, al alcance',
+                        ServicioIdioma.t(context, 'Lo esencial, al alcance'),
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -259,7 +260,7 @@ class InicioPage extends ConsumerWidget {
                       const SizedBox(height: 10),
                       _Acceso(
                         icon: Icons.more_horiz_rounded,
-                        titulo: 'Más acciones',
+                        titulo: ServicioIdioma.t(context, 'Más acciones'),
                         sub: 'Crédito · Clientes · Proveedores',
                         color: const Color(0xFF64748B),
                         onTap: () => _mostrarMasAccionesNormal(context, ref),
@@ -358,7 +359,7 @@ class InicioPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Más acciones',
+                  ServicioIdioma.t(context, 'Más acciones'),
                   style: AppTypography.h4.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
@@ -597,8 +598,8 @@ class _DashboardColmado extends StatelessWidget {
                           ),
                         ),
                         icon: const Icon(Icons.add_shopping_cart_rounded),
-                        label: const Text(
-                          'NUEVA VENTA',
+                        label: Text(
+                          ServicioIdioma.t(context, 'NUEVA VENTA'),
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.4,
@@ -611,7 +612,7 @@ class _DashboardColmado extends StatelessWidget {
               ),
               SizedBox(height: mobile ? 18 : 22),
               Text(
-                'Accesos del día',
+                ServicioIdioma.t(context, 'Accesos del día'),
                 style: AppTypography.h4.copyWith(
                   fontWeight: FontWeight.w800,
                   fontSize: mobile ? 16 : null,
@@ -619,7 +620,7 @@ class _DashboardColmado extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Todo lo que usas en el mostrador',
+                ServicioIdioma.t(context, 'Todo lo que usas en el mostrador'),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -864,8 +865,10 @@ class _HeroBanner extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Cotiza, facture con NCF, cobre en caja y gestione crédito '
-                'desde un solo lugar.',
+                ServicioIdioma.t(
+                  context,
+                  'Cotiza, facture con NCF, cobre en caja y gestione crédito desde un solo lugar.',
+                ),
                 style: AppTypography.bodySmall.copyWith(
                   color: Colors.white.withValues(alpha: 0.9),
                   height: 1.35,
@@ -1578,7 +1581,10 @@ class _InsightsCarouselState extends ConsumerState<_InsightsCarousel>
                                         onPressed:
                                             s.onAction ??
                                             widget.onNuevaCotizacion,
-                                        icon: const Icon(Icons.open_in_new, size: 18),
+                                        icon: const Icon(
+                                          Icons.open_in_new,
+                                          size: 18,
+                                        ),
                                         label: Text(s.actionLabel),
                                         style: FilledButton.styleFrom(
                                           backgroundColor: Theme.of(

@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DevolucionesPage extends ConsumerStatefulWidget {
   const DevolucionesPage({super.key});
@@ -145,21 +146,24 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
           padding: AppLayout.pantallaPadding,
           child: ListView(
             children: [
-              const Text(
-                'La devolucion emite una nota de credito y no borra la factura. Puede devolver una parte de las cantidades. En una venta a credito, la devolucion tiene que ser completa.',
+              Text(
+                ServicioIdioma.t(
+                  context,
+                  'La devolucion emite una nota de credito y no borra la factura. Puede devolver una parte de las cantidades. En una venta a credito, la devolucion tiene que ser completa.',
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _ncf,
-                decoration: const InputDecoration(
-                  labelText: 'Numero de cotizacion',
+                decoration: InputDecoration(
+                  labelText: ServicioIdioma.t(context, 'Numero de cotizacion'),
                 ),
                 onSubmitted: (_) => _buscar(),
               ),
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _busy ? null : _buscar,
-                child: const Text('Buscar factura'),
+                child: Text(ServicioIdioma.t(context, 'Buscar factura')),
               ),
               if (venta != null) ...[
                 const SizedBox(height: 16),
@@ -178,20 +182,27 @@ class _DevolucionesPageState extends ConsumerState<DevolucionesPage> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Cantidad a devolver',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        'Cantidad a devolver',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                 ],
                 TextField(
                   controller: _motivo,
-                  decoration: const InputDecoration(labelText: 'Motivo'),
+                  decoration: InputDecoration(
+                    labelText: ServicioIdioma.t(context, 'Motivo'),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
                   onPressed: _busy ? null : _emitir,
-                  child: const Text('Emitir nota de credito'),
+                  child: Text(
+                    ServicioIdioma.t(context, 'Emitir nota de credito'),
+                  ),
                 ),
               ],
             ],

@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/unidad_medida_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/unidad_medida.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class UnidadesPage extends ConsumerStatefulWidget {
   const UnidadesPage({super.key});
@@ -149,9 +150,12 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.straighten_rounded, size: 20),
-                            label: const Text(
-                              'Nueva unidad',
+                            icon: const Icon(
+                              Icons.straighten_rounded,
+                              size: 20,
+                            ),
+                            label: Text(
+                              ServicioIdioma.t(context, 'Nueva unidad'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -180,8 +184,8 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             elevation: 0,
                           ),
                           icon: const Icon(Icons.straighten_rounded, size: 20),
-                          label: const Text(
-                            'Nueva unidad',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Nueva unidad'),
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
@@ -212,11 +216,15 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -407,7 +415,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         AppButton(
           text: 'Eliminar',
@@ -486,7 +494,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                     valueListenable: esBaseN,
                     builder: (_, v, __) => SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Es unidad base'),
+                      title: Text(
+                        ServicioIdioma.t(dialogContext, 'Es unidad base'),
+                      ),
                       value: v,
                       onChanged: (nv) => esBaseN.value = nv,
                     ),
@@ -495,7 +505,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                     valueListenable: activoN,
                     builder: (_, v, __) => SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Activa'),
+                      title: Text(ServicioIdioma.t(dialogContext, 'Activa')),
                       value: v,
                       onChanged: (nv) => activoN.value = nv,
                     ),
@@ -646,7 +656,9 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancelar'),
+                        child: Text(
+                          ServicioIdioma.t(dialogContext, 'Cancelar'),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       AbsorbPointer(
@@ -832,7 +844,11 @@ class _UnidadCard extends StatelessWidget {
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: const Icon(
+              Icons.delete_outline,
+              color: AppColors.error,
+              size: 20,
+            ),
             onPressed: onDelete,
           ),
         ],

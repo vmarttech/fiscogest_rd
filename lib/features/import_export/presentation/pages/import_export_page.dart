@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/import_export/presentation/providers/import_export_providers.dart';
 import 'package:fiscogest_rd/features/import_export/data/services/import_export_service.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ImportExportPage extends ConsumerWidget {
   const ImportExportPage({super.key});
@@ -448,7 +449,7 @@ class _ExportCard extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onRespaldar,
                   icon: const Icon(Icons.backup_outlined, size: 18),
-                  label: const Text('Respaldo completo'),
+                  label: Text(ServicioIdioma.t(context, 'Respaldo completo')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -460,7 +461,7 @@ class _ExportCard extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onProductos,
                   icon: const Icon(Icons.inventory_2_outlined, size: 18),
-                  label: const Text('Productos'),
+                  label: Text(ServicioIdioma.t(context, 'Productos')),
                   style: FilledButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -474,7 +475,7 @@ class _ExportCard extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onClientes,
                   icon: const Icon(Icons.people_outline, size: 18),
-                  label: const Text('Clientes'),
+                  label: Text(ServicioIdioma.t(context, 'Clientes')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -486,7 +487,7 @@ class _ExportCard extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onProveedores,
                   icon: const Icon(Icons.business_outlined, size: 18),
-                  label: const Text('Proveedores'),
+                  label: Text(ServicioIdioma.t(context, 'Proveedores')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -626,7 +627,9 @@ class _ImportCard extends StatelessWidget {
                       FilledButton.icon(
                         onPressed: onSimular,
                         icon: const Icon(Icons.folder_open, size: 18),
-                        label: const Text('Elegir archivo CSV'),
+                        label: Text(
+                          ServicioIdioma.t(context, 'Elegir archivo CSV'),
+                        ),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.info,
                           foregroundColor: Colors.white,

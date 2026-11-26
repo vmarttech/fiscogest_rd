@@ -2,6 +2,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:drift/drift.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 import 'package:fiscogest_rd/core/interfaces/inventario_fisico_repository_interface.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_fisico.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/diferencia_conteo.dart';
@@ -217,7 +218,7 @@ class InventarioFisicoRepositoryImpl
                   tipoAjuste: tipo,
                   cantidad: d.diferencia.abs(),
                   motivo: 'Conteo físico #$conteoId',
-                                    observaciones: Value(
+                  observaciones: Value(
                     '${d.nombreProducto}: '
                     '${d.stockSistema.toStringAsFixed(2)} → '
                     '${d.stockFisico.toStringAsFixed(2)}',
@@ -255,26 +256,34 @@ class InventarioFisicoRepositoryImpl
         margin: const pw.EdgeInsets.all(32),
         build: (ctx) => [
           pw.Text(
-            'REPORTE CONTEO FÍSICO #$conteoId',
+            '${ServicioIdioma.traducirParaIdioma('REPORTE CONTEO FÍSICO #')}$conteoId',
             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
           if (cab != null) ...[
-            pw.Text('Nombre: ${cab.nombreConteo}'),
-            pw.Text('Estado: ${cab.estado.etiqueta}'),
-            pw.Text('Fecha: ${cab.fechaConteo}'),
+            pw.Text(
+              '${ServicioIdioma.traducirParaIdioma('Nombre:')} ${cab.nombreConteo}',
+            ),
+            pw.Text(
+              '${ServicioIdioma.traducirParaIdioma('Estado:')} ${ServicioIdioma.traducirParaIdioma(cab.estado.etiqueta)}',
+            ),
+            pw.Text(
+              '${ServicioIdioma.traducirParaIdioma('Fecha:')} ${cab.fechaConteo}',
+            ),
             if (cab.observaciones != null && cab.observaciones!.isNotEmpty)
-              pw.Text('Obs: ${cab.observaciones}'),
+              pw.Text(
+                '${ServicioIdioma.traducirParaIdioma('Obs:')} ${cab.observaciones}',
+              ),
           ],
           pw.SizedBox(height: 16),
           pw.TableHelper.fromTextArray(
-            headers: const [
-              'Código',
-              'Producto',
-              'Sistema',
-              'Físico',
-              'Dif',
-              'Estado',
+            headers: [
+              ServicioIdioma.traducirParaIdioma('Código'),
+              ServicioIdioma.traducirParaIdioma('Producto'),
+              ServicioIdioma.traducirParaIdioma('Sistema'),
+              ServicioIdioma.traducirParaIdioma('Físico'),
+              ServicioIdioma.traducirParaIdioma('Dif'),
+              ServicioIdioma.traducirParaIdioma('Estado'),
             ],
             data: [
               for (final d in difs)
@@ -284,7 +293,7 @@ class InventarioFisicoRepositoryImpl
                   d.stockSistema.toStringAsFixed(2),
                   d.stockFisico.toStringAsFixed(2),
                   d.diferencia.toStringAsFixed(2),
-                  d.estado,
+                  ServicioIdioma.traducirParaIdioma(d.estado),
                 ],
             ],
             headerStyle: pw.TextStyle(
@@ -295,9 +304,11 @@ class InventarioFisicoRepositoryImpl
             cellAlignment: pw.Alignment.centerLeft,
           ),
           pw.SizedBox(height: 12),
-          pw.Text('Total líneas: ${difs.length}'),
           pw.Text(
-            'Con diferencia: ${difs.where((d) => d.diferencia != 0).length}',
+            '${ServicioIdioma.traducirParaIdioma('Total líneas:')} ${difs.length}',
+          ),
+          pw.Text(
+            '${ServicioIdioma.traducirParaIdioma('Con diferencia:')} ${difs.where((d) => d.diferencia != 0).length}',
           ),
         ],
       ),

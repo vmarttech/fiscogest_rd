@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/configuracion/presentation/providers/configuracion_providers.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Hub Facturación y NC — SaaS premium (ruta real /sales).
 class FacturacionInicioPage extends ConsumerWidget {
@@ -100,9 +101,12 @@ class FacturacionInicioPage extends ConsumerWidget {
                         child: FilledButton.icon(
                           onPressed: () =>
                               context.push('/sales/emitir-factura'),
-                          icon: const Icon(Icons.receipt_long_rounded, size: 20),
-                          label: const Text(
-                            'Emitir factura',
+                          icon: const Icon(
+                            Icons.receipt_long_rounded,
+                            size: 20,
+                          ),
+                          label: Text(
+                            ServicioIdioma.t(context, 'Emitir factura'),
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
@@ -127,8 +131,8 @@ class FacturacionInicioPage extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           onPressed: () => context.push('/sales/emitir-nc'),
                           icon: const Icon(Icons.note_alt_outlined, size: 20),
-                          label: const Text(
-                            'Emitir nota de crédito',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Emitir nota de crédito'),
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 14,
@@ -150,8 +154,8 @@ class FacturacionInicioPage extends ConsumerWidget {
                         child: FilledButton.icon(
                           onPressed: () => context.push('/sales/historial'),
                           icon: const Icon(Icons.history_rounded, size: 20),
-                          label: const Text(
-                            'Ver historial',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Ver historial'),
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
@@ -395,7 +399,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: _quickLink(
-                            context: context,
+                              context: context,
                               icon: Icons.qr_code_2_rounded,
                               label: 'Secuencias',
                               onTap: () =>

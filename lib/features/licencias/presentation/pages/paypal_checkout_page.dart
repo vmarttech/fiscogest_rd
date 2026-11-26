@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:fiscogest_rd/features/licencias/domain/paypal_config.dart';
 import 'package:fiscogest_rd/features/licencias/data/paypal_service.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Resultado del checkout dentro de la app (no abre Chrome externo).
 class PaypalCheckoutResult {
@@ -154,7 +155,7 @@ class _PaypalCheckoutPageState extends State<PaypalCheckoutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pagar con PayPal'),
+        title: Text(ServicioIdioma.t(context, 'Pagar con PayPal')),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(

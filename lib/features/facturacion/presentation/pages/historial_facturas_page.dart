@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_p
 import 'package:fiscogest_rd/features/facturacion/presentation/providers/facturacion_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 final historialFacturasProvider = FutureProvider.autoDispose<List<Venta>>((
   ref,
@@ -312,7 +313,12 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                                                   motivo: n.motivo,
                                                 );
                                               },
-                                              child: const Text('Imprimir'),
+                                              child: Text(
+                                                ServicioIdioma.t(
+                                                  context,
+                                                  'Imprimir',
+                                                ),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -380,7 +386,9 @@ class _HistorialFacturasPageState extends ConsumerState<HistorialFacturasPage> {
                             }
                           },
                           icon: const Icon(Icons.print, size: 20),
-                          label: const Text('Imprimir comprobante'),
+                          label: Text(
+                            ServicioIdioma.t(context, 'Imprimir comprobante'),
+                          ),
                           style: FilledButton.styleFrom(
                             backgroundColor: Theme.of(
                               context,

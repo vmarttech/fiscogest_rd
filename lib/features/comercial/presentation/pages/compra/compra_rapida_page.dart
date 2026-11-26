@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/features/comercial/data/repositories/providers/repo
     as repo;
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 // ─── Paleta local (alineada al resto de la app) ─────────────────────────────
 class _C {
@@ -168,19 +169,34 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
       final cost = double.tryParse(l.costo.text.replaceAll(',', '.')) ?? 0;
       if (nom.isEmpty) {
         FiscoGestNotifications.show(
-          SnackBar(content: Text('Línea ${i + 1}: indica el producto')),
+          SnackBar(
+            content: Text(
+              '${ServicioIdioma.t(context, 'Línea')} ${i + 1}: '
+              '${ServicioIdioma.t(context, 'Indica el producto')}',
+            ),
+          ),
         );
         return;
       }
       if (cant <= 0) {
         FiscoGestNotifications.show(
-          SnackBar(content: Text('Línea ${i + 1}: cantidad > 0')),
+          SnackBar(
+            content: Text(
+              '${ServicioIdioma.t(context, 'Línea')} ${i + 1}: '
+              '${ServicioIdioma.t(context, 'Cantidad > 0')}',
+            ),
+          ),
         );
         return;
       }
       if (cost <= 0) {
         FiscoGestNotifications.show(
-          SnackBar(content: Text('Línea ${i + 1}: costo > 0')),
+          SnackBar(
+            content: Text(
+              '${ServicioIdioma.t(context, 'Línea')} ${i + 1}: '
+              '${ServicioIdioma.t(context, 'Costo > 0')}',
+            ),
+          ),
         );
         return;
       }
@@ -361,7 +377,10 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.primary,
+          width: 1.5,
+        ),
       ),
       suffixIcon: suffix,
     );
@@ -406,8 +425,8 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Registro express',
+                        Text(
+                          ServicioIdioma.t(context, 'Registro express'),
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
@@ -453,8 +472,8 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                       ),
                     ),
                     icon: const Icon(Icons.add_circle_outline, size: 18),
-                    label: const Text(
-                      'Agregar otra línea',
+                    label: Text(
+                      ServicioIdioma.t(context, 'Agregar otra línea'),
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -482,8 +501,8 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                     children: [
                       Row(
                         children: [
-                          const Text(
-                            'Total',
+                          Text(
+                            ServicioIdioma.t(context, 'Total'),
                             style: TextStyle(
                               fontSize: 13,
                               color: _C.muted,
@@ -509,10 +528,12 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                         child: FilledButton(
                           onPressed: _guardando ? null : _registrarYConfirmar,
                           style: FilledButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(
-                              alpha: 0.5,
-                            ),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            disabledBackgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.5),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -626,12 +647,14 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                   ),
                 )
               else
-                const Text(
-                  'Producto',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: _C.muted,
+                Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Producto'),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _C.muted,
+                    ),
                   ),
                 ),
               const Spacer(),
@@ -898,7 +921,10 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -1021,7 +1047,9 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primaryContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
@@ -1045,7 +1073,7 @@ class _SelectorProductoSheetState extends State<_SelectorProductoSheet> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 11, color: _C.muted),
-                          ),
+                        ),
                         trailing: const Icon(
                           Icons.chevron_right_rounded,
                           color: _C.muted,

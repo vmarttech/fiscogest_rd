@@ -14,6 +14,7 @@ import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pdf/comprobante_pdf.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class MostrarDetalleVenta extends ConsumerWidget {
   const MostrarDetalleVenta({super.key, required this.venta});
@@ -129,8 +130,10 @@ class MostrarDetalleVenta extends ConsumerWidget {
       if (v.detalles.isEmpty) {
         if (context.mounted) {
           FiscoGestNotifications.show(
-            const SnackBar(
-              content: Text('Sin líneas de producto.'),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(context, 'Sin líneas de producto.'),
+              ),
               backgroundColor: AppColors.warning,
               behavior: SnackBarBehavior.floating,
             ),
@@ -159,12 +162,12 @@ class MostrarDetalleVenta extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Enviar al cliente'),
+        title: Text(ServicioIdioma.t(ctx, 'Enviar al cliente')),
         content: TextField(
           controller: correoCtrl,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'Correo del cliente',
+          decoration: InputDecoration(
+            labelText: ServicioIdioma.t(ctx, 'Correo del cliente'),
             hintText: 'cliente@correo.com',
             border: OutlineInputBorder(),
           ),
@@ -172,11 +175,11 @@ class MostrarDetalleVenta extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Enviar'),
+            child: Text(ServicioIdioma.t(ctx, 'Enviar')),
           ),
         ],
       ),
@@ -185,8 +188,8 @@ class MostrarDetalleVenta extends ConsumerWidget {
     final correo = correoCtrl.text.trim();
     if (correo.isEmpty || !correo.contains('@')) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Indique un correo válido'),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Indique un correo válido')),
           backgroundColor: AppColors.warning,
           behavior: SnackBarBehavior.floating,
         ),
@@ -277,7 +280,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
     }
 
     Widget sectionTitle(String s) => Text(
-      s,
+      ServicioIdioma.t(context, s),
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w800,

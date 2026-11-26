@@ -27,6 +27,7 @@ import 'package:fiscogest_rd/features/creditos/presentation/widgets/formulario_c
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class VistaInicioVacia extends ConsumerStatefulWidget {
   const VistaInicioVacia({super.key});
@@ -299,7 +300,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                   child: TextButton.icon(
                     onPressed: _cerrarFormularioCredito,
                     icon: const Icon(Icons.arrow_back),
-                    label: const Text('Volver'),
+                    label: Text(ServicioIdioma.t(context, 'Volver')),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -446,7 +447,7 @@ class _VistaInicioVaciaState extends ConsumerState<VistaInicioVacia> {
                           foregroundColor: AppColors.warning,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                        child: const Text('Cambiar'),
+                        child: Text(ServicioIdioma.t(context, 'Cambiar')),
                       ),
                     ],
                   ),
@@ -1042,7 +1043,12 @@ class _PosFlujoBanner extends StatelessWidget {
     );
   }
 
-  Widget _paso(BuildContext context, IconData icon, String label, {bool compact = false}) {
+  Widget _paso(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    bool compact = false,
+  }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,

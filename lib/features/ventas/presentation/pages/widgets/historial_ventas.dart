@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_ventas.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Historial de ventas — en PC alineado al Dashboard; en móvil vista compacta.
 class HistorialVentas extends ConsumerStatefulWidget {
@@ -428,7 +429,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                         }
                       },
                       icon: const Icon(Icons.arrow_back, size: 18),
-                      label: const Text('Volver'),
+                      label: Text(ServicioIdioma.t(context, 'Volver')),
                     ),
                   ],
                 ),
@@ -457,7 +458,7 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                             .read(ventasNavegacionProvider.notifier)
                             .cambiarVista(VistaActual.inicio),
                         icon: const Icon(Icons.arrow_back, size: 18),
-                        label: const Text('Volver'),
+                        label: Text(ServicioIdioma.t(context, 'Volver')),
                       ),
                     ],
                   ),
@@ -548,7 +549,10 @@ class _HistorialVentasState extends ConsumerState<HistorialVentas> {
                                     decoration: InputDecoration(
                                       hintText:
                                           'Buscar por número, cliente o NCF…',
-                                      prefixIcon: const Icon(Icons.search, size: 20),
+                                      prefixIcon: const Icon(
+                                        Icons.search,
+                                        size: 20,
+                                      ),
                                       isDense: true,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),

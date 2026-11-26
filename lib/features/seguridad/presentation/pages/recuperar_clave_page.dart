@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/seguridad/data/auth_service.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class RecuperarClavePage extends ConsumerStatefulWidget {
   const RecuperarClavePage({super.key});
@@ -99,8 +100,10 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
       }
       if (!mounted) return;
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Contraseña actualizada. Inicie sesión.'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Contraseña actualizada. Inicie sesión.'),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -126,7 +129,7 @@ class _RecuperarClavePageState extends ConsumerState<RecuperarClavePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
-        title: const Text('Recuperar contraseña'),
+        title: Text(ServicioIdioma.t(context, 'Recuperar contraseña')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),

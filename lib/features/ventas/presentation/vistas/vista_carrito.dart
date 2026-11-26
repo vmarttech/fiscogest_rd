@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/contenedor/enums_venta
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/ventas_navegacion_provider.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class VistaCarrito extends ConsumerWidget {
   const VistaCarrito({super.key});
@@ -95,7 +96,7 @@ class VistaCarrito extends ConsumerWidget {
                 icon: const Icon(Icons.delete_outline, size: 18),
                 label: isMobile
                     ? const SizedBox.shrink()
-                    : const Text('Vaciar'),
+                    : Text(ServicioIdioma.t(context, 'Vaciar')),
                 style: TextButton.styleFrom(foregroundColor: AppColors.error),
               ),
             ],

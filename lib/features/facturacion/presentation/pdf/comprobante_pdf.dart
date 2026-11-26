@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:fiscogest_rd/core/print/print_formats.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
@@ -863,35 +864,37 @@ class ComprobantePdf {
           pw.SizedBox(height: 12),
           pw.Center(
             child: pw.Text(
-              'COMPROBANTE DE ENTREGA',
+              ServicioIdioma.traducirParaIdioma('COMPROBANTE DE ENTREGA'),
               style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
             ),
           ),
           pw.SizedBox(height: 4),
           pw.Center(
             child: pw.Text(
-              'Uso: despacho / delivery — no es comprobante fiscal',
+              ServicioIdioma.traducirParaIdioma(
+                'Uso: despacho / delivery — no es comprobante fiscal',
+              ),
               style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
             ),
           ),
           pw.SizedBox(height: 14),
           pw.Divider(),
           pw.Text(
-            'Ref. cotización: $cot',
+            '${ServicioIdioma.traducirParaIdioma('Ref. cotización:')} $cot',
             style: const pw.TextStyle(fontSize: 10),
           ),
           if (ncf.isNotEmpty)
             pw.Text(
-              'Ref. factura: $ncf',
+              '${ServicioIdioma.traducirParaIdioma('Ref. factura:')} $ncf',
               style: const pw.TextStyle(fontSize: 10),
             ),
           pw.Text(
-            'Fecha: ${_fecha.format(v.fecha)}',
+            '${ServicioIdioma.traducirParaIdioma('Fecha:')} ${_fecha.format(v.fecha)}',
             style: const pw.TextStyle(fontSize: 10),
           ),
           pw.SizedBox(height: 12),
           pw.Text(
-            'ENTREGAR A',
+            ServicioIdioma.traducirParaIdioma('ENTREGAR A'),
             style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 4),
@@ -900,30 +903,35 @@ class ComprobantePdf {
             style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if (tel.isNotEmpty)
-            pw.Text('Teléfono: $tel', style: const pw.TextStyle(fontSize: 10)),
+            pw.Text(
+              '${ServicioIdioma.traducirParaIdioma('Teléfono:')} $tel',
+              style: const pw.TextStyle(fontSize: 10),
+            ),
           if (wa.isNotEmpty)
             pw.Text('WhatsApp: $wa', style: const pw.TextStyle(fontSize: 10)),
           pw.SizedBox(height: 6),
           pw.Text(
-            'Dirección de entrega:',
+            ServicioIdioma.traducirParaIdioma('Dirección de entrega:'),
             style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
           ),
           pw.Text(
             dir.isNotEmpty
                 ? dir
-                : '(Sin dirección registrada — completar a mano)',
+                : ServicioIdioma.traducirParaIdioma(
+                    '(Sin dirección registrada — completar a mano)',
+                  ),
             style: const pw.TextStyle(fontSize: 11),
           ),
           pw.SizedBox(height: 14),
           pw.Text(
-            'ARTÍCULOS A ENTREGAR',
+            ServicioIdioma.traducirParaIdioma('ARTÍCULOS A ENTREGAR'),
             style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 6),
           _tablaEntrega(v.detalles),
           pw.SizedBox(height: 8),
           pw.Text(
-            'Cantidad de líneas: ${v.detalles.length}',
+            '${ServicioIdioma.traducirParaIdioma('Cantidad de líneas:')} ${v.detalles.length}',
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           ),
           pw.SizedBox(height: 28),
@@ -933,7 +941,9 @@ class ComprobantePdf {
           ),
           pw.SizedBox(height: 8),
           pw.Text(
-            'Recibí conforme la mercancía descrita, en buen estado.',
+            ServicioIdioma.traducirParaIdioma(
+              'Recibí conforme la mercancía descrita, en buen estado.',
+            ),
             style: const pw.TextStyle(fontSize: 9),
           ),
           pw.SizedBox(height: 36),
@@ -942,22 +952,24 @@ class ComprobantePdf {
             children: [
               pw.Expanded(
                 child: _bloqueFirmaEntrega(
-                  'Firma del cliente',
-                  'Nombre: _________________',
+                  ServicioIdioma.traducirParaIdioma('Firma del cliente'),
+                  '${ServicioIdioma.traducirParaIdioma('Nombre:')} _________________',
                 ),
               ),
               pw.SizedBox(width: 24),
               pw.Expanded(
                 child: _bloqueFirmaEntrega(
-                  'Firma quien entrega',
-                  'Nombre: _________________',
+                  ServicioIdioma.traducirParaIdioma('Firma quien entrega'),
+                  '${ServicioIdioma.traducirParaIdioma('Nombre:')} _________________',
                 ),
               ),
             ],
           ),
           pw.SizedBox(height: 16),
           pw.Text(
-            'Fecha/hora entrega: ____ / ____ / ________   Hora: ____ : ____',
+            ServicioIdioma.traducirParaIdioma(
+              'Fecha/hora entrega: ____ / ____ / ________   Hora: ____ : ____',
+            ),
             style: const pw.TextStyle(fontSize: 9),
           ),
           pw.SizedBox(height: 8),
@@ -997,9 +1009,20 @@ class ComprobantePdf {
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColors.grey200),
           children: [
-            _celdaEntrega('Descripción', bold: true),
-            _celdaEntrega('Cant.', bold: true, align: pw.TextAlign.center),
-            _celdaEntrega('Unidad', bold: true, align: pw.TextAlign.center),
+            _celdaEntrega(
+              ServicioIdioma.traducirParaIdioma('Descripción'),
+              bold: true,
+            ),
+            _celdaEntrega(
+              ServicioIdioma.traducirParaIdioma('Cant.'),
+              bold: true,
+              align: pw.TextAlign.center,
+            ),
+            _celdaEntrega(
+              ServicioIdioma.traducirParaIdioma('Unidad'),
+              bold: true,
+              align: pw.TextAlign.center,
+            ),
           ],
         ),
         ...detalles.map((d) {

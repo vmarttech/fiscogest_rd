@@ -17,6 +17,7 @@ import 'package:fiscogest_rd/features/licencias/presentation/pages/paypal_checko
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/campanas/data/oferta_reserva_pago_store.dart';
 import 'package:fiscogest_rd/features/campanas/presentation/providers/campanas_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Compra: solo PayPal en USD. PC sin AppBar; móvil con AppBar + scroll.
 class LicenciaComprarPage extends ConsumerStatefulWidget {
@@ -260,8 +261,8 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Pago por depósito o transferencia',
+                Text(
+                  ServicioIdioma.t(ctx, 'Pago por depósito o transferencia'),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -269,8 +270,11 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Elige el plan. Se generará tu referencia FG- y verás las cuentas para depositar.',
+                Text(
+                  ServicioIdioma.t(
+                    ctx,
+                    'Elige el plan. Se generará tu referencia FG- y verás las cuentas para depositar.',
+                  ),
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.35,
@@ -387,8 +391,8 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Tu referencia de pago',
+                Text(
+                  ServicioIdioma.t(ctx, 'Tu referencia de pago'),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -460,8 +464,8 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Cuentas para depositar',
+                Text(
+                  ServicioIdioma.t(ctx, 'Cuentas para depositar'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -523,7 +527,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                               );
                             },
                             icon: const Icon(Icons.copy, size: 16),
-                            label: const Text('Copiar dato'),
+                            label: Text(ServicioIdioma.t(ctx, 'Copiar dato')),
                           ),
                         ),
                       ],
@@ -533,7 +537,9 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Ya pagué · Activar con mi FG-'),
+                  child: Text(
+                    ServicioIdioma.t(ctx, 'Ya pagué · Activar con mi FG-'),
+                  ),
                 ),
               ],
             );
@@ -586,8 +592,8 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                       ),
                       tooltip: 'Volver',
                     ),
-                    const Text(
-                      'Planes y pago',
+                    Text(
+                      ServicioIdioma.t(context, 'Planes y pago'),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -668,8 +674,11 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                             maxWidth: contentW - padH * 2,
                           ),
                           const SizedBox(height: 20),
-                          const Text(
-                            'Tras el pago, la licencia se activa sola. No hace falta enviar comprobantes.',
+                          Text(
+                            ServicioIdioma.t(
+                              context,
+                              'Tras el pago, la licencia se activa sola. No hace falta enviar comprobantes.',
+                            ),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: AppColors.textSecondary,
@@ -697,8 +706,11 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: const Text(
-                                '¿Prefieres depósito o transferencia? Generar código FG-',
+                              child: Text(
+                                ServicioIdioma.t(
+                                  context,
+                                  '¿Prefieres depósito o transferencia? Generar código FG-',
+                                ),
                               ),
                             ),
                           ),
@@ -981,8 +993,8 @@ class _PriceCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Tu plan actual',
+                    child: Text(
+                      ServicioIdioma.t(context, 'Tu plan actual'),
                       style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                   )

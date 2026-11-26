@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_card.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class RegistrarSalidaPage extends ConsumerStatefulWidget {
   const RegistrarSalidaPage({
@@ -59,8 +60,13 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
     if (cantidad == null || cantidad <= 0) {
       if (mounted) {
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('Ingrese una cantidad válida mayor a cero'),
+          SnackBar(
+            content: Text(
+              ServicioIdioma.t(
+                context,
+                'Ingrese una cantidad válida mayor a cero',
+              ),
+            ),
           ),
         );
       }
@@ -127,8 +133,11 @@ class _RegistrarSalidaPageState extends ConsumerState<RegistrarSalidaPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Retiro de mercancía',
+                              Text(
+                                ServicioIdioma.t(
+                                  context,
+                                  'Retiro de mercancía',
+                                ),
                                 style: AppTypography.h4,
                               ),
                               AppLayout.vXs,

@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/categoria_providers.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/categoria.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class CategoriasPage extends ConsumerStatefulWidget {
   const CategoriasPage({super.key});
@@ -150,8 +151,8 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                               elevation: 0,
                             ),
                             icon: const Icon(Icons.category_outlined, size: 20),
-                            label: const Text(
-                              'Nueva categoría',
+                            label: Text(
+                              ServicioIdioma.t(context, 'Nueva categoría'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -180,8 +181,8 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                             elevation: 0,
                           ),
                           icon: const Icon(Icons.category_outlined, size: 20),
-                          label: const Text(
-                            'Nueva categoría',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Nueva categoría'),
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
@@ -212,11 +213,15 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -375,7 +380,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         AppButton(
           text: 'Eliminar',
@@ -454,18 +459,25 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                           ref.read(categoriaControllerProvider).valueOrNull ??
                           [];
                       return InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Categoría padre (opcional)',
+                        decoration: InputDecoration(
+                          labelText: ServicioIdioma.t(
+                            dialogContext,
+                            'Categoría padre (opcional)',
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<int?>(
                             isExpanded: true,
                             value: padre,
-                            hint: const Text('Ninguna (raíz)'),
+                            hint: Text(
+                              ServicioIdioma.t(dialogContext, 'Ninguna (raíz)'),
+                            ),
                             items: [
-                              const DropdownMenuItem<int?>(
+                              DropdownMenuItem<int?>(
                                 value: null,
-                                child: Text('Ninguna (raíz)'),
+                                child: Text(
+                                  ServicioIdioma.t(context, 'Ninguna (raíz)'),
+                                ),
                               ),
                               for (final c in cats)
                                 if (c.id != null && c.id != categoriaToEdit?.id)
@@ -490,7 +502,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     valueListenable: activoN,
                     builder: (_, v, __) => SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Activa'),
+                      title: Text(ServicioIdioma.t(dialogContext, 'Activa')),
                       value: v,
                       onChanged: (nv) => activoN.value = nv,
                     ),
@@ -591,7 +603,9 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancelar'),
+                        child: Text(
+                          ServicioIdioma.t(dialogContext, 'Cancelar'),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       AbsorbPointer(
@@ -765,7 +779,11 @@ class _CategoriaCard extends StatelessWidget {
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: const Icon(
+              Icons.delete_outline,
+              color: AppColors.error,
+              size: 20,
+            ),
             onPressed: onDelete,
           ),
         ],

@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class LicenciaActivarPage extends ConsumerStatefulWidget {
   const LicenciaActivarPage({super.key});
@@ -127,7 +128,10 @@ class _LicenciaActivarPageState extends ConsumerState<LicenciaActivarPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Referencia', style: AppTypography.labelLarge),
+                Text(
+                  ServicioIdioma.t(context, 'Referencia'),
+                  style: AppTypography.labelLarge,
+                ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _ctrl,

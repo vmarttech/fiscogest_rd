@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/core/navigation/safe_back.dart';
 import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 final listadoCuentasCobrarProvider =
     FutureProvider.family<List<CuentaCobrarItem>, int>((
@@ -189,7 +190,7 @@ class _CobrarPageState extends ConsumerState<CobrarPage> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: AppColors.white,
               ),
-              child: const Text('NUEVO CRÉDITO'),
+              child: Text(ServicioIdioma.t(context, 'NUEVO CRÉDITO')),
             ),
           ),
       ],

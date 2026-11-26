@@ -13,6 +13,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class LicenciaAdminPedidosPage extends ConsumerStatefulWidget {
   const LicenciaAdminPedidosPage({super.key});
@@ -335,7 +336,9 @@ class _LicenciaAdminPedidosPageState
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  child: const Text('Pagado'),
+                                  child: Text(
+                                    ServicioIdioma.t(context, 'Pagado'),
+                                  ),
                                 ),
                             ],
                           ),

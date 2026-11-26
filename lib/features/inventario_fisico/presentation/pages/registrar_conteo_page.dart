@@ -9,6 +9,7 @@ import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_fisico.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Nuevo Conteo Físico — 3 columnas desktop / stack móvil.
 /// Tarjetas interactivas (no decoración). Texto en negrita.
@@ -32,7 +33,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
   static const _border = Color(0xFFE2E8F0);
   static const _textPrimary = Color(0xFF0F172A);
   static const _textMuted = Color(0xFF475569);
-  
+
   @override
   void dispose() {
     _nombreCtrl.dispose();
@@ -42,16 +43,36 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
 
   String _fmtFechaLarga(DateTime d) {
     const meses = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
     ];
     return '${d.day} de ${meses[d.month - 1]} ${d.year}';
   }
 
   String _fmtFechaCorta(DateTime d) {
     const meses = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
     ];
     return '${d.day} ${meses[d.month - 1]} ${d.year}';
   }
@@ -138,7 +159,10 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         ),
       );
     } finally {
-      if (mounted) setState(() { _cargando = false; });
+      if (mounted)
+        setState(() {
+          _cargando = false;
+        });
     }
   }
 
@@ -156,10 +180,12 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
     conteosAsync.whenData((lista) {
       totalConteos = lista.length;
       abiertos = lista
-          .where((c) =>
-              c.estado == EstadoConteo.pendiente ||
-              c.estado == EstadoConteo.abierto ||
-              c.estado == EstadoConteo.enProceso)
+          .where(
+            (c) =>
+                c.estado == EstadoConteo.pendiente ||
+                c.estado == EstadoConteo.abierto ||
+                c.estado == EstadoConteo.enProceso,
+          )
           .length;
       if (lista.isNotEmpty) {
         final sorted = [...lista]
@@ -273,12 +299,17 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.tertiary],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.tertiary,
+              ],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.35),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -367,7 +398,9 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: active ? Theme.of(context).colorScheme.primary : _textMuted,
+              color: active
+                  ? Theme.of(context).colorScheme.primary
+                  : _textMuted,
             ),
           ),
         ),
@@ -385,12 +418,14 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Datos de Sesión',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-            color: _textPrimary,
+        Builder(
+          builder: (context) => Text(
+            ServicioIdioma.t(context, 'Datos de Sesión'),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+              color: _textPrimary,
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -424,14 +459,14 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               ? null
               : '${ultimo.nombreConteo} · ${ultimo.estado.etiqueta}',
           trailing: ultimo?.id != null
-              ? const Icon(Icons.chevron_right_rounded,
-                  color: Color(0xFF94A3B8))
+              ? const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF94A3B8),
+                )
               : null,
           onTap: ultimo?.id == null
               ? () => context.push('/inventario-fisico/listar')
-              : () => context.push(
-                    '/inventario-fisico/capturar/${ultimo!.id}',
-                  ),
+              : () => context.push('/inventario-fisico/capturar/${ultimo!.id}'),
         ),
       ],
     );
@@ -554,8 +589,11 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: Icon(Icons.edit_note_rounded,
-                    color: Theme.of(context).colorScheme.primary, size: 20),
+                child: Icon(
+                  Icons.edit_note_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -652,7 +690,9 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                disabledBackgroundColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.5),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -712,7 +752,10 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(11),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.6),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.6,
+              ),
             ),
           ),
         ),
@@ -746,12 +789,14 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Guías Operativas',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              color: _textPrimary,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Guías Operativas'),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: _textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -800,29 +845,26 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             },
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Estadísticas Rápidas',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-              color: _textPrimary,
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(context, 'Estadísticas Rápidas'),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: _textPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 10),
           _statCard(
             icon: Icons.check_circle_outline_rounded,
             label: 'Conteo anterior',
-            value: ultimo == null
-                ? 'Ninguno'
-                : ultimo.estado.etiqueta,
-            color: ultimo == null
-                ? _textMuted
-                : const Color(0xFF16A34A),
+            value: ultimo == null ? 'Ninguno' : ultimo.estado.etiqueta,
+            color: ultimo == null ? _textMuted : const Color(0xFF16A34A),
             onTap: ultimo?.id == null
                 ? () => context.push('/inventario-fisico/listar')
-                : () => context.push(
-                      '/inventario-fisico/capturar/${ultimo!.id}',
-                    ),
+                : () =>
+                      context.push('/inventario-fisico/capturar/${ultimo!.id}'),
           ),
           const SizedBox(height: 8),
           _statCard(
@@ -832,9 +874,8 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
             color: const Color(0xFF2563EB),
             onTap: ultimo?.id == null
                 ? null
-                : () => context.push(
-                      '/diferencias-conteo-fisico/${ultimo!.id}',
-                    ),
+                : () =>
+                      context.push('/diferencias-conteo-fisico/${ultimo!.id}'),
           ),
           const SizedBox(height: 8),
           _statCard(
@@ -846,9 +887,8 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                 : const Color(0xFF16A34A),
             onTap: ultimo?.id == null
                 ? null
-                : () => context.push(
-                      '/diferencias-conteo-fisico/${ultimo!.id}',
-                    ),
+                : () =>
+                      context.push('/diferencias-conteo-fisico/${ultimo!.id}'),
           ),
           const SizedBox(height: 8),
           _statCard(
@@ -874,7 +914,11 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                icon,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -888,8 +932,11 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
                 ),
               ),
               if (onTap != null)
-                const Icon(Icons.chevron_right,
-                    size: 16, color: Color(0xFF94A3B8)),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: Color(0xFF94A3B8),
+                ),
             ],
           ),
         ),

@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/compra/dashboard_compras_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/lista_cuentas_pagar_page.dart';
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class DashboardComprasPage extends ConsumerStatefulWidget {
   const DashboardComprasPage({super.key});
@@ -101,9 +102,14 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
             ),
             onPressed: () => context.push('/compras/registrar'),
             icon: const Icon(Icons.add_rounded, size: 20),
-            label: const Text(
-              'Registrar compra',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            label: Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Registrar compra'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
+              ),
             ),
           ),
         ),
@@ -158,12 +164,14 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
         const SizedBox(height: 18),
 
         // ── Accesos ──
-        const Text(
-          'Operaciones',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+        Builder(
+          builder: (context) => Text(
+            ServicioIdioma.t(context, 'Operaciones'),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -221,9 +229,11 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text(
-                'Ver todo',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              child: Builder(
+                builder: (context) => Text(
+                  ServicioIdioma.t(context, 'Ver todo'),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                ),
               ),
             ),
           ],
@@ -547,12 +557,17 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                             data: (k) => Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                const Text(
-                                  'Métricas Consolidadas',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                Builder(
+                                  builder: (context) => Text(
+                                    ServicioIdioma.t(
+                                      context,
+                                      'Métricas Consolidadas',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF64748B),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -584,12 +599,17 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                   Icons.schedule,
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
-                                  'Filtros de actividad',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF64748B),
+                                Builder(
+                                  builder: (context) => Text(
+                                    ServicioIdioma.t(
+                                      context,
+                                      'Filtros de actividad',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF64748B),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -668,13 +688,15 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'OPERACIONES',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF94A3B8),
-                                letterSpacing: 0.6,
+                            Builder(
+                              builder: (context) => Text(
+                                ServicioIdioma.t(context, 'OPERACIONES'),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF94A3B8),
+                                  letterSpacing: 0.6,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -716,13 +738,18 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text(
-                                'ACTIVIDAD RECIENTE  (↑ ↓ para navegar)',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF94A3B8),
-                                  letterSpacing: 0.5,
+                              Builder(
+                                builder: (context) => Text(
+                                  ServicioIdioma.t(
+                                    context,
+                                    'ACTIVIDAD RECIENTE  (↑ ↓ para navegar)',
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF94A3B8),
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -984,11 +1011,16 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                               const Divider(height: 10),
                               Row(
                                 children: [
-                                  const Text(
-                                    'Operaciones sobre fila activa:',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF64748B),
+                                  Builder(
+                                    builder: (context) => Text(
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Operaciones sobre fila activa:',
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Color(0xFF64748B),
+                                      ),
                                     ),
                                   ),
                                   const Spacer(),
@@ -996,11 +1028,13 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     onPressed: () => context.goNamed(
                                       ListaCuentasPagarPage.routeName,
                                     ),
-                                    child: const Text(
-                                      '[F2] Pagar',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
+                                    child: Builder(
+                                      builder: (context) => Text(
+                                        ServicioIdioma.t(context, '[F2] Pagar'),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1008,11 +1042,13 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     onPressed: () => context.goNamed(
                                       ListaCuentasPagarPage.routeName,
                                     ),
-                                    child: const Text(
-                                      '[F3] Abono',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
+                                    child: Builder(
+                                      builder: (context) => Text(
+                                        ServicioIdioma.t(context, '[F3] Abono'),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1086,12 +1122,14 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Total Pendientes',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF64748B),
+                        Builder(
+                          builder: (context) => Text(
+                            ServicioIdioma.t(context, 'Total Pendientes'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF64748B),
+                            ),
                           ),
                         ),
                         Text(
@@ -1157,11 +1195,16 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Comprobante Fiscal NCF',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Color(0xFF94A3B8),
+                                Builder(
+                                  builder: (context) => Text(
+                                    ServicioIdioma.t(
+                                      context,
+                                      'Comprobante Fiscal NCF',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ),
                                 Text(
@@ -1190,11 +1233,16 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Balance Liquidado',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Color(0xFF94A3B8),
+                                Builder(
+                                  builder: (context) => Text(
+                                    ServicioIdioma.t(
+                                      context,
+                                      'Balance Liquidado',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ),
                                 Text(

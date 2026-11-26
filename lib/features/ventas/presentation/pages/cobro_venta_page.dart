@@ -37,6 +37,7 @@ import 'package:fiscogest_rd/features/creditos/data/dao/pronto_pago_acuerdos_dao
 import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/services/recibo_digital_service.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class CobroVentaPage extends ConsumerStatefulWidget {
   const CobroVentaPage({super.key});
@@ -323,20 +324,20 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'imprimir'),
-            child: const Text('Imprimir'),
+            child: Text(ServicioIdioma.t(ctx, 'Imprimir')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'enviar'),
-            child: const Text('Enviar PDF'),
+            child: Text(ServicioIdioma.t(ctx, 'Enviar PDF')),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, 'recibo_digital'),
             icon: const Icon(Icons.chat_outlined, size: 18),
-            label: const Text('Recibo digital'),
+            label: Text(ServicioIdioma.t(ctx, 'Recibo digital')),
           ),
         ],
       ),
@@ -475,8 +476,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     if (!DgiiRncConsultaService.esFormatoValido(raw)) {
       if (!mounted) return;
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Ingrese RNC (9) o cédula (11 dígitos)'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Ingrese RNC (9) o cédula (11 dígitos)'),
+          ),
           backgroundColor: AppColors.warning,
         ),
       );
@@ -613,7 +616,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     } catch (errorEcfe) {
       if (mounted) {
         FiscoGestNotifications.show(
-          SnackBar(content: Text('e-CF no quedó listo: $errorEcfe')),
+          SnackBar(
+            content: Text(
+              ServicioIdioma.t(context, 'e-CF no quedó listo: $errorEcfe'),
+            ),
+          ),
         );
       }
     }
@@ -670,8 +677,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
 
     if (ventaId <= 0) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Seleccione una cotización'),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Seleccione una cotización')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -814,22 +821,32 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text('Cobro completado'),
+            title: Text(ServicioIdioma.t(ctx, 'Cobro completado')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'N° Factura: $numeroFactura',
+                  ServicioIdioma.t(context, 'N° Factura: $numeroFactura'),
                   style: AppTypography.bodyMedium.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text('Ref. Cotización: ${venta.numeroCotizacion}'),
+                Text(
+                  ServicioIdioma.t(
+                    context,
+                    'Ref. Cotización: ${venta.numeroCotizacion}',
+                  ),
+                ),
                 if (esCredito) ...[
                   const SizedBox(height: 8),
-                  Text('Abono: ${formatRd(estado.abono)}'),
+                  Text(
+                    ServicioIdioma.t(
+                      context,
+                      'Abono: ${formatRd(estado.abono)}',
+                    ),
+                  ),
                   Text('Saldo: ${formatRd(saldo)}'),
                 ],
               ],
@@ -837,12 +854,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Más tarde'),
+                child: Text(ServicioIdioma.t(ctx, 'Más tarde')),
               ),
               FilledButton.icon(
                 onPressed: () => Navigator.pop(ctx, true),
                 icon: const Icon(Icons.receipt_long_outlined, size: 18),
-                label: const Text('Imprimir / enviar'),
+                label: Text(ServicioIdioma.t(ctx, 'Imprimir / enviar')),
               ),
             ],
           );
@@ -1013,8 +1030,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final monto = _parseMontoCobro(_cxcMontoController.text) ?? 0;
     if (monto <= 0) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Indique un monto válido'),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Indique un monto válido')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -1184,8 +1201,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
     final sesion = await repo.obtenerSesionAbierta();
     if (sesion == null || !mounted) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('No hay sesión de caja abierta.'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'No hay sesión de caja abierta.'),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1300,8 +1319,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Esperado en Caja',
+                                  Text(
+                                    ServicioIdioma.t(ctx, 'Esperado en Caja'),
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
@@ -1334,8 +1353,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Conteo Físico',
+                                  Text(
+                                    ServicioIdioma.t(ctx, 'Conteo Físico'),
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
@@ -1392,8 +1411,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Denominaciones (RD\$)',
+                      Text(
+                        ServicioIdioma.t(ctx, 'Denominaciones (RD\$)'),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
@@ -1561,8 +1580,10 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
         }
       } else {
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('No se pudo cerrar la sesión.'),
+          SnackBar(
+            content: Text(
+              ServicioIdioma.t(context, 'No se pudo cerrar la sesión.'),
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -1991,7 +2012,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     alignment: Alignment.centerRight,
                                     child: TextButton(
                                       onPressed: _limpiarTicket,
-                                      child: const Text('Cambiar ticket (Esc)'),
+                                      child: Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Cambiar ticket (Esc)',
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -2034,7 +2060,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     alignment: Alignment.centerRight,
                                     child: TextButton(
                                       onPressed: _limpiarTicket,
-                                      child: const Text('Cambiar cuenta (Esc)'),
+                                      child: Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Cambiar cuenta (Esc)',
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -2340,7 +2371,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                 .toStringAsFixed(2);
                                             setState(() {});
                                           },
-                                          child: const Text('1 cuota'),
+                                          child: Text(
+                                            ServicioIdioma.t(
+                                              context,
+                                              '1 cuota',
+                                            ),
+                                          ),
                                         ),
                                         if (_cxcProntoPago != null)
                                           TextButton(
@@ -2353,7 +2389,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                   m.toStringAsFixed(2);
                                               setState(() {});
                                             },
-                                            child: const Text('Liquidar PP'),
+                                            child: Text(
+                                              ServicioIdioma.t(
+                                                context,
+                                                'Liquidar PP',
+                                              ),
+                                            ),
                                           ),
                                         TextButton(
                                           onPressed: () {
@@ -2365,7 +2406,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                 .toStringAsFixed(2);
                                             setState(() {});
                                           },
-                                          child: const Text('Saldo total'),
+                                          child: Text(
+                                            ServicioIdioma.t(
+                                              context,
+                                              'Saldo total',
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -2449,7 +2495,9 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                                 montoCobrar.toStringAsFixed(2);
                                             setState(() {});
                                           },
-                                          child: const Text('Exacto'),
+                                          child: Text(
+                                            ServicioIdioma.t(context, 'Exacto'),
+                                          ),
                                         ),
                                         const Spacer(),
                                         Text(
@@ -2582,8 +2630,11 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  const Text(
-                                    'Atajos: F2 Buscar · F3 Cotiz · F6 CxC · F4 Arqueo · F12 Cobrar · Esc Limpiar',
+                                  Text(
+                                    ServicioIdioma.t(
+                                      context,
+                                      'Atajos: F2 Buscar · F3 Cotiz · F6 CxC · F4 Arqueo · F12 Cobrar · Esc Limpiar',
+                                    ),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 11,
@@ -2632,8 +2683,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       color: const Color(0xFF064E3B),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      'Sesión abierta',
+                    child: Text(
+                      ServicioIdioma.t(context, 'Sesión abierta'),
                       style: TextStyle(
                         color: Color(0xFF6EE7B7),
                         fontSize: 11,
@@ -2656,8 +2707,8 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       foregroundColor: const Color(0xFF94A3B8),
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                     ),
-                    child: const Text(
-                      'Arqueo (F4)',
+                    child: Text(
+                      ServicioIdioma.t(context, 'Arqueo (F4)'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -2807,9 +2858,14 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
           const SizedBox(height: 6),
         ],
         if (pend.isEmpty && cuotas.isEmpty)
-          const Text(
-            'Sin plan de cuotas — abono libre al saldo.',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+          Builder(
+            builder: (context) => Text(
+              ServicioIdioma.t(
+                context,
+                'Sin plan de cuotas — abono libre al saldo.',
+              ),
+              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+            ),
           ),
         for (final q in (pend.isEmpty ? cuotas : pend).take(12))
           Container(
@@ -3504,7 +3560,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                             runSpacing: 8,
                             children: [
                               ChoiceChip(
-                                label: const Text('B02 · Consumidor final'),
+                                label: Text(
+                                  ServicioIdioma.t(
+                                    context,
+                                    'B02 · Consumidor final',
+                                  ),
+                                ),
                                 selected: _tipoNcf == 'B02',
                                 onSelected: (sel) {
                                   if (sel) {
@@ -3515,7 +3576,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 },
                               ),
                               ChoiceChip(
-                                label: const Text('B01 · Crédito fiscal'),
+                                label: Text(
+                                  ServicioIdioma.t(
+                                    context,
+                                    'B01 · Crédito fiscal',
+                                  ),
+                                ),
                                 selected: _tipoNcf == 'B01',
                                 onSelected: (sel) {
                                   if (sel) {
@@ -3526,7 +3592,12 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 },
                               ),
                               ChoiceChip(
-                                label: const Text('B14 · Regímenes especiales'),
+                                label: Text(
+                                  ServicioIdioma.t(
+                                    context,
+                                    'B14 · Regímenes especiales',
+                                  ),
+                                ),
                                 selected: _tipoNcf == 'B14',
                                 onSelected: (sel) {
                                   if (sel) {

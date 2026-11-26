@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 const _bgCanvas = Color(0xFFF3F7F9);
 const _border = Color(0xFFE2E8F0);
@@ -336,9 +337,14 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (mobile) ...[
-            const Text(
-              'Datos personales, fiscales y contacto',
-              style: TextStyle(color: Color(0xFF334155), fontSize: 13),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(
+                  context,
+                  'Datos personales, fiscales y contacto',
+                ),
+                style: TextStyle(color: Color(0xFF334155), fontSize: 13),
+              ),
             ),
             const SizedBox(height: 10),
             if (clientes != null) _buildIndicadores(clientes),
@@ -355,9 +361,14 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   ),
                 ),
                 icon: const Icon(Icons.person_add_rounded, size: 22),
-                label: const Text(
-                  'Nuevo cliente',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                label: Builder(
+                  builder: (context) => Text(
+                    ServicioIdioma.t(context, 'Nuevo cliente'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -407,11 +418,13 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                       ),
                     ),
                     icon: const Icon(Icons.person_add_rounded, size: 20),
-                    label: const Text(
-                      'Nuevo cliente',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
+                    label: Builder(
+                      builder: (context) => Text(
+                        ServicioIdioma.t(context, 'Nuevo cliente'),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
@@ -479,15 +492,20 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Eliminar cliente',
+        title: Text(
+          ServicioIdioma.t(ctx, 'Eliminar cliente'),
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
-        content: Text('¿Eliminar a “${cliente.nombre}”?'),
+        content: Text(
+          '${ServicioIdioma.t(ctx, '¿Eliminar a “')}${cliente.nombre}${ServicioIdioma.t(ctx, '”?')}',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: _muted)),
+            child: Text(
+              ServicioIdioma.t(ctx, 'Cancelar'),
+              style: TextStyle(color: _muted),
+            ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.error),
@@ -499,7 +517,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Eliminar'),
+            child: Text(ServicioIdioma.t(ctx, 'Eliminar')),
           ),
         ],
       ),
@@ -716,8 +734,8 @@ class _ClienteCardPremium extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              child: const Text(
-                                'Historial de Pagos',
+                              child: Text(
+                                ServicioIdioma.t(context, 'Historial de Pagos'),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -958,8 +976,8 @@ class _PanelDerechoDesktop extends StatelessWidget {
         const SizedBox(height: 18),
         const Divider(height: 1, color: Color(0xFFE2E8F0)),
         const SizedBox(height: 16),
-        const Text(
-          'Composición de Crédito',
+        Text(
+          ServicioIdioma.t(context, 'Composición de Crédito'),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
@@ -984,8 +1002,8 @@ class _PanelDerechoDesktop extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Últimas Acciones',
+        Text(
+          ServicioIdioma.t(context, 'Últimas Acciones'),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
@@ -1028,8 +1046,8 @@ class _PanelDerechoDesktop extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Ver Detalles Completos',
+            child: Text(
+              ServicioIdioma.t(context, 'Ver Detalles Completos'),
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
@@ -1040,8 +1058,13 @@ class _PanelDerechoDesktop extends StatelessWidget {
           child: OutlinedButton(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Reporte del cliente: próximamente'),
+                SnackBar(
+                  content: Text(
+                    ServicioIdioma.t(
+                      context,
+                      'Reporte del cliente: próximamente',
+                    ),
+                  ),
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -1053,8 +1076,8 @@ class _PanelDerechoDesktop extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Generar Reporte',
+            child: Text(
+              ServicioIdioma.t(context, 'Generar Reporte'),
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),
@@ -1289,7 +1312,7 @@ class ClienteDetallePage extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: goEdit,
               icon: const Icon(Icons.edit_outlined, size: 16),
-              label: const Text('Editar'),
+              label: Text(ServicioIdioma.t(context, 'Editar')),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.primary,
                 side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1341,8 +1364,8 @@ class ClienteDetallePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Composición de crédito',
+          Text(
+            ServicioIdioma.t(context, 'Composición de crédito'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -1407,8 +1430,8 @@ class ClienteDetallePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Últimas acciones',
+          Text(
+            ServicioIdioma.t(context, 'Últimas acciones'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -1484,8 +1507,8 @@ class ClienteDetallePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Detalle del cliente',
+                Text(
+                  ServicioIdioma.t(context, 'Detalle del cliente'),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -1534,8 +1557,8 @@ class ClienteDetallePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Volver a la cartera',
+            child: Text(
+              ServicioIdioma.t(context, 'Volver a la cartera'),
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),

@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
 import 'package:fiscogest_rd/features/impuestos/domain/services/resolver_tasa_itbis.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class FacturaImprimible extends StatelessWidget {
   const FacturaImprimible({
@@ -237,13 +238,13 @@ class FacturaImprimible extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.copy, size: 16),
-                  label: const Text('Copiar'),
+                  label: Text(ServicioIdioma.t(context, 'Copiar')),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: onCerrar,
                   icon: const Icon(Icons.check_circle_outline, size: 16),
-                  label: const Text('Cerrar'),
+                  label: Text(ServicioIdioma.t(context, 'Cerrar')),
                 ),
               ],
             ),

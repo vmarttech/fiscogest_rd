@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart'
 import 'package:fiscogest_rd/features/comercial/domain/entities/cuenta_pagar.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/cuentas_pagar_providers.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/cuentas_pagar/detalle_cuenta_pagar_page.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ListaCuentasPagarPage extends ConsumerWidget {
   const ListaCuentasPagarPage({super.key});
@@ -71,8 +72,8 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Error al cargar cuentas',
+                  Text(
+                    ServicioIdioma.t(context, 'Error al cargar cuentas'),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),

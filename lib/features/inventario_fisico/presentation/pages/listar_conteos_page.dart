@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/conteo_f
 import 'package:fiscogest_rd/features/inventario_fisico/domain/entities/estado_conteo.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/pages/capturar_conteo_page.dart';
 import 'package:fiscogest_rd/features/inventario_fisico/presentation/providers/inventario_fisico_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Lista de conteos — KPIs activos, filtros, cards móviles / tabla desktop.
 class ListarConteosPage extends ConsumerStatefulWidget {
@@ -91,8 +92,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Nuevo',
+              label: Text(
+                ServicioIdioma.t(context, 'Nuevo'),
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
             )
@@ -117,8 +118,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
           final abiertos = lista
               .where(
                 (c) =>
-                  c.estado == EstadoConteo.pendiente ||
-                  c.estado == EstadoConteo.abierto ||
+                    c.estado == EstadoConteo.pendiente ||
+                    c.estado == EstadoConteo.abierto ||
                     c.estado == EstadoConteo.enProceso,
               )
               .length;
@@ -205,8 +206,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                           FilledButton.icon(
                             onPressed: () => context.push('/inventario-fisico'),
                             icon: const Icon(Icons.add_rounded, size: 20),
-                            label: const Text(
-                              'Nuevo conteo',
+                            label: Text(
+                              ServicioIdioma.t(context, 'Nuevo conteo'),
                               style: TextStyle(fontWeight: FontWeight.w900),
                             ),
                             style: FilledButton.styleFrom(
@@ -233,8 +234,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                         child: FilledButton.icon(
                           onPressed: () => context.push('/inventario-fisico'),
                           icon: const Icon(Icons.add_rounded),
-                          label: const Text(
-                            'Nuevo conteo',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Nuevo conteo'),
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 15,
@@ -279,8 +280,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                                   () => setState(() {
                                     _estadoFiltro =
                                         _estadoFiltro == EstadoConteo.abierto
-                                            ? null
-                                            : EstadoConteo.abierto;
+                                        ? null
+                                        : EstadoConteo.abierto;
                                   }),
                                 ),
                               ),
@@ -313,8 +314,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                                   () => setState(() {
                                     _estadoFiltro =
                                         _estadoFiltro == EstadoConteo.aprobado
-                                            ? null
-                                            : EstadoConteo.aprobado;
+                                        ? null
+                                        : EstadoConteo.aprobado;
                                   }),
                                 ),
                               ),
@@ -346,8 +347,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               () => setState(() {
                                 _estadoFiltro =
                                     _estadoFiltro == EstadoConteo.abierto
-                                        ? null
-                                        : EstadoConteo.abierto;
+                                    ? null
+                                    : EstadoConteo.abierto;
                               }),
                             ),
                           ),
@@ -361,8 +362,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               () => setState(() {
                                 _estadoFiltro =
                                     _estadoFiltro == EstadoConteo.enProceso
-                                        ? null
-                                        : EstadoConteo.enProceso;
+                                    ? null
+                                    : EstadoConteo.enProceso;
                               }),
                             ),
                           ),
@@ -376,8 +377,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                               () => setState(() {
                                 _estadoFiltro =
                                     _estadoFiltro == EstadoConteo.aprobado
-                                        ? null
-                                        : EstadoConteo.aprobado;
+                                    ? null
+                                    : EstadoConteo.aprobado;
                               }),
                             ),
                           ),
@@ -456,8 +457,8 @@ class _ListarConteosPageState extends ConsumerState<ListarConteosPage> {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        const Text(
-                          'Conteos',
+                        Text(
+                          ServicioIdioma.t(context, 'Conteos'),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w900,

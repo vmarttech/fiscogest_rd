@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/cuenta_pagar.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/cuentas_pagar_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class RegistrarAbonoPage extends ConsumerStatefulWidget {
   const RegistrarAbonoPage({super.key, required this.cuentaId});
@@ -88,8 +89,13 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
       } else {
         if (!mounted) return;
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('No se pudo registrar el abono. ¿Caja abierta?'),
+          SnackBar(
+            content: Text(
+              ServicioIdioma.t(
+                context,
+                'No se pudo registrar el abono. ¿Caja abierta?',
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -141,16 +147,23 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.check_circle, size: 48, color: Colors.green),
+                      const Icon(
+                        Icons.check_circle,
+                        size: 48,
+                        color: Colors.green,
+                      ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Esta cuenta ya está pagada.',
+                      Text(
+                        ServicioIdioma.t(
+                          context,
+                          'Esta cuenta ya está pagada.',
+                        ),
                         style: AppTypography.h4Bold,
                       ),
                       const SizedBox(height: 24),
                       TextButton.icon(
                         icon: const Icon(Icons.arrow_back),
-                        label: const Text('Volver'),
+                        label: Text(ServicioIdioma.t(context, 'Volver')),
                         onPressed: () => context.pop(),
                       ),
                     ],
@@ -179,8 +192,11 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                               style: AppTypography.h4Bold,
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Saldo pendiente a la fecha:',
+                            Text(
+                              ServicioIdioma.t(
+                                context,
+                                'Saldo pendiente a la fecha:',
+                              ),
                               style: AppTypography.bodyMedium,
                             ),
                             const SizedBox(height: 4),
@@ -196,8 +212,8 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Fecha',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Fecha'),
                         suffixIcon: Icon(Icons.calendar_today),
                       ),
                       initialValue: _fecha.toString().split(' ')[0],
@@ -224,8 +240,8 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Monto del Abono',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Monto del Abono'),
                         prefixText: 'RD\$ ',
                       ),
                       validator: (String? value) {
@@ -244,8 +260,8 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _formaPago,
-                      decoration: const InputDecoration(
-                        labelText: 'Forma de Pago',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Forma de Pago'),
                       ),
                       items: const [
                         DropdownMenuItem<String>(
@@ -272,15 +288,18 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _referenciaCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Referencia / Nº Comprobante',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(
+                          context,
+                          'Referencia / Nº Comprobante',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _notaCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Nota (opcional)',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Nota (opcional)'),
                       ),
                       maxLines: 2,
                     ),
@@ -289,7 +308,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                       actions: [
                         TextButton(
                           onPressed: _cargando ? null : () => context.pop(),
-                          child: const Text('Cancelar'),
+                          child: Text(ServicioIdioma.t(context, 'Cancelar')),
                         ),
                         ElevatedButton(
                           onPressed: _cargando ? null : _guardar,
@@ -307,8 +326,8 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                               ? const CircularProgressIndicator(
                                   color: Colors.white,
                                 )
-                              : const Text(
-                                  'Registrar Abono',
+                              : Text(
+                                  ServicioIdioma.t(context, 'Registrar Abono'),
                                   style: TextStyle(fontSize: 16),
                                 ),
                         ),

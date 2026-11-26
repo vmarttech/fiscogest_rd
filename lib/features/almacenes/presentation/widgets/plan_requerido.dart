@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/licencias/domain/planes_precios.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Al entrar a una función no incluida en el plan → upgrade (menú siempre visible).
 class PlanRequeridoAlmacenes extends StatelessWidget {
@@ -49,8 +50,8 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Función de plan superior',
+                Text(
+                  ServicioIdioma.t(context, 'Función de plan superior'),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -75,8 +76,8 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () => context.push('/licencia/comprar'),
                     icon: const Icon(Icons.workspace_premium_outlined),
-                    label: const Text(
-                      'Ver planes y pagar',
+                    label: Text(
+                      ServicioIdioma.t(context, 'Ver planes y pagar'),
                       style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                     style: FilledButton.styleFrom(
@@ -90,7 +91,7 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                 const SizedBox(height: 10),
                 TextButton(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  child: const Text('Más tarde'),
+                  child: Text(ServicioIdioma.t(context, 'Más tarde')),
                 ),
               ],
             ),

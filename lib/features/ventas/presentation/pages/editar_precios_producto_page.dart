@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/features/ventas/presentation/providers/lista_precio
 import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class EditarPreciosProductoPage extends ConsumerStatefulWidget {
   const EditarPreciosProductoPage({super.key, required this.producto});
@@ -139,8 +140,11 @@ class _EditarPreciosProductoPageState
                   const SizedBox(height: 16),
                   TextField(
                     controller: _costoCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Costo (solo lectura)',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(
+                        context,
+                        'Costo (solo lectura)',
+                      ),
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
@@ -177,8 +181,8 @@ class _EditarPreciosProductoPageState
                   const SizedBox(height: 12),
                   TextField(
                     controller: _precioMinimoCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Precio Mínimo',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(context, 'Precio Mínimo'),
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
@@ -186,8 +190,8 @@ class _EditarPreciosProductoPageState
                   const SizedBox(height: 12),
                   TextField(
                     controller: _precioMayoristaCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Precio Mayorista',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(context, 'Precio Mayorista'),
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
@@ -195,8 +199,8 @@ class _EditarPreciosProductoPageState
                   const SizedBox(height: 12),
                   TextField(
                     controller: _precioEspecialCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Precio Especial',
+                    decoration: InputDecoration(
+                      labelText: ServicioIdioma.t(context, 'Precio Especial'),
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
@@ -204,7 +208,7 @@ class _EditarPreciosProductoPageState
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: _guardar,
-                    child: const Text('Guardar Precios'),
+                    child: Text(ServicioIdioma.t(context, 'Guardar Precios')),
                   ),
                 ],
               );

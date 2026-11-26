@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_layout.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/providers/recepcion/recepcion_provider.dart';
 import 'package:fiscogest_rd/features/comercial/domain/entities/recepcion_elemento.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class RegistrarRecepcionPage extends ConsumerStatefulWidget {
   const RegistrarRecepcionPage({
@@ -107,7 +108,10 @@ class _RegistrarRecepcionPageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Datos de Recepción', style: AppTypography.h4),
+              Text(
+                ServicioIdioma.t(context, 'Datos de Recepción'),
+                style: AppTypography.h4,
+              ),
               AppLayout.vM,
               AppTextField(
                 controller: fechaController,
@@ -121,8 +125,8 @@ class _RegistrarRecepcionPageState
                 enabled: false,
               ),
               AppLayout.vM,
-              const Text(
-                'Estado de Recepción',
+              Text(
+                ServicioIdioma.t(context, 'Estado de Recepción'),
                 style: AppTypography.labelMedium,
               ),
               AppLayout.vS,
@@ -134,8 +138,8 @@ class _RegistrarRecepcionPageState
                 ],
               ),
               AppLayout.vM,
-              const Text(
-                'Detalle de Productos',
+              Text(
+                ServicioIdioma.t(context, 'Detalle de Productos'),
                 style: AppTypography.labelMedium,
               ),
               AppLayout.vS,

@@ -20,6 +20,7 @@ import 'package:fiscogest_rd/features/creditos/domain/services/calculadora_credi
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class ResultadoFormularioCredito {
   const ResultadoFormularioCredito({
@@ -350,8 +351,11 @@ class _FormularioCreditoDialogState
                     InkWell(
                       onTap: _seleccionarFecha,
                       child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Fecha primer vencimiento',
+                        decoration: InputDecoration(
+                          labelText: ServicioIdioma.t(
+                            context,
+                            'Fecha primer vencimiento',
+                          ),
                           border: OutlineInputBorder(),
                           suffixIcon: Icon(Icons.calendar_today),
                         ),
@@ -546,25 +550,45 @@ class _FormularioCreditoDialogState
           columnSpacing: AppSpacing.m,
           headingRowHeight: 40,
           dataRowMaxHeight: 48,
-          columns: const [
-            DataColumn(label: Text('Cuota', style: AppTypography.labelMedium)),
+          columns: [
             DataColumn(
-              label: Text('Vencimiento', style: AppTypography.labelMedium),
+              label: Text(
+                ServicioIdioma.t(context, 'Cuota'),
+                style: AppTypography.labelMedium,
+              ),
             ),
             DataColumn(
-              label: Text('Capital', style: AppTypography.labelMedium),
+              label: Text(
+                ServicioIdioma.t(context, 'Vencimiento'),
+                style: AppTypography.labelMedium,
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                ServicioIdioma.t(context, 'Capital'),
+                style: AppTypography.labelMedium,
+              ),
               numeric: true,
             ),
             DataColumn(
-              label: Text('Interés', style: AppTypography.labelMedium),
+              label: Text(
+                ServicioIdioma.t(context, 'Interés'),
+                style: AppTypography.labelMedium,
+              ),
               numeric: true,
             ),
             DataColumn(
-              label: Text('Total', style: AppTypography.labelMedium),
+              label: Text(
+                ServicioIdioma.t(context, 'Total'),
+                style: AppTypography.labelMedium,
+              ),
               numeric: true,
             ),
             DataColumn(
-              label: Text('Saldo', style: AppTypography.labelMedium),
+              label: Text(
+                ServicioIdioma.t(context, 'Saldo'),
+                style: AppTypography.labelMedium,
+              ),
               numeric: true,
             ),
           ],

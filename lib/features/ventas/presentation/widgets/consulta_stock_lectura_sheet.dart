@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/core/ui/app_breakpoints.dart';
 import 'package:fiscogest_rd/features/inventario/domain/entities/producto.dart';
 import 'package:fiscogest_rd/features/inventario/presentation/providers/producto_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Consulta de existencia en Ventas. Solo lectura.
 /// Tarjeta flotante arrastrable para que el teclado nunca la tape.
@@ -131,7 +132,7 @@ class _ConsultaStockLecturaSheetState
                             if (keyboardOpen)
                               TextButton(
                                 onPressed: () => _focus.unfocus(),
-                                child: const Text('Listo'),
+                                child: Text(ServicioIdioma.t(context, 'Listo')),
                               ),
                             IconButton(
                               visualDensity: VisualDensity.compact,

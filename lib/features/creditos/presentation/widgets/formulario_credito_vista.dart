@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 import 'package:fiscogest_rd/features/clientes/presentation/providers/cliente_providers.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -417,13 +418,25 @@ class _FormularioCreditoVistaState
           headingRowHeight: 44,
           dataRowMinHeight: 44,
           dataRowMaxHeight: 52,
-          columns: const [
+          columns: [
             DataColumn(label: Text('#')),
-            DataColumn(label: Text('Vencimiento')),
-            DataColumn(label: Text('Capital'), numeric: true),
-            DataColumn(label: Text('Interés'), numeric: true),
-            DataColumn(label: Text('Total'), numeric: true),
-            DataColumn(label: Text('Saldo'), numeric: true),
+            DataColumn(label: Text(ServicioIdioma.t(context, 'Vencimiento'))),
+            DataColumn(
+              label: Text(ServicioIdioma.t(context, 'Capital')),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text(ServicioIdioma.t(context, 'Interés')),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text(ServicioIdioma.t(context, 'Total')),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text(ServicioIdioma.t(context, 'Saldo')),
+              numeric: true,
+            ),
           ],
           rows: cuotas.map((c) {
             return DataRow(

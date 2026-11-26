@@ -7,6 +7,7 @@ import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/ui/enterprise_page_header.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/notificaciones/presentation/providers/avisos_provider.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class AdminEnviarAvisoPage extends ConsumerStatefulWidget {
   const AdminEnviarAvisoPage({super.key});
@@ -137,8 +138,8 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 10),
-                        const Text(
-                          'Destinatarios',
+                        Text(
+                          ServicioIdioma.t(context, 'Destinatarios'),
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
@@ -149,7 +150,9 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _tipo,
-                      decoration: const InputDecoration(labelText: 'Tipo'),
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Tipo'),
+                      ),
                       items: [
                         for (final t in _tipos)
                           DropdownMenuItem(value: t, child: Text(t)),
@@ -159,8 +162,11 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _segmento,
-                      decoration: const InputDecoration(
-                        labelText: 'Segmento destino',
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(
+                          context,
+                          'Segmento destino',
+                        ),
                       ),
                       items: const [
                         DropdownMenuItem(
@@ -183,8 +189,11 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _negocioId,
-                        decoration: const InputDecoration(
-                          labelText: 'ID del negocio',
+                        decoration: InputDecoration(
+                          labelText: ServicioIdioma.t(
+                            context,
+                            'ID del negocio',
+                          ),
                           hintText: 'a0000000-0000-4000-8000-000000000001',
                         ),
                         validator: (v) => (v == null || v.trim().isEmpty)
@@ -196,8 +205,8 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: _plan,
-                        decoration: const InputDecoration(
-                          labelText: 'Plan destino',
+                        decoration: InputDecoration(
+                          labelText: ServicioIdioma.t(context, 'Plan destino'),
                         ),
                         items: [
                           for (final p in _planes)
@@ -209,7 +218,9 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _prioridad,
-                      decoration: const InputDecoration(labelText: 'Prioridad'),
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Prioridad'),
+                      ),
                       items: [
                         for (final p in _prioridades)
                           DropdownMenuItem(value: p, child: Text(p)),
@@ -227,8 +238,8 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 10),
-                        const Text(
-                          'Contenido del aviso',
+                        Text(
+                          ServicioIdioma.t(context, 'Contenido del aviso'),
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
@@ -239,7 +250,9 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _titulo,
-                      decoration: const InputDecoration(labelText: 'Título'),
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Título'),
+                      ),
                       validator: (v) => (v == null || v.trim().isEmpty)
                           ? 'Falta el título'
                           : null,
@@ -248,7 +261,9 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                     TextFormField(
                       controller: _mensaje,
                       maxLines: 4,
-                      decoration: const InputDecoration(labelText: 'Mensaje'),
+                      decoration: InputDecoration(
+                        labelText: ServicioIdioma.t(context, 'Mensaje'),
+                      ),
                       validator: (v) => (v == null || v.trim().isEmpty)
                           ? 'Falta el mensaje'
                           : null,

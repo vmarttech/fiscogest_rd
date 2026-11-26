@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/app_colors.dart';
 import 'package:fiscogest_rd/core/ui/app_typography.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
@@ -30,7 +31,7 @@ class SectionHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  ServicioIdioma.t(context, title),
                   style: AppTypography.h4.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -39,7 +40,7 @@ class SectionHeader extends StatelessWidget {
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    subtitle!,
+                    ServicioIdioma.t(context, subtitle!),
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -57,7 +58,7 @@ class SectionHeader extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
-                actionLabel!,
+                ServicioIdioma.t(context, actionLabel!),
                 style: AppTypography.labelMedium.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,

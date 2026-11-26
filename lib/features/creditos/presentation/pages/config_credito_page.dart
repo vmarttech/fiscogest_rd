@@ -5,6 +5,7 @@ import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/providers/credito_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Modelos editables precargables (variables {{…}} se resuelven al imprimir).
 class CreditoPlantillasModelo {
@@ -94,8 +95,8 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
     final cap = p.capacidadPagoPorcentaje <= 0
         ? 30.0
         : (p.capacidadPagoPorcentaje > 1
-            ? p.capacidadPagoPorcentaje
-            : p.capacidadPagoPorcentaje * 100);
+              ? p.capacidadPagoPorcentaje
+              : p.capacidadPagoPorcentaje * 100);
     _capacidadCtrl.text = cap.toStringAsFixed(0);
     _moraCtrl.text = (p.moraPorcentaje * 100).toStringAsFixed(2);
     _plantillaSolCtrl.text = p.plantillaSolicitud;
@@ -156,8 +157,10 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
       ref.invalidate(creditoDocumentoServiceProvider);
       if (!mounted) return;
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Configuración de crédito guardada'),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'Configuración de crédito guardada'),
+          ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -396,11 +399,15 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                               Icons.description_outlined,
                               size: 18,
                             ),
-                            label: const Text('Cargar modelo'),
+                            label: Text(
+                              ServicioIdioma.t(context, 'Cargar modelo'),
+                            ),
                           ),
                           TextButton(
                             onPressed: _limpiarSolicitud,
-                            child: const Text('Usar default del PDF'),
+                            child: Text(
+                              ServicioIdioma.t(context, 'Usar default del PDF'),
+                            ),
                           ),
                         ],
                       ),
@@ -448,11 +455,15 @@ class _ConfigCreditoPageState extends ConsumerState<ConfigCreditoPage> {
                               Icons.description_outlined,
                               size: 18,
                             ),
-                            label: const Text('Cargar modelo'),
+                            label: Text(
+                              ServicioIdioma.t(context, 'Cargar modelo'),
+                            ),
                           ),
                           TextButton(
                             onPressed: _limpiarContrato,
-                            child: const Text('Usar default del PDF'),
+                            child: Text(
+                              ServicioIdioma.t(context, 'Usar default del PDF'),
+                            ),
                           ),
                         ],
                       ),

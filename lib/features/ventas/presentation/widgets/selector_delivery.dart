@@ -4,6 +4,7 @@ import 'package:fiscogest_rd/core/ui/app_typography.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/registrar_venta_provider.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// [onAsignarCosto] si se pasa, se usa ese callback (ej. cotización).
 /// Si es null, escribe en registrarVentaProvider (flujo legacy / apartado).
@@ -110,8 +111,11 @@ class _SelectorDeliveryDialogState
         child: ListView(
           shrinkWrap: true,
           children: [
-            const Text(
-              'Selecciona una opción o ingresa el monto manualmente:',
+            Text(
+              ServicioIdioma.t(
+                context,
+                'Selecciona una opción o ingresa el monto manualmente:',
+              ),
               style: AppTypography.labelSmall,
             ),
             const SizedBox(height: 12),
@@ -150,8 +154,11 @@ class _SelectorDeliveryDialogState
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Monto personalizado (RD\$)',
+              decoration: InputDecoration(
+                labelText: ServicioIdioma.t(
+                  context,
+                  'Monto personalizado (RD\$)',
+                ),
                 labelStyle: AppTypography.labelMedium,
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(
@@ -172,9 +179,12 @@ class _SelectorDeliveryDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
-        FilledButton(onPressed: _confirmar, child: const Text('Confirmar')),
+        FilledButton(
+          onPressed: _confirmar,
+          child: Text(ServicioIdioma.t(context, 'Confirmar')),
+        ),
       ],
     );
   }

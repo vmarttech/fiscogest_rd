@@ -3,6 +3,7 @@ import 'package:fiscogest_rd/core/ui/scanner/barcode_scanner_page.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/tipos_linea.dart';
 import 'package:fiscogest_rd/features/comercial/presentation/pages/compra/registrar_compra_page/widgets/linea_producto_widget.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class SeccionLineasWidget extends StatelessWidget {
   const SeccionLineasWidget({
@@ -27,7 +28,7 @@ class SeccionLineasWidget extends StatelessWidget {
   final void Function(int, String) onValorCambiado;
   final bool esPequena;
   final Widget Function({required Widget child1, required Widget child2})
-      filaResponsiva;
+  filaResponsiva;
   final bool modoSimplificado;
   final ValueChanged<String>? onBuscarProducto;
 
@@ -160,7 +161,7 @@ class SeccionLineasWidget extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onAgregarLinea,
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Agregar Producto'),
+                label: Text(ServicioIdioma.t(context, 'Agregar Producto')),
                 style: FilledButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(

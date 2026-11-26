@@ -16,6 +16,7 @@ import 'package:fiscogest_rd/features/configuracion/presentation/providers/confi
 import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/creditos/presentation/widgets/avisar_atrasados_button.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class FiosListaPage extends ConsumerWidget {
   const FiosListaPage({super.key});
@@ -46,7 +47,7 @@ class FiosListaPage extends ConsumerWidget {
             onPressed: () =>
                 AvisarAtrasadosButton.avisar(context, ref, atrasados),
             icon: const Icon(Icons.chat_bubble_outline),
-            label: const Text('Avisar atrasados'),
+            label: Text(ServicioIdioma.t(context, 'Avisar atrasados')),
           );
         },
       ),
@@ -233,10 +234,8 @@ class FiosListaPage extends ConsumerWidget {
         initialChildSize: 0.82,
         minChildSize: 0.48,
         maxChildSize: 0.96,
-        builder: (context, scrollController) => _SheetAbonarFiao(
-          fio: fio,
-          scrollController: scrollController,
-        ),
+        builder: (context, scrollController) =>
+            _SheetAbonarFiao(fio: fio, scrollController: scrollController),
       ),
     );
     if (ok == true && context.mounted) {
@@ -329,7 +328,11 @@ class _FioTile extends StatelessWidget {
               IconButton(
                 tooltip: 'Recordatorio WhatsApp',
                 onPressed: onRecordatorio,
-                icon: const Icon(Icons.chat, color: Color(0xFF059669), size: 22),
+                icon: const Icon(
+                  Icons.chat,
+                  color: Color(0xFF059669),
+                  size: 22,
+                ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -359,10 +362,7 @@ class _FioTile extends StatelessWidget {
 }
 
 class _SheetAbonarFiao extends ConsumerStatefulWidget {
-  const _SheetAbonarFiao({
-    required this.fio,
-    required this.scrollController,
-  });
+  const _SheetAbonarFiao({required this.fio, required this.scrollController});
   final FioData fio;
   final ScrollController scrollController;
 
@@ -393,8 +393,8 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
     final valor = double.tryParse(raw);
     if (valor == null || valor <= 0) {
       FiscoGestNotifications.show(
-        const SnackBar(
-          content: Text('Ingrese un monto válido'),
+        SnackBar(
+          content: Text(ServicioIdioma.t(context, 'Ingrese un monto válido')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -571,13 +571,13 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
                     onPressed: () => setState(() {
                       _monto.text = (saldo / 2).toStringAsFixed(2);
                     }),
-                    child: const Text('Mitad'),
+                    child: Text(ServicioIdioma.t(context, 'Mitad')),
                   ),
                   TextButton(
                     onPressed: () => setState(() {
                       _monto.text = saldo.toStringAsFixed(2);
                     }),
-                    child: const Text('Todo'),
+                    child: Text(ServicioIdioma.t(context, 'Todo')),
                   ),
                 ],
               ),
@@ -610,7 +610,7 @@ class _SheetAbonarFiaoState extends ConsumerState<_SheetAbonarFiao> {
               ),
               TextButton(
                 onPressed: _guardando ? null : () => Navigator.pop(context),
-                child: const Text('Cancelar'),
+                child: Text(ServicioIdioma.t(context, 'Cancelar')),
               ),
             ],
           ),
@@ -653,7 +653,7 @@ class _RecordatorioWhatsAppDialogState
     final fio = widget.fio;
 
     return AlertDialog(
-      title: const Text('Recordatorio WhatsApp'),
+      title: Text(ServicioIdioma.t(context, 'Recordatorio WhatsApp')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -675,8 +675,8 @@ class _RecordatorioWhatsAppDialogState
           TextField(
             controller: _telefonoCtrl,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'WhatsApp del cliente',
+            decoration: InputDecoration(
+              labelText: ServicioIdioma.t(context, 'WhatsApp del cliente'),
               hintText: '8091234567',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.phone),
@@ -687,12 +687,12 @@ class _RecordatorioWhatsAppDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _telefonoCtrl.text.trim()),
           icon: const Icon(Icons.chat, size: 18),
-          label: const Text('Enviar'),
+          label: Text(ServicioIdioma.t(context, 'Enviar')),
         ),
       ],
     );

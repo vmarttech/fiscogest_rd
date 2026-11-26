@@ -11,6 +11,7 @@ import 'package:fiscogest_rd/core/ui/app_dialog.dart';
 import 'package:fiscogest_rd/features/presentaciones/presentation/providers/presentacion_providers.dart';
 import 'package:fiscogest_rd/features/presentaciones/domain/entities/presentacion.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class PresentacionesPage extends ConsumerStatefulWidget {
   const PresentacionesPage({super.key});
@@ -157,8 +158,8 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                               elevation: 0,
                             ),
                             icon: const Icon(Icons.layers_outlined, size: 20),
-                            label: const Text(
-                              'Nueva presentación',
+                            label: Text(
+                              ServicioIdioma.t(context, 'Nueva presentación'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -187,8 +188,8 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                             elevation: 0,
                           ),
                           icon: const Icon(Icons.layers_outlined, size: 20),
-                          label: const Text(
-                            'Nueva presentación',
+                          label: Text(
+                            ServicioIdioma.t(context, 'Nueva presentación'),
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
@@ -220,11 +221,15 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -401,7 +406,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(ServicioIdioma.t(context, 'Cancelar')),
         ),
         AppButton(
           text: 'Eliminar',
@@ -497,7 +502,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                               valueListenable: activoN,
                               builder: (_, value, __) => SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Activa'),
+                                title: Text(
+                                  ServicioIdioma.t(dialogContext, 'Activa'),
+                                ),
                                 value: value,
                                 onChanged: (next) => activoN.value = next,
                               ),
@@ -514,7 +521,9 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(dialogContext),
-                        child: const Text('Cancelar'),
+                        child: Text(
+                          ServicioIdioma.t(dialogContext, 'Cancelar'),
+                        ),
                       ),
                       AppButton(
                         text: isEditing ? 'Actualizar' : 'Guardar',
@@ -666,7 +675,11 @@ class _PresentacionCard extends StatelessWidget {
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: const Icon(
+              Icons.delete_outline,
+              color: AppColors.error,
+              size: 20,
+            ),
             onPressed: onDelete,
           ),
         ],

@@ -15,6 +15,7 @@ import 'package:fiscogest_rd/core/providers/core_providers.dart';
 import 'package:fiscogest_rd/features/licencias/presentation/providers/licencia_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/providers/almacen_providers.dart';
 import 'package:fiscogest_rd/features/almacenes/presentation/widgets/plan_requerido.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class KardexPage extends ConsumerStatefulWidget {
   const KardexPage({super.key, this.productoId});
@@ -71,13 +72,13 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   }
 
   String _labelTipo(TipoMovimiento t) => switch (t) {
-        TipoMovimiento.entrada => 'ENTRADA',
-        TipoMovimiento.salida => 'SALIDA',
-        TipoMovimiento.ajuste => 'AJUSTE',
-        TipoMovimiento.transferencia => 'TRANSFERENCIA',
-        TipoMovimiento.devolucion => 'DEVOLUCIÓN',
-        TipoMovimiento.traslado => 'TRASLADO',
-      };
+    TipoMovimiento.entrada => 'ENTRADA',
+    TipoMovimiento.salida => 'SALIDA',
+    TipoMovimiento.ajuste => 'AJUSTE',
+    TipoMovimiento.transferencia => 'TRANSFERENCIA',
+    TipoMovimiento.devolucion => 'DEVOLUCIÓN',
+    TipoMovimiento.traslado => 'TRASLADO',
+  };
 
   bool _esEntrada(TipoMovimiento t) =>
       t == TipoMovimiento.entrada ||
@@ -218,119 +219,119 @@ class _KardexPageState extends ConsumerState<KardexPage> {
             color: Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            16 + MediaQuery.of(ctx).viewInsets.bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: _border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                12,
+                16,
+                16 + MediaQuery.of(ctx).viewInsets.bottom,
               ),
-              const SizedBox(height: 16),
-              Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                         ),
-                    decoration: BoxDecoration(
-                      color: entrada
-                          ? const Color(0xFFF0FDF4)
-                          : const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      _labelTipo(mov.tipoMovimiento),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: entrada
-                            ? const Color(0xFF16A34A)
-                            : const Color(0xFFDC2626),
+                        decoration: BoxDecoration(
+                          color: entrada
+                              ? const Color(0xFFF0FDF4)
+                              : const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          _labelTipo(mov.tipoMovimiento),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: entrada
+                                ? const Color(0xFF16A34A)
+                                : const Color(0xFFDC2626),
+                          ),
+                        ),
                       ),
+                      const Spacer(),
+                      Text(
+                        _fmtFecha(mov.fechaMovimiento),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: _textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    doc.isEmpty ? 'Sin documento' : doc,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: _textPrimary,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 6),
                   Text(
-                    _fmtFecha(mov.fechaMovimiento),
+                    (mov.observacion ?? '').trim().isEmpty
+                        ? 'Sin observación'
+                        : mov.observacion!.trim(),
                     style: const TextStyle(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: _textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _detailRow('Producto', nombreProd),
+                  _detailRow('Código', prod?.codigo ?? '—'),
+                  _detailRow('Categoría', cat),
+                  _detailRow('Usuario', user),
+                  _detailRow('ID usuario', '${mov.usuarioId}'),
+                  _detailRow('Cantidad', _fmtNum(mov.cantidad)),
+                  _detailRow('Costo unit.', _fmtMoney(mov.costoUnitario)),
+                  _detailRow('Valor total', _fmtMoney(mov.totalMovimiento)),
+                  _detailRow(
+                    'Saldo',
+                    '${_fmtNum(mov.saldoAnterior)} → ${_fmtNum(mov.saldoNuevo)}',
+                  ),
+                  const SizedBox(height: 16),
+                  if (_puedeAbrirDocumento(doc))
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(ctx).pop();
+                        await _abrirDocumentoRelacionado(doc);
+                      },
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: Text(
+                        ServicioIdioma.t(ctx, 'Abrir documento relacionado'),
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(
+                      ServicioIdioma.t(ctx, 'Cerrar'),
+                      style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
-              Text(
-                doc.isEmpty ? 'Sin documento' : doc,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: _textPrimary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                (mov.observacion ?? '').trim().isEmpty
-                    ? 'Sin observación'
-                    : mov.observacion!.trim(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: _textMuted,
-                ),
-              ),
-              const SizedBox(height: 18),
-              _detailRow('Producto', nombreProd),
-              _detailRow('Código', prod?.codigo ?? '—'),
-              _detailRow('Categoría', cat),
-              _detailRow('Usuario', user),
-              _detailRow('ID usuario', '${mov.usuarioId}'),
-              _detailRow('Cantidad', _fmtNum(mov.cantidad)),
-              _detailRow('Costo unit.', _fmtMoney(mov.costoUnitario)),
-              _detailRow('Valor total', _fmtMoney(mov.totalMovimiento)),
-              _detailRow(
-                'Saldo',
-                '${_fmtNum(mov.saldoAnterior)} → ${_fmtNum(mov.saldoNuevo)}',
-              ),
-              const SizedBox(height: 16),
-              if (_puedeAbrirDocumento(doc))
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: () async {
-                    Navigator.of(ctx).pop();
-                    await _abrirDocumentoRelacionado(doc);
-                  },
-                      icon: const Icon(Icons.open_in_new, size: 18),
-                  label: const Text(
-                    'Abrir documento relacionado',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text(
-                  'Cerrar',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
             ),
           ),
         );
@@ -431,7 +432,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
     if (parsed == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se reconoció el documento: $doc')),
+        SnackBar(
+          content: Text(
+            ServicioIdioma.t(context, 'No se reconoció el documento: $doc'),
+          ),
+        ),
       );
       return;
     }
@@ -445,7 +450,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         if (venta?.id == null) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No se encontró la factura ${parsed.ref}')),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'No se encontró la factura ${parsed.ref}',
+                ),
+              ),
+            ),
           );
           return;
         }
@@ -466,7 +478,14 @@ class _KardexPageState extends ConsumerState<KardexPage> {
         if (venta?.id == null) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No se encontró la venta ${parsed.ref}')),
+            SnackBar(
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'No se encontró la venta ${parsed.ref}',
+                ),
+              ),
+            ),
           );
           return;
         }
@@ -494,7 +513,12 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('No se encontró el documento ${parsed.ref}'),
+              content: Text(
+                ServicioIdioma.t(
+                  context,
+                  'No se encontró el documento ${parsed.ref}',
+                ),
+              ),
             ),
           );
           return;
@@ -557,8 +581,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       useAppPage: false,
       backgroundColor: _bgMain,
       body: movimientosAsync.when(
-        loading: () =>
-            Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         error: (e, _) => Center(
           child: Text(
             'Error al cargar movimientos: $e',
@@ -847,7 +874,12 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     selectedColor: const Color(0xFFE0F2F1),
                     checkmarkColor: Theme.of(context).colorScheme.primary,
                     backgroundColor: Colors.white,
-                    side: BorderSide(color: sel ? Theme.of(context).colorScheme.primary : _border, width: 1.5),
+                    side: BorderSide(
+                      color: sel
+                          ? Theme.of(context).colorScheme.primary
+                          : _border,
+                      width: 1.5,
+                    ),
                     onSelected: (_) => setState(() {
                       _filtroCategoriaId = sel ? null : c.id;
                       _pagina = 1;
@@ -991,7 +1023,10 @@ class _KardexPageState extends ConsumerState<KardexPage> {
       selectedColor: const Color(0xFFE0F2F1),
       checkmarkColor: Theme.of(context).colorScheme.primary,
       backgroundColor: Colors.white,
-      side: BorderSide(color: selected ? Theme.of(context).colorScheme.primary : _border, width: 1.5),
+      side: BorderSide(
+        color: selected ? Theme.of(context).colorScheme.primary : _border,
+        width: 1.5,
+      ),
       onSelected: (_) => setState(() {
         _filtroTipo = tipo;
         _pagina = 1;
@@ -1321,23 +1356,26 @@ class _KardexPageState extends ConsumerState<KardexPage> {
   }
 
   // ─── FILTROS DESKTOP ─────────────────────────────────────────────────
-  Widget _buildFiltros({required BuildContext context, required List<Categoria> listaCategorias}) {
+  Widget _buildFiltros({
+    required BuildContext context,
+    required List<Categoria> listaCategorias,
+  }) {
     InputDecoration deco(String label) => InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w700),
-          filled: true,
-          fillColor: Colors.white,
-          isDense: true,
+      labelText: label,
+      labelStyle: const TextStyle(fontWeight: FontWeight.w700),
+      filled: true,
+      fillColor: Colors.white,
+      isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: _border, width: 1.5),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: _border, width: 1.5),
-          ),
-        );
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -1360,7 +1398,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               }),
               style: const TextStyle(fontWeight: FontWeight.w700),
               decoration: deco('Buscar producto o documento').copyWith(
-                prefixIcon: const Icon(Icons.search, color: _textMuted, size: 20),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: _textMuted,
+                  size: 20,
+                ),
                 labelText: null,
                 hintText: 'Buscar producto o documento',
                 hintStyle: const TextStyle(fontWeight: FontWeight.w600),
@@ -1385,9 +1427,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 }
               },
               child: InputDecorator(
-                decoration: deco(
-                  'Fecha',
-                ).copyWith(suffixIcon: const Icon(Icons.calendar_today, size: 16)),
+                decoration: deco('Fecha').copyWith(
+                  suffixIcon: const Icon(Icons.calendar_today, size: 16),
+                ),
                 child: Text(
                   _filtroFecha == null ? '—' : _fmtFecha(_filtroFecha),
                   style: const TextStyle(
@@ -1412,8 +1454,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     fontWeight: FontWeight.w700,
                     color: _textPrimary,
                   ),
-                  hint: const Text(
-                    'Todos',
+                  hint: Text(
+                    ServicioIdioma.t(context, 'Todos'),
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   items: [
@@ -1447,8 +1489,8 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     fontWeight: FontWeight.w700,
                     color: _textPrimary,
                   ),
-                  hint: const Text(
-                    'Todas',
+                  hint: Text(
+                    ServicioIdioma.t(context, 'Todas'),
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   items: [
@@ -1787,7 +1829,11 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                 child: IconButton(
                   tooltip: 'Ver documento',
                   visualDensity: VisualDensity.compact,
-                  icon: Icon(Icons.visibility_outlined, size: 20, color: Theme.of(context).colorScheme.primary),
+                  icon: Icon(
+                    Icons.visibility_outlined,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   onPressed: () => _verDocumento(
                     mov,
                     productos: productos,
@@ -1862,7 +1908,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Material(
-              color: n == paginaActual ? Theme.of(context).colorScheme.primary : Colors.white,
+              color: n == paginaActual
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.white,
               borderRadius: BorderRadius.circular(6),
               child: InkWell(
                 onTap: () => setState(() {
@@ -1877,7 +1925,9 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: n == paginaActual ? Theme.of(context).colorScheme.primary : _border,
+                      color: n == paginaActual
+                          ? Theme.of(context).colorScheme.primary
+                          : _border,
                       width: 1.5,
                     ),
                   ),
@@ -1929,11 +1979,23 @@ class _KardexPageState extends ConsumerState<KardexPage> {
               fontWeight: FontWeight.w700,
               color: _textPrimary,
             ),
-            items: const [
-              DropdownMenuItem(value: 10, child: Text('10 / pág')),
-              DropdownMenuItem(value: 15, child: Text('15 / pág')),
-              DropdownMenuItem(value: 25, child: Text('25 / pág')),
-              DropdownMenuItem(value: 50, child: Text('50 / pág')),
+            items: [
+              DropdownMenuItem(
+                value: 10,
+                child: Text(ServicioIdioma.t(context, '10 / pág')),
+              ),
+              DropdownMenuItem(
+                value: 15,
+                child: Text(ServicioIdioma.t(context, '15 / pág')),
+              ),
+              DropdownMenuItem(
+                value: 25,
+                child: Text(ServicioIdioma.t(context, '25 / pág')),
+              ),
+              DropdownMenuItem(
+                value: 50,
+                child: Text(ServicioIdioma.t(context, '50 / pág')),
+              ),
             ],
             onChanged: (v) {
               if (v == null) return;

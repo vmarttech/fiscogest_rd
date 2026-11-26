@@ -10,6 +10,7 @@ import 'package:fiscogest_rd/core/ui/app_textfield.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/gastos/domain/entities/gasto.dart';
 import 'package:fiscogest_rd/features/gastos/presentation/providers/gastos_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 /// Gastos — UI según mock HTML (KPI x3, filtros, tabla).
 class GastosPage extends ConsumerStatefulWidget {
@@ -174,8 +175,13 @@ class _GastosPageState extends ConsumerState<GastosPage> {
       final monto = double.tryParse(montoCtrl.text.replaceAll(',', '.')) ?? 0;
       if (desc.isEmpty || monto <= 0) {
         FiscoGestNotifications.show(
-          const SnackBar(
-            content: Text('Descripción y monto válidos son requeridos'),
+          SnackBar(
+            content: Text(
+              ServicioIdioma.t(
+                ctx,
+                'Descripción y monto válidos son requeridos',
+              ),
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -286,45 +292,48 @@ class _GastosPageState extends ConsumerState<GastosPage> {
     }
 
     Widget header(BuildContext ctx) => Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-            child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF2563EB)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      edit == null ? 'Registrar gasto' : 'Editar gasto',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF111827),
-                      ),
-                    ),
-                    const Text(
-                      'Egreso operativo del negocio',
-                  style: TextStyle(fontSize: 12.5, color: Color(0xFF6B7280)),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(ctx),
-            icon: const Icon(Icons.close),
-              ),
-            ],
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.receipt_long_rounded,
+              color: Color(0xFF2563EB),
+            ),
           ),
-        );
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  edit == null ? 'Registrar gasto' : 'Editar gasto',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+                Text(
+                  ServicioIdioma.t(ctx, 'Egreso operativo del negocio'),
+                  style: TextStyle(fontSize: 12.5, color: Color(0xFF6B7280)),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.pop(ctx),
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      ),
+    );
 
     if (mobile) {
       await showModalBottomSheet<void>(
@@ -367,7 +376,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () => Navigator.pop(ctx),
-                                  child: const Text('Cancelar'),
+                                  child: Text(
+                                    ServicioIdioma.t(ctx, 'Cancelar'),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -418,13 +429,13 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                           children: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancelar'),
+                              child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
                             ),
                             const Spacer(),
                             FilledButton.icon(
                               onPressed: () => guardar(ctx),
                               icon: const Icon(Icons.check, size: 18),
-                              label: const Text('Guardar'),
+                              label: Text(ServicioIdioma.t(ctx, 'Guardar')),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF2563EB),
                                 foregroundColor: Colors.white,
@@ -448,7 +459,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Detalle del gasto'),
+        title: Text(ServicioIdioma.t(ctx, 'Detalle del gasto')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,14 +475,14 @@ class _GastosPageState extends ConsumerState<GastosPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cerrar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cerrar')),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               _abrirForm(edit: g);
             },
-            child: const Text('Editar'),
+            child: Text(ServicioIdioma.t(ctx, 'Editar')),
           ),
         ],
       ),
@@ -479,50 +490,50 @@ class _GastosPageState extends ConsumerState<GastosPage> {
   }
 
   Widget _kv(String k, String v) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 110,
-              child: Text(
-                k,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF6B7280),
-                ),
-              ),
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 110,
+          child: Text(
+            k,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF6B7280),
             ),
-            Expanded(
-              child: Text(
-                v,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF111827),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      );
+        Expanded(
+          child: Text(
+            v,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF111827),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _eliminar(Gasto g) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar gasto'),
+        title: Text(ServicioIdioma.t(ctx, 'Eliminar gasto')),
         content: Text('Eliminar "${g.descripcion}" (${formatRd(g.monto)})?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(ctx, 'Cancelar')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Eliminar'),
+            child: Text(ServicioIdioma.t(ctx, 'Eliminar')),
           ),
         ],
       ),
@@ -551,8 +562,8 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               foregroundColor: Colors.white,
               elevation: 4,
               icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Registrar',
+              label: Text(
+                ServicioIdioma.t(context, 'Registrar'),
                 style: TextStyle(fontWeight: FontWeight.w800),
               ),
             )
@@ -633,7 +644,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                             FilledButton.icon(
                               onPressed: () => _abrirForm(),
                               icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Registrar Gasto'),
+                              label: Text(
+                                ServicioIdioma.t(context, 'Registrar Gasto'),
+                              ),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF2563EB),
                                 foregroundColor: Colors.white,
@@ -801,9 +814,14 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                     _categoriaFiltro = v;
                                   }),
                                   itemBuilder: (_) => [
-                                    const PopupMenuItem(
+                                    PopupMenuItem(
                                       value: null,
-                                      child: Text('Todas las categorías'),
+                                      child: Text(
+                                        ServicioIdioma.t(
+                                          context,
+                                          'Todas las categorías',
+                                        ),
+                                      ),
                                     ),
                                     for (final c in _cats)
                                       PopupMenuItem(value: c, child: Text(c)),
@@ -895,16 +913,22 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                       color: Colors.grey.shade400,
                                     ),
                                     const SizedBox(height: 10),
-                                    const Text(
-                                      'No hay gastos con estos filtros',
+                                    Text(
+                                      ServicioIdioma.t(
+                                        context,
+                                        'No hay gastos con estos filtros',
+                                      ),
                                       style: TextStyle(
                                         color: Color(0xFF6B7280),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
-                                    const Text(
-                                      'Use «Registrar Gasto» arriba para agregar uno.',
+                                    Text(
+                                      ServicioIdioma.t(
+                                        context,
+                                        'Use «Registrar Gasto» arriba para agregar uno.',
+                                      ),
                                       style: TextStyle(
                                         fontSize: 12.5,
                                         color: Color(0xFF9CA3AF),
@@ -928,27 +952,51 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                     dataRowMaxHeight: 64,
                                     horizontalMargin: 20,
                                     columnSpacing: 24,
-                                    columns: const [
-                                      DataColumn(
-                                        label: Text('ICONO', style: _th),
-                                      ),
-                                      DataColumn(
-                                        label: Text('DESCRIPCIÓN', style: _th),
-                                      ),
-                                      DataColumn(
-                                        label: Text('CATEGORÍA', style: _th),
-                                      ),
-                                      DataColumn(
-                                        label: Text('FECHA', style: _th),
-                                      ),
+                                    columns: [
                                       DataColumn(
                                         label: Text(
-                                          'MÉTODO DE PAGO',
+                                          ServicioIdioma.t(context, 'ICONO'),
                                           style: _th,
                                         ),
                                       ),
                                       DataColumn(
-                                        label: Text('MONTO', style: _th),
+                                        label: Text(
+                                          ServicioIdioma.t(
+                                            context,
+                                            'DESCRIPCIÓN',
+                                          ),
+                                          style: _th,
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(
+                                          ServicioIdioma.t(
+                                            context,
+                                            'CATEGORÍA',
+                                          ),
+                                          style: _th,
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(
+                                          ServicioIdioma.t(context, 'FECHA'),
+                                          style: _th,
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(
+                                          ServicioIdioma.t(
+                                            context,
+                                            'MÉTODO DE PAGO',
+                                          ),
+                                          style: _th,
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(
+                                          ServicioIdioma.t(context, 'MONTO'),
+                                          style: _th,
+                                        ),
                                         numeric: true,
                                       ),
                                       DataColumn(
@@ -995,9 +1043,9 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 4,
-                                                ),
+                                                      horizontal: 10,
+                                                      vertical: 4,
+                                                    ),
                                                 decoration: BoxDecoration(
                                                   color: const Color(
                                                     0xFFF3F4F6,
@@ -1184,7 +1232,10 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.4),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.4,
+              ),
             ),
           ),
         ),
@@ -1222,9 +1273,11 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                   _categoriaFiltro = v;
                 }),
                 itemBuilder: (_) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: null,
-                    child: Text('Todas las categorías'),
+                    child: Text(
+                      ServicioIdioma.t(context, 'Todas las categorías'),
+                    ),
                   ),
                   for (final c in _cats)
                     PopupMenuItem(value: c, child: Text(c)),
@@ -1276,12 +1329,14 @@ class _GastosPageState extends ConsumerState<GastosPage> {
         const SizedBox(height: 14),
         Row(
           children: [
-            const Text(
-              'Movimientos',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(context, 'Movimientos'),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
               ),
             ),
             const Spacer(),
@@ -1546,12 +1601,14 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 ),
                 child: Row(
                   children: [
-                    const Text(
-                      'Monto',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF94A3B8),
+                    Builder(
+                      builder: (context) => Text(
+                        ServicioIdioma.t(context, 'Monto'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF94A3B8),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),

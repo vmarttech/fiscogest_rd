@@ -8,6 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:fiscogest_rd/core/legal/legal_texts.dart';
 import 'package:fiscogest_rd/core/ui/app_scaffold.dart';
 import 'package:fiscogest_rd/core/presentation/widgets/shell_drawer_scope.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 enum LegalDocumento { privacidad, terminos, eliminarCuenta }
 
@@ -96,16 +97,26 @@ class _LegalPageState extends State<LegalPage> {
           children: [
             const Icon(Icons.language, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              'WebView no disponible en esta plataforma',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(
+                  context,
+                  'WebView no disponible en esta plataforma',
+                ),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Se abrirá en el navegador del sistema',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+            Builder(
+              builder: (context) => Text(
+                ServicioIdioma.t(
+                  context,
+                  'Se abrirá en el navegador del sistema',
+                ),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -116,7 +127,10 @@ class _LegalPageState extends State<LegalPage> {
                 );
               },
               icon: const Icon(Icons.open_in_browser),
-              label: const Text('Abrir en el navegador'),
+              label: Builder(
+                builder: (context) =>
+                    Text(ServicioIdioma.t(context, 'Abrir en el navegador')),
+              ),
             ),
           ],
         ),

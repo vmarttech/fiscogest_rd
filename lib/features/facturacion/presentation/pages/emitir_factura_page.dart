@@ -12,6 +12,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/providers/listas_ventas_providers.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/providers/ecfe_providers.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class EmitirFacturaPage extends ConsumerStatefulWidget {
   const EmitirFacturaPage({super.key});
@@ -84,16 +85,18 @@ class _EmitirFacturaPageState extends ConsumerState<EmitirFacturaPage> {
       final imprimir = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Factura emitida'),
-          content: Text('NCF: $ncf\n¿Imprimir comprobante?'),
+          title: Text(ServicioIdioma.t(ctx, 'Factura emitida')),
+          content: Text(
+            'NCF: $ncf\n${ServicioIdioma.t(ctx, '¿Imprimir comprobante?')}',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Después'),
+              child: Text(ServicioIdioma.t(ctx, 'Después')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Imprimir'),
+              child: Text(ServicioIdioma.t(ctx, 'Imprimir')),
             ),
           ],
         ),
@@ -483,17 +486,21 @@ class _PanelEmitir extends StatelessWidget {
             runSpacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('B02 · Consumidor final'),
+                label: Text(
+                  ServicioIdioma.t(context, 'B02 · Consumidor final'),
+                ),
                 selected: tipoNcf == 'B02',
                 onSelected: (_) => onTipo('B02'),
               ),
               ChoiceChip(
-                label: const Text('B01 · Crédito fiscal'),
+                label: Text(ServicioIdioma.t(context, 'B01 · Crédito fiscal')),
                 selected: tipoNcf == 'B01',
                 onSelected: (_) => onTipo('B01'),
               ),
               ChoiceChip(
-                label: const Text('B14 · Regímenes especiales'),
+                label: Text(
+                  ServicioIdioma.t(context, 'B14 · Regímenes especiales'),
+                ),
                 selected: tipoNcf == 'B14',
                 onSelected: (_) => onTipo('B14'),
               ),

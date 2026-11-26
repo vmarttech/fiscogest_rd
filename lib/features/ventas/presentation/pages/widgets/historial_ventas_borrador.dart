@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/features/ventas/domain/enums/estado_documento.dart'
 import 'package:fiscogest_rd/features/ventas/presentation/providers/venta_providers.dart';
 import 'package:fiscogest_rd/features/ventas/presentation/providers/convertir_cotizacion_provider.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class HistorialVentasBorrador extends ConsumerWidget {
   const HistorialVentasBorrador({super.key});
@@ -30,27 +31,31 @@ class HistorialVentasBorrador extends ConsumerWidget {
     EstadoDocumento.facturado => 'Facturada',
   };
 
-  Color _colorEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
-    EstadoDocumento.borrador => AppColors.textSecondary,
-    EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
-    EstadoDocumento.enCredito => const Color(0xFFE65100),
-    EstadoDocumento.aprobado => AppColors.success,
-    EstadoDocumento.anulado => AppColors.error,
-    EstadoDocumento.facturado => AppColors.success,
-  };
+  Color _colorEstado(EstadoDocumento estado, BuildContext context) =>
+      switch (estado) {
+        EstadoDocumento.borrador => AppColors.textSecondary,
+        EstadoDocumento.cotizado => Theme.of(context).colorScheme.primary,
+        EstadoDocumento.enCredito => const Color(0xFFE65100),
+        EstadoDocumento.aprobado => AppColors.success,
+        EstadoDocumento.anulado => AppColors.error,
+        EstadoDocumento.facturado => AppColors.success,
+      };
 
-  Color _colorFondoEstado(EstadoDocumento estado, BuildContext context) => switch (estado) {
-    EstadoDocumento.borrador => AppColors.textSecondary.withValues(alpha: 0.12),
-    EstadoDocumento.cotizado => Theme.of(
-      context,
-    ).colorScheme.primary.withValues(alpha: 0.12),
-    EstadoDocumento.enCredito => const Color(
-      0xFFE65100,
-    ).withValues(alpha: 0.12),
-    EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
-    EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
-    EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
-  };
+  Color _colorFondoEstado(EstadoDocumento estado, BuildContext context) =>
+      switch (estado) {
+        EstadoDocumento.borrador => AppColors.textSecondary.withValues(
+          alpha: 0.12,
+        ),
+        EstadoDocumento.cotizado => Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.12),
+        EstadoDocumento.enCredito => const Color(
+          0xFFE65100,
+        ).withValues(alpha: 0.12),
+        EstadoDocumento.aprobado => AppColors.success.withValues(alpha: 0.12),
+        EstadoDocumento.anulado => AppColors.error.withValues(alpha: 0.12),
+        EstadoDocumento.facturado => AppColors.success.withValues(alpha: 0.12),
+      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -124,7 +129,11 @@ class HistorialVentasBorrador extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Error al cargar cotizaciones: $e',
@@ -178,8 +187,14 @@ class HistorialVentasBorrador extends ConsumerWidget {
                     return _TarjetaCotizacion(
                       cotizacion: c,
                       etiquetaEstado: _etiquetaEstado(c.estadoDocumento),
-                      colorTextoEstado: _colorEstado(c.estadoDocumento, context),
-                      colorFondoEstado: _colorFondoEstado(c.estadoDocumento, context),
+                      colorTextoEstado: _colorEstado(
+                        c.estadoDocumento,
+                        context,
+                      ),
+                      colorFondoEstado: _colorFondoEstado(
+                        c.estadoDocumento,
+                        context,
+                      ),
                       fechaEmision: _formatearFecha(c.fecha),
                       fechaVencimiento: _formatearFecha(c.vencimiento),
                       esPantallaPequena: esPantallaPequena,
@@ -220,14 +235,14 @@ class _TarjetaCotizacion extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Enviar a Aprobación'),
+        title: Text(ServicioIdioma.t(context, 'Enviar a Aprobación')),
         content: Text(
           '¿Enviar la Cotización N° ${cotizacion.numero} a aprobación de crédito?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -235,7 +250,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: AppColors.white,
             ),
-            child: const Text('Enviar'),
+            child: Text(ServicioIdioma.t(context, 'Enviar')),
           ),
         ],
       ),
@@ -283,7 +298,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Ir a Caja'),
+        title: Text(ServicioIdioma.t(context, 'Ir a Caja')),
         content: Text(
           '¿Cobrar la Cotización N° ${cotizacion.numero} en Caja?\n\n'
           'Allí se generará el número de factura fiscal.',
@@ -291,7 +306,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(ServicioIdioma.t(context, 'Cancelar')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -299,7 +314,7 @@ class _TarjetaCotizacion extends ConsumerWidget {
               backgroundColor: AppColors.success,
               foregroundColor: AppColors.white,
             ),
-            child: const Text('Ir a Caja'),
+            child: Text(ServicioIdioma.t(context, 'Ir a Caja')),
           ),
         ],
       ),
@@ -461,7 +476,11 @@ class _TarjetaCotizacion extends ConsumerWidget {
             else if (convertida)
               Row(
                 children: [
-                  const Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                  const Icon(
+                    Icons.check_circle,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Venta generada',

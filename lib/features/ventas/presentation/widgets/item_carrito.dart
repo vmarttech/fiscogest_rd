@@ -8,6 +8,7 @@ import 'package:fiscogest_rd/core/ui/app_radius.dart';
 import 'package:fiscogest_rd/core/ui/status_chip.dart';
 import 'package:fiscogest_rd/core/ui/fisco_gest_notifications.dart';
 import 'package:fiscogest_rd/core/ui/app_formatters.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 String _formatearMonto(double monto) => formatRd(monto);
 
@@ -48,8 +49,8 @@ class ItemCarrito extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Cancelar',
+            child: Text(
+              ServicioIdioma.t(ctx, 'Cancelar'),
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -66,7 +67,7 @@ class ItemCarrito extends ConsumerWidget {
                   double.tryParse(controlador.text.replaceAll(',', '.')) ?? 0;
               Navigator.pop(ctx, v > 0 ? v : null);
             },
-            child: const Text('Aceptar'),
+            child: Text(ServicioIdioma.t(ctx, 'Aceptar')),
           ),
         ],
       ),
@@ -193,8 +194,8 @@ class ItemCarrito extends ConsumerWidget {
                 }
                 Navigator.pop(ctx);
               },
-              child: const Text(
-                'Sin descuento',
+              child: Text(
+                ServicioIdioma.t(ctx, 'Sin descuento'),
                 style: TextStyle(color: AppColors.textSecondary),
               ),
             ),
@@ -225,7 +226,7 @@ class ItemCarrito extends ConsumerWidget {
                   Navigator.pop(ctx);
                 }
               },
-              child: const Text('Aceptar'),
+              child: Text(ServicioIdioma.t(ctx, 'Aceptar')),
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fiscogest_rd/core/ui/ui.dart';
+import 'package:fiscogest_rd/core/i18n/servicio_idioma.dart';
 
 class CabeceraCompraWidget extends StatefulWidget {
   const CabeceraCompraWidget({
@@ -40,7 +41,7 @@ class CabeceraCompraWidget extends StatefulWidget {
   final bool esPequena;
   final bool modoSimplificado;
   final Widget Function({required Widget child1, required Widget child2})
-      filaResponsiva;
+  filaResponsiva;
 
   @override
   State<CabeceraCompraWidget> createState() => _CabeceraCompraWidgetState();
@@ -52,22 +53,22 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
   static const _sucursales = ['Principal (Santo Domingo)', 'Sucursal Santiago'];
 
   Widget _titulo(String t) => Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.only(bottom: 8),
-        decoration: const BoxDecoration(
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: 20),
+    padding: const EdgeInsets.only(bottom: 8),
+    decoration: const BoxDecoration(
       border: Border(bottom: BorderSide(color: Color(0xFFF0F4F8), width: 2)),
-        ),
-        child: Text(
-          t,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-            color: Color(0xFF2D3748),
-          ),
-        ),
-      );
+    ),
+    child: Text(
+      t,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.5,
+        color: Color(0xFF2D3748),
+      ),
+    ),
+  );
 
   Widget _chip(String valor, String etiqueta) {
     final sel = widget.tipoComprobante == valor;
@@ -80,7 +81,9 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
           color: sel ? const Color(0xFFE6F4F2) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: sel ? Theme.of(context).colorScheme.primary : const Color(0xFFCBD5E0),
+            color: sel
+                ? Theme.of(context).colorScheme.primary
+                : const Color(0xFFCBD5E0),
           ),
         ),
         child: Text(
@@ -88,7 +91,9 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: sel ? Theme.of(context).colorScheme.primary : const Color(0xFF666666),
+            color: sel
+                ? Theme.of(context).colorScheme.primary
+                : const Color(0xFF666666),
           ),
         ),
       ),
@@ -253,7 +258,10 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
             ),
           AppLayout.vM,
           if (!widget.modoSimplificado) ...[
-            const Text('Tipo de Comprobante', style: AppTypography.labelMedium),
+            Text(
+              ServicioIdioma.t(context, 'Tipo de Comprobante'),
+              style: AppTypography.labelMedium,
+            ),
             AppLayout.vS,
             Wrap(
               spacing: 8,
@@ -267,7 +275,10 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
             ),
             AppLayout.vM,
           ],
-          const Text('Forma de Pago', style: AppTypography.labelMedium),
+          Text(
+            ServicioIdioma.t(context, 'Forma de Pago'),
+            style: AppTypography.labelMedium,
+          ),
           AppLayout.vS,
           _segment(),
           if (!widget.modoSimplificado && widget.formaPago == 'credito') ...[
@@ -427,8 +438,8 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Tipo de Comprobante',
+                          Text(
+                            ServicioIdioma.t(context, 'Tipo de Comprobante'),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -455,8 +466,8 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Forma de Pago',
+                          Text(
+                            ServicioIdioma.t(context, 'Forma de Pago'),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -471,8 +482,8 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                   ],
                 )
               else ...[
-                const Text(
-                  'Forma de Pago',
+                Text(
+                  ServicioIdioma.t(context, 'Forma de Pago'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
