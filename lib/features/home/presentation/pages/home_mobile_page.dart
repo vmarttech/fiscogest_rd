@@ -257,7 +257,7 @@ class HomeMobilePage extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 ServicioIdioma.t(ctx, 'Nueva acción'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: _text,
@@ -271,7 +271,7 @@ class HomeMobilePage extends ConsumerWidget {
                 ),
                 title: Text(
                   ServicioIdioma.t(ctx, 'Nueva venta'),
-                  style: TextStyle(fontWeight: FontWeight.w700, color: _text),
+                  style: const TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
                 onTap: () => Navigator.pop(ctx, '/ventas/cotizaciones/nueva'),
               ),
@@ -282,7 +282,7 @@ class HomeMobilePage extends ConsumerWidget {
                 ),
                 title: Text(
                   ServicioIdioma.t(ctx, 'Nueva compra'),
-                  style: TextStyle(fontWeight: FontWeight.w700, color: _text),
+                  style: const TextStyle(fontWeight: FontWeight.w700, color: _text),
                 ),
                 onTap: () {
                   final modoSimple = ProviderScope.containerOf(

@@ -1283,7 +1283,7 @@ class _CatalogoRapidoDialogState extends State<_CatalogoRapidoDialog> {
                     context,
                     'Abreviatura (opcional)',
                   ),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   counterText: '',
                 ),
               ),

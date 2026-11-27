@@ -117,8 +117,8 @@ class _DetalleCompraPageState extends ConsumerState<DetalleCompraPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                    SizedBox(height: 16),
+                    const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const SizedBox(height: 16),
                     Text(
                       ServicioIdioma.t(context, 'ID de compra no válido'),
                       style: AppTypography.h4Bold,

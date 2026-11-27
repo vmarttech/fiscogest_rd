@@ -88,7 +88,7 @@ class AvisarAtrasadosButton extends ConsumerWidget {
     if (fiosAtrasados.isEmpty) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           behavior: SnackBarBehavior.floating,
           width: 320,
           content: Text('No hay fios pendientes de cobro.'),
@@ -294,8 +294,8 @@ class AvisarAtrasadosButton extends ConsumerWidget {
                       decoration: InputDecoration(
                         labelText: ServicioIdioma.t(ctx, 'WhatsApp / Teléfono'),
                         isDense: true,
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.phone, size: 18),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.phone, size: 18),
                       ),
                     ),
                     const SizedBox(height: 12),

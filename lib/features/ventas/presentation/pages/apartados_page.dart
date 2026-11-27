@@ -247,7 +247,7 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             labelText: ServicioIdioma.t(ctx, 'Monto del abono'),
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
@@ -291,7 +291,7 @@ class _ApartadosPageState extends ConsumerState<ApartadosPage> {
           controller: ctrlMotivo,
           decoration: InputDecoration(
             labelText: ServicioIdioma.t(ctx, 'Motivo de cancelación'),
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [

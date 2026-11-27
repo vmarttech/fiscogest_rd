@@ -1064,7 +1064,7 @@ class _DetalleSolicitudCreditoPageState
               builder: (context) => Text(
                 ServicioIdioma.t(context, 'Score: — (complete expediente)'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF065F46),
@@ -1238,7 +1238,7 @@ class _DetalleSolicitudCreditoPageState
                     icon: const Icon(Icons.arrow_back, size: 18),
                     label: Text(
                       ServicioIdioma.t(context, 'Volver'),
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.grey700,

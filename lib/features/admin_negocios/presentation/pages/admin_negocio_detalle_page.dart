@@ -76,8 +76,9 @@ class _DetalleState extends ConsumerState<AdminNegocioDetallePage> {
           ),
           FilledButton(
             onPressed: () {
-              if (ctrl.text.trim().isNotEmpty)
+              if (ctrl.text.trim().isNotEmpty) {
                 Navigator.pop(ctx, ctrl.text.trim());
+              }
             },
             child: Text(accion),
           ),

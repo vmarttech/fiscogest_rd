@@ -51,7 +51,7 @@ class ItemCarrito extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               ServicioIdioma.t(ctx, 'Cancelar'),
-              style: TextStyle(color: AppColors.textSecondary),
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -196,7 +196,7 @@ class ItemCarrito extends ConsumerWidget {
               },
               child: Text(
                 ServicioIdioma.t(ctx, 'Sin descuento'),
-                style: TextStyle(color: AppColors.textSecondary),
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
             ),
             ElevatedButton(

@@ -423,7 +423,7 @@ class _PeriodoChips extends ConsumerWidget {
           ),
           Text(
             ServicioIdioma.t(context, 'Comparar con'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
@@ -994,7 +994,7 @@ class _ChartCard extends StatelessWidget {
                     context,
                     'Ventas vs. Margen - Tendencia de 30 Días',
                   ),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                     color: _kInk,
@@ -1014,7 +1014,7 @@ class _ChartCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   ServicioIdioma.t(context, 'Análisis dinámico comparativo'),
-                  style: TextStyle(fontSize: 12, color: _kMuted),
+                  style: const TextStyle(fontSize: 12, color: _kMuted),
                 ),
               ],
             )
@@ -1147,7 +1147,7 @@ class _PrevisionPanel extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           ServicioIdioma.t(context, 'Histórica vendida vs. previsión'),
-          style: TextStyle(fontSize: 10, color: _kMuted2),
+          style: const TextStyle(fontSize: 10, color: _kMuted2),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -1259,7 +1259,7 @@ class _MixPagoCard extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Formas de pago'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: _kInk,
@@ -1267,13 +1267,13 @@ class _MixPagoCard extends StatelessWidget {
           ),
           Text(
             ServicioIdioma.t(context, 'Mes en curso'),
-            style: TextStyle(fontSize: 11, color: _kMuted2),
+            style: const TextStyle(fontSize: 11, color: _kMuted2),
           ),
           const SizedBox(height: 16),
           if (entries.isEmpty)
             Text(
               ServicioIdioma.t(context, 'Sin datos'),
-              style: TextStyle(color: _kMuted),
+              style: const TextStyle(color: _kMuted),
             )
           else
             for (final e in entries)
@@ -1349,7 +1349,7 @@ class _TopProductosCard extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Top productos'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: _kInk,
@@ -1357,13 +1357,13 @@ class _TopProductosCard extends StatelessWidget {
           ),
           Text(
             ServicioIdioma.t(context, 'Mes en curso'),
-            style: TextStyle(fontSize: 11, color: _kMuted2),
+            style: const TextStyle(fontSize: 11, color: _kMuted2),
           ),
           const SizedBox(height: 16),
           if (items.isEmpty)
             Text(
               ServicioIdioma.t(context, 'Sin datos'),
-              style: TextStyle(color: _kMuted),
+              style: const TextStyle(color: _kMuted),
             )
           else
             for (var i = 0; i < items.length && i < 5; i++) ...[
@@ -1476,7 +1476,7 @@ class _SaludCard extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Salud del negocio'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: _kInk,
@@ -1484,7 +1484,7 @@ class _SaludCard extends StatelessWidget {
           ),
           Text(
             ServicioIdioma.t(context, 'Periodo seleccionado'),
-            style: TextStyle(fontSize: 11, color: _kMuted2),
+            style: const TextStyle(fontSize: 11, color: _kMuted2),
           ),
           const SizedBox(height: 16),
           Row(

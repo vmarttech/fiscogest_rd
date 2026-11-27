@@ -123,7 +123,7 @@ class TotalesCompraWidget extends StatelessWidget {
               children: [
                 Text(
                   ServicioIdioma.t(context, 'Total'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1A202C),

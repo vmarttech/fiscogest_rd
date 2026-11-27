@@ -228,7 +228,7 @@ class _TarjetaCampana extends ConsumerWidget {
                 ),
                 Text(
                   ServicioIdioma.t(context, 'Activa'),
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
                 const Spacer(),
                 Text(

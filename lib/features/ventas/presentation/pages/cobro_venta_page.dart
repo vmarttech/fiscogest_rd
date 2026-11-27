@@ -1321,7 +1321,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 children: [
                                   Text(
                                     ServicioIdioma.t(ctx, 'Esperado en Caja'),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF64748B),
@@ -1355,7 +1355,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                 children: [
                                   Text(
                                     ServicioIdioma.t(ctx, 'Conteo Físico'),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF065F46),
@@ -1413,7 +1413,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                       const SizedBox(height: 10),
                       Text(
                         ServicioIdioma.t(ctx, 'Denominaciones (RD\$)'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF64748B),
@@ -2636,7 +2636,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                                       'Atajos: F2 Buscar · F3 Cotiz · F6 CxC · F4 Arqueo · F12 Cobrar · Esc Limpiar',
                                     ),
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       color: Color(0xFF94A3B8),
                                     ),
@@ -2685,7 +2685,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     ),
                     child: Text(
                       ServicioIdioma.t(context, 'Sesión abierta'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF6EE7B7),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -2709,7 +2709,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                     ),
                     child: Text(
                       ServicioIdioma.t(context, 'Arqueo (F4)'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
@@ -2864,7 +2864,7 @@ class _CobroVentaPageState extends ConsumerState<CobroVentaPage> {
                 context,
                 'Sin plan de cuotas — abono libre al saldo.',
               ),
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
             ),
           ),
         for (final q in (pend.isEmpty ? cuotas : pend).take(12))

@@ -549,7 +549,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       icon: const Icon(Icons.close, color: Colors.white70),
                       label: Text(
                         ServicioIdioma.t(context, 'Cancelar'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white70,
                           fontWeight: FontWeight.w700,
                         ),
@@ -614,7 +614,7 @@ class _ErrorPanel extends StatelessWidget {
               onPressed: onReintentar,
               child: Text(
                 ServicioIdioma.t(context, 'Reintentar cámara'),
-                style: TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Colors.white70),
               ),
             ),
           ],

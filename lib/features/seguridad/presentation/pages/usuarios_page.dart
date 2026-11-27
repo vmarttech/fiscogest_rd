@@ -466,7 +466,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                 controller: _userCtrl,
                 decoration: InputDecoration(
                   labelText: ServicioIdioma.t(context, 'Usuario *'),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 10),
@@ -475,7 +475,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                 maxLength: 80,
                 decoration: InputDecoration(
                   labelText: ServicioIdioma.t(context, 'Nombre *'),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 10),
@@ -506,7 +506,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                     : 'Vendedor',
                 decoration: InputDecoration(
                   labelText: ServicioIdioma.t(context, 'Rol *'),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: rolesPermitidos
                     .map((r) => DropdownMenuItem(value: r, child: Text(r)))
@@ -524,7 +524,7 @@ class _FormUsuarioSheetState extends ConsumerState<_FormUsuarioSheet> {
                 initialValue: _estado,
                 decoration: InputDecoration(
                   labelText: ServicioIdioma.t(context, 'Estado'),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'Activo', child: Text('Activo')),

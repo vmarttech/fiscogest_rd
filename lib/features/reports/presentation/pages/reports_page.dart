@@ -106,7 +106,7 @@ class ReportsPage extends StatelessWidget {
                         ),
                         Text(
                           ServicioIdioma.t(context, 'Reportes operativos'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                             color: Color(0xFF0F172A),

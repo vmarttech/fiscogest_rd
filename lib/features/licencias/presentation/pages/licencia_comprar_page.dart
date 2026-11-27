@@ -263,7 +263,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const SizedBox(height: 16),
                 Text(
                   ServicioIdioma.t(ctx, 'Pago por depósito o transferencia'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: _ink,
@@ -275,7 +275,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                     ctx,
                     'Elige el plan. Se generará tu referencia FG- y verás las cuentas para depositar.',
                   ),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     height: 1.35,
                     color: Colors.black54,
@@ -393,7 +393,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const SizedBox(height: 16),
                 Text(
                   ServicioIdioma.t(ctx, 'Tu referencia de pago'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: _ink,
@@ -466,7 +466,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                 const SizedBox(height: 20),
                 Text(
                   ServicioIdioma.t(ctx, 'Cuentas para depositar'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: _ink,
@@ -594,7 +594,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                     ),
                     Text(
                       ServicioIdioma.t(context, 'Planes y pago'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: _ink,
@@ -680,7 +680,7 @@ class _LicenciaComprarPageState extends ConsumerState<LicenciaComprarPage> {
                               'Tras el pago, la licencia se activa sola. No hace falta enviar comprobantes.',
                             ),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
                               height: 1.35,
@@ -995,7 +995,7 @@ class _PriceCard extends StatelessWidget {
                     ),
                     child: Text(
                       ServicioIdioma.t(context, 'Tu plan actual'),
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   )
                 : FilledButton(

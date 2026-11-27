@@ -156,7 +156,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                             ),
                             label: Text(
                               ServicioIdioma.t(context, 'Nueva unidad'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -186,7 +186,7 @@ class _UnidadesPageState extends ConsumerState<UnidadesPage> {
                           icon: const Icon(Icons.straighten_rounded, size: 20),
                           label: Text(
                             ServicioIdioma.t(context, 'Nueva unidad'),
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),

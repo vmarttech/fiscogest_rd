@@ -634,7 +634,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                       ),
                       child: Text(
                         ServicioIdioma.t(context, 'Registrar Compra'),
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -655,7 +655,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                       ),
                       child: Text(
                         ServicioIdioma.t(context, 'Guardar Borrador'),
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -692,8 +692,8 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                   context,
                                   'Seleccione a qué almacén ingresarán estos productos',
                                 ),
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.warehouse),
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.warehouse),
                               ),
                               items: almacenes
                                   .map(
@@ -743,7 +743,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                         context,
                                         'Registrar Compra',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -773,7 +773,7 @@ class _RegistrarCompraPageState extends ConsumerState<RegistrarCompraPage> {
                                         context,
                                         'Guardar Borrador',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -863,9 +863,9 @@ class _SelectorProductoCompraDialogState
                   context,
                   'Buscar por nombre, SKU o barras',
                 ),
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 isDense: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               onChanged: (_) => setState(() {}),
             ),

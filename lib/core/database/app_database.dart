@@ -54,6 +54,10 @@ import 'package:fiscogest_rd/features/comercial/data/dao/caja_sesiones_table.dar
 import 'package:fiscogest_rd/features/comercial/data/dao/cuentas_cobrar_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/compras_table.dart';
 import 'package:fiscogest_rd/features/gastos/data/dao/gastos_table.dart';
+import 'package:fiscogest_rd/features/nomina/data/dao/empleados_table.dart';
+import 'package:fiscogest_rd/features/nomina/data/dao/liquidaciones_table.dart';
+import 'package:fiscogest_rd/features/nomina/data/dao/planillas_table.dart';
+import 'package:fiscogest_rd/features/nomina/data/dao/planilla_lineas_table.dart';
 import 'package:fiscogest_rd/features/e_cf/data/dao/ecfe_tables.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
@@ -120,6 +124,10 @@ part 'app_database.g.dart';
     TransferenciasTable,
     PresentacionesTable,
     ImpuestosTable,
+    EmpleadosTable,
+    PlanillasTable,
+    PlanillaLineasTable,
+    LiquidacionesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -134,7 +142,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 85;
+  int get schemaVersion => 91;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -201,6 +209,48 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 91) {
+        try { await m.createTable(liquidacionesTable); } catch (_) {}
+      }
+      if (from < 90) {
+        try { await m.addColumn(empleadosTable, empleadosTable.banco); } catch (_) {}
+        try { await m.addColumn(empleadosTable, empleadosTable.tipoCuenta); } catch (_) {}
+        try { await m.addColumn(empleadosTable, empleadosTable.numeroCuenta); } catch (_) {}
+        try { await m.addColumn(empleadosTable, empleadosTable.formaPago); } catch (_) {}
+      }
+      if (from < 89) {
+        try { await m.addColumn(planillasTable, planillasTable.tipoPeriodo); } catch (_) {}
+        try { await m.addColumn(planillasTable, planillasTable.totalNeto); } catch (_) {}
+        try { await m.addColumn(planillasTable, planillasTable.totalTssTrab); } catch (_) {}
+        try { await m.addColumn(planillasTable, planillasTable.totalIsr); } catch (_) {}
+        try { await m.addColumn(planillasTable, planillasTable.totalCostoEmpleador); } catch (_) {}
+        try { await m.addColumn(planillasTable, planillasTable.fechaPago); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.afpPatronal); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.sfsPatronal); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.srlPatronal); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.fondoSolidaridad); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.infotep); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.tssAfp); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.tssSfs); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.isr); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.montoNeto); } catch (_) {}
+      }
+
+      if (from < 88) {
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.tssAfp); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.tssSfs); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.isr); } catch (_) {}
+        try { await m.addColumn(planillaLineasTable, planillaLineasTable.montoNeto); } catch (_) {}
+      }
+      if (from < 87) {
+        try { await m.createTable(planillasTable); } catch (_) {}
+        try { await m.createTable(planillaLineasTable); } catch (_) {}
+      }
+      if (from < 86) {
+        try {
+          await m.createTable(empleadosTable);
+        } catch (_) {}
+      }
       if (from < 85) {
         try { await m.addColumn(licenciasTable, licenciasTable.pruebaInicio); } catch (_) {}
         try { await m.addColumn(licenciasTable, licenciasTable.pruebaFin); } catch (_) {}

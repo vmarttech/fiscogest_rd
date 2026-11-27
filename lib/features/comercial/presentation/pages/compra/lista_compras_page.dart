@@ -1067,7 +1067,7 @@ class ListaComprasPage extends ConsumerWidget {
                 children: [
                   Text(
                     ServicioIdioma.t(context, 'Vistas Rápidas'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF1E293B),
@@ -1103,7 +1103,7 @@ class ListaComprasPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     ServicioIdioma.t(context, 'Acciones Rápidas'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF1E293B),
@@ -1313,7 +1313,7 @@ class ListaComprasPage extends ConsumerWidget {
                                           'Ninguna compra coincide con los filtros',
                                         ),
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Color(0xFF64748B),
                                         ),
                                       ),
@@ -1375,7 +1375,7 @@ class ListaComprasPage extends ConsumerWidget {
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text(
                 ServicioIdioma.t(context, 'Nueva Compra'),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             )
           : null,

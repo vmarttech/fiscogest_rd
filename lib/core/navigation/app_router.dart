@@ -70,6 +70,11 @@ import 'package:fiscogest_rd/features/clientes/presentation/pages/nuevo_cliente_
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
 import 'package:fiscogest_rd/features/gastos/presentation/pages/gastos_page.dart';
+import 'package:fiscogest_rd/features/contabilidad/presentation/pages/contabilidad_page.dart';
+import 'package:fiscogest_rd/features/nomina/presentation/pages/nomina_page.dart';
+import 'package:fiscogest_rd/features/nomina/presentation/pages/planillas_page.dart';
+import 'package:fiscogest_rd/features/nomina/presentation/pages/planilla_detalle_page.dart';
+import 'package:fiscogest_rd/features/nomina/presentation/pages/prestaciones_page.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/pages/ecfe_hub_page.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/pages/ecfe_detalle_page.dart';
 import 'package:fiscogest_rd/features/e_cf/presentation/pages/ecfe_spec_page.dart';
@@ -877,6 +882,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/gastos',
         name: GastosPage.routeName,
         builder: (_, __) => const AppShell(child: GastosPage()),
+      ),
+      GoRoute(
+        path: '/contabilidad',
+        name: ContabilidadPage.routeName,
+        builder: (_, __) => const AppShell(child: ContabilidadPage()),
+      ),
+      GoRoute(
+        path: '/nomina',
+        name: NominaPage.routeName,
+        builder: (_, __) => const AppShell(child: NominaPage()),
+      ),
+      GoRoute(
+        path: '/nomina/planillas',
+        name: PlanillasPage.routeName,
+        builder: (_, __) => const AppShell(child: PlanillasPage()),
+      ),
+      GoRoute(
+        path: '/nomina/planillas/:id',
+        name: PlanillaDetallePage.routeName,
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          return AppShell(child: PlanillaDetallePage(planillaId: id));
+        },
+      ),
+      GoRoute(
+        path: '/nomina/prestaciones',
+        name: PrestacionesPage.routeName,
+        builder: (_, state) {
+          final id = int.tryParse(state.uri.queryParameters['empleadoId'] ?? '');
+          return AppShell(child: PrestacionesPage(empleadoId: id));
+        },
       ),
       GoRoute(
         path: '/reports',

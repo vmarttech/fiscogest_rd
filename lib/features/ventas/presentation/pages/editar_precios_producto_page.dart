@@ -145,7 +145,7 @@ class _EditarPreciosProductoPageState
                         context,
                         'Costo (solo lectura)',
                       ),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                     readOnly: true,
@@ -183,7 +183,7 @@ class _EditarPreciosProductoPageState
                     controller: _precioMinimoCtrl,
                     decoration: InputDecoration(
                       labelText: ServicioIdioma.t(context, 'Precio Mínimo'),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -192,7 +192,7 @@ class _EditarPreciosProductoPageState
                     controller: _precioMayoristaCtrl,
                     decoration: InputDecoration(
                       labelText: ServicioIdioma.t(context, 'Precio Mayorista'),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -201,7 +201,7 @@ class _EditarPreciosProductoPageState
                     controller: _precioEspecialCtrl,
                     decoration: InputDecoration(
                       labelText: ServicioIdioma.t(context, 'Precio Especial'),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                   ),

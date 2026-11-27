@@ -825,7 +825,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                       icon: const Icon(Icons.image_outlined, size: 16),
                       label: Text(
                         ServicioIdioma.t(context, 'Cambiar logo'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           color: Color(0xFF315A58),
                         ),
@@ -1363,7 +1363,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 context,
                 'Manifiesto de transferencia (packing list)',
               ),
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
             ),
           ),
           const SizedBox(height: 4),
@@ -1373,7 +1373,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 context,
                 'Edita el contenido del PDF que se genera al transferir entre almacenes.',
               ),
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ),
           const SizedBox(height: 8),
@@ -1382,7 +1382,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
             title: Builder(
               builder: (context) => Text(
                 ServicioIdioma.t(context, 'Imprimir manifiesto al transferir'),
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
               ),
             ),
             subtitle: Builder(
@@ -1391,7 +1391,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                   context,
                   'Si está activo, al completar una transferencia se abre el PDF.',
                 ),
-                style: TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 12),
               ),
             ),
             value: _transfImprimirManifiesto,
@@ -1450,7 +1450,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
               title: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Mostrar bloque de firmas'),
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
               subtitle: Builder(
@@ -1459,7 +1459,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                     context,
                     'Despachado / Transportista / Recibido',
                   ),
-                  style: TextStyle(fontSize: 11),
+                  style: const TextStyle(fontSize: 11),
                 ),
               ),
               value: _transfMostrarFirmas,
@@ -1476,7 +1476,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                   context,
                   'Guarda con el botón de esta sección para aplicar los cambios al próximo manifiesto.',
                 ),
-                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
               ),
             ),
           ],
@@ -1521,7 +1521,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 context,
                 'Formas de pago y reglas al cobrar en caja.',
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF64748B),
               ),
@@ -1629,7 +1629,7 @@ class _ConfiguracionPageState extends ConsumerState<ConfiguracionPage> {
                 context,
                 'Prefijos del número de cotización (Contado / Crédito).',
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF64748B),
               ),

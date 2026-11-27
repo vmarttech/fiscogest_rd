@@ -159,10 +159,11 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         ),
       );
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _cargando = false;
         });
+      }
     }
   }
 
@@ -421,7 +422,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
         Builder(
           builder: (context) => Text(
             ServicioIdioma.t(context, 'Datos de Sesión'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w900,
               color: _textPrimary,
@@ -792,7 +793,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
           Builder(
             builder: (context) => Text(
               ServicioIdioma.t(context, 'Guías Operativas'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
                 color: _textPrimary,
@@ -848,7 +849,7 @@ class _RegistrarConteoPageState extends ConsumerState<RegistrarConteoPage> {
           Builder(
             builder: (context) => Text(
               ServicioIdioma.t(context, 'Estadísticas Rápidas'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
                 color: _textPrimary,

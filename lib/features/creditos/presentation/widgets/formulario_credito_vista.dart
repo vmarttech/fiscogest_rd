@@ -419,7 +419,7 @@ class _FormularioCreditoVistaState
           dataRowMinHeight: 44,
           dataRowMaxHeight: 52,
           columns: [
-            DataColumn(label: Text('#')),
+            const DataColumn(label: Text('#')),
             DataColumn(label: Text(ServicioIdioma.t(context, 'Vencimiento'))),
             DataColumn(
               label: Text(ServicioIdioma.t(context, 'Capital')),

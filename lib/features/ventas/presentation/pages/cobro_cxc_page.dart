@@ -388,7 +388,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                       const SizedBox(height: 20),
                       Text(
                         ServicioIdioma.t(context, 'Monto a cobrar'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
@@ -419,7 +419,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                       const SizedBox(height: 16),
                       Text(
                         ServicioIdioma.t(context, 'Forma de pago'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
@@ -453,7 +453,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                         const SizedBox(height: 14),
                         Text(
                           ServicioIdioma.t(context, 'Efectivo recibido'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                           ),
@@ -476,7 +476,7 @@ class _CobroCxcPageState extends ConsumerState<CobroCxcPage> {
                         const SizedBox(height: 14),
                         Text(
                           ServicioIdioma.t(context, 'N° referencia'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                           ),

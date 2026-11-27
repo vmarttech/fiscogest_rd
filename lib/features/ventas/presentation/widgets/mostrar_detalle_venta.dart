@@ -169,7 +169,7 @@ class MostrarDetalleVenta extends ConsumerWidget {
           decoration: InputDecoration(
             labelText: ServicioIdioma.t(ctx, 'Correo del cliente'),
             hintText: 'cliente@correo.com',
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [

@@ -1,4 +1,5 @@
 import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
 import 'package:fiscogest_rd/core/sync/supabase/licencia_sync.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
@@ -25,9 +26,18 @@ class SyncEngine {
 
   /// Local → Supabase (todas las tablas registradas).
   Future<void> pushAll() async {
-    await RenovarToken.asegurar();
     if (!SupabaseConfig.isConfigured) {
       debugPrint('SyncEngine.pushAll: Supabase no configurado');
+      return;
+    }
+    await RenovarToken.asegurar();
+    final jwt = await SesionNube.tokenVigente();
+    final hayJwt = jwt != null && jwt.isNotEmpty;
+    if (!hayJwt) {
+      debugPrint(
+        'SyncEngine.pushAll: sin JWT vigente — se omite push '
+        '(inicie sesión con red para EmitirToken).',
+      );
       return;
     }
     debugPrint('SyncEngine.pushAll: inicio');

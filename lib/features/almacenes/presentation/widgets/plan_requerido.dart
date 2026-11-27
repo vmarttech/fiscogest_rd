@@ -52,7 +52,7 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   ServicioIdioma.t(context, 'Función de plan superior'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A),
@@ -78,7 +78,7 @@ class PlanRequeridoAlmacenes extends StatelessWidget {
                     icon: const Icon(Icons.workspace_premium_outlined),
                     label: Text(
                       ServicioIdioma.t(context, 'Ver planes y pagar'),
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,

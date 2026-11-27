@@ -107,7 +107,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           ),
                           label: Text(
                             ServicioIdioma.t(context, 'Emitir factura'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
                             ),
@@ -133,7 +133,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           icon: const Icon(Icons.note_alt_outlined, size: 20),
                           label: Text(
                             ServicioIdioma.t(context, 'Emitir nota de crédito'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 14,
                             ),
@@ -156,7 +156,7 @@ class FacturacionInicioPage extends ConsumerWidget {
                           icon: const Icon(Icons.history_rounded, size: 20),
                           label: Text(
                             ServicioIdioma.t(context, 'Ver historial'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
                             ),

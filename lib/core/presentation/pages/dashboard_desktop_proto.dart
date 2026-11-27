@@ -199,7 +199,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                             const SizedBox(width: 6),
                             Text(
                               ServicioIdioma.t(context, 'Sistema Operativo'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF6EE7B7),
@@ -369,7 +369,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                         context,
                                         'Resumen de Ventas',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A),
@@ -380,7 +380,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                         context,
                                         'Comportamiento de ingresos y facturación e-CF',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 11,
                                         color: Color(0xFF64748B),
                                       ),
@@ -617,7 +617,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                           context,
                                           'Actividad Reciente',
                                         ),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF0F172A),
@@ -631,7 +631,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                           context,
                                           'Ver todas →',
                                         ),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                           color: Color(0xFF2563EB),
@@ -647,7 +647,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                       context,
                                       'Sin actividad reciente',
                                     ),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xFF94A3B8),
                                     ),
@@ -766,12 +766,12 @@ class DashboardDesktopProto extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.inventory_2_outlined,
                                 size: 18,
                                 color: Color(0xFF2563EB),
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -781,7 +781,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                         context,
                                         'Estado del Inventario y Movimientos',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F172A),
@@ -792,7 +792,7 @@ class DashboardDesktopProto extends ConsumerWidget {
                                         context,
                                         'Artículos en almacén y estatus comercial',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 11,
                                         color: Color(0xFF64748B),
                                       ),
@@ -1142,26 +1142,26 @@ class DashboardDesktopProto extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.pie_chart_outline,
                                 size: 18,
                                 color: Color(0xFF9333EA),
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   ServicioIdioma.t(
                                     context,
                                     'Resumen Financiero',
                                   ),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A),
                                   ),
                                 ),
                               ),
-                              Text(
+                              const Text(
                                 'HOY',
                                 style: TextStyle(
                                   fontSize: 10,

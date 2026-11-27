@@ -531,7 +531,7 @@ class _DetalleCuentaCobrarPageState
               child: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Crédito'),
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ),
@@ -550,7 +550,7 @@ class _DetalleCuentaCobrarPageState
               child: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Cuentas por Cobrar'),
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ),
@@ -561,7 +561,7 @@ class _DetalleCuentaCobrarPageState
             Builder(
               builder: (context) => Text(
                 ServicioIdioma.t(context, 'Detalle de cuenta'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -633,7 +633,7 @@ class _DetalleCuentaCobrarPageState
               context,
               'Gestión integral de cuotas, saldos pendientes y registro inmediato de cobros.',
             ),
-            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
           ),
         ),
         const SizedBox(height: 12),
@@ -650,7 +650,7 @@ class _DetalleCuentaCobrarPageState
               label: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Enviar Recordatorio'),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
               style: OutlinedButton.styleFrom(
@@ -673,7 +673,7 @@ class _DetalleCuentaCobrarPageState
               label: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Estado de Cuenta'),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
               style: OutlinedButton.styleFrom(
@@ -821,7 +821,7 @@ class _DetalleCuentaCobrarPageState
                 Builder(
                   builder: (context) => Text(
                     ServicioIdioma.t(context, 'Acuerdo de pronto pago activo'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF047857),
@@ -883,7 +883,7 @@ class _DetalleCuentaCobrarPageState
                   label: Builder(
                     builder: (context) => Text(
                       ServicioIdioma.t(context, 'Imprimir Tabla'),
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ),
@@ -952,7 +952,7 @@ class _DetalleCuentaCobrarPageState
                         style: _th,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 72,
                       child: Text(
                         'ACCIÓN',
@@ -1524,7 +1524,7 @@ class _DetalleCuentaCobrarPageState
               Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Progreso de Pago'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF475569),
@@ -1708,7 +1708,7 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Text(
         ServicioIdioma.t(context, 'Pronto pago (descuento sobre intereses)'),
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
       ),
       content: SingleChildScrollView(
         child: SizedBox(
@@ -1776,7 +1776,7 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
                     '% descuento sobre intereses',
                   ),
                   hintText: '0 – 100',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   helperText: ServicioIdioma.t(
                     context,
                     'Ej: 50 = condona la mitad de los intereses',
@@ -1793,7 +1793,7 @@ class _ProntoPagoDialogState extends State<_ProntoPagoDialog> {
                     context,
                     'Nota del acuerdo (opcional)',
                   ),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               if (calc.error != null) ...[

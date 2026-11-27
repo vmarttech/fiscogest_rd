@@ -66,7 +66,7 @@ class EnterprisePageHeader extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back_rounded, size: 18),
                 label: Text(
                   ServicioIdioma.t(context, 'Volver'),
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ),
             ),

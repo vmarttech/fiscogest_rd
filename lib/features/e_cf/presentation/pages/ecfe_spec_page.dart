@@ -213,7 +213,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
               controller: codigo,
               decoration: InputDecoration(
                 labelText: ServicioIdioma.t(ctx, 'Código (ej. 1.1)'),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 8),
@@ -221,7 +221,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
               controller: nombre,
               decoration: InputDecoration(
                 labelText: ServicioIdioma.t(ctx, 'Nombre'),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 8),
@@ -229,7 +229,7 @@ class _SpecCardState extends ConsumerState<_SpecCard> {
               controller: circular,
               decoration: InputDecoration(
                 labelText: ServicioIdioma.t(ctx, 'Circular / doc. DGII'),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
           ],

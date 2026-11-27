@@ -23,6 +23,8 @@ class Permiso {
   static const usuariosGestionar = 'usuarios.gestionar';
   static const fiaoUsar = 'fiao.usar';
   static const kardexVer = 'kardex.ver';
+  static const nominaVer = 'nomina.ver';
+  static const nominaGestionar = 'nomina.gestionar';
 
   /// Todos los códigos conocidos (documentación / UI futura).
   static const todos = <String>{
@@ -43,6 +45,8 @@ class Permiso {
     usuariosGestionar,
     fiaoUsar,
     kardexVer,
+    nominaVer,
+    nominaGestionar,
   };
 }
 
@@ -85,6 +89,8 @@ const Map<String, Set<String>> permisosPorRol = {
     Permiso.clientesEditar,
     Permiso.reportesVer,
     Permiso.facturacionGestionar,
+    Permiso.nominaVer,
+    Permiso.nominaGestionar,
     // sin compras, sin config, sin usuarios
   },
   'Compras': {
@@ -175,6 +181,7 @@ String? permisoParaRuta(String path) {
     return Permiso.configAdmin;
   }
   if (p.startsWith('/usuarios')) return Permiso.usuariosGestionar;
+  if (p.startsWith('/nomina')) return Permiso.nominaVer;
   // Desconocido: solo admin (*) pasará si se usa rolTienePermiso con check admin
   return Permiso.configAdmin;
 }

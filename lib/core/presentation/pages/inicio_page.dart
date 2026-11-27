@@ -385,6 +385,20 @@ class InicioPage extends ConsumerWidget {
                   AppColors.info,
                   '/proveedores',
                 ),
+                tile(
+                  Icons.account_balance_outlined,
+                  ServicioIdioma.t(context, 'Contabilidad'),
+                  'Libros y asientos',
+                  AppColors.info,
+                  '/contabilidad',
+                ),
+                tile(
+                  Icons.groups_outlined,
+                  ServicioIdioma.t(context, 'Nómina'),
+                  'Empleados y planilla',
+                  AppColors.success,
+                  '/nomina',
+                ),
               ],
             ),
           ),
@@ -600,7 +614,7 @@ class _DashboardColmado extends StatelessWidget {
                         icon: const Icon(Icons.add_shopping_cart_rounded),
                         label: Text(
                           ServicioIdioma.t(context, 'NUEVA VENTA'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.4,
                           ),

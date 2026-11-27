@@ -678,8 +678,8 @@ class _RecordatorioWhatsAppDialogState
             decoration: InputDecoration(
               labelText: ServicioIdioma.t(context, 'WhatsApp del cliente'),
               hintText: '8091234567',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.phone),
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.phone),
             ),
           ),
         ],

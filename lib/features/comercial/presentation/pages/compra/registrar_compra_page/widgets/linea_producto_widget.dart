@@ -262,7 +262,7 @@ class _LineaProductoWidgetState extends State<LineaProductoWidget> {
                 Builder(
                   builder: (context) => Text(
                     ServicioIdioma.t(context, 'Costos adicionales por unidad'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF666666),

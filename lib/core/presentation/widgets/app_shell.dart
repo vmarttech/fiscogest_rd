@@ -660,6 +660,27 @@ class AppShell extends ConsumerWidget {
                       ),
 
                     const SizedBox(height: 16),
+                    _buildSectionTitle(context, 'ADMINISTRACIÓN'),
+                    if (puede(Permiso.nominaVer) || esAdmin)
+                      _buildNavItem(
+                        context,
+                        '/nomina',
+                        'Nómina',
+                        Icons.groups_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+                    if (esAdmin || puede(Permiso.configAdmin))
+                      _buildNavItem(
+                        context,
+                        '/contabilidad',
+                        'Contabilidad',
+                        Icons.account_balance_outlined,
+                        currentPath,
+                        isPermanent,
+                      ),
+
+                    const SizedBox(height: 16),
                     _buildSectionTitle(context, 'INVENTARIO'),
                     if (puede(Permiso.inventarioVer))
                       _buildNavItem(

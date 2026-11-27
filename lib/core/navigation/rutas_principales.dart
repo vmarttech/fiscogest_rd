@@ -42,6 +42,8 @@ const rutasPrincipalesApp = <String>{
   '/admin/avisos/nuevo',
   '/admin/campanas',
   '/ofertas-disponibles',
+  '/contabilidad',
+  '/nomina',
   '/ventas/cotizaciones/nueva',
   '/ventas/fios',
 };

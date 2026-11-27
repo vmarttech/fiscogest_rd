@@ -319,7 +319,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                       icon: const Icon(Icons.open_in_new, size: 18),
                       label: Text(
                         ServicioIdioma.t(ctx, 'Abrir documento relacionado'),
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                   const SizedBox(height: 8),
@@ -327,7 +327,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                     onPressed: () => Navigator.of(ctx).pop(),
                     child: Text(
                       ServicioIdioma.t(ctx, 'Cerrar'),
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
@@ -1456,7 +1456,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   ),
                   hint: Text(
                     ServicioIdioma.t(context, 'Todos'),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   items: [
                     const DropdownMenuItem(value: null, child: Text('Todos')),
@@ -1491,7 +1491,7 @@ class _KardexPageState extends ConsumerState<KardexPage> {
                   ),
                   hint: Text(
                     ServicioIdioma.t(context, 'Todas'),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   items: [
                     const DropdownMenuItem(value: null, child: Text('Todas')),

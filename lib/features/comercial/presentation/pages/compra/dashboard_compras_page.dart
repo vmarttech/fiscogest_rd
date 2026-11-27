@@ -232,7 +232,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
               child: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Ver todo'),
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                 ),
               ),
             ),
@@ -563,7 +563,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                       context,
                                       'Métricas Consolidadas',
                                     ),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF64748B),
@@ -605,7 +605,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                       context,
                                       'Filtros de actividad',
                                     ),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF64748B),
@@ -744,7 +744,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     context,
                                     'ACTIVIDAD RECIENTE  (↑ ↓ para navegar)',
                                   ),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF94A3B8),
@@ -1017,7 +1017,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                         context,
                                         'Operaciones sobre fila activa:',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 11,
                                         color: Color(0xFF64748B),
                                       ),
@@ -1031,7 +1031,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     child: Builder(
                                       builder: (context) => Text(
                                         ServicioIdioma.t(context, '[F2] Pagar'),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -1045,7 +1045,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                     child: Builder(
                                       builder: (context) => Text(
                                         ServicioIdioma.t(context, '[F3] Abono'),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -1126,7 +1126,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                           builder: (context) => Text(
                             ServicioIdioma.t(context, 'Total Pendientes'),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF64748B),
                             ),
@@ -1201,7 +1201,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                       context,
                                       'Comprobante Fiscal NCF',
                                     ),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 10,
                                       color: Color(0xFF94A3B8),
                                     ),
@@ -1239,7 +1239,7 @@ class _DashboardComprasPageState extends ConsumerState<DashboardComprasPage> {
                                       context,
                                       'Balance Liquidado',
                                     ),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 10,
                                       color: Color(0xFF94A3B8),
                                     ),

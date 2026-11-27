@@ -1114,7 +1114,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                       activeThumbColor: const Color(0xFF008F83),
                       title: Text(
                         ServicioIdioma.t(context, 'Habilitar módulo e-CF'),
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       subtitle: Text(
                         ServicioIdioma.t(
@@ -1133,7 +1133,7 @@ class _ConfigTabState extends ConsumerState<_ConfigTab> {
                       isExpanded: true,
                       decoration: InputDecoration(
                         labelText: ServicioIdioma.t(context, 'Ambiente DGII'),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       items: [
                         for (final a in AmbienteDgii.values)
@@ -1501,7 +1501,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                           ctx,
                           'Tipo e-CF (31, 32, 34…)',
                         ),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -1513,7 +1513,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                           ctx,
                           'Último usado (actual)',
                         ),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         helperText: ServicioIdioma.t(
                           ctx,
                           'El próximo será actual+1',
@@ -1529,7 +1529,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                           ctx,
                           'Desde (autorizado DGII)',
                         ),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         helperText: ServicioIdioma.t(
                           ctx,
                           'Inicio del rango asignado por la DGII',
@@ -1545,7 +1545,7 @@ class _SecuenciasEncfSection extends ConsumerWidget {
                           ctx,
                           'Hasta (autorizado DGII)',
                         ),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         helperText: ServicioIdioma.t(
                           ctx,
                           'Fin del rango asignado por la DGII',

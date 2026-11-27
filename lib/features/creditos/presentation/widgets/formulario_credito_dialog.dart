@@ -356,8 +356,8 @@ class _FormularioCreditoDialogState
                             context,
                             'Fecha primer vencimiento',
                           ),
-                          border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.calendar_today),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: const Icon(Icons.calendar_today),
                         ),
                         child: Text(
                           _formatoFecha.format(_fechaPrimerVencimiento),

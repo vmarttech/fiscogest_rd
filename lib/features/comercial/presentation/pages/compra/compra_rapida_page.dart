@@ -427,7 +427,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                       children: [
                         Text(
                           ServicioIdioma.t(context, 'Registro express'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
                             color: _C.navy,
@@ -474,7 +474,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                     icon: const Icon(Icons.add_circle_outline, size: 18),
                     label: Text(
                       ServicioIdioma.t(context, 'Agregar otra línea'),
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -503,7 +503,7 @@ class _CompraRapidaPageState extends ConsumerState<CompraRapidaPage> {
                         children: [
                           Text(
                             ServicioIdioma.t(context, 'Total'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
                               color: _C.muted,
                               fontWeight: FontWeight.w600,

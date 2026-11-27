@@ -172,7 +172,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                   icon: const Icon(Icons.add_rounded, size: 20),
                                   label: Text(
                                     ServicioIdioma.t(context, 'NUEVO IMPUESTO'),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -224,7 +224,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
                                   icon: const Icon(Icons.add_rounded, size: 18),
                                   label: Text(
                                     ServicioIdioma.t(context, 'Nuevo impuesto'),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -366,7 +366,7 @@ class _ImpuestosPageState extends ConsumerState<ImpuestosPage> {
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               ServicioIdioma.t(ctx, 'Cancelar'),
-              style: TextStyle(color: AppColors.textSecondary),
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(

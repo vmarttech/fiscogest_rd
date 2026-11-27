@@ -162,7 +162,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                             icon: const Icon(Icons.add_rounded, size: 20),
                             label: Text(
                               ServicioIdioma.t(context, 'Nuevo Proveedor'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -190,7 +190,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                           icon: const Icon(Icons.add_rounded, size: 20),
                           label: Text(
                             ServicioIdioma.t(context, 'Nuevo Proveedor'),
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),
@@ -694,7 +694,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                         ctx,
                         'Límite de crédito, días y condiciones',
                       ),
-                      style: TextStyle(fontSize: 12, color: Color(0xFF1E293B)),
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF1E293B)),
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -791,7 +791,7 @@ class _ProveedoresPageState extends ConsumerState<ProveedoresPage> {
                       ),
                       child: Text(
                         ServicioIdioma.t(ctx, 'Guardar configuración'),
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],

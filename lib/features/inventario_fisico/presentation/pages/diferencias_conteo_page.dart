@@ -39,21 +39,21 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
       builder: (ctx) => AlertDialog(
         title: Text(
           ServicioIdioma.t(ctx, 'Aprobar ajustes'),
-          style: TextStyle(fontWeight: FontWeight.w900),
+          style: const TextStyle(fontWeight: FontWeight.w900),
         ),
         content: Text(
           ServicioIdioma.t(
             ctx,
             'Se actualizará el stock de cada producto al valor físico contado. ¿Continuar?',
           ),
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               ServicioIdioma.t(ctx, 'Cancelar'),
-              style: TextStyle(fontWeight: FontWeight.w800),
+              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
           FilledButton(
@@ -63,7 +63,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
             ),
             child: Text(
               ServicioIdioma.t(ctx, 'Aprobar'),
-              style: TextStyle(fontWeight: FontWeight.w900),
+              style: const TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -280,7 +280,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                           context,
                                           'Sistema vs físico',
                                         ),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700,
                                           color: _textMuted,
@@ -297,7 +297,7 @@ class _DiferenciasConteoPageState extends ConsumerState<DiferenciasConteoPage> {
                                   ),
                                   label: Text(
                                     ServicioIdioma.t(context, 'Exportar PDF'),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),

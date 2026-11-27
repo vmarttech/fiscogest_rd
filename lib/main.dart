@@ -201,7 +201,7 @@ void main() async {
       try {
         unawaited(() async {
           await RenovarToken.asegurar();
-          debugPrint('main: push al entrar o cada 5 min');
+          debugPrint('main: revisión de sesión de nube al iniciar');
         }());
       } catch (e, st) {
         debugPrint('Sync nube: $e');

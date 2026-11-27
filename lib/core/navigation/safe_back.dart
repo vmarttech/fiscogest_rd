@@ -38,6 +38,8 @@ String _rutaAnterior(String path, String fallback) {
     '/licencia/comprar': '/licencia',
     '/licencia/activar': '/licencia',
     '/licencia/admin': '/licencia',
+    '/nomina/planillas': '/nomina',
+    '/nomina/prestaciones': '/nomina',
   };
   final explicit = rutasAnteriores[path];
   if (explicit != null) return explicit;

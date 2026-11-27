@@ -322,7 +322,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                 ),
                 Text(
                   ServicioIdioma.t(ctx, 'Egreso operativo del negocio'),
-                  style: TextStyle(fontSize: 12.5, color: Color(0xFF6B7280)),
+                  style: const TextStyle(fontSize: 12.5, color: Color(0xFF6B7280)),
                 ),
               ],
             ),
@@ -564,7 +564,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
               icon: const Icon(Icons.add_rounded),
               label: Text(
                 ServicioIdioma.t(context, 'Registrar'),
-                style: TextStyle(fontWeight: FontWeight.w800),
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             )
           : null,
@@ -918,7 +918,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                         context,
                                         'No hay gastos con estos filtros',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Color(0xFF6B7280),
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -929,7 +929,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                         context,
                                         'Use «Registrar Gasto» arriba para agregar uno.',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 12.5,
                                         color: Color(0xFF9CA3AF),
                                       ),
@@ -999,7 +999,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                                         ),
                                         numeric: true,
                                       ),
-                                      DataColumn(
+                                      const DataColumn(
                                         label: Text('ACCIONES', style: _th),
                                         numeric: true,
                                       ),
@@ -1332,7 +1332,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
             Builder(
               builder: (context) => Text(
                 ServicioIdioma.t(context, 'Movimientos'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
@@ -1604,7 +1604,7 @@ class _GastosPageState extends ConsumerState<GastosPage> {
                     Builder(
                       builder: (context) => Text(
                         ServicioIdioma.t(context, 'Monto'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF94A3B8),

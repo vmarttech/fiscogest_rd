@@ -1042,7 +1042,7 @@ class _NuevaVentaBorradorPageState
             child: Builder(
               builder: (context) => Text(
                 ServicioIdioma.t(context, 'Atajos de teclado'),
-                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
               ),
             ),
           ),
@@ -1053,7 +1053,7 @@ class _NuevaVentaBorradorPageState
                 context,
                 'F9 Crédito · F10 Cotización · F11 Finalizar',
               ),
-              style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+              style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
             ),
           ),
         ],
@@ -1854,7 +1854,7 @@ class _NuevaVentaBorradorPageState
           Builder(
             builder: (context) => Text(
               ServicioIdioma.t(context, 'Punto de venta'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF0F172A),
@@ -1869,7 +1869,7 @@ class _NuevaVentaBorradorPageState
                 context,
                 'Capture la venta: cliente · productos · delivery · contado o crédito',
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF64748B),

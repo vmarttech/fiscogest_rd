@@ -153,7 +153,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                             icon: const Icon(Icons.sell_outlined, size: 20),
                             label: Text(
                               ServicioIdioma.t(context, 'Nueva marca'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -183,7 +183,7 @@ class _MarcasPageState extends ConsumerState<MarcasPage> {
                           icon: const Icon(Icons.sell_outlined, size: 20),
                           label: Text(
                             ServicioIdioma.t(context, 'Nueva marca'),
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),

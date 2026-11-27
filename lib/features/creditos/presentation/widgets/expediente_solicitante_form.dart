@@ -506,7 +506,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
                               children: [
                                 Text(
                                   ServicioIdioma.t(context, 'Sexo:'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF334155),
@@ -794,7 +794,7 @@ class _ExpedienteSolicitanteFormState extends State<ExpedienteSolicitanteForm> {
             children: [
               Text(
                 ServicioIdioma.t(context, 'Notas del analista'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF334155),

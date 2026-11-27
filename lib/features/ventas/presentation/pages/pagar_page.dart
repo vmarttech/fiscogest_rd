@@ -31,7 +31,7 @@ class _PagarPageState extends ConsumerState<PagarPage> {
               ServicioIdioma.t(context, 'Gestión de Pagos y Compromisos'),
               style: AppTypography.h4,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               ServicioIdioma.t(
                 context,

@@ -343,7 +343,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
                   context,
                   'Datos personales, fiscales y contacto',
                 ),
-                style: TextStyle(color: Color(0xFF334155), fontSize: 13),
+                style: const TextStyle(color: Color(0xFF334155), fontSize: 13),
               ),
             ),
             const SizedBox(height: 10),
@@ -494,7 +494,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           ServicioIdioma.t(ctx, 'Eliminar cliente'),
-          style: TextStyle(fontWeight: FontWeight.w800),
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
         content: Text(
           '${ServicioIdioma.t(ctx, '¿Eliminar a “')}${cliente.nombre}${ServicioIdioma.t(ctx, '”?')}',
@@ -504,7 +504,7 @@ class _ClientesGestionPageState extends ConsumerState<ClientesGestionPage> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               ServicioIdioma.t(ctx, 'Cancelar'),
-              style: TextStyle(color: _muted),
+              style: const TextStyle(color: _muted),
             ),
           ),
           FilledButton(
@@ -736,7 +736,7 @@ class _ClienteCardPremium extends StatelessWidget {
                               ),
                               child: Text(
                                 ServicioIdioma.t(context, 'Historial de Pagos'),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -978,7 +978,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           ServicioIdioma.t(context, 'Composición de Crédito'),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: Color(0xFF020617),
@@ -1004,7 +1004,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           ServicioIdioma.t(context, 'Últimas Acciones'),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: Color(0xFF020617),
@@ -1048,7 +1048,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
             ),
             child: Text(
               ServicioIdioma.t(context, 'Ver Detalles Completos'),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
         ),
@@ -1065,7 +1065,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
                       'Reporte del cliente: próximamente',
                     ),
                   ),
-                  duration: Duration(seconds: 2),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },
@@ -1078,7 +1078,7 @@ class _PanelDerechoDesktop extends StatelessWidget {
             ),
             child: Text(
               ServicioIdioma.t(context, 'Generar Reporte'),
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),
         ),
@@ -1366,7 +1366,7 @@ class ClienteDetallePage extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Composición de crédito'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: Color(0xFF020617),
@@ -1432,7 +1432,7 @@ class ClienteDetallePage extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Últimas acciones'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: Color(0xFF020617),
@@ -1509,7 +1509,7 @@ class ClienteDetallePage extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   ServicioIdioma.t(context, 'Detalle del cliente'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF020617),
@@ -1559,7 +1559,7 @@ class ClienteDetallePage extends StatelessWidget {
             ),
             child: Text(
               ServicioIdioma.t(context, 'Volver a la cartera'),
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ],

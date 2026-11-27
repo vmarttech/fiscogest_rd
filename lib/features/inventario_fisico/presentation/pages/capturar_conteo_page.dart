@@ -230,7 +230,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                                 context,
                                 'Registre cantidades físicas por producto',
                               ),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: _textMuted,
@@ -246,7 +246,7 @@ class _CapturarConteoPageState extends ConsumerState<CapturarConteoPage> {
                         icon: const Icon(Icons.difference_outlined, size: 18),
                         label: Text(
                           ServicioIdioma.t(context, 'Ver diferencias'),
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Theme.of(

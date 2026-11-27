@@ -71,7 +71,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
               icon: const Icon(Icons.add_rounded),
               label: Text(
                 ServicioIdioma.t(context, 'Nuevo'),
-                style: TextStyle(fontWeight: FontWeight.w900),
+                style: const TextStyle(fontWeight: FontWeight.w900),
               ),
             )
           : null,
@@ -183,7 +183,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                             icon: const Icon(Icons.add_rounded, size: 20),
                             label: Text(
                               ServicioIdioma.t(context, 'Nuevo ajuste'),
-                              style: TextStyle(fontWeight: FontWeight.w900),
+                              style: const TextStyle(fontWeight: FontWeight.w900),
                             ),
                             style: FilledButton.styleFrom(
                               backgroundColor: Theme.of(
@@ -210,7 +210,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                           icon: const Icon(Icons.add_rounded),
                           label: Text(
                             ServicioIdioma.t(context, 'Nuevo ajuste'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 15,
                             ),
@@ -430,7 +430,7 @@ class _ListaAjustesPageState extends ConsumerState<ListaAjustesPage> {
                       children: [
                         Text(
                           ServicioIdioma.t(context, 'Ajustes'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w900,
                             color: _textPrimary,

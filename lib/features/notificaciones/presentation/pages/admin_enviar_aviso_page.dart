@@ -140,7 +140,7 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                         const SizedBox(width: 10),
                         Text(
                           ServicioIdioma.t(context, 'Destinatarios'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                           ),
@@ -240,7 +240,7 @@ class _AdminEnviarAvisoPageState extends ConsumerState<AdminEnviarAvisoPage> {
                         const SizedBox(width: 10),
                         Text(
                           ServicioIdioma.t(context, 'Contenido del aviso'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                           ),

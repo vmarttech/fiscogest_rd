@@ -138,7 +138,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                     context,
                                     'Añadir Nuevo Almacén',
                                   ),
-                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ),
@@ -192,7 +192,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                                         context,
                                         'Añadir Nuevo Almacén',
                                       ),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
                                       ),
@@ -795,7 +795,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                     ),
                     child: Text(
                       ServicioIdioma.t(context, 'view details'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -857,7 +857,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                             ),
                             child: Text(
                               ServicioIdioma.t(context, 'Ver detalles'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,
                               ),
@@ -1041,7 +1041,7 @@ class _AlmacenesPageState extends ConsumerState<AlmacenesPage> {
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   label: Text(
                     ServicioIdioma.t(ctx, 'Editar almacén'),
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ],

@@ -252,7 +252,7 @@ class _RegistrarTransferenciaPageState
                 ),
                 child: Text(
                   ServicioIdioma.t(ctx, 'Cerrar'),
-                  style: TextStyle(fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
             ),
@@ -463,7 +463,7 @@ class _RegistrarTransferenciaPageState
               Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Nueva Transferencia'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w900,
                     color: _textDark,
@@ -978,7 +978,7 @@ class _RegistrarTransferenciaPageState
           Builder(
             builder: (context) => Text(
               ServicioIdioma.t(context, 'Estado General del Stock'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
                 color: _textMuted,
@@ -1107,7 +1107,7 @@ class _RegistrarTransferenciaPageState
           Builder(
             builder: (context) => Text(
               ServicioIdioma.t(context, 'Últimos Movimientos'),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
                 color: _textMuted,
@@ -1179,7 +1179,7 @@ class _RegistrarTransferenciaPageState
                               Builder(
                                 builder: (context) => Text(
                                   ServicioIdioma.t(context, 'Completa'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w900,
                                     color: _ok,
@@ -1316,7 +1316,7 @@ class _RegistrarTransferenciaPageState
                             'Aún no hay transferencias registradas',
                           ),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w900,
                             color: _textMuted,
@@ -1331,7 +1331,7 @@ class _RegistrarTransferenciaPageState
                             'Las actividades generadas durante el día aparecerán listadas en este panel.',
                           ),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF9CA3AF),

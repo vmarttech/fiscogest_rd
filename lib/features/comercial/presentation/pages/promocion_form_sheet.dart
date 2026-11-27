@@ -196,9 +196,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                       context,
                       'Nombre de la promoción *',
                     ),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
@@ -213,9 +213,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   maxLines: 2,
                   decoration: InputDecoration(
                     labelText: ServicioIdioma.t(context, 'Descripción'),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
@@ -226,9 +226,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   initialValue: _tipo,
                   decoration: InputDecoration(
                     labelText: ServicioIdioma.t(context, 'Tipo de promoción'),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
@@ -297,7 +297,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 const SizedBox(height: 8),
                 Text(
                   ServicioIdioma.t(context, 'Vigencia'),
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -332,7 +332,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 const SizedBox(height: 8),
                 Text(
                   ServicioIdioma.t(context, 'Condiciones mínimas (opcionales)'),
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -340,9 +340,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: ServicioIdioma.t(context, 'Cantidad mínima'),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
@@ -364,9 +364,9 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                       context,
                       'Compra mínima (RD\$)',
                     ),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
                     ),
@@ -380,7 +380,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                 const SizedBox(height: 8),
                 Text(
                   ServicioIdioma.t(context, 'Aplicación de la promoción'),
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -388,7 +388,7 @@ class _PromocionFormSheetState extends State<PromocionFormSheet> {
                     context,
                     'Si no eliges productos ni categorías, aplica a todos.',
                   ),
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
                 ExpansionTile(
                   tilePadding: EdgeInsets.zero,

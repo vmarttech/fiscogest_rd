@@ -214,7 +214,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                     TextFormField(
                       decoration: InputDecoration(
                         labelText: ServicioIdioma.t(context, 'Fecha'),
-                        suffixIcon: Icon(Icons.calendar_today),
+                        suffixIcon: const Icon(Icons.calendar_today),
                       ),
                       initialValue: _fecha.toString().split(' ')[0],
                       readOnly: true,
@@ -328,7 +328,7 @@ class _RegistrarAbonoPageState extends ConsumerState<RegistrarAbonoPage> {
                                 )
                               : Text(
                                   ServicioIdioma.t(context, 'Registrar Abono'),
-                                  style: TextStyle(fontSize: 16),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                         ),
                       ],

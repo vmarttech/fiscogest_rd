@@ -440,7 +440,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                         children: [
                           Text(
                             ServicioIdioma.t(context, 'Tipo de Comprobante'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF666666),
@@ -468,7 +468,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
                         children: [
                           Text(
                             ServicioIdioma.t(context, 'Forma de Pago'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF666666),
@@ -484,7 +484,7 @@ class _CabeceraCompraWidgetState extends State<CabeceraCompraWidget> {
               else ...[
                 Text(
                   ServicioIdioma.t(context, 'Forma de Pago'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF666666),

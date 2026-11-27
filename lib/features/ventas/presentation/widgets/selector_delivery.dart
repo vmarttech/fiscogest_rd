@@ -160,8 +160,8 @@ class _SelectorDeliveryDialogState
                   'Monto personalizado (RD\$)',
                 ),
                 labelStyle: AppTypography.labelMedium,
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 10,
                 ),

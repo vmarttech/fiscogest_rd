@@ -289,7 +289,7 @@ class _Cabecera extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Alertas operativas'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
@@ -324,7 +324,7 @@ class _Cabecera extends StatelessWidget {
                 ),
                 child: Text(
                   ServicioIdioma.t(context, 'Marcar leídas'),
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -358,7 +358,7 @@ class _CabeceraAvisos extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             ServicioIdioma.t(context, 'Avisos de plataforma'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
@@ -393,7 +393,7 @@ class _CabeceraAvisos extends StatelessWidget {
                 ),
                 child: Text(
                   ServicioIdioma.t(context, 'Marcar todos'),
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                 ),
               ),
             ],

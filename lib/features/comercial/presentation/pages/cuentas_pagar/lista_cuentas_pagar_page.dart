@@ -74,7 +74,7 @@ class ListaCuentasPagarPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     ServicioIdioma.t(context, 'Error al cargar cuentas'),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text('$error', textAlign: TextAlign.center),

@@ -160,7 +160,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                             icon: const Icon(Icons.layers_outlined, size: 20),
                             label: Text(
                               ServicioIdioma.t(context, 'Nueva presentación'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -190,7 +190,7 @@ class _PresentacionesPageState extends ConsumerState<PresentacionesPage> {
                           icon: const Icon(Icons.layers_outlined, size: 20),
                           label: Text(
                             ServicioIdioma.t(context, 'Nueva presentación'),
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),

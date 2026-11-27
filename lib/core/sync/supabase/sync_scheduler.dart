@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/core/sync/supabase/supabase_config.dart';
+import 'package:fiscogest_rd/core/sync/supabase/renovar_token.dart';
+import 'package:fiscogest_rd/core/sync/supabase/sesion_nube.dart';
 import 'package:fiscogest_rd/core/sync/supabase/sync_engine.dart';
 
 /// Reintenta subida a Supabase cada [intervalo].
@@ -12,6 +14,7 @@ class SyncScheduler {
   final Duration intervalo;
   Timer? _timer;
   bool _corriendo = false;
+  bool _esperandoSesionNube = false;
 
   void start() {
     if (!SupabaseConfig.isConfigured) {
@@ -34,6 +37,29 @@ class SyncScheduler {
     if (!SupabaseConfig.isConfigured) return;
     _corriendo = true;
     try {
+      // No intentes el push cada cinco minutos si nunca se inició una sesión
+      // de nube en este equipo. Si hay refresh token, intenta recuperarla.
+      var jwt = await SesionNube.tokenVigente();
+      if (jwt == null) {
+        await RenovarToken.asegurar();
+        jwt = await SesionNube.tokenVigente();
+      }
+      if (jwt == null || jwt.isEmpty) {
+        if (!_esperandoSesionNube) {
+          debugPrint(
+            'SyncScheduler: en espera de inicio de sesión en línea; '
+            'los cambios locales siguen guardados.',
+          );
+          _esperandoSesionNube = true;
+        }
+        return;
+      }
+      if (_esperandoSesionNube) {
+        debugPrint(
+          'SyncScheduler: sesión de nube disponible; se reanuda sync.',
+        );
+        _esperandoSesionNube = false;
+      }
       await SyncEngine(_db).pushAll();
       debugPrint('SyncScheduler: tick OK');
     } catch (e, st) {

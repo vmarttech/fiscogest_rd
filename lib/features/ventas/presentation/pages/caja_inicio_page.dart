@@ -368,7 +368,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
             Builder(
               builder: (context) => Text(
                 ServicioIdioma.t(context, 'Caja unificada'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
@@ -386,7 +386,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               child: Builder(
                 builder: (context) => Text(
                   ServicioIdioma.t(context, 'Sin turno activo'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF047857),
@@ -402,7 +402,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   'Abre el turno para comenzar.\nLa estación inicia vacía.',
                 ),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   height: 1.35,
                   color: Color(0xFF64748B),
@@ -490,7 +490,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
               children: [
                 Text(
                   ServicioIdioma.t(context, 'Resumen último Turno'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1E293B),
@@ -649,7 +649,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                 Builder(
                   builder: (context) => Text(
                     ServicioIdioma.t(context, 'Resumen de Ventas Diarias'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF1E293B),
@@ -712,7 +712,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           Builder(
                             builder: (context) => Text(
                               ServicioIdioma.t(context, 'Últimos 7 días'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: Color(0xFF64748B),
                               ),
@@ -792,7 +792,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                   decoration: InputDecoration(
                     labelText: ServicioIdioma.t(ctx, 'Fondo inicial'),
                     prefixText: 'RD\$ ',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   autofocus: true,
                 ),
@@ -1016,7 +1016,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               'Efectivo contado en cajón',
                             ),
                             prefixText: 'RD\$ ',
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
                             helperText: ServicioIdioma.t(
                               ctx,
                               'Cuente billetes y monedas del cajón',
@@ -1061,7 +1061,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                               ctx,
                               'Observación (opcional)',
                             ),
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
                             hintText: ServicioIdioma.t(
                               ctx,
                               'Ej. faltante por cambio, billete roto…',
@@ -2552,7 +2552,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             children: [
                               Text(
                                 ServicioIdioma.t(ctx, 'Notificaciones Rápidas'),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFF1E293B),
@@ -2574,7 +2574,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     ),
                                     error: (_, __) => Text(
                                       ServicioIdioma.t(context, 'Sin alertas'),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFF94A3B8),
                                       ),
@@ -2586,7 +2586,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                             context,
                                             'Todo en orden · sin alertas pendientes',
                                           ),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 12,
                                             color: Color(0xFF64748B),
                                             fontWeight: FontWeight.w600,
@@ -2826,7 +2826,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       dialogContext,
                       'N° Cotización o Cliente...',
                     ),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                 ),
@@ -2948,7 +2948,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       dialogContext,
                       'RNC, Cédula o Nombre...',
                     ),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                 ),
@@ -3189,7 +3189,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     dialogContext,
                                     'Explique faltante/sobrante',
                                   ),
-                                  border: OutlineInputBorder(),
+                                  border: const OutlineInputBorder(),
                                 ),
                               ),
                             ],
@@ -3502,7 +3502,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                           Builder(
                             builder: (context) => Text(
                               ServicioIdioma.t(context, 'Caja unificada'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
@@ -3561,7 +3561,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                             context,
                             'FiscoGest · CAJA UNIFICADA',
                           ),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -4431,7 +4431,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                           context,
                                           'Productos en factura',
                                         ),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF2563EB),
@@ -4654,7 +4654,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                     context,
                                     'Cuotas pendientes',
                                   ),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 11,
 
                                     color: Color(0xFF1E293B),
@@ -4738,7 +4738,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                   context,
                                   'Monto a abonar (esta cuota)',
                                 ),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 11,
 
                                   color: Color(0xFF1E293B),
@@ -4786,7 +4786,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                                   context,
                                   'Ticket seleccionado',
                                 ),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 11,
                                   color: Color(0xFF2563EB),
                                   fontWeight: FontWeight.w700,
@@ -5639,7 +5639,7 @@ class _CajaInicioPageState extends ConsumerState<CajaInicioPage> {
                       Builder(
                         builder: (context) => Text(
                           ServicioIdioma.t(context, 'Rápido:'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 11,
                             color: Color(0xFF334155),
                             fontWeight: FontWeight.w700,

@@ -441,7 +441,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           controller: ctrl,
           decoration: InputDecoration(
             labelText: ServicioIdioma.t(ctx, 'e-NCF modificado (E31… / E32…)'),
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             helperText: ServicioIdioma.t(
               ctx,
               'Obligatorio para nota de crédito electrónica (34)',
@@ -490,7 +490,7 @@ class _EcfeDetallePageState extends ConsumerState<EcfeDetallePage> {
           maxLines: 3,
           decoration: InputDecoration(
             labelText: ServicioIdioma.t(ctx, 'Motivo'),
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             helperText: ServicioIdioma.t(
               ctx,
               'Queda registrado en el historial del documento',

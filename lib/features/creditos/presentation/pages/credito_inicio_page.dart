@@ -609,7 +609,7 @@ class _CxcPanel extends StatelessWidget {
                 ),
                 child: Text(
                   ServicioIdioma.t(context, 'Ver todos los vencimientos →'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF059669),
@@ -938,7 +938,7 @@ class _SolicitudesPanel extends StatelessWidget {
                 ),
                 child: Text(
                   ServicioIdioma.t(context, 'Ver todas'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF2563EB),
@@ -1116,7 +1116,7 @@ class _AccionesRapidas extends StatelessWidget {
         children: [
           Text(
             ServicioIdioma.t(context, 'Acciones Rápidas'),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
