@@ -43019,6 +43019,1766 @@ class LiquidacionesTableCompanion extends UpdateCompanion<LiquidacionData> {
   }
 }
 
+class $PlanCuentasTableTable extends PlanCuentasTable
+    with TableInfo<$PlanCuentasTableTable, PlanCuentasTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanCuentasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  @override
+  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
+    'nombre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TipoCuenta, String> tipo =
+      GeneratedColumn<String>(
+        'tipo',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<TipoCuenta>($PlanCuentasTableTable.$convertertipo);
+  static const VerificationMeta _padreIdMeta = const VerificationMeta(
+    'padreId',
+  );
+  @override
+  late final GeneratedColumn<int> padreId = GeneratedColumn<int>(
+    'padre_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nivelMeta = const VerificationMeta('nivel');
+  @override
+  late final GeneratedColumn<int> nivel = GeneratedColumn<int>(
+    'nivel',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _permiteMovimientoMeta = const VerificationMeta(
+    'permiteMovimiento',
+  );
+  @override
+  late final GeneratedColumn<bool> permiteMovimiento = GeneratedColumn<bool>(
+    'permite_movimiento',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("permite_movimiento" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _activoMeta = const VerificationMeta('activo');
+  @override
+  late final GeneratedColumn<bool> activo = GeneratedColumn<bool>(
+    'activo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("activo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _descripcionMeta = const VerificationMeta(
+    'descripcion',
+  );
+  @override
+  late final GeneratedColumn<String> descripcion = GeneratedColumn<String>(
+    'descripcion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    codigo,
+    nombre,
+    tipo,
+    padreId,
+    nivel,
+    permiteMovimiento,
+    activo,
+    descripcion,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'plan_cuentas_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlanCuentasTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codigoMeta);
+    }
+    if (data.containsKey('nombre')) {
+      context.handle(
+        _nombreMeta,
+        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreMeta);
+    }
+    if (data.containsKey('padre_id')) {
+      context.handle(
+        _padreIdMeta,
+        padreId.isAcceptableOrUnknown(data['padre_id']!, _padreIdMeta),
+      );
+    }
+    if (data.containsKey('nivel')) {
+      context.handle(
+        _nivelMeta,
+        nivel.isAcceptableOrUnknown(data['nivel']!, _nivelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nivelMeta);
+    }
+    if (data.containsKey('permite_movimiento')) {
+      context.handle(
+        _permiteMovimientoMeta,
+        permiteMovimiento.isAcceptableOrUnknown(
+          data['permite_movimiento']!,
+          _permiteMovimientoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('activo')) {
+      context.handle(
+        _activoMeta,
+        activo.isAcceptableOrUnknown(data['activo']!, _activoMeta),
+      );
+    }
+    if (data.containsKey('descripcion')) {
+      context.handle(
+        _descripcionMeta,
+        descripcion.isAcceptableOrUnknown(
+          data['descripcion']!,
+          _descripcionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {codigo},
+  ];
+  @override
+  PlanCuentasTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanCuentasTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      nombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre'],
+      )!,
+      tipo: $PlanCuentasTableTable.$convertertipo.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}tipo'],
+        )!,
+      ),
+      padreId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}padre_id'],
+      ),
+      nivel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}nivel'],
+      )!,
+      permiteMovimiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}permite_movimiento'],
+      )!,
+      activo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}activo'],
+      )!,
+      descripcion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descripcion'],
+      ),
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $PlanCuentasTableTable createAlias(String alias) {
+    return $PlanCuentasTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<TipoCuenta, String> $convertertipo =
+      const TipoCuentaConverter();
+}
+
+class PlanCuentasTableData extends DataClass
+    implements Insertable<PlanCuentasTableData> {
+  final int id;
+  final String codigo;
+  final String nombre;
+  final TipoCuenta tipo;
+  final int? padreId;
+  final int nivel;
+  final bool permiteMovimiento;
+  final bool activo;
+  final String? descripcion;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const PlanCuentasTableData({
+    required this.id,
+    required this.codigo,
+    required this.nombre,
+    required this.tipo,
+    this.padreId,
+    required this.nivel,
+    required this.permiteMovimiento,
+    required this.activo,
+    this.descripcion,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['codigo'] = Variable<String>(codigo);
+    map['nombre'] = Variable<String>(nombre);
+    {
+      map['tipo'] = Variable<String>(
+        $PlanCuentasTableTable.$convertertipo.toSql(tipo),
+      );
+    }
+    if (!nullToAbsent || padreId != null) {
+      map['padre_id'] = Variable<int>(padreId);
+    }
+    map['nivel'] = Variable<int>(nivel);
+    map['permite_movimiento'] = Variable<bool>(permiteMovimiento);
+    map['activo'] = Variable<bool>(activo);
+    if (!nullToAbsent || descripcion != null) {
+      map['descripcion'] = Variable<String>(descripcion);
+    }
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  PlanCuentasTableCompanion toCompanion(bool nullToAbsent) {
+    return PlanCuentasTableCompanion(
+      id: Value(id),
+      codigo: Value(codigo),
+      nombre: Value(nombre),
+      tipo: Value(tipo),
+      padreId: padreId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(padreId),
+      nivel: Value(nivel),
+      permiteMovimiento: Value(permiteMovimiento),
+      activo: Value(activo),
+      descripcion: descripcion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(descripcion),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory PlanCuentasTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanCuentasTableData(
+      id: serializer.fromJson<int>(json['id']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      nombre: serializer.fromJson<String>(json['nombre']),
+      tipo: serializer.fromJson<TipoCuenta>(json['tipo']),
+      padreId: serializer.fromJson<int?>(json['padreId']),
+      nivel: serializer.fromJson<int>(json['nivel']),
+      permiteMovimiento: serializer.fromJson<bool>(json['permiteMovimiento']),
+      activo: serializer.fromJson<bool>(json['activo']),
+      descripcion: serializer.fromJson<String?>(json['descripcion']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'codigo': serializer.toJson<String>(codigo),
+      'nombre': serializer.toJson<String>(nombre),
+      'tipo': serializer.toJson<TipoCuenta>(tipo),
+      'padreId': serializer.toJson<int?>(padreId),
+      'nivel': serializer.toJson<int>(nivel),
+      'permiteMovimiento': serializer.toJson<bool>(permiteMovimiento),
+      'activo': serializer.toJson<bool>(activo),
+      'descripcion': serializer.toJson<String?>(descripcion),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  PlanCuentasTableData copyWith({
+    int? id,
+    String? codigo,
+    String? nombre,
+    TipoCuenta? tipo,
+    Value<int?> padreId = const Value.absent(),
+    int? nivel,
+    bool? permiteMovimiento,
+    bool? activo,
+    Value<String?> descripcion = const Value.absent(),
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => PlanCuentasTableData(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    nombre: nombre ?? this.nombre,
+    tipo: tipo ?? this.tipo,
+    padreId: padreId.present ? padreId.value : this.padreId,
+    nivel: nivel ?? this.nivel,
+    permiteMovimiento: permiteMovimiento ?? this.permiteMovimiento,
+    activo: activo ?? this.activo,
+    descripcion: descripcion.present ? descripcion.value : this.descripcion,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  PlanCuentasTableData copyWithCompanion(PlanCuentasTableCompanion data) {
+    return PlanCuentasTableData(
+      id: data.id.present ? data.id.value : this.id,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      padreId: data.padreId.present ? data.padreId.value : this.padreId,
+      nivel: data.nivel.present ? data.nivel.value : this.nivel,
+      permiteMovimiento: data.permiteMovimiento.present
+          ? data.permiteMovimiento.value
+          : this.permiteMovimiento,
+      activo: data.activo.present ? data.activo.value : this.activo,
+      descripcion: data.descripcion.present
+          ? data.descripcion.value
+          : this.descripcion,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanCuentasTableData(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('tipo: $tipo, ')
+          ..write('padreId: $padreId, ')
+          ..write('nivel: $nivel, ')
+          ..write('permiteMovimiento: $permiteMovimiento, ')
+          ..write('activo: $activo, ')
+          ..write('descripcion: $descripcion, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    codigo,
+    nombre,
+    tipo,
+    padreId,
+    nivel,
+    permiteMovimiento,
+    activo,
+    descripcion,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanCuentasTableData &&
+          other.id == this.id &&
+          other.codigo == this.codigo &&
+          other.nombre == this.nombre &&
+          other.tipo == this.tipo &&
+          other.padreId == this.padreId &&
+          other.nivel == this.nivel &&
+          other.permiteMovimiento == this.permiteMovimiento &&
+          other.activo == this.activo &&
+          other.descripcion == this.descripcion &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class PlanCuentasTableCompanion extends UpdateCompanion<PlanCuentasTableData> {
+  final Value<int> id;
+  final Value<String> codigo;
+  final Value<String> nombre;
+  final Value<TipoCuenta> tipo;
+  final Value<int?> padreId;
+  final Value<int> nivel;
+  final Value<bool> permiteMovimiento;
+  final Value<bool> activo;
+  final Value<String?> descripcion;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const PlanCuentasTableCompanion({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.nombre = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.padreId = const Value.absent(),
+    this.nivel = const Value.absent(),
+    this.permiteMovimiento = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.descripcion = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  PlanCuentasTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String codigo,
+    required String nombre,
+    required TipoCuenta tipo,
+    this.padreId = const Value.absent(),
+    required int nivel,
+    this.permiteMovimiento = const Value.absent(),
+    this.activo = const Value.absent(),
+    this.descripcion = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : codigo = Value(codigo),
+       nombre = Value(nombre),
+       tipo = Value(tipo),
+       nivel = Value(nivel);
+  static Insertable<PlanCuentasTableData> custom({
+    Expression<int>? id,
+    Expression<String>? codigo,
+    Expression<String>? nombre,
+    Expression<String>? tipo,
+    Expression<int>? padreId,
+    Expression<int>? nivel,
+    Expression<bool>? permiteMovimiento,
+    Expression<bool>? activo,
+    Expression<String>? descripcion,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (codigo != null) 'codigo': codigo,
+      if (nombre != null) 'nombre': nombre,
+      if (tipo != null) 'tipo': tipo,
+      if (padreId != null) 'padre_id': padreId,
+      if (nivel != null) 'nivel': nivel,
+      if (permiteMovimiento != null) 'permite_movimiento': permiteMovimiento,
+      if (activo != null) 'activo': activo,
+      if (descripcion != null) 'descripcion': descripcion,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  PlanCuentasTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? codigo,
+    Value<String>? nombre,
+    Value<TipoCuenta>? tipo,
+    Value<int?>? padreId,
+    Value<int>? nivel,
+    Value<bool>? permiteMovimiento,
+    Value<bool>? activo,
+    Value<String?>? descripcion,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return PlanCuentasTableCompanion(
+      id: id ?? this.id,
+      codigo: codigo ?? this.codigo,
+      nombre: nombre ?? this.nombre,
+      tipo: tipo ?? this.tipo,
+      padreId: padreId ?? this.padreId,
+      nivel: nivel ?? this.nivel,
+      permiteMovimiento: permiteMovimiento ?? this.permiteMovimiento,
+      activo: activo ?? this.activo,
+      descripcion: descripcion ?? this.descripcion,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (nombre.present) {
+      map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(
+        $PlanCuentasTableTable.$convertertipo.toSql(tipo.value),
+      );
+    }
+    if (padreId.present) {
+      map['padre_id'] = Variable<int>(padreId.value);
+    }
+    if (nivel.present) {
+      map['nivel'] = Variable<int>(nivel.value);
+    }
+    if (permiteMovimiento.present) {
+      map['permite_movimiento'] = Variable<bool>(permiteMovimiento.value);
+    }
+    if (activo.present) {
+      map['activo'] = Variable<bool>(activo.value);
+    }
+    if (descripcion.present) {
+      map['descripcion'] = Variable<String>(descripcion.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanCuentasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('tipo: $tipo, ')
+          ..write('padreId: $padreId, ')
+          ..write('nivel: $nivel, ')
+          ..write('permiteMovimiento: $permiteMovimiento, ')
+          ..write('activo: $activo, ')
+          ..write('descripcion: $descripcion, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AsientosTableTable extends AsientosTable
+    with TableInfo<$AsientosTableTable, AsientosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AsientosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _numeroAsientoMeta = const VerificationMeta(
+    'numeroAsiento',
+  );
+  @override
+  late final GeneratedColumn<String> numeroAsiento = GeneratedColumn<String>(
+    'numero_asiento',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaMeta = const VerificationMeta('fecha');
+  @override
+  late final GeneratedColumn<DateTime> fecha = GeneratedColumn<DateTime>(
+    'fecha',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _conceptoMeta = const VerificationMeta(
+    'concepto',
+  );
+  @override
+  late final GeneratedColumn<String> concepto = GeneratedColumn<String>(
+    'concepto',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<EstadoAsiento, String> estado =
+      GeneratedColumn<String>(
+        'estado',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('borrador'),
+      ).withConverter<EstadoAsiento>($AsientosTableTable.$converterestado);
+  static const VerificationMeta _documentoOrigenMeta = const VerificationMeta(
+    'documentoOrigen',
+  );
+  @override
+  late final GeneratedColumn<String> documentoOrigen = GeneratedColumn<String>(
+    'documento_origen',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tipoOrigenMeta = const VerificationMeta(
+    'tipoOrigen',
+  );
+  @override
+  late final GeneratedColumn<String> tipoOrigen = GeneratedColumn<String>(
+    'tipo_origen',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _referenciaIdMeta = const VerificationMeta(
+    'referenciaId',
+  );
+  @override
+  late final GeneratedColumn<int> referenciaId = GeneratedColumn<int>(
+    'referencia_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _motivoAnulacionMeta = const VerificationMeta(
+    'motivoAnulacion',
+  );
+  @override
+  late final GeneratedColumn<String> motivoAnulacion = GeneratedColumn<String>(
+    'motivo_anulacion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    numeroAsiento,
+    fecha,
+    concepto,
+    estado,
+    documentoOrigen,
+    tipoOrigen,
+    referenciaId,
+    motivoAnulacion,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'asientos_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AsientosTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('numero_asiento')) {
+      context.handle(
+        _numeroAsientoMeta,
+        numeroAsiento.isAcceptableOrUnknown(
+          data['numero_asiento']!,
+          _numeroAsientoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_numeroAsientoMeta);
+    }
+    if (data.containsKey('fecha')) {
+      context.handle(
+        _fechaMeta,
+        fecha.isAcceptableOrUnknown(data['fecha']!, _fechaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaMeta);
+    }
+    if (data.containsKey('concepto')) {
+      context.handle(
+        _conceptoMeta,
+        concepto.isAcceptableOrUnknown(data['concepto']!, _conceptoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_conceptoMeta);
+    }
+    if (data.containsKey('documento_origen')) {
+      context.handle(
+        _documentoOrigenMeta,
+        documentoOrigen.isAcceptableOrUnknown(
+          data['documento_origen']!,
+          _documentoOrigenMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tipo_origen')) {
+      context.handle(
+        _tipoOrigenMeta,
+        tipoOrigen.isAcceptableOrUnknown(data['tipo_origen']!, _tipoOrigenMeta),
+      );
+    }
+    if (data.containsKey('referencia_id')) {
+      context.handle(
+        _referenciaIdMeta,
+        referenciaId.isAcceptableOrUnknown(
+          data['referencia_id']!,
+          _referenciaIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('motivo_anulacion')) {
+      context.handle(
+        _motivoAnulacionMeta,
+        motivoAnulacion.isAcceptableOrUnknown(
+          data['motivo_anulacion']!,
+          _motivoAnulacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {numeroAsiento},
+  ];
+  @override
+  AsientosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AsientosTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      numeroAsiento: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}numero_asiento'],
+      )!,
+      fecha: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha'],
+      )!,
+      concepto: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}concepto'],
+      )!,
+      estado: $AsientosTableTable.$converterestado.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}estado'],
+        )!,
+      ),
+      documentoOrigen: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}documento_origen'],
+      ),
+      tipoOrigen: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo_origen'],
+      ),
+      referenciaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}referencia_id'],
+      ),
+      motivoAnulacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}motivo_anulacion'],
+      ),
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $AsientosTableTable createAlias(String alias) {
+    return $AsientosTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<EstadoAsiento, String> $converterestado =
+      const EstadoAsientoConverter();
+}
+
+class AsientosTableData extends DataClass
+    implements Insertable<AsientosTableData> {
+  final int id;
+  final String numeroAsiento;
+  final DateTime fecha;
+  final String concepto;
+  final EstadoAsiento estado;
+  final String? documentoOrigen;
+  final String? tipoOrigen;
+  final int? referenciaId;
+  final String? motivoAnulacion;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const AsientosTableData({
+    required this.id,
+    required this.numeroAsiento,
+    required this.fecha,
+    required this.concepto,
+    required this.estado,
+    this.documentoOrigen,
+    this.tipoOrigen,
+    this.referenciaId,
+    this.motivoAnulacion,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['numero_asiento'] = Variable<String>(numeroAsiento);
+    map['fecha'] = Variable<DateTime>(fecha);
+    map['concepto'] = Variable<String>(concepto);
+    {
+      map['estado'] = Variable<String>(
+        $AsientosTableTable.$converterestado.toSql(estado),
+      );
+    }
+    if (!nullToAbsent || documentoOrigen != null) {
+      map['documento_origen'] = Variable<String>(documentoOrigen);
+    }
+    if (!nullToAbsent || tipoOrigen != null) {
+      map['tipo_origen'] = Variable<String>(tipoOrigen);
+    }
+    if (!nullToAbsent || referenciaId != null) {
+      map['referencia_id'] = Variable<int>(referenciaId);
+    }
+    if (!nullToAbsent || motivoAnulacion != null) {
+      map['motivo_anulacion'] = Variable<String>(motivoAnulacion);
+    }
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  AsientosTableCompanion toCompanion(bool nullToAbsent) {
+    return AsientosTableCompanion(
+      id: Value(id),
+      numeroAsiento: Value(numeroAsiento),
+      fecha: Value(fecha),
+      concepto: Value(concepto),
+      estado: Value(estado),
+      documentoOrigen: documentoOrigen == null && nullToAbsent
+          ? const Value.absent()
+          : Value(documentoOrigen),
+      tipoOrigen: tipoOrigen == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tipoOrigen),
+      referenciaId: referenciaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(referenciaId),
+      motivoAnulacion: motivoAnulacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(motivoAnulacion),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory AsientosTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AsientosTableData(
+      id: serializer.fromJson<int>(json['id']),
+      numeroAsiento: serializer.fromJson<String>(json['numeroAsiento']),
+      fecha: serializer.fromJson<DateTime>(json['fecha']),
+      concepto: serializer.fromJson<String>(json['concepto']),
+      estado: serializer.fromJson<EstadoAsiento>(json['estado']),
+      documentoOrigen: serializer.fromJson<String?>(json['documentoOrigen']),
+      tipoOrigen: serializer.fromJson<String?>(json['tipoOrigen']),
+      referenciaId: serializer.fromJson<int?>(json['referenciaId']),
+      motivoAnulacion: serializer.fromJson<String?>(json['motivoAnulacion']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'numeroAsiento': serializer.toJson<String>(numeroAsiento),
+      'fecha': serializer.toJson<DateTime>(fecha),
+      'concepto': serializer.toJson<String>(concepto),
+      'estado': serializer.toJson<EstadoAsiento>(estado),
+      'documentoOrigen': serializer.toJson<String?>(documentoOrigen),
+      'tipoOrigen': serializer.toJson<String?>(tipoOrigen),
+      'referenciaId': serializer.toJson<int?>(referenciaId),
+      'motivoAnulacion': serializer.toJson<String?>(motivoAnulacion),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  AsientosTableData copyWith({
+    int? id,
+    String? numeroAsiento,
+    DateTime? fecha,
+    String? concepto,
+    EstadoAsiento? estado,
+    Value<String?> documentoOrigen = const Value.absent(),
+    Value<String?> tipoOrigen = const Value.absent(),
+    Value<int?> referenciaId = const Value.absent(),
+    Value<String?> motivoAnulacion = const Value.absent(),
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => AsientosTableData(
+    id: id ?? this.id,
+    numeroAsiento: numeroAsiento ?? this.numeroAsiento,
+    fecha: fecha ?? this.fecha,
+    concepto: concepto ?? this.concepto,
+    estado: estado ?? this.estado,
+    documentoOrigen: documentoOrigen.present
+        ? documentoOrigen.value
+        : this.documentoOrigen,
+    tipoOrigen: tipoOrigen.present ? tipoOrigen.value : this.tipoOrigen,
+    referenciaId: referenciaId.present ? referenciaId.value : this.referenciaId,
+    motivoAnulacion: motivoAnulacion.present
+        ? motivoAnulacion.value
+        : this.motivoAnulacion,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  AsientosTableData copyWithCompanion(AsientosTableCompanion data) {
+    return AsientosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      numeroAsiento: data.numeroAsiento.present
+          ? data.numeroAsiento.value
+          : this.numeroAsiento,
+      fecha: data.fecha.present ? data.fecha.value : this.fecha,
+      concepto: data.concepto.present ? data.concepto.value : this.concepto,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      documentoOrigen: data.documentoOrigen.present
+          ? data.documentoOrigen.value
+          : this.documentoOrigen,
+      tipoOrigen: data.tipoOrigen.present
+          ? data.tipoOrigen.value
+          : this.tipoOrigen,
+      referenciaId: data.referenciaId.present
+          ? data.referenciaId.value
+          : this.referenciaId,
+      motivoAnulacion: data.motivoAnulacion.present
+          ? data.motivoAnulacion.value
+          : this.motivoAnulacion,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AsientosTableData(')
+          ..write('id: $id, ')
+          ..write('numeroAsiento: $numeroAsiento, ')
+          ..write('fecha: $fecha, ')
+          ..write('concepto: $concepto, ')
+          ..write('estado: $estado, ')
+          ..write('documentoOrigen: $documentoOrigen, ')
+          ..write('tipoOrigen: $tipoOrigen, ')
+          ..write('referenciaId: $referenciaId, ')
+          ..write('motivoAnulacion: $motivoAnulacion, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    numeroAsiento,
+    fecha,
+    concepto,
+    estado,
+    documentoOrigen,
+    tipoOrigen,
+    referenciaId,
+    motivoAnulacion,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AsientosTableData &&
+          other.id == this.id &&
+          other.numeroAsiento == this.numeroAsiento &&
+          other.fecha == this.fecha &&
+          other.concepto == this.concepto &&
+          other.estado == this.estado &&
+          other.documentoOrigen == this.documentoOrigen &&
+          other.tipoOrigen == this.tipoOrigen &&
+          other.referenciaId == this.referenciaId &&
+          other.motivoAnulacion == this.motivoAnulacion &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class AsientosTableCompanion extends UpdateCompanion<AsientosTableData> {
+  final Value<int> id;
+  final Value<String> numeroAsiento;
+  final Value<DateTime> fecha;
+  final Value<String> concepto;
+  final Value<EstadoAsiento> estado;
+  final Value<String?> documentoOrigen;
+  final Value<String?> tipoOrigen;
+  final Value<int?> referenciaId;
+  final Value<String?> motivoAnulacion;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const AsientosTableCompanion({
+    this.id = const Value.absent(),
+    this.numeroAsiento = const Value.absent(),
+    this.fecha = const Value.absent(),
+    this.concepto = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.documentoOrigen = const Value.absent(),
+    this.tipoOrigen = const Value.absent(),
+    this.referenciaId = const Value.absent(),
+    this.motivoAnulacion = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  AsientosTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String numeroAsiento,
+    required DateTime fecha,
+    required String concepto,
+    this.estado = const Value.absent(),
+    this.documentoOrigen = const Value.absent(),
+    this.tipoOrigen = const Value.absent(),
+    this.referenciaId = const Value.absent(),
+    this.motivoAnulacion = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : numeroAsiento = Value(numeroAsiento),
+       fecha = Value(fecha),
+       concepto = Value(concepto);
+  static Insertable<AsientosTableData> custom({
+    Expression<int>? id,
+    Expression<String>? numeroAsiento,
+    Expression<DateTime>? fecha,
+    Expression<String>? concepto,
+    Expression<String>? estado,
+    Expression<String>? documentoOrigen,
+    Expression<String>? tipoOrigen,
+    Expression<int>? referenciaId,
+    Expression<String>? motivoAnulacion,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (numeroAsiento != null) 'numero_asiento': numeroAsiento,
+      if (fecha != null) 'fecha': fecha,
+      if (concepto != null) 'concepto': concepto,
+      if (estado != null) 'estado': estado,
+      if (documentoOrigen != null) 'documento_origen': documentoOrigen,
+      if (tipoOrigen != null) 'tipo_origen': tipoOrigen,
+      if (referenciaId != null) 'referencia_id': referenciaId,
+      if (motivoAnulacion != null) 'motivo_anulacion': motivoAnulacion,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  AsientosTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? numeroAsiento,
+    Value<DateTime>? fecha,
+    Value<String>? concepto,
+    Value<EstadoAsiento>? estado,
+    Value<String?>? documentoOrigen,
+    Value<String?>? tipoOrigen,
+    Value<int?>? referenciaId,
+    Value<String?>? motivoAnulacion,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return AsientosTableCompanion(
+      id: id ?? this.id,
+      numeroAsiento: numeroAsiento ?? this.numeroAsiento,
+      fecha: fecha ?? this.fecha,
+      concepto: concepto ?? this.concepto,
+      estado: estado ?? this.estado,
+      documentoOrigen: documentoOrigen ?? this.documentoOrigen,
+      tipoOrigen: tipoOrigen ?? this.tipoOrigen,
+      referenciaId: referenciaId ?? this.referenciaId,
+      motivoAnulacion: motivoAnulacion ?? this.motivoAnulacion,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (numeroAsiento.present) {
+      map['numero_asiento'] = Variable<String>(numeroAsiento.value);
+    }
+    if (fecha.present) {
+      map['fecha'] = Variable<DateTime>(fecha.value);
+    }
+    if (concepto.present) {
+      map['concepto'] = Variable<String>(concepto.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(
+        $AsientosTableTable.$converterestado.toSql(estado.value),
+      );
+    }
+    if (documentoOrigen.present) {
+      map['documento_origen'] = Variable<String>(documentoOrigen.value);
+    }
+    if (tipoOrigen.present) {
+      map['tipo_origen'] = Variable<String>(tipoOrigen.value);
+    }
+    if (referenciaId.present) {
+      map['referencia_id'] = Variable<int>(referenciaId.value);
+    }
+    if (motivoAnulacion.present) {
+      map['motivo_anulacion'] = Variable<String>(motivoAnulacion.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AsientosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('numeroAsiento: $numeroAsiento, ')
+          ..write('fecha: $fecha, ')
+          ..write('concepto: $concepto, ')
+          ..write('estado: $estado, ')
+          ..write('documentoOrigen: $documentoOrigen, ')
+          ..write('tipoOrigen: $tipoOrigen, ')
+          ..write('referenciaId: $referenciaId, ')
+          ..write('motivoAnulacion: $motivoAnulacion, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LineasAsientoTableTable extends LineasAsientoTable
+    with TableInfo<$LineasAsientoTableTable, LineasAsientoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LineasAsientoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _asientoIdMeta = const VerificationMeta(
+    'asientoId',
+  );
+  @override
+  late final GeneratedColumn<int> asientoId = GeneratedColumn<int>(
+    'asiento_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES asientos_table (id)',
+    ),
+  );
+  static const VerificationMeta _cuentaIdMeta = const VerificationMeta(
+    'cuentaId',
+  );
+  @override
+  late final GeneratedColumn<int> cuentaId = GeneratedColumn<int>(
+    'cuenta_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES plan_cuentas_table (id)',
+    ),
+  );
+  static const VerificationMeta _debeMeta = const VerificationMeta('debe');
+  @override
+  late final GeneratedColumn<double> debe = GeneratedColumn<double>(
+    'debe',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _haberMeta = const VerificationMeta('haber');
+  @override
+  late final GeneratedColumn<double> haber = GeneratedColumn<double>(
+    'haber',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _conceptoLineaMeta = const VerificationMeta(
+    'conceptoLinea',
+  );
+  @override
+  late final GeneratedColumn<String> conceptoLinea = GeneratedColumn<String>(
+    'concepto_linea',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    asientoId,
+    cuentaId,
+    debe,
+    haber,
+    conceptoLinea,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lineas_asiento_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LineasAsientoTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('asiento_id')) {
+      context.handle(
+        _asientoIdMeta,
+        asientoId.isAcceptableOrUnknown(data['asiento_id']!, _asientoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_asientoIdMeta);
+    }
+    if (data.containsKey('cuenta_id')) {
+      context.handle(
+        _cuentaIdMeta,
+        cuentaId.isAcceptableOrUnknown(data['cuenta_id']!, _cuentaIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cuentaIdMeta);
+    }
+    if (data.containsKey('debe')) {
+      context.handle(
+        _debeMeta,
+        debe.isAcceptableOrUnknown(data['debe']!, _debeMeta),
+      );
+    }
+    if (data.containsKey('haber')) {
+      context.handle(
+        _haberMeta,
+        haber.isAcceptableOrUnknown(data['haber']!, _haberMeta),
+      );
+    }
+    if (data.containsKey('concepto_linea')) {
+      context.handle(
+        _conceptoLineaMeta,
+        conceptoLinea.isAcceptableOrUnknown(
+          data['concepto_linea']!,
+          _conceptoLineaMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LineasAsientoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LineasAsientoTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      asientoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}asiento_id'],
+      )!,
+      cuentaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cuenta_id'],
+      )!,
+      debe: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}debe'],
+      )!,
+      haber: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}haber'],
+      )!,
+      conceptoLinea: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}concepto_linea'],
+      ),
+    );
+  }
+
+  @override
+  $LineasAsientoTableTable createAlias(String alias) {
+    return $LineasAsientoTableTable(attachedDatabase, alias);
+  }
+}
+
+class LineasAsientoTableData extends DataClass
+    implements Insertable<LineasAsientoTableData> {
+  final int id;
+  final int asientoId;
+  final int cuentaId;
+  final double debe;
+  final double haber;
+  final String? conceptoLinea;
+  const LineasAsientoTableData({
+    required this.id,
+    required this.asientoId,
+    required this.cuentaId,
+    required this.debe,
+    required this.haber,
+    this.conceptoLinea,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['asiento_id'] = Variable<int>(asientoId);
+    map['cuenta_id'] = Variable<int>(cuentaId);
+    map['debe'] = Variable<double>(debe);
+    map['haber'] = Variable<double>(haber);
+    if (!nullToAbsent || conceptoLinea != null) {
+      map['concepto_linea'] = Variable<String>(conceptoLinea);
+    }
+    return map;
+  }
+
+  LineasAsientoTableCompanion toCompanion(bool nullToAbsent) {
+    return LineasAsientoTableCompanion(
+      id: Value(id),
+      asientoId: Value(asientoId),
+      cuentaId: Value(cuentaId),
+      debe: Value(debe),
+      haber: Value(haber),
+      conceptoLinea: conceptoLinea == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conceptoLinea),
+    );
+  }
+
+  factory LineasAsientoTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LineasAsientoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      asientoId: serializer.fromJson<int>(json['asientoId']),
+      cuentaId: serializer.fromJson<int>(json['cuentaId']),
+      debe: serializer.fromJson<double>(json['debe']),
+      haber: serializer.fromJson<double>(json['haber']),
+      conceptoLinea: serializer.fromJson<String?>(json['conceptoLinea']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'asientoId': serializer.toJson<int>(asientoId),
+      'cuentaId': serializer.toJson<int>(cuentaId),
+      'debe': serializer.toJson<double>(debe),
+      'haber': serializer.toJson<double>(haber),
+      'conceptoLinea': serializer.toJson<String?>(conceptoLinea),
+    };
+  }
+
+  LineasAsientoTableData copyWith({
+    int? id,
+    int? asientoId,
+    int? cuentaId,
+    double? debe,
+    double? haber,
+    Value<String?> conceptoLinea = const Value.absent(),
+  }) => LineasAsientoTableData(
+    id: id ?? this.id,
+    asientoId: asientoId ?? this.asientoId,
+    cuentaId: cuentaId ?? this.cuentaId,
+    debe: debe ?? this.debe,
+    haber: haber ?? this.haber,
+    conceptoLinea: conceptoLinea.present
+        ? conceptoLinea.value
+        : this.conceptoLinea,
+  );
+  LineasAsientoTableData copyWithCompanion(LineasAsientoTableCompanion data) {
+    return LineasAsientoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      asientoId: data.asientoId.present ? data.asientoId.value : this.asientoId,
+      cuentaId: data.cuentaId.present ? data.cuentaId.value : this.cuentaId,
+      debe: data.debe.present ? data.debe.value : this.debe,
+      haber: data.haber.present ? data.haber.value : this.haber,
+      conceptoLinea: data.conceptoLinea.present
+          ? data.conceptoLinea.value
+          : this.conceptoLinea,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LineasAsientoTableData(')
+          ..write('id: $id, ')
+          ..write('asientoId: $asientoId, ')
+          ..write('cuentaId: $cuentaId, ')
+          ..write('debe: $debe, ')
+          ..write('haber: $haber, ')
+          ..write('conceptoLinea: $conceptoLinea')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, asientoId, cuentaId, debe, haber, conceptoLinea);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LineasAsientoTableData &&
+          other.id == this.id &&
+          other.asientoId == this.asientoId &&
+          other.cuentaId == this.cuentaId &&
+          other.debe == this.debe &&
+          other.haber == this.haber &&
+          other.conceptoLinea == this.conceptoLinea);
+}
+
+class LineasAsientoTableCompanion
+    extends UpdateCompanion<LineasAsientoTableData> {
+  final Value<int> id;
+  final Value<int> asientoId;
+  final Value<int> cuentaId;
+  final Value<double> debe;
+  final Value<double> haber;
+  final Value<String?> conceptoLinea;
+  const LineasAsientoTableCompanion({
+    this.id = const Value.absent(),
+    this.asientoId = const Value.absent(),
+    this.cuentaId = const Value.absent(),
+    this.debe = const Value.absent(),
+    this.haber = const Value.absent(),
+    this.conceptoLinea = const Value.absent(),
+  });
+  LineasAsientoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int asientoId,
+    required int cuentaId,
+    this.debe = const Value.absent(),
+    this.haber = const Value.absent(),
+    this.conceptoLinea = const Value.absent(),
+  }) : asientoId = Value(asientoId),
+       cuentaId = Value(cuentaId);
+  static Insertable<LineasAsientoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? asientoId,
+    Expression<int>? cuentaId,
+    Expression<double>? debe,
+    Expression<double>? haber,
+    Expression<String>? conceptoLinea,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (asientoId != null) 'asiento_id': asientoId,
+      if (cuentaId != null) 'cuenta_id': cuentaId,
+      if (debe != null) 'debe': debe,
+      if (haber != null) 'haber': haber,
+      if (conceptoLinea != null) 'concepto_linea': conceptoLinea,
+    });
+  }
+
+  LineasAsientoTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? asientoId,
+    Value<int>? cuentaId,
+    Value<double>? debe,
+    Value<double>? haber,
+    Value<String?>? conceptoLinea,
+  }) {
+    return LineasAsientoTableCompanion(
+      id: id ?? this.id,
+      asientoId: asientoId ?? this.asientoId,
+      cuentaId: cuentaId ?? this.cuentaId,
+      debe: debe ?? this.debe,
+      haber: haber ?? this.haber,
+      conceptoLinea: conceptoLinea ?? this.conceptoLinea,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (asientoId.present) {
+      map['asiento_id'] = Variable<int>(asientoId.value);
+    }
+    if (cuentaId.present) {
+      map['cuenta_id'] = Variable<int>(cuentaId.value);
+    }
+    if (debe.present) {
+      map['debe'] = Variable<double>(debe.value);
+    }
+    if (haber.present) {
+      map['haber'] = Variable<double>(haber.value);
+    }
+    if (conceptoLinea.present) {
+      map['concepto_linea'] = Variable<String>(conceptoLinea.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LineasAsientoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('asientoId: $asientoId, ')
+          ..write('cuentaId: $cuentaId, ')
+          ..write('debe: $debe, ')
+          ..write('haber: $haber, ')
+          ..write('conceptoLinea: $conceptoLinea')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -43128,6 +44888,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $PlanillaLineasTableTable(this);
   late final $LiquidacionesTableTable liquidacionesTable =
       $LiquidacionesTableTable(this);
+  late final $PlanCuentasTableTable planCuentasTable = $PlanCuentasTableTable(
+    this,
+  );
+  late final $AsientosTableTable asientosTable = $AsientosTableTable(this);
+  late final $LineasAsientoTableTable lineasAsientoTable =
+      $LineasAsientoTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -43194,6 +44960,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     planillasTable,
     planillaLineasTable,
     liquidacionesTable,
+    planCuentasTable,
+    asientosTable,
+    lineasAsientoTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -69730,6 +71499,1330 @@ typedef $$LiquidacionesTableTableProcessedTableManager =
       LiquidacionData,
       PrefetchHooks Function()
     >;
+typedef $$PlanCuentasTableTableCreateCompanionBuilder =
+    PlanCuentasTableCompanion Function({
+      Value<int> id,
+      required String codigo,
+      required String nombre,
+      required TipoCuenta tipo,
+      Value<int?> padreId,
+      required int nivel,
+      Value<bool> permiteMovimiento,
+      Value<bool> activo,
+      Value<String?> descripcion,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$PlanCuentasTableTableUpdateCompanionBuilder =
+    PlanCuentasTableCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      Value<String> nombre,
+      Value<TipoCuenta> tipo,
+      Value<int?> padreId,
+      Value<int> nivel,
+      Value<bool> permiteMovimiento,
+      Value<bool> activo,
+      Value<String?> descripcion,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+final class $$PlanCuentasTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $PlanCuentasTableTable,
+          PlanCuentasTableData
+        > {
+  $$PlanCuentasTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $LineasAsientoTableTable,
+    List<LineasAsientoTableData>
+  >
+  _lineasAsientoTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.lineasAsientoTable,
+        aliasName: $_aliasNameGenerator(
+          db.planCuentasTable.id,
+          db.lineasAsientoTable.cuentaId,
+        ),
+      );
+
+  $$LineasAsientoTableTableProcessedTableManager get lineasAsientoTableRefs {
+    final manager = $$LineasAsientoTableTableTableManager(
+      $_db,
+      $_db.lineasAsientoTable,
+    ).filter((f) => f.cuentaId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _lineasAsientoTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$PlanCuentasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanCuentasTableTable> {
+  $$PlanCuentasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TipoCuenta, TipoCuenta, String> get tipo =>
+      $composableBuilder(
+        column: $table.tipo,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get padreId => $composableBuilder(
+    column: $table.padreId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nivel => $composableBuilder(
+    column: $table.nivel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get permiteMovimiento => $composableBuilder(
+    column: $table.permiteMovimiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> lineasAsientoTableRefs(
+    Expression<bool> Function($$LineasAsientoTableTableFilterComposer f) f,
+  ) {
+    final $$LineasAsientoTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.lineasAsientoTable,
+      getReferencedColumn: (t) => t.cuentaId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LineasAsientoTableTableFilterComposer(
+            $db: $db,
+            $table: $db.lineasAsientoTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PlanCuentasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanCuentasTableTable> {
+  $$PlanCuentasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get padreId => $composableBuilder(
+    column: $table.padreId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get nivel => $composableBuilder(
+    column: $table.nivel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get permiteMovimiento => $composableBuilder(
+    column: $table.permiteMovimiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get activo => $composableBuilder(
+    column: $table.activo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PlanCuentasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanCuentasTableTable> {
+  $$PlanCuentasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get nombre =>
+      $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TipoCuenta, String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<int> get padreId =>
+      $composableBuilder(column: $table.padreId, builder: (column) => column);
+
+  GeneratedColumn<int> get nivel =>
+      $composableBuilder(column: $table.nivel, builder: (column) => column);
+
+  GeneratedColumn<bool> get permiteMovimiento => $composableBuilder(
+    column: $table.permiteMovimiento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get activo =>
+      $composableBuilder(column: $table.activo, builder: (column) => column);
+
+  GeneratedColumn<String> get descripcion => $composableBuilder(
+    column: $table.descripcion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+
+  Expression<T> lineasAsientoTableRefs<T extends Object>(
+    Expression<T> Function($$LineasAsientoTableTableAnnotationComposer a) f,
+  ) {
+    final $$LineasAsientoTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lineasAsientoTable,
+          getReferencedColumn: (t) => t.cuentaId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LineasAsientoTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lineasAsientoTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$PlanCuentasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlanCuentasTableTable,
+          PlanCuentasTableData,
+          $$PlanCuentasTableTableFilterComposer,
+          $$PlanCuentasTableTableOrderingComposer,
+          $$PlanCuentasTableTableAnnotationComposer,
+          $$PlanCuentasTableTableCreateCompanionBuilder,
+          $$PlanCuentasTableTableUpdateCompanionBuilder,
+          (PlanCuentasTableData, $$PlanCuentasTableTableReferences),
+          PlanCuentasTableData,
+          PrefetchHooks Function({bool lineasAsientoTableRefs})
+        > {
+  $$PlanCuentasTableTableTableManager(
+    _$AppDatabase db,
+    $PlanCuentasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlanCuentasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlanCuentasTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlanCuentasTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String> nombre = const Value.absent(),
+                Value<TipoCuenta> tipo = const Value.absent(),
+                Value<int?> padreId = const Value.absent(),
+                Value<int> nivel = const Value.absent(),
+                Value<bool> permiteMovimiento = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<String?> descripcion = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => PlanCuentasTableCompanion(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                tipo: tipo,
+                padreId: padreId,
+                nivel: nivel,
+                permiteMovimiento: permiteMovimiento,
+                activo: activo,
+                descripcion: descripcion,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String codigo,
+                required String nombre,
+                required TipoCuenta tipo,
+                Value<int?> padreId = const Value.absent(),
+                required int nivel,
+                Value<bool> permiteMovimiento = const Value.absent(),
+                Value<bool> activo = const Value.absent(),
+                Value<String?> descripcion = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => PlanCuentasTableCompanion.insert(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                tipo: tipo,
+                padreId: padreId,
+                nivel: nivel,
+                permiteMovimiento: permiteMovimiento,
+                activo: activo,
+                descripcion: descripcion,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PlanCuentasTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({lineasAsientoTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (lineasAsientoTableRefs) db.lineasAsientoTable,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (lineasAsientoTableRefs)
+                    await $_getPrefetchedData<
+                      PlanCuentasTableData,
+                      $PlanCuentasTableTable,
+                      LineasAsientoTableData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PlanCuentasTableTableReferences
+                          ._lineasAsientoTableRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$PlanCuentasTableTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).lineasAsientoTableRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.cuentaId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlanCuentasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlanCuentasTableTable,
+      PlanCuentasTableData,
+      $$PlanCuentasTableTableFilterComposer,
+      $$PlanCuentasTableTableOrderingComposer,
+      $$PlanCuentasTableTableAnnotationComposer,
+      $$PlanCuentasTableTableCreateCompanionBuilder,
+      $$PlanCuentasTableTableUpdateCompanionBuilder,
+      (PlanCuentasTableData, $$PlanCuentasTableTableReferences),
+      PlanCuentasTableData,
+      PrefetchHooks Function({bool lineasAsientoTableRefs})
+    >;
+typedef $$AsientosTableTableCreateCompanionBuilder =
+    AsientosTableCompanion Function({
+      Value<int> id,
+      required String numeroAsiento,
+      required DateTime fecha,
+      required String concepto,
+      Value<EstadoAsiento> estado,
+      Value<String?> documentoOrigen,
+      Value<String?> tipoOrigen,
+      Value<int?> referenciaId,
+      Value<String?> motivoAnulacion,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$AsientosTableTableUpdateCompanionBuilder =
+    AsientosTableCompanion Function({
+      Value<int> id,
+      Value<String> numeroAsiento,
+      Value<DateTime> fecha,
+      Value<String> concepto,
+      Value<EstadoAsiento> estado,
+      Value<String?> documentoOrigen,
+      Value<String?> tipoOrigen,
+      Value<int?> referenciaId,
+      Value<String?> motivoAnulacion,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+final class $$AsientosTableTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $AsientosTableTable, AsientosTableData> {
+  $$AsientosTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $LineasAsientoTableTable,
+    List<LineasAsientoTableData>
+  >
+  _lineasAsientoTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.lineasAsientoTable,
+        aliasName: $_aliasNameGenerator(
+          db.asientosTable.id,
+          db.lineasAsientoTable.asientoId,
+        ),
+      );
+
+  $$LineasAsientoTableTableProcessedTableManager get lineasAsientoTableRefs {
+    final manager = $$LineasAsientoTableTableTableManager(
+      $_db,
+      $_db.lineasAsientoTable,
+    ).filter((f) => f.asientoId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _lineasAsientoTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AsientosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AsientosTableTable> {
+  $$AsientosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get numeroAsiento => $composableBuilder(
+    column: $table.numeroAsiento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get concepto => $composableBuilder(
+    column: $table.concepto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<EstadoAsiento, EstadoAsiento, String>
+  get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get documentoOrigen => $composableBuilder(
+    column: $table.documentoOrigen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipoOrigen => $composableBuilder(
+    column: $table.tipoOrigen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get referenciaId => $composableBuilder(
+    column: $table.referenciaId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get motivoAnulacion => $composableBuilder(
+    column: $table.motivoAnulacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> lineasAsientoTableRefs(
+    Expression<bool> Function($$LineasAsientoTableTableFilterComposer f) f,
+  ) {
+    final $$LineasAsientoTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.lineasAsientoTable,
+      getReferencedColumn: (t) => t.asientoId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LineasAsientoTableTableFilterComposer(
+            $db: $db,
+            $table: $db.lineasAsientoTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AsientosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AsientosTableTable> {
+  $$AsientosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get numeroAsiento => $composableBuilder(
+    column: $table.numeroAsiento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fecha => $composableBuilder(
+    column: $table.fecha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get concepto => $composableBuilder(
+    column: $table.concepto,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get documentoOrigen => $composableBuilder(
+    column: $table.documentoOrigen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipoOrigen => $composableBuilder(
+    column: $table.tipoOrigen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get referenciaId => $composableBuilder(
+    column: $table.referenciaId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get motivoAnulacion => $composableBuilder(
+    column: $table.motivoAnulacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AsientosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AsientosTableTable> {
+  $$AsientosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get numeroAsiento => $composableBuilder(
+    column: $table.numeroAsiento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fecha =>
+      $composableBuilder(column: $table.fecha, builder: (column) => column);
+
+  GeneratedColumn<String> get concepto =>
+      $composableBuilder(column: $table.concepto, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EstadoAsiento, String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get documentoOrigen => $composableBuilder(
+    column: $table.documentoOrigen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get tipoOrigen => $composableBuilder(
+    column: $table.tipoOrigen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get referenciaId => $composableBuilder(
+    column: $table.referenciaId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get motivoAnulacion => $composableBuilder(
+    column: $table.motivoAnulacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+
+  Expression<T> lineasAsientoTableRefs<T extends Object>(
+    Expression<T> Function($$LineasAsientoTableTableAnnotationComposer a) f,
+  ) {
+    final $$LineasAsientoTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.lineasAsientoTable,
+          getReferencedColumn: (t) => t.asientoId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LineasAsientoTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.lineasAsientoTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AsientosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AsientosTableTable,
+          AsientosTableData,
+          $$AsientosTableTableFilterComposer,
+          $$AsientosTableTableOrderingComposer,
+          $$AsientosTableTableAnnotationComposer,
+          $$AsientosTableTableCreateCompanionBuilder,
+          $$AsientosTableTableUpdateCompanionBuilder,
+          (AsientosTableData, $$AsientosTableTableReferences),
+          AsientosTableData,
+          PrefetchHooks Function({bool lineasAsientoTableRefs})
+        > {
+  $$AsientosTableTableTableManager(_$AppDatabase db, $AsientosTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AsientosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AsientosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AsientosTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> numeroAsiento = const Value.absent(),
+                Value<DateTime> fecha = const Value.absent(),
+                Value<String> concepto = const Value.absent(),
+                Value<EstadoAsiento> estado = const Value.absent(),
+                Value<String?> documentoOrigen = const Value.absent(),
+                Value<String?> tipoOrigen = const Value.absent(),
+                Value<int?> referenciaId = const Value.absent(),
+                Value<String?> motivoAnulacion = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => AsientosTableCompanion(
+                id: id,
+                numeroAsiento: numeroAsiento,
+                fecha: fecha,
+                concepto: concepto,
+                estado: estado,
+                documentoOrigen: documentoOrigen,
+                tipoOrigen: tipoOrigen,
+                referenciaId: referenciaId,
+                motivoAnulacion: motivoAnulacion,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String numeroAsiento,
+                required DateTime fecha,
+                required String concepto,
+                Value<EstadoAsiento> estado = const Value.absent(),
+                Value<String?> documentoOrigen = const Value.absent(),
+                Value<String?> tipoOrigen = const Value.absent(),
+                Value<int?> referenciaId = const Value.absent(),
+                Value<String?> motivoAnulacion = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => AsientosTableCompanion.insert(
+                id: id,
+                numeroAsiento: numeroAsiento,
+                fecha: fecha,
+                concepto: concepto,
+                estado: estado,
+                documentoOrigen: documentoOrigen,
+                tipoOrigen: tipoOrigen,
+                referenciaId: referenciaId,
+                motivoAnulacion: motivoAnulacion,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AsientosTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({lineasAsientoTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (lineasAsientoTableRefs) db.lineasAsientoTable,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (lineasAsientoTableRefs)
+                    await $_getPrefetchedData<
+                      AsientosTableData,
+                      $AsientosTableTable,
+                      LineasAsientoTableData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AsientosTableTableReferences
+                          ._lineasAsientoTableRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AsientosTableTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).lineasAsientoTableRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.asientoId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AsientosTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AsientosTableTable,
+      AsientosTableData,
+      $$AsientosTableTableFilterComposer,
+      $$AsientosTableTableOrderingComposer,
+      $$AsientosTableTableAnnotationComposer,
+      $$AsientosTableTableCreateCompanionBuilder,
+      $$AsientosTableTableUpdateCompanionBuilder,
+      (AsientosTableData, $$AsientosTableTableReferences),
+      AsientosTableData,
+      PrefetchHooks Function({bool lineasAsientoTableRefs})
+    >;
+typedef $$LineasAsientoTableTableCreateCompanionBuilder =
+    LineasAsientoTableCompanion Function({
+      Value<int> id,
+      required int asientoId,
+      required int cuentaId,
+      Value<double> debe,
+      Value<double> haber,
+      Value<String?> conceptoLinea,
+    });
+typedef $$LineasAsientoTableTableUpdateCompanionBuilder =
+    LineasAsientoTableCompanion Function({
+      Value<int> id,
+      Value<int> asientoId,
+      Value<int> cuentaId,
+      Value<double> debe,
+      Value<double> haber,
+      Value<String?> conceptoLinea,
+    });
+
+final class $$LineasAsientoTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LineasAsientoTableTable,
+          LineasAsientoTableData
+        > {
+  $$LineasAsientoTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AsientosTableTable _asientoIdTable(_$AppDatabase db) =>
+      db.asientosTable.createAlias(
+        $_aliasNameGenerator(
+          db.lineasAsientoTable.asientoId,
+          db.asientosTable.id,
+        ),
+      );
+
+  $$AsientosTableTableProcessedTableManager get asientoId {
+    final $_column = $_itemColumn<int>('asiento_id')!;
+
+    final manager = $$AsientosTableTableTableManager(
+      $_db,
+      $_db.asientosTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_asientoIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PlanCuentasTableTable _cuentaIdTable(_$AppDatabase db) =>
+      db.planCuentasTable.createAlias(
+        $_aliasNameGenerator(
+          db.lineasAsientoTable.cuentaId,
+          db.planCuentasTable.id,
+        ),
+      );
+
+  $$PlanCuentasTableTableProcessedTableManager get cuentaId {
+    final $_column = $_itemColumn<int>('cuenta_id')!;
+
+    final manager = $$PlanCuentasTableTableTableManager(
+      $_db,
+      $_db.planCuentasTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cuentaIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LineasAsientoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LineasAsientoTableTable> {
+  $$LineasAsientoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get debe => $composableBuilder(
+    column: $table.debe,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get haber => $composableBuilder(
+    column: $table.haber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get conceptoLinea => $composableBuilder(
+    column: $table.conceptoLinea,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AsientosTableTableFilterComposer get asientoId {
+    final $$AsientosTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.asientoId,
+      referencedTable: $db.asientosTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AsientosTableTableFilterComposer(
+            $db: $db,
+            $table: $db.asientosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PlanCuentasTableTableFilterComposer get cuentaId {
+    final $$PlanCuentasTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaId,
+      referencedTable: $db.planCuentasTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanCuentasTableTableFilterComposer(
+            $db: $db,
+            $table: $db.planCuentasTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LineasAsientoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LineasAsientoTableTable> {
+  $$LineasAsientoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get debe => $composableBuilder(
+    column: $table.debe,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get haber => $composableBuilder(
+    column: $table.haber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conceptoLinea => $composableBuilder(
+    column: $table.conceptoLinea,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AsientosTableTableOrderingComposer get asientoId {
+    final $$AsientosTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.asientoId,
+      referencedTable: $db.asientosTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AsientosTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.asientosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PlanCuentasTableTableOrderingComposer get cuentaId {
+    final $$PlanCuentasTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaId,
+      referencedTable: $db.planCuentasTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanCuentasTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.planCuentasTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LineasAsientoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LineasAsientoTableTable> {
+  $$LineasAsientoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get debe =>
+      $composableBuilder(column: $table.debe, builder: (column) => column);
+
+  GeneratedColumn<double> get haber =>
+      $composableBuilder(column: $table.haber, builder: (column) => column);
+
+  GeneratedColumn<String> get conceptoLinea => $composableBuilder(
+    column: $table.conceptoLinea,
+    builder: (column) => column,
+  );
+
+  $$AsientosTableTableAnnotationComposer get asientoId {
+    final $$AsientosTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.asientoId,
+      referencedTable: $db.asientosTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AsientosTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.asientosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PlanCuentasTableTableAnnotationComposer get cuentaId {
+    final $$PlanCuentasTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cuentaId,
+      referencedTable: $db.planCuentasTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanCuentasTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.planCuentasTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LineasAsientoTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LineasAsientoTableTable,
+          LineasAsientoTableData,
+          $$LineasAsientoTableTableFilterComposer,
+          $$LineasAsientoTableTableOrderingComposer,
+          $$LineasAsientoTableTableAnnotationComposer,
+          $$LineasAsientoTableTableCreateCompanionBuilder,
+          $$LineasAsientoTableTableUpdateCompanionBuilder,
+          (LineasAsientoTableData, $$LineasAsientoTableTableReferences),
+          LineasAsientoTableData,
+          PrefetchHooks Function({bool asientoId, bool cuentaId})
+        > {
+  $$LineasAsientoTableTableTableManager(
+    _$AppDatabase db,
+    $LineasAsientoTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LineasAsientoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LineasAsientoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LineasAsientoTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> asientoId = const Value.absent(),
+                Value<int> cuentaId = const Value.absent(),
+                Value<double> debe = const Value.absent(),
+                Value<double> haber = const Value.absent(),
+                Value<String?> conceptoLinea = const Value.absent(),
+              }) => LineasAsientoTableCompanion(
+                id: id,
+                asientoId: asientoId,
+                cuentaId: cuentaId,
+                debe: debe,
+                haber: haber,
+                conceptoLinea: conceptoLinea,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int asientoId,
+                required int cuentaId,
+                Value<double> debe = const Value.absent(),
+                Value<double> haber = const Value.absent(),
+                Value<String?> conceptoLinea = const Value.absent(),
+              }) => LineasAsientoTableCompanion.insert(
+                id: id,
+                asientoId: asientoId,
+                cuentaId: cuentaId,
+                debe: debe,
+                haber: haber,
+                conceptoLinea: conceptoLinea,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LineasAsientoTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({asientoId = false, cuentaId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (asientoId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.asientoId,
+                                referencedTable:
+                                    $$LineasAsientoTableTableReferences
+                                        ._asientoIdTable(db),
+                                referencedColumn:
+                                    $$LineasAsientoTableTableReferences
+                                        ._asientoIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (cuentaId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cuentaId,
+                                referencedTable:
+                                    $$LineasAsientoTableTableReferences
+                                        ._cuentaIdTable(db),
+                                referencedColumn:
+                                    $$LineasAsientoTableTableReferences
+                                        ._cuentaIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LineasAsientoTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LineasAsientoTableTable,
+      LineasAsientoTableData,
+      $$LineasAsientoTableTableFilterComposer,
+      $$LineasAsientoTableTableOrderingComposer,
+      $$LineasAsientoTableTableAnnotationComposer,
+      $$LineasAsientoTableTableCreateCompanionBuilder,
+      $$LineasAsientoTableTableUpdateCompanionBuilder,
+      (LineasAsientoTableData, $$LineasAsientoTableTableReferences),
+      LineasAsientoTableData,
+      PrefetchHooks Function({bool asientoId, bool cuentaId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -69877,4 +72970,10 @@ class $AppDatabaseManager {
       $$PlanillaLineasTableTableTableManager(_db, _db.planillaLineasTable);
   $$LiquidacionesTableTableTableManager get liquidacionesTable =>
       $$LiquidacionesTableTableTableManager(_db, _db.liquidacionesTable);
+  $$PlanCuentasTableTableTableManager get planCuentasTable =>
+      $$PlanCuentasTableTableTableManager(_db, _db.planCuentasTable);
+  $$AsientosTableTableTableManager get asientosTable =>
+      $$AsientosTableTableTableManager(_db, _db.asientosTable);
+  $$LineasAsientoTableTableTableManager get lineasAsientoTable =>
+      $$LineasAsientoTableTableTableManager(_db, _db.lineasAsientoTable);
 }

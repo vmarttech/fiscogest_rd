@@ -1,3 +1,9 @@
+import 'package:fiscogest_rd/core/contabilidad/data/repositories/asiento_repository_impl.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/repositories/plan_cuentas_repository_impl.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_asiento_repository.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_plan_cuentas_repository.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/services/motor_partida_doble.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/services/contabilidad_eventos_listener.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
 import 'package:fiscogest_rd/features/comercial/data/dao/ventas_dao.dart';
@@ -32,10 +38,14 @@ class RepositoryInjection {
     required this.inventarioService,
     required this.productosDao,
     required this.ventaInventarioService,
+    required this.planCuentasRepository,
+    required this.asientoRepository,
+    required this.motorPartidaDoble,
   });
 
   static RepositoryInjection? _instance;
   static CompraEventosListener? _compraEventosListener;
+  static ContabilidadEventosListener? _contabilidadEventosListener;
 
   static RepositoryInjection get instance {
     if (_instance == null) {
@@ -53,8 +63,12 @@ class RepositoryInjection {
   final IInventarioService inventarioService;
   final ProductosDao productosDao;
   final IVentaInventarioService ventaInventarioService;
+  final IPlanCuentasRepository planCuentasRepository;
+  final IAsientoRepository asientoRepository;
+  final MotorPartidaDoble motorPartidaDoble;
 
   static Future<RepositoryInjection> initialize(AppDatabase db) async {
+    if (_instance != null) return _instance!;
     final apartadosDao = ApartadosDao(db);
     final devolucionesDao = DevolucionesDao(db);
     final cajaMovimientosDao = CajaMovimientosDao(db);
@@ -89,10 +103,14 @@ class RepositoryInjection {
       cajaMovimientosDao: cajaMovimientosDao,
       cajaSesionesDao: cajaSesionesDao,
     );
+    final planCuentasRepository = PlanCuentasRepositoryImpl(db);
+    final asientoRepository = AsientoRepositoryImpl(db);
+    // Seam de licencia: verificarLicencia se inyecta al cablear licencia_service.dart.
+    final motorPartidaDoble = MotorPartidaDoble(asientoRepository);
     _compraEventosListener = CompraEventosListener();
+    _contabilidadEventosListener = ContabilidadEventosListener();
 
-    // ✅ Leemos la variable para eliminar advertencia de campo no usado
-    assert(_compraEventosListener != null, 'Listener inicializado');
+    // Los listeners se desuscriben en RepositoryInjection.dispose().
 
     _instance = RepositoryInjection._(
       db: db,
@@ -104,7 +122,18 @@ class RepositoryInjection {
       inventarioService: inventarioService,
       productosDao: productosDao,
       ventaInventarioService: ventaInventarioService,
+      planCuentasRepository: planCuentasRepository,
+      asientoRepository: asientoRepository,
+      motorPartidaDoble: motorPartidaDoble,
     );
     return _instance!;
+  }
+
+  static void dispose() {
+    _compraEventosListener?.dispose();
+    _contabilidadEventosListener?.dispose();
+    _compraEventosListener = null;
+    _contabilidadEventosListener = null;
+    _instance = null;
   }
 }

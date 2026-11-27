@@ -11,7 +11,6 @@ part 'cuentas_cobrar_dao.g.dart';
 class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     with _$CuentasCobrarDaoMixin {
   CuentasCobrarDao(super.db);
-  final DateTime _hoy = DateTime.now();
 
   Future<int> registrarCuenta(CuentasCobrarTableCompanion cuenta) async {
     return await into(cuentasCobrarTable).insert(cuenta);
@@ -27,7 +26,7 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     int numeroCuotas = 1,
     double montoInteresTotal = 0.0,
   }) async {
-    final vencimiento = fechaVencimiento ?? _hoy.add(const Duration(days: 30));
+    final vencimiento = fechaVencimiento ?? DateTime.now().add(const Duration(days: 30));
     final saldoPendiente = montoOriginal + montoInteresTotal - montoAbonado;
     return await into(cuentasCobrarTable).insert(
       CuentasCobrarTableCompanion.insert(
@@ -229,7 +228,7 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     if (saldoPendiente <= 0.001) {
       nuevoEstado = CobrarEstado.pagado;
     } else {
-      final diasVencido = _hoy.difference(cuenta.fechaVencimiento).inDays;
+      final diasVencido = DateTime.now().difference(cuenta.fechaVencimiento).inDays;
       if (diasVencido > 0) {
         nuevoEstado = CobrarEstado.vencido;
       } else if (totalAbonado > 0) {
@@ -482,9 +481,9 @@ class CuentasCobrarDao extends DatabaseAccessor<AppDatabase>
     required int diasAnticipacion,
     int? limite,
   }) async {
-    final fechaLimite = _hoy.add(Duration(days: diasAnticipacion));
+    final fechaLimite = DateTime.now().add(Duration(days: diasAnticipacion));
     final lista = await listarCuentas(
-      venceDesde: _hoy,
+      venceDesde: DateTime.now(),
       venceHasta: fechaLimite,
     );
     final filtradas = lista.where((c) => c.estado != CobrarEstado.pagado);

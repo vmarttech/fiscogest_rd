@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fiscogest_rd/core/database/app_database.dart';
+import 'package:fiscogest_rd/core/database/database_provider.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/lista_precios.dart';
 import 'package:fiscogest_rd/features/ventas/domain/usecases/calcular_precio_desde_margen.dart';
 import 'package:fiscogest_rd/features/ventas/domain/usecases/calcular_margen.dart';
@@ -15,7 +15,7 @@ final calcularMargenProvider = Provider<CalcularMargen>(
 );
 
 final listaPreciosRepositoryProvider = Provider<IListaPreciosRepository>(
-  (ref) => ListaPreciosRepositoryImpl(AppDatabase()),
+  (ref) => ListaPreciosRepositoryImpl(ref.watch(databaseProvider)),
 );
 
 final listaPreciosPorProductoProvider =

@@ -1,4 +1,6 @@
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/enums/tipo_cuenta.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/enums/estado_asiento.dart';
 import 'package:fiscogest_rd/core/database/encrypted_connection.dart';
 // ignore_for_file: experimental_member_use
 import 'package:drift/drift.dart';
@@ -63,6 +65,9 @@ import 'package:fiscogest_rd/features/comercial/data/dao/detalle_compra_table.da
 import 'package:fiscogest_rd/features/facturacion/data/dao/secuencias_ncf_table.dart';
 import 'package:fiscogest_rd/features/facturacion/data/dao/notas_credito_table.dart';
 import 'package:fiscogest_rd/features/ventas/data/dao/abonos_fiao_table.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/dao/plan_cuentas_table.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/dao/asientos_table.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/dao/lineas_asiento_table.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -128,6 +133,9 @@ part 'app_database.g.dart';
     PlanillasTable,
     PlanillaLineasTable,
     LiquidacionesTable,
+    PlanCuentasTable,
+    AsientosTable,
+    LineasAsientoTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -142,7 +150,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 91;
+  int get schemaVersion => 92;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -209,6 +217,11 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 92) {
+        try { await m.createTable(planCuentasTable); } catch (_) {}
+        try { await m.createTable(asientosTable); } catch (_) {}
+        try { await m.createTable(lineasAsientoTable); } catch (_) {}
+      }
       if (from < 91) {
         try { await m.createTable(liquidacionesTable); } catch (_) {}
       }
