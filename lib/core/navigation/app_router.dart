@@ -106,6 +106,13 @@ import 'package:fiscogest_rd/features/facturacion/presentation/pages/historial_f
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_nc_page.dart';
 import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
 import 'package:fiscogest_rd/core/contabilidad/presentation/pages/contabilidad_home_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/detalle_asiento_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/balance_comprobacion_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/libro_mayor_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/libro_diario_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/nuevo_asiento_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/plan_cuentas_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/nueva_cuenta_page.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -887,6 +894,48 @@ GoRoute(
         path: ContabilidadHomePage.routePath,
         name: ContabilidadHomePage.routeName,
         builder: (_, __) => const AppShell(child: ContabilidadHomePage()),
+        routes: [
+          GoRoute(
+            path: 'plan',
+            name: PlanCuentasPage.routeName,
+            builder: (_, __) => const AppShell(child: PlanCuentasPage()),
+          ),
+
+          GoRoute(
+            path: 'plan/nueva',
+            name: NuevaCuentaPage.routeName,
+            builder: (_, __) => const AppShell(child: NuevaCuentaPage()),
+          ),
+          GoRoute(
+            path: 'asientos/nuevo',
+            name: NuevoAsientoPage.routeName,
+            builder: (_, __) => const AppShell(child: NuevoAsientoPage()),
+          ),
+          GoRoute(
+            path: 'asientos/detalle',
+            name: DetalleAsientoPage.routeName,
+            builder: (context, state) {
+              final id = int.tryParse(state.uri.queryParameters['id'] ?? '') ?? 0;
+              return AppShell(child: DetalleAsientoPage(asientoId: id));
+            },
+          ),
+          GoRoute(
+            path: 'diario',
+            name: LibroDiarioPage.routeName,
+            builder: (_, __) => const AppShell(child: LibroDiarioPage()),
+          ),
+          GoRoute(
+            path: 'mayor',
+            name: LibroMayorPage.routeName,
+            builder: (_, __) => const AppShell(child: LibroMayorPage()),
+          ),
+          GoRoute(
+            path: 'balance',
+            name: BalanceComprobacionPage.routeName,
+            builder: (_, __) => const AppShell(child: BalanceComprobacionPage()),
+          ),
+
+        ],
       ),
       GoRoute(
         path: '/nomina',

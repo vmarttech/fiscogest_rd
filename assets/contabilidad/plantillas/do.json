@@ -1,0 +1,17 @@
+{
+  "paisCodigo": "DO",
+  "nombre": "República Dominicana",
+  "moneda": "DOP",
+  "etiquetaImpuesto": "ITBIS",
+  "roles": {
+    "caja": "1101",
+    "cxc": "1103",
+    "impuestoCredito": "1105",
+    "inventario": "1201",
+    "cxp": "2101",
+    "impuestoPorPagar": "2104",
+    "ingresosVentas": "4101",
+    "costoVentas": "5101"
+  },
+  "impuestoDefaultBps": 1800
+}

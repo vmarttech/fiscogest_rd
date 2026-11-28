@@ -1,3 +1,5 @@
+import 'package:fiscogest_rd/features/licencias/domain/licencia_service.dart';
+import 'package:fiscogest_rd/features/licencias/domain/licencia_gates.dart';
 import 'package:fiscogest_rd/core/contabilidad/data/repositories/asiento_repository_impl.dart';
 import 'package:fiscogest_rd/core/contabilidad/data/repositories/plan_cuentas_repository_impl.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_asiento_repository.dart';
@@ -29,6 +31,7 @@ import 'package:fiscogest_rd/features/inventario/data/services/inventario_servic
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
 import 'package:fiscogest_rd/core/contabilidad/data/seed/plan_cuentas_rd_seed.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/config/plantilla_json_loader.dart';
 import 'package:fiscogest_rd/features/comercial/domain/services/compra_eventos_listener.dart';
 
 class RepositoryInjection {
@@ -113,23 +116,35 @@ class RepositoryInjection {
     final asientoRepository = AsientoRepositoryImpl(db);
     final periodoFiscalRepository = PeriodoFiscalRepositoryImpl(db);
     // Plan + periodo del país activo (DO/MX/PR). Idempotente.
+    // Plantilla del país: JSON en assets; fallback catálogo Dart.
+    final plantilla =
+        await PlantillaJsonLoader.cargar(ContabilidadPaisConfig.paisCodigo);
+    ContabilidadPaisConfig.setPlantilla(plantilla);
+
     await PlanCuentasRdSeed(planCuentasRepository).asegurarPlanMinimo();
     await periodoFiscalRepository.asegurarPeriodoAnualActual(
       ContabilidadPaisConfig.paisCodigo,
     );
     // Seam de licencia: verificarLicencia se inyecta al cablear licencia_service.dart.
+    // Seam licencia: fail-closed vía permiteContabilidad.
     final motorPartidaDoble = MotorPartidaDoble(
       asientoRepository,
       planCuentas: planCuentasRepository,
       periodos: periodoFiscalRepository,
+      verificarLicencia: () async {
+        try {
+          final info = await LicenciaService(db).obtenerActual();
+          return LicenciaGates(info).permiteContabilidad;
+        } catch (_) {
+          return false;
+        }
+      },
     );
     _compraEventosListener = CompraEventosListener();
     _contabilidadEventosListener = ContabilidadEventosListener(
       motor: motorPartidaDoble,
       planCuentas: planCuentasRepository,
     );
-
-    // Los listeners se desuscriben en RepositoryInjection.dispose().
 
     _instance = RepositoryInjection._(
       db: db,

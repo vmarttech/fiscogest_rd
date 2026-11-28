@@ -1,5 +1,4 @@
-/// Tasas de referencia F0 (bps). No van en el motor: solo semilla/datos.
-/// 1800 = 18.00% ITBIS general RD. MX/PR se amplían en F2.
+/// Tasas en basis points (1800 = 18.00%). Multi-país DO / MX / PR.
 class TasaImpuestoSeed {
   const TasaImpuestoSeed({
     required this.codigo,
@@ -15,7 +14,7 @@ class TasaImpuestoSeed {
 }
 
 class TasasImpuestoSeedCatalogo {
-  static const List<TasaImpuestoSeed> doRd = [
+  static const doRd = <TasaImpuestoSeed>[
     TasaImpuestoSeed(
       codigo: 'ITBIS_GEN',
       paisCodigo: 'DO',
@@ -36,16 +35,49 @@ class TasasImpuestoSeedCatalogo {
     ),
   ];
 
+  static const mx = <TasaImpuestoSeed>[
+    TasaImpuestoSeed(
+      codigo: 'IVA_GEN',
+      paisCodigo: 'MX',
+      tasaBps: 1600,
+      descripcion: 'IVA general 16%',
+    ),
+    TasaImpuestoSeed(
+      codigo: 'IVA_EXE',
+      paisCodigo: 'MX',
+      tasaBps: 0,
+      descripcion: 'IVA exento / 0%',
+    ),
+  ];
+
+  static const pr = <TasaImpuestoSeed>[
+    TasaImpuestoSeed(
+      codigo: 'IVU_GEN',
+      paisCodigo: 'PR',
+      tasaBps: 1150,
+      descripcion: 'IVU general 11.5%',
+    ),
+    TasaImpuestoSeed(
+      codigo: 'IVU_EXE',
+      paisCodigo: 'PR',
+      tasaBps: 0,
+      descripcion: 'IVU exento',
+    ),
+  ];
+
   static List<TasaImpuestoSeed> porPais(String pais) {
     switch (pais.toUpperCase()) {
+      case 'MX':
+        return mx;
+      case 'PR':
+        return pr;
       case 'DO':
-        return doRd;
       default:
-        return doRd; // F0: fallback; F2 semillas MX/PR
+        return doRd;
     }
   }
 
-  /// Redondeo al centavo (plano §8): (base * bps + 5000) ~/ 10000
+  /// Redondeo al centavo: (base * bps + 5000) ~/ 10000
   static int montoCents(int baseCents, int tasaBps) =>
       (baseCents * tasaBps + 5000) ~/ 10000;
 }

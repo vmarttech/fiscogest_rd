@@ -53,6 +53,12 @@ class LicenciaGates {
     return limites.permiteEcf;
   }
 
+  /// Módulo contable (partida doble, libros). Solo pro / empresa / demo / dev.
+  bool get permiteContabilidad {
+    if (esDesarrollador || esDemo) return true;
+    return limites.permiteContabilidad;
+  }
+
   bool get permiteNotifWhatsappFiao {
     if (esDesarrollador || esDemo) return true;
     return limites.notificaPagosFiaoWhatsapp;

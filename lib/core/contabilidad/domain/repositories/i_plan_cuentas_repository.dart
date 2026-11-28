@@ -9,5 +9,6 @@ abstract class IPlanCuentasRepository {
   Future<int> insertar(PlanCuenta cuenta);
   Future<bool> actualizar(PlanCuenta cuenta);
   Future<bool> desactivar(int cuentaId);
+  Future<bool> activar(int cuentaId);
   Future<void> inicializarPlan(List<PlanCuenta> planCuentas);
 }

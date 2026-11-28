@@ -201,6 +201,18 @@ class PlanCuentasRepositoryImpl implements IPlanCuentasRepository {
   }
 
   @override
+  Future<bool> activar(int cuentaId) async {
+    if (cuentaId <= 0) return false;
+    final n = await (_db.update(_db.planCuentasTable)
+          ..where((t) => t.id.equals(cuentaId)))
+        .write(PlanCuentasTableCompanion(
+          activo: const Value(true),
+          actualizadoEn: Value(DateTime.now()),
+        ));
+    return n > 0;
+  }
+
+  @override
   Future<void> inicializarPlan(List<PlanCuenta> planCuentas) async {
     if (planCuentas.isEmpty) return;
     final existentes = await _db.select(_db.planCuentasTable).get();

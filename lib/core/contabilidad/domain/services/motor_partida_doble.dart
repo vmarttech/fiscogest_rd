@@ -9,7 +9,7 @@ import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_plan_cuenta
 import 'package:fiscogest_rd/core/contabilidad/domain/services/validador_asientos.dart';
 
 /// Motor de partida doble. Anulación = asiento de reversa.
-/// Si hay repo de periodos, exige periodo abierto que contenga la fecha.
+/// Licencia fail-closed: sin callback o false → no escribe.
 class MotorPartidaDoble {
   MotorPartidaDoble(
     this._repo, {
@@ -22,7 +22,21 @@ class MotorPartidaDoble {
   final IAsientoRepository _repo;
   final IPlanCuentasRepository? _planCuentas;
   final IPeriodoFiscalRepository? _periodos;
+
+  /// Si es null o devuelve false, no se permiten altas/anulaciones.
   final Future<bool> Function()? verificarLicencia;
+
+  /// Fail-closed: sin callback o false → no se escriben asientos.
+  Future<void> _assertLicencia() async {
+    final fn = verificarLicencia;
+    if (fn == null) {
+      throw StateError('acct_error_license_inactive');
+    }
+    final ok = await fn();
+    if (!ok) {
+      throw StateError('acct_error_license_inactive');
+    }
+  }
 
   Future<Map<int, PlanCuenta>?> _cargarCuentas(List<LineaAsiento> lineas) async {
     final plan = _planCuentas;
@@ -54,6 +68,8 @@ class MotorPartidaDoble {
     required AsientoContable asiento,
     required List<LineaAsiento> lineas,
   }) async {
+    await _assertLicencia();
+
     final cuentas = await _cargarCuentas(lineas);
     final errores =
         ValidadorAsientos().validar(asiento, lineas, cuentasPorId: cuentas);
@@ -62,16 +78,6 @@ class MotorPartidaDoble {
     }
 
     await _assertPeriodoAbierto(asiento.fecha);
-
-    if (verificarLicencia != null) {
-      bool ok;
-      try {
-        ok = await verificarLicencia!();
-      } catch (_) {
-        ok = false;
-      }
-      if (!ok) throw StateError('acct_error_license_inactive');
-    }
 
     if (asiento.estado == EstadoAsiento.contabilizado) {
       throw ArgumentError('acct_error_already_posted');
@@ -102,10 +108,13 @@ class MotorPartidaDoble {
       _repo.obtenerLineas(asientoId);
 
   Future<AsientoContable> anular(int asientoId, String motivo) async {
+    await _assertLicencia();
+
     final motivoLimpio = motivo.trim();
     if (motivoLimpio.isEmpty) {
       throw ArgumentError('acct_error_void_reason_required');
     }
+
     final existente = await _repo.obtenerPorId(asientoId);
     if (existente == null) {
       throw ArgumentError('acct_error_entry_not_found:$asientoId');
@@ -118,6 +127,7 @@ class MotorPartidaDoble {
         'acct_error_void_requires_posted:${existente.estado.name}',
       );
     }
+
     final lineasOrig = await _repo.obtenerLineas(asientoId);
     if (lineasOrig.length < 2) {
       throw StateError('acct_error_void_no_lines:$asientoId');
@@ -152,7 +162,9 @@ class MotorPartidaDoble {
     );
 
     final ok = await _repo.anular(asientoId, motivoLimpio);
-    if (!ok) throw StateError('acct_error_void_mark_failed:$asientoId');
+    if (!ok) {
+      throw StateError('acct_error_void_mark_failed:$asientoId');
+    }
     return reversa;
   }
 }

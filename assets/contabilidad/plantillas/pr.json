@@ -1,0 +1,17 @@
+{
+  "paisCodigo": "PR",
+  "nombre": "Puerto Rico",
+  "moneda": "USD",
+  "etiquetaImpuesto": "IVU",
+  "roles": {
+    "caja": "1010",
+    "cxc": "1100",
+    "impuestoCredito": "1150",
+    "inventario": "1200",
+    "cxp": "2000",
+    "impuestoPorPagar": "2100",
+    "ingresosVentas": "4000",
+    "costoVentas": "5000"
+  },
+  "impuestoDefaultBps": 1150
+}

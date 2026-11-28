@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/config/plantilla_json_loader.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/seed/plan_cuentas_rd_seed.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/config/contabilidad_pais_config.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/config/plantilla_contrapartida.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/entities/asiento_contable.dart';
 import 'package:fiscogest_rd/core/contabilidad/presentation/acct_strings.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/balance_comprobacion_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/detalle_asiento_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/libro_diario_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/libro_mayor_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/nuevo_asiento_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/plan_cuentas_page.dart';
 import 'package:fiscogest_rd/core/dependency_injection/repository_injection.dart';
 
-/// Home F0 del módulo contable. Solo Drift local (sin red).
 class ContabilidadHomePage extends StatefulWidget {
   const ContabilidadHomePage({super.key});
 
@@ -25,18 +34,43 @@ class _ContabilidadHomePageState extends State<ContabilidadHomePage> {
   }
 
   Future<List<AsientoContable>> _cargar() {
-    return RepositoryInjection.instance.asientoRepository.listar(limite: 30);
+    return RepositoryInjection.instance.asientoRepository.listar(limite: 40);
   }
 
   void _refrescar() {
+    final f = _cargar();
     setState(() {
-      _futuro = _cargar();
+      _futuro = f;
     });
+  }
+
+  Future<void> _cambiarPais(String codigo) async {
+    ContabilidadPaisConfig.setPais(codigo);
+    final plantilla = await PlantillaJsonLoader.cargar(codigo);
+    ContabilidadPaisConfig.setPlantilla(plantilla);
+
+    try {
+      await PlanCuentasRdSeed(
+        RepositoryInjection.instance.planCuentasRepository,
+      ).asegurarPlanMinimo(paisCodigo: codigo);
+    } catch (_) {}
+
+    if (!mounted) return;
+    setState(() {});
+    _refrescar();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${AcctStrings.countryLabel}: ${plantilla.nombre} · '
+          '${plantilla.etiquetaImpuesto}',
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final pais = ContabilidadPaisConfig.paisCodigo;
     final plantilla = ContabilidadPaisConfig.plantilla;
 
     return Scaffold(
@@ -50,6 +84,14 @@ class _ContabilidadHomePageState extends State<ContabilidadHomePage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final ok = await context.push<bool>(NuevoAsientoPage.routePath);
+          if (ok == true) _refrescar();
+        },
+        icon: const Icon(Icons.add),
+        label: const Text(AcctStrings.entryNew),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -59,13 +101,103 @@ class _ContabilidadHomePageState extends State<ContabilidadHomePage> {
           ),
           const SizedBox(height: 12),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.public),
-              title: Text('${AcctStrings.countryLabel}: $pais'),
-              subtitle: Text(plantilla.nombre),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.public),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AcctStrings.countryLabel,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        DropdownButtonFormField<String>(
+                          // ignore: deprecated_member_use
+                          value: ContabilidadPaisConfig.paisCodigo,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                          items: PlantillasContrapartida.todas
+                              .map(
+                                (p) => DropdownMenuItem(
+                                  value: p.paisCodigo,
+                                  child: Text('${p.nombre} (${p.paisCodigo})'),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) {
+                            if (v != null) _cambiarPais(v);
+                          },
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          plantilla.etiquetaImpuesto,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push(PlanCuentasPage.routePath),
+                  icon: const Icon(Icons.account_tree_outlined),
+                  label: const Text(AcctStrings.accountsTitle),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final ok =
+                        await context.push<bool>(NuevoAsientoPage.routePath);
+                    if (ok == true) _refrescar();
+                  },
+                  icon: const Icon(Icons.post_add),
+                  label: const Text(AcctStrings.entryNew),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            AcctStrings.booksTitle,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: () => context.push(LibroDiarioPage.routePath),
+                child: const Text(AcctStrings.journalTitle),
+              ),
+              OutlinedButton(
+                onPressed: () => context.push(LibroMayorPage.routePath),
+                child: const Text(AcctStrings.ledgerTitle),
+              ),
+              OutlinedButton(
+                onPressed: () =>
+                    context.push(BalanceComprobacionPage.routePath),
+                child: const Text(AcctStrings.trialBalanceTitle),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           Text(
             AcctStrings.entriesTitle,
             style: Theme.of(context).textTheme.titleMedium,
@@ -81,7 +213,7 @@ class _ContabilidadHomePageState extends State<ContabilidadHomePage> {
                 );
               }
               if (snap.hasError) {
-                return Text('Error: ${snap.error}');
+                return Text('${AcctStrings.errorGeneric}: ${snap.error}');
               }
               final items = snap.data ?? const <AsientoContable>[];
               if (items.isEmpty) {
@@ -95,11 +227,19 @@ class _ContabilidadHomePageState extends State<ContabilidadHomePage> {
                     .map(
                       (a) => Card(
                         child: ListTile(
-                          title: Text(a.numeroAsiento.isEmpty
-                              ? '#${a.id}'
-                              : a.numeroAsiento),
+                          title: Text(
+                            a.numeroAsiento.isEmpty
+                                ? '#${a.id}'
+                                : a.numeroAsiento,
+                          ),
                           subtitle: Text(a.concepto),
                           trailing: Text(a.estado.name),
+                          onTap: () async {
+                            final ok = await context.push<bool>(
+                              '${DetalleAsientoPage.routePath}?id=${a.id}',
+                            );
+                            if (ok == true) _refrescar();
+                          },
                         ),
                       ),
                     )

@@ -64,6 +64,7 @@ class LimitesPlan {
     required this.permiteAlmacenes,
     required this.permiteUsuariosExtra,
     required this.permiteEcf,
+    required this.permiteContabilidad,
     this.notificaPagosFiaoWhatsapp = false,
   });
 
@@ -80,6 +81,8 @@ class LimitesPlan {
   final bool permiteAlmacenes;
   final bool permiteUsuariosExtra;
   final bool permiteEcf;
+  /// Módulo contable (partida doble, libros). Solo pro / empresa / demo / dev.
+  final bool permiteContabilidad;
   final bool notificaPagosFiaoWhatsapp;
 }
 
@@ -98,6 +101,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: true,
     permiteUsuariosExtra: true,
     permiteEcf: true,
+    permiteContabilidad: true,
   ),
   // Gratis: contadores mensuales locales; datos operativos no sincronizados.
   'gratis': LimitesPlan(
@@ -112,6 +116,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: false,
     permiteUsuariosExtra: false,
     permiteEcf: false,
+    permiteContabilidad: false,
   ),
   // Esencial US$4.99 — 300 facturas/mes, reportes basicos, sync nube, 1 equipo.
   'basico': LimitesPlan(
@@ -126,6 +131,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: false,
     permiteUsuariosExtra: false,
     permiteEcf: false,
+    permiteContabilidad: false,
     notificaPagosFiaoWhatsapp: true,
   ),
   // Avanzado US$9.99 — multi-equipo (3), fiao sin tope, reportes avanzados, sin fiscal.
@@ -141,6 +147,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: false,
     permiteUsuariosExtra: false,
     permiteEcf: false,
+    permiteContabilidad: false,
     notificaPagosFiaoWhatsapp: true,
   ),
   // Fiscal Pro US$19.99 — credito formal + fiscal DGII + almacenes + equipos.
@@ -156,6 +163,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: true,
     permiteUsuariosExtra: true,
     permiteEcf: true,
+    permiteContabilidad: true,
   ),
   // Alias legado PC / admin
   'profesional': LimitesPlan(
@@ -170,6 +178,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: true,
     permiteUsuariosExtra: true,
     permiteEcf: true,
+    permiteContabilidad: true,
   ),
   'empresa': LimitesPlan(
     maxProductos: null,
@@ -183,6 +192,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: true,
     permiteUsuariosExtra: true,
     permiteEcf: true,
+    permiteContabilidad: true,
   ),
   'desarrollador': LimitesPlan(
     maxProductos: null,
@@ -196,6 +206,7 @@ const kLimitesPorPlan = <String, LimitesPlan>{
     permiteAlmacenes: true,
     permiteUsuariosExtra: true,
     permiteEcf: true,
+    permiteContabilidad: true,
   ),
 };
 
@@ -240,6 +251,9 @@ bool planPermiteAlmacenes(String plan) => limitesDe(plan).permiteAlmacenes;
 bool planPermiteUsuariosExtra(String plan) =>
     limitesDe(plan).permiteUsuariosExtra;
 
+bool planPermiteContabilidad(String plan) =>
+    limitesDe(plan).permiteContabilidad;
+
 int maxInstalacionesPermitidas(String plan) {
   final p = plan.toLowerCase();
   return kMaxDispositivosBase[p] ?? 1;
@@ -281,6 +295,7 @@ String planMinimoPara(String funcion) {
     case 'fiscal':
     case 'ecf':
     case 'credito_formal':
+    case 'contabilidad':
       return 'pro';
     case 'sync_nube':
       return 'basico';

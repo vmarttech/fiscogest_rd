@@ -60,6 +60,7 @@ flutter:
   default-flavor: fiscogest
   uses-material-design: true
   assets:
+    - assets/contabilidad/plantillas/
     - assets/ecf_xsd/
     - assets/branding/app_icon.png
     - assets/images/fondo.png

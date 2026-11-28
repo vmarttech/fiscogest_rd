@@ -1,0 +1,17 @@
+{
+  "paisCodigo": "MX",
+  "nombre": "México",
+  "moneda": "MXN",
+  "etiquetaImpuesto": "IVA",
+  "roles": {
+    "caja": "101.01",
+    "cxc": "105.01",
+    "impuestoCredito": "118.01",
+    "inventario": "115.01",
+    "cxp": "201.01",
+    "impuestoPorPagar": "208.01",
+    "ingresosVentas": "401.01",
+    "costoVentas": "501.01"
+  },
+  "impuestoDefaultBps": 1600
+}

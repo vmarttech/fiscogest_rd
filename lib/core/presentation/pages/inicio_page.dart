@@ -304,6 +304,7 @@ class InicioPage extends ConsumerWidget {
         );
     final modoCfg = ref.watch(modoSimplificadoProvider);
     final mostrarCredito = !modoCfg && gates.permiteCreditoFormal;
+    final mostrarContabilidad = !modoCfg && gates.permiteContabilidad;
     final ruta = await showModalBottomSheet<String>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -385,13 +386,14 @@ class InicioPage extends ConsumerWidget {
                   AppColors.info,
                   '/proveedores',
                 ),
-                tile(
-                  Icons.account_balance_outlined,
-                  ServicioIdioma.t(context, 'Contabilidad'),
-                  'Libros y asientos',
-                  AppColors.info,
-                  '/contabilidad',
-                ),
+                if (mostrarContabilidad)
+                  tile(
+                    Icons.account_balance_outlined,
+                    ServicioIdioma.t(context, 'Contabilidad'),
+                    'Libros y asientos',
+                    AppColors.info,
+                    '/contabilidad',
+                  ),
                 tile(
                   Icons.groups_outlined,
                   ServicioIdioma.t(context, 'Nómina'),
