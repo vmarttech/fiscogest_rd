@@ -1,7 +1,7 @@
 import 'package:fiscogest_rd/core/contabilidad/domain/enums/estado_asiento.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/entities/linea_asiento.dart';
 
-/// Entidad de dominio: Asiento contable en partida doble con sus lineas.
+/// Entidad de dominio: Asiento contable en partida doble.
 class AsientoContable {
   const AsientoContable({
     this.id = 0,
@@ -29,20 +29,19 @@ class AsientoContable {
   final DateTime creadoEn;
   final DateTime? actualizadoEn;
 
-  double get totalDebe => lineas.fold(0.0, (s, l) => s + l.debe);
-  double get totalHaber => lineas.fold(0.0, (s, l) => s + l.haber);
+  int get totalDebeCents =>
+      lineas.fold(0, (s, l) => s + l.debeCents);
 
-  // Partida doble: total debe = total haber, con tolerancia de centavos.
-  // Se exigen ambos lados con movimiento y se redondea a centavos antes de comparar.
+  int get totalHaberCents =>
+      lineas.fold(0, (s, l) => s + l.haberCents);
+
+  /// Partida doble estricta: debe == haber y ambos lados con movimiento.
   bool get estaCuadrado {
     if (lineas.isEmpty) return false;
-    if (totalDebe <= 0 || totalHaber <= 0) return false;
-    final debeCents = (totalDebe * 100).roundToDouble() / 100;
-    final haberCents = (totalHaber * 100).roundToDouble() / 100;
-    return (debeCents - haberCents).abs() < 0.005;
+    if (totalDebeCents <= 0 || totalHaberCents <= 0) return false;
+    return totalDebeCents == totalHaberCents;
   }
 
-  // Listado de fallos de dominio para validar antes de persistir el asiento.
   List<String> get errores {
     final out = <String>[];
     if (numeroAsiento.trim().isEmpty) out.add('acct_error_number_required');

@@ -6,6 +6,7 @@ import 'package:fiscogest_rd/features/inventario/domain/enums/tipo_movimiento.da
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/detalle_venta.dart';
+import 'package:fiscogest_rd/features/ventas/domain/entities/resultado_venta_inventario.dart';
 import 'package:fiscogest_rd/features/ventas/domain/entities/venta.dart';
 import 'package:fiscogest_rd/features/ventas/domain/repositories/i_ventas_repository.dart';
 import 'package:fiscogest_rd/features/ventas/domain/services/i_venta_inventario_service.dart';
@@ -118,7 +119,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
   }
 
   @override
-  Future<Venta> registrarVentaConInventario(Venta venta) async {
+  Future<ResultadoVentaInventario> registrarVentaConInventario(Venta venta) async {
     final almacenId = await _almacenIdDeVenta(venta);
 
     // Validar contra la existencia de la sucursal activa (stock_almacen).
@@ -129,6 +130,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       throw Exception('No se pudo guardar la venta');
     }
 
+    var costoTotalCents = 0;
     for (final elemento in venta.detalles) {
       final detalle = elemento;
 
@@ -149,6 +151,7 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       final costoUnitario = promedio > 0
           ? promedio
           : (producto?.precioCompra ?? 0.0);
+      costoTotalCents += (costoUnitario * detalle.cantidad * 100).round();
       final saldoNuevo = saldoAnterior - detalle.cantidad;
 
       final movimientoKardex = Kardex(
@@ -182,7 +185,10 @@ class VentaInventarioServiceImpl implements IVentaInventarioService {
       }
     }
 
-    return ventaRegistrada;
+    return ResultadoVentaInventario(
+      venta: ventaRegistrada,
+      costoCents: costoTotalCents,
+    );
   }
 
   @override

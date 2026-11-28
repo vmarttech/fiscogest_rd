@@ -7,11 +7,9 @@ import 'package:fiscogest_rd/core/contabilidad/domain/entities/linea_asiento.dar
 import 'package:fiscogest_rd/core/contabilidad/domain/enums/estado_asiento.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_asiento_repository.dart';
 
-/// Implementacion local (Drift) de [IAsientoRepository].
-/// Repositorio plano sobre [AppDatabase], sin DAO aparte (mismo estilo que
-/// PlanCuentasRepositoryImpl). La cabecera del asiento y sus lineas se
-/// escriben en una sola transaccion: la partida doble no puede persistir
-/// las dos tablas por separado.
+/// Implementación local (Drift) de [IAsientoRepository].
+/// Repositorio plano sobre [AppDatabase]. Cabecera + líneas en una sola
+/// transacción. Todos los montos se manejan en centavos enteros.
 class AsientoRepositoryImpl implements IAsientoRepository {
   AsientoRepositoryImpl(this._db);
 
@@ -41,9 +39,10 @@ class AsientoRepositoryImpl implements IAsientoRepository {
     AsientoContable asiento,
     List<LineaAsiento> lineas,
   ) async {
-    // Validacion de dominio antes de tocar la base de datos.
+    // Validación de dominio antes de tocar la base de datos.
     if (!asiento.esValido) {
-      throw ArgumentError('acct_error_invalid_asiento:${asiento.errores.join('|')}');
+      throw ArgumentError(
+          'acct_error_invalid_asiento:${asiento.errores.join('|')}');
     }
     if (lineas.isEmpty) {
       throw ArgumentError('acct_error_no_lines');
@@ -67,8 +66,7 @@ class AsientoRepositoryImpl implements IAsientoRepository {
     }
 
     return _db.transaction(() async {
-      // El numero es unico por tabla; el chequeo va dentro de la transaccion
-      // para que un choque entre reintentos revierta la escritura.
+      // El número es único; el chequeo va dentro de la transacción.
       final duplicado = await (_db.select(_db.asientosTable)
             ..where((t) => t.numeroAsiento.equals(numero)))
           .getSingleOrNull();
@@ -95,8 +93,8 @@ class AsientoRepositoryImpl implements IAsientoRepository {
               LineasAsientoTableCompanion.insert(
                 asientoId: cabecera.id,
                 cuentaId: linea.cuentaId,
-                debe: Value(linea.debe),
-                haber: Value(linea.haber),
+                debeCents: Value(linea.debeCents),
+                haberCents: Value(linea.haberCents),
                 conceptoLinea: Value(linea.concepto),
               ),
             );
@@ -129,8 +127,8 @@ class AsientoRepositoryImpl implements IAsientoRepository {
               id: l.id,
               asientoId: l.asientoId,
               cuentaId: l.cuentaId,
-              debe: l.debe,
-              haber: l.haber,
+              debeCents: l.debeCents,
+              haberCents: l.haberCents,
               concepto: l.conceptoLinea,
             ))
         .toList();
@@ -192,8 +190,8 @@ class AsientoRepositoryImpl implements IAsientoRepository {
               id: l.id,
               asientoId: l.asientoId,
               cuentaId: l.cuentaId,
-              debe: l.debe,
-              haber: l.haber,
+              debeCents: l.debeCents,
+              haberCents: l.haberCents,
               concepto: l.conceptoLinea,
             ));
       }

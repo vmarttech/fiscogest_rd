@@ -59,7 +59,8 @@ class RegistrarVentaUseCase {
       montoDescuento: estado.montoDescuento,
       almacenId: _ref.read(almacenActivoIdEfectivoProvider),
     );
-    return await _servicioInventario.registrarVentaConInventario(venta);
+    final resultado = await _servicioInventario.registrarVentaConInventario(venta);
+    return resultado.venta;
   }
 }
 

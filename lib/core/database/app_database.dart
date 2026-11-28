@@ -1,6 +1,7 @@
 import 'package:fiscogest_rd/features/comercial/data/enums/comercial_enums.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/enums/tipo_cuenta.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/enums/estado_asiento.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/enums/estado_periodo.dart';
 import 'package:fiscogest_rd/core/database/encrypted_connection.dart';
 // ignore_for_file: experimental_member_use
 import 'package:drift/drift.dart';
@@ -68,6 +69,7 @@ import 'package:fiscogest_rd/features/ventas/data/dao/abonos_fiao_table.dart';
 import 'package:fiscogest_rd/core/contabilidad/data/dao/plan_cuentas_table.dart';
 import 'package:fiscogest_rd/core/contabilidad/data/dao/asientos_table.dart';
 import 'package:fiscogest_rd/core/contabilidad/data/dao/lineas_asiento_table.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/dao/periodos_fiscales_table.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -136,6 +138,7 @@ part 'app_database.g.dart';
     PlanCuentasTable,
     AsientosTable,
     LineasAsientoTable,
+    PeriodosFiscalesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -150,7 +153,7 @@ class AppDatabase extends _$AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();
   CuentasCobrarDao get cuentasCobrarDao => CuentasCobrarDao(this);
   @override
-  int get schemaVersion => 92;
+  int get schemaVersion => 94;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -217,6 +220,50 @@ class AppDatabase extends _$AppDatabase {
       await m.database.customStatement(_crearColaSincronizacion);
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 94) {
+        try { await m.createTable(periodosFiscalesTable); } catch (_) {}
+      }
+      // v93: lineas de asiento en centavos enteros (debe_cents / haber_cents).
+      if (from < 93) {
+        try {
+          await m.database.customStatement(
+            'CREATE TABLE IF NOT EXISTS lineas_asiento_table_v93 ('
+            'id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+            'asiento_id INTEGER NOT NULL REFERENCES asientos_table (id), '
+            'cuenta_id INTEGER NOT NULL REFERENCES plan_cuentas_table (id), '
+            'debe_cents INTEGER NOT NULL DEFAULT 0, '
+            'haber_cents INTEGER NOT NULL DEFAULT 0, '
+            'concepto_linea TEXT NULL'
+            ');'
+          );
+          final info = await m.database.customSelect(
+            'PRAGMA table_info("lineas_asiento_table")',
+          ).get();
+          final names = info.map((r) => r.data['name'] as String).toSet();
+          if (names.contains('debe') && names.contains('haber')) {
+            await m.database.customStatement(
+              'INSERT INTO lineas_asiento_table_v93 '
+              '(id, asiento_id, cuenta_id, debe_cents, haber_cents, concepto_linea) '
+              'SELECT id, asiento_id, cuenta_id, '
+              'CAST(ROUND(debe * 100.0) AS INTEGER), '
+              'CAST(ROUND(haber * 100.0) AS INTEGER), '
+              'concepto_linea FROM lineas_asiento_table;'
+            );
+            await m.database.customStatement('DROP TABLE lineas_asiento_table;');
+            await m.database.customStatement(
+              'ALTER TABLE lineas_asiento_table_v93 RENAME TO lineas_asiento_table;'
+            );
+          } else {
+            await m.database.customStatement(
+              'DROP TABLE IF EXISTS lineas_asiento_table_v93;'
+            );
+            try { await m.createTable(lineasAsientoTable); } catch (_) {}
+          }
+        } catch (_) {}
+        try { await m.createTable(planCuentasTable); } catch (_) {}
+        try { await m.createTable(asientosTable); } catch (_) {}
+        try { await m.createTable(lineasAsientoTable); } catch (_) {}
+      }
       if (from < 92) {
         try { await m.createTable(planCuentasTable); } catch (_) {}
         try { await m.createTable(asientosTable); } catch (_) {}

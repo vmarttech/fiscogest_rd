@@ -3,11 +3,12 @@ import 'package:fiscogest_rd/core/contabilidad/domain/entities/linea_asiento.dar
 import 'package:fiscogest_rd/core/contabilidad/domain/enums/tipo_cuenta.dart';
 
 /// Calcula saldos y movimientos de cuentas a partir de líneas de asientos.
+/// Todos los montos se manejan en centavos enteros.
 class CalculadorSaldos {
-  /// Saldo actual de una cuenta a partir de sus movimientos.
+  /// Saldo actual de una cuenta a partir de sus movimientos (en centavos).
   /// Aplica la naturaleza contable: cuentas de activo/gasto aumentan al debe,
   /// pasivo/ingreso/patrimonio al haber.
-  double calcularSaldo(
+  int calcularSaldo(
     PlanCuenta cuenta,
     List<LineaAsiento> movimientos,
   ) {
@@ -15,24 +16,21 @@ class CalculadorSaldos {
     final haber = _sumarHaber(movimientos);
 
     final saldo = cuenta.tipo.esDeudora ? debe - haber : haber - debe;
-    // Redondeo a centavos para evitar ruido de punto flotante en saldos.
-    return (saldo * 100).roundToDouble() / 100;
+    return saldo;
   }
 
-  // Solo se consideran lineas validas (monto no negativo, un solo lado, importe > 0).
-  double _sumarDebe(List<LineaAsiento> m) => m
-      .where((l) => l.esValida)
-      .fold(0.0, (s, l) => s + l.debe);
-  double _sumarHaber(List<LineaAsiento> m) => m
-      .where((l) => l.esValida)
-      .fold(0.0, (s, l) => s + l.haber);
+  int _sumarDebe(List<LineaAsiento> m) =>
+      m.where((l) => l.esValida).fold(0, (s, l) => s + l.debeCents);
 
-  /// Movimientos en un rango de fechas para una lista de asientos filtrados.
-  Map<int, double> calcularSaldosPorCuenta(
+  int _sumarHaber(List<LineaAsiento> m) =>
+      m.where((l) => l.esValida).fold(0, (s, l) => s + l.haberCents);
+
+  /// Saldos por cuenta (en centavos).
+  Map<int, int> calcularSaldosPorCuenta(
     List<PlanCuenta> cuentas,
     Map<int, List<LineaAsiento>> movimientosPorCuenta,
   ) {
-    final resultado = <int, double>{};
+    final resultado = <int, int>{};
     for (final cuenta in cuentas) {
       final mov = movimientosPorCuenta[cuenta.id] ?? <LineaAsiento>[];
       resultado[cuenta.id] = calcularSaldo(cuenta, mov);

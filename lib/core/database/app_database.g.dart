@@ -44418,25 +44418,29 @@ class $LineasAsientoTableTable extends LineasAsientoTable
       'REFERENCES plan_cuentas_table (id)',
     ),
   );
-  static const VerificationMeta _debeMeta = const VerificationMeta('debe');
-  @override
-  late final GeneratedColumn<double> debe = GeneratedColumn<double>(
-    'debe',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
+  static const VerificationMeta _debeCentsMeta = const VerificationMeta(
+    'debeCents',
   );
-  static const VerificationMeta _haberMeta = const VerificationMeta('haber');
   @override
-  late final GeneratedColumn<double> haber = GeneratedColumn<double>(
-    'haber',
+  late final GeneratedColumn<int> debeCents = GeneratedColumn<int>(
+    'debe_cents',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _haberCentsMeta = const VerificationMeta(
+    'haberCents',
+  );
+  @override
+  late final GeneratedColumn<int> haberCents = GeneratedColumn<int>(
+    'haber_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _conceptoLineaMeta = const VerificationMeta(
     'conceptoLinea',
@@ -44454,8 +44458,8 @@ class $LineasAsientoTableTable extends LineasAsientoTable
     id,
     asientoId,
     cuentaId,
-    debe,
-    haber,
+    debeCents,
+    haberCents,
     conceptoLinea,
   ];
   @override
@@ -44489,16 +44493,16 @@ class $LineasAsientoTableTable extends LineasAsientoTable
     } else if (isInserting) {
       context.missing(_cuentaIdMeta);
     }
-    if (data.containsKey('debe')) {
+    if (data.containsKey('debe_cents')) {
       context.handle(
-        _debeMeta,
-        debe.isAcceptableOrUnknown(data['debe']!, _debeMeta),
+        _debeCentsMeta,
+        debeCents.isAcceptableOrUnknown(data['debe_cents']!, _debeCentsMeta),
       );
     }
-    if (data.containsKey('haber')) {
+    if (data.containsKey('haber_cents')) {
       context.handle(
-        _haberMeta,
-        haber.isAcceptableOrUnknown(data['haber']!, _haberMeta),
+        _haberCentsMeta,
+        haberCents.isAcceptableOrUnknown(data['haber_cents']!, _haberCentsMeta),
       );
     }
     if (data.containsKey('concepto_linea')) {
@@ -44531,13 +44535,13 @@ class $LineasAsientoTableTable extends LineasAsientoTable
         DriftSqlType.int,
         data['${effectivePrefix}cuenta_id'],
       )!,
-      debe: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}debe'],
+      debeCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}debe_cents'],
       )!,
-      haber: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}haber'],
+      haberCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}haber_cents'],
       )!,
       conceptoLinea: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -44557,15 +44561,17 @@ class LineasAsientoTableData extends DataClass
   final int id;
   final int asientoId;
   final int cuentaId;
-  final double debe;
-  final double haber;
+
+  /// Montos en centavos (enteros). Nunca usar double/real.
+  final int debeCents;
+  final int haberCents;
   final String? conceptoLinea;
   const LineasAsientoTableData({
     required this.id,
     required this.asientoId,
     required this.cuentaId,
-    required this.debe,
-    required this.haber,
+    required this.debeCents,
+    required this.haberCents,
     this.conceptoLinea,
   });
   @override
@@ -44574,8 +44580,8 @@ class LineasAsientoTableData extends DataClass
     map['id'] = Variable<int>(id);
     map['asiento_id'] = Variable<int>(asientoId);
     map['cuenta_id'] = Variable<int>(cuentaId);
-    map['debe'] = Variable<double>(debe);
-    map['haber'] = Variable<double>(haber);
+    map['debe_cents'] = Variable<int>(debeCents);
+    map['haber_cents'] = Variable<int>(haberCents);
     if (!nullToAbsent || conceptoLinea != null) {
       map['concepto_linea'] = Variable<String>(conceptoLinea);
     }
@@ -44587,8 +44593,8 @@ class LineasAsientoTableData extends DataClass
       id: Value(id),
       asientoId: Value(asientoId),
       cuentaId: Value(cuentaId),
-      debe: Value(debe),
-      haber: Value(haber),
+      debeCents: Value(debeCents),
+      haberCents: Value(haberCents),
       conceptoLinea: conceptoLinea == null && nullToAbsent
           ? const Value.absent()
           : Value(conceptoLinea),
@@ -44604,8 +44610,8 @@ class LineasAsientoTableData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       asientoId: serializer.fromJson<int>(json['asientoId']),
       cuentaId: serializer.fromJson<int>(json['cuentaId']),
-      debe: serializer.fromJson<double>(json['debe']),
-      haber: serializer.fromJson<double>(json['haber']),
+      debeCents: serializer.fromJson<int>(json['debeCents']),
+      haberCents: serializer.fromJson<int>(json['haberCents']),
       conceptoLinea: serializer.fromJson<String?>(json['conceptoLinea']),
     );
   }
@@ -44616,8 +44622,8 @@ class LineasAsientoTableData extends DataClass
       'id': serializer.toJson<int>(id),
       'asientoId': serializer.toJson<int>(asientoId),
       'cuentaId': serializer.toJson<int>(cuentaId),
-      'debe': serializer.toJson<double>(debe),
-      'haber': serializer.toJson<double>(haber),
+      'debeCents': serializer.toJson<int>(debeCents),
+      'haberCents': serializer.toJson<int>(haberCents),
       'conceptoLinea': serializer.toJson<String?>(conceptoLinea),
     };
   }
@@ -44626,15 +44632,15 @@ class LineasAsientoTableData extends DataClass
     int? id,
     int? asientoId,
     int? cuentaId,
-    double? debe,
-    double? haber,
+    int? debeCents,
+    int? haberCents,
     Value<String?> conceptoLinea = const Value.absent(),
   }) => LineasAsientoTableData(
     id: id ?? this.id,
     asientoId: asientoId ?? this.asientoId,
     cuentaId: cuentaId ?? this.cuentaId,
-    debe: debe ?? this.debe,
-    haber: haber ?? this.haber,
+    debeCents: debeCents ?? this.debeCents,
+    haberCents: haberCents ?? this.haberCents,
     conceptoLinea: conceptoLinea.present
         ? conceptoLinea.value
         : this.conceptoLinea,
@@ -44644,8 +44650,10 @@ class LineasAsientoTableData extends DataClass
       id: data.id.present ? data.id.value : this.id,
       asientoId: data.asientoId.present ? data.asientoId.value : this.asientoId,
       cuentaId: data.cuentaId.present ? data.cuentaId.value : this.cuentaId,
-      debe: data.debe.present ? data.debe.value : this.debe,
-      haber: data.haber.present ? data.haber.value : this.haber,
+      debeCents: data.debeCents.present ? data.debeCents.value : this.debeCents,
+      haberCents: data.haberCents.present
+          ? data.haberCents.value
+          : this.haberCents,
       conceptoLinea: data.conceptoLinea.present
           ? data.conceptoLinea.value
           : this.conceptoLinea,
@@ -44658,16 +44666,22 @@ class LineasAsientoTableData extends DataClass
           ..write('id: $id, ')
           ..write('asientoId: $asientoId, ')
           ..write('cuentaId: $cuentaId, ')
-          ..write('debe: $debe, ')
-          ..write('haber: $haber, ')
+          ..write('debeCents: $debeCents, ')
+          ..write('haberCents: $haberCents, ')
           ..write('conceptoLinea: $conceptoLinea')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, asientoId, cuentaId, debe, haber, conceptoLinea);
+  int get hashCode => Object.hash(
+    id,
+    asientoId,
+    cuentaId,
+    debeCents,
+    haberCents,
+    conceptoLinea,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -44675,8 +44689,8 @@ class LineasAsientoTableData extends DataClass
           other.id == this.id &&
           other.asientoId == this.asientoId &&
           other.cuentaId == this.cuentaId &&
-          other.debe == this.debe &&
-          other.haber == this.haber &&
+          other.debeCents == this.debeCents &&
+          other.haberCents == this.haberCents &&
           other.conceptoLinea == this.conceptoLinea);
 }
 
@@ -44685,23 +44699,23 @@ class LineasAsientoTableCompanion
   final Value<int> id;
   final Value<int> asientoId;
   final Value<int> cuentaId;
-  final Value<double> debe;
-  final Value<double> haber;
+  final Value<int> debeCents;
+  final Value<int> haberCents;
   final Value<String?> conceptoLinea;
   const LineasAsientoTableCompanion({
     this.id = const Value.absent(),
     this.asientoId = const Value.absent(),
     this.cuentaId = const Value.absent(),
-    this.debe = const Value.absent(),
-    this.haber = const Value.absent(),
+    this.debeCents = const Value.absent(),
+    this.haberCents = const Value.absent(),
     this.conceptoLinea = const Value.absent(),
   });
   LineasAsientoTableCompanion.insert({
     this.id = const Value.absent(),
     required int asientoId,
     required int cuentaId,
-    this.debe = const Value.absent(),
-    this.haber = const Value.absent(),
+    this.debeCents = const Value.absent(),
+    this.haberCents = const Value.absent(),
     this.conceptoLinea = const Value.absent(),
   }) : asientoId = Value(asientoId),
        cuentaId = Value(cuentaId);
@@ -44709,16 +44723,16 @@ class LineasAsientoTableCompanion
     Expression<int>? id,
     Expression<int>? asientoId,
     Expression<int>? cuentaId,
-    Expression<double>? debe,
-    Expression<double>? haber,
+    Expression<int>? debeCents,
+    Expression<int>? haberCents,
     Expression<String>? conceptoLinea,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (asientoId != null) 'asiento_id': asientoId,
       if (cuentaId != null) 'cuenta_id': cuentaId,
-      if (debe != null) 'debe': debe,
-      if (haber != null) 'haber': haber,
+      if (debeCents != null) 'debe_cents': debeCents,
+      if (haberCents != null) 'haber_cents': haberCents,
       if (conceptoLinea != null) 'concepto_linea': conceptoLinea,
     });
   }
@@ -44727,16 +44741,16 @@ class LineasAsientoTableCompanion
     Value<int>? id,
     Value<int>? asientoId,
     Value<int>? cuentaId,
-    Value<double>? debe,
-    Value<double>? haber,
+    Value<int>? debeCents,
+    Value<int>? haberCents,
     Value<String?>? conceptoLinea,
   }) {
     return LineasAsientoTableCompanion(
       id: id ?? this.id,
       asientoId: asientoId ?? this.asientoId,
       cuentaId: cuentaId ?? this.cuentaId,
-      debe: debe ?? this.debe,
-      haber: haber ?? this.haber,
+      debeCents: debeCents ?? this.debeCents,
+      haberCents: haberCents ?? this.haberCents,
       conceptoLinea: conceptoLinea ?? this.conceptoLinea,
     );
   }
@@ -44753,11 +44767,11 @@ class LineasAsientoTableCompanion
     if (cuentaId.present) {
       map['cuenta_id'] = Variable<int>(cuentaId.value);
     }
-    if (debe.present) {
-      map['debe'] = Variable<double>(debe.value);
+    if (debeCents.present) {
+      map['debe_cents'] = Variable<int>(debeCents.value);
     }
-    if (haber.present) {
-      map['haber'] = Variable<double>(haber.value);
+    if (haberCents.present) {
+      map['haber_cents'] = Variable<int>(haberCents.value);
     }
     if (conceptoLinea.present) {
       map['concepto_linea'] = Variable<String>(conceptoLinea.value);
@@ -44771,9 +44785,581 @@ class LineasAsientoTableCompanion
           ..write('id: $id, ')
           ..write('asientoId: $asientoId, ')
           ..write('cuentaId: $cuentaId, ')
-          ..write('debe: $debe, ')
-          ..write('haber: $haber, ')
+          ..write('debeCents: $debeCents, ')
+          ..write('haberCents: $haberCents, ')
           ..write('conceptoLinea: $conceptoLinea')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PeriodosFiscalesTableTable extends PeriodosFiscalesTable
+    with TableInfo<$PeriodosFiscalesTableTable, PeriodosFiscalesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PeriodosFiscalesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nombreMeta = const VerificationMeta('nombre');
+  @override
+  late final GeneratedColumn<String> nombre = GeneratedColumn<String>(
+    'nombre',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaInicioMeta = const VerificationMeta(
+    'fechaInicio',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaInicio = GeneratedColumn<DateTime>(
+    'fecha_inicio',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fechaFinMeta = const VerificationMeta(
+    'fechaFin',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaFin = GeneratedColumn<DateTime>(
+    'fecha_fin',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<EstadoPeriodo, String> estado =
+      GeneratedColumn<String>(
+        'estado',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('abierto'),
+      ).withConverter<EstadoPeriodo>(
+        $PeriodosFiscalesTableTable.$converterestado,
+      );
+  static const VerificationMeta _paisCodigoMeta = const VerificationMeta(
+    'paisCodigo',
+  );
+  @override
+  late final GeneratedColumn<String> paisCodigo = GeneratedColumn<String>(
+    'pais_codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('DO'),
+  );
+  static const VerificationMeta _creadoEnMeta = const VerificationMeta(
+    'creadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> creadoEn = GeneratedColumn<DateTime>(
+    'creado_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _actualizadoEnMeta = const VerificationMeta(
+    'actualizadoEn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> actualizadoEn =
+      GeneratedColumn<DateTime>(
+        'actualizado_en',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    codigo,
+    nombre,
+    fechaInicio,
+    fechaFin,
+    estado,
+    paisCodigo,
+    creadoEn,
+    actualizadoEn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'periodos_fiscales_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PeriodosFiscalesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codigoMeta);
+    }
+    if (data.containsKey('nombre')) {
+      context.handle(
+        _nombreMeta,
+        nombre.isAcceptableOrUnknown(data['nombre']!, _nombreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nombreMeta);
+    }
+    if (data.containsKey('fecha_inicio')) {
+      context.handle(
+        _fechaInicioMeta,
+        fechaInicio.isAcceptableOrUnknown(
+          data['fecha_inicio']!,
+          _fechaInicioMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaInicioMeta);
+    }
+    if (data.containsKey('fecha_fin')) {
+      context.handle(
+        _fechaFinMeta,
+        fechaFin.isAcceptableOrUnknown(data['fecha_fin']!, _fechaFinMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fechaFinMeta);
+    }
+    if (data.containsKey('pais_codigo')) {
+      context.handle(
+        _paisCodigoMeta,
+        paisCodigo.isAcceptableOrUnknown(data['pais_codigo']!, _paisCodigoMeta),
+      );
+    }
+    if (data.containsKey('creado_en')) {
+      context.handle(
+        _creadoEnMeta,
+        creadoEn.isAcceptableOrUnknown(data['creado_en']!, _creadoEnMeta),
+      );
+    }
+    if (data.containsKey('actualizado_en')) {
+      context.handle(
+        _actualizadoEnMeta,
+        actualizadoEn.isAcceptableOrUnknown(
+          data['actualizado_en']!,
+          _actualizadoEnMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {codigo, paisCodigo},
+  ];
+  @override
+  PeriodosFiscalesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PeriodosFiscalesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      nombre: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nombre'],
+      )!,
+      fechaInicio: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_inicio'],
+      )!,
+      fechaFin: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_fin'],
+      )!,
+      estado: $PeriodosFiscalesTableTable.$converterestado.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}estado'],
+        )!,
+      ),
+      paisCodigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pais_codigo'],
+      )!,
+      creadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}creado_en'],
+      )!,
+      actualizadoEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}actualizado_en'],
+      ),
+    );
+  }
+
+  @override
+  $PeriodosFiscalesTableTable createAlias(String alias) {
+    return $PeriodosFiscalesTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<EstadoPeriodo, String> $converterestado =
+      const EstadoPeriodoConverter();
+}
+
+class PeriodosFiscalesTableData extends DataClass
+    implements Insertable<PeriodosFiscalesTableData> {
+  final int id;
+  final String codigo;
+  final String nombre;
+  final DateTime fechaInicio;
+  final DateTime fechaFin;
+  final EstadoPeriodo estado;
+  final String paisCodigo;
+  final DateTime creadoEn;
+  final DateTime? actualizadoEn;
+  const PeriodosFiscalesTableData({
+    required this.id,
+    required this.codigo,
+    required this.nombre,
+    required this.fechaInicio,
+    required this.fechaFin,
+    required this.estado,
+    required this.paisCodigo,
+    required this.creadoEn,
+    this.actualizadoEn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['codigo'] = Variable<String>(codigo);
+    map['nombre'] = Variable<String>(nombre);
+    map['fecha_inicio'] = Variable<DateTime>(fechaInicio);
+    map['fecha_fin'] = Variable<DateTime>(fechaFin);
+    {
+      map['estado'] = Variable<String>(
+        $PeriodosFiscalesTableTable.$converterestado.toSql(estado),
+      );
+    }
+    map['pais_codigo'] = Variable<String>(paisCodigo);
+    map['creado_en'] = Variable<DateTime>(creadoEn);
+    if (!nullToAbsent || actualizadoEn != null) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn);
+    }
+    return map;
+  }
+
+  PeriodosFiscalesTableCompanion toCompanion(bool nullToAbsent) {
+    return PeriodosFiscalesTableCompanion(
+      id: Value(id),
+      codigo: Value(codigo),
+      nombre: Value(nombre),
+      fechaInicio: Value(fechaInicio),
+      fechaFin: Value(fechaFin),
+      estado: Value(estado),
+      paisCodigo: Value(paisCodigo),
+      creadoEn: Value(creadoEn),
+      actualizadoEn: actualizadoEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualizadoEn),
+    );
+  }
+
+  factory PeriodosFiscalesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PeriodosFiscalesTableData(
+      id: serializer.fromJson<int>(json['id']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      nombre: serializer.fromJson<String>(json['nombre']),
+      fechaInicio: serializer.fromJson<DateTime>(json['fechaInicio']),
+      fechaFin: serializer.fromJson<DateTime>(json['fechaFin']),
+      estado: serializer.fromJson<EstadoPeriodo>(json['estado']),
+      paisCodigo: serializer.fromJson<String>(json['paisCodigo']),
+      creadoEn: serializer.fromJson<DateTime>(json['creadoEn']),
+      actualizadoEn: serializer.fromJson<DateTime?>(json['actualizadoEn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'codigo': serializer.toJson<String>(codigo),
+      'nombre': serializer.toJson<String>(nombre),
+      'fechaInicio': serializer.toJson<DateTime>(fechaInicio),
+      'fechaFin': serializer.toJson<DateTime>(fechaFin),
+      'estado': serializer.toJson<EstadoPeriodo>(estado),
+      'paisCodigo': serializer.toJson<String>(paisCodigo),
+      'creadoEn': serializer.toJson<DateTime>(creadoEn),
+      'actualizadoEn': serializer.toJson<DateTime?>(actualizadoEn),
+    };
+  }
+
+  PeriodosFiscalesTableData copyWith({
+    int? id,
+    String? codigo,
+    String? nombre,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+    EstadoPeriodo? estado,
+    String? paisCodigo,
+    DateTime? creadoEn,
+    Value<DateTime?> actualizadoEn = const Value.absent(),
+  }) => PeriodosFiscalesTableData(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    nombre: nombre ?? this.nombre,
+    fechaInicio: fechaInicio ?? this.fechaInicio,
+    fechaFin: fechaFin ?? this.fechaFin,
+    estado: estado ?? this.estado,
+    paisCodigo: paisCodigo ?? this.paisCodigo,
+    creadoEn: creadoEn ?? this.creadoEn,
+    actualizadoEn: actualizadoEn.present
+        ? actualizadoEn.value
+        : this.actualizadoEn,
+  );
+  PeriodosFiscalesTableData copyWithCompanion(
+    PeriodosFiscalesTableCompanion data,
+  ) {
+    return PeriodosFiscalesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      nombre: data.nombre.present ? data.nombre.value : this.nombre,
+      fechaInicio: data.fechaInicio.present
+          ? data.fechaInicio.value
+          : this.fechaInicio,
+      fechaFin: data.fechaFin.present ? data.fechaFin.value : this.fechaFin,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      paisCodigo: data.paisCodigo.present
+          ? data.paisCodigo.value
+          : this.paisCodigo,
+      creadoEn: data.creadoEn.present ? data.creadoEn.value : this.creadoEn,
+      actualizadoEn: data.actualizadoEn.present
+          ? data.actualizadoEn.value
+          : this.actualizadoEn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodosFiscalesTableData(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('fechaInicio: $fechaInicio, ')
+          ..write('fechaFin: $fechaFin, ')
+          ..write('estado: $estado, ')
+          ..write('paisCodigo: $paisCodigo, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    codigo,
+    nombre,
+    fechaInicio,
+    fechaFin,
+    estado,
+    paisCodigo,
+    creadoEn,
+    actualizadoEn,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PeriodosFiscalesTableData &&
+          other.id == this.id &&
+          other.codigo == this.codigo &&
+          other.nombre == this.nombre &&
+          other.fechaInicio == this.fechaInicio &&
+          other.fechaFin == this.fechaFin &&
+          other.estado == this.estado &&
+          other.paisCodigo == this.paisCodigo &&
+          other.creadoEn == this.creadoEn &&
+          other.actualizadoEn == this.actualizadoEn);
+}
+
+class PeriodosFiscalesTableCompanion
+    extends UpdateCompanion<PeriodosFiscalesTableData> {
+  final Value<int> id;
+  final Value<String> codigo;
+  final Value<String> nombre;
+  final Value<DateTime> fechaInicio;
+  final Value<DateTime> fechaFin;
+  final Value<EstadoPeriodo> estado;
+  final Value<String> paisCodigo;
+  final Value<DateTime> creadoEn;
+  final Value<DateTime?> actualizadoEn;
+  const PeriodosFiscalesTableCompanion({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.nombre = const Value.absent(),
+    this.fechaInicio = const Value.absent(),
+    this.fechaFin = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.paisCodigo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  });
+  PeriodosFiscalesTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String codigo,
+    required String nombre,
+    required DateTime fechaInicio,
+    required DateTime fechaFin,
+    this.estado = const Value.absent(),
+    this.paisCodigo = const Value.absent(),
+    this.creadoEn = const Value.absent(),
+    this.actualizadoEn = const Value.absent(),
+  }) : codigo = Value(codigo),
+       nombre = Value(nombre),
+       fechaInicio = Value(fechaInicio),
+       fechaFin = Value(fechaFin);
+  static Insertable<PeriodosFiscalesTableData> custom({
+    Expression<int>? id,
+    Expression<String>? codigo,
+    Expression<String>? nombre,
+    Expression<DateTime>? fechaInicio,
+    Expression<DateTime>? fechaFin,
+    Expression<String>? estado,
+    Expression<String>? paisCodigo,
+    Expression<DateTime>? creadoEn,
+    Expression<DateTime>? actualizadoEn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (codigo != null) 'codigo': codigo,
+      if (nombre != null) 'nombre': nombre,
+      if (fechaInicio != null) 'fecha_inicio': fechaInicio,
+      if (fechaFin != null) 'fecha_fin': fechaFin,
+      if (estado != null) 'estado': estado,
+      if (paisCodigo != null) 'pais_codigo': paisCodigo,
+      if (creadoEn != null) 'creado_en': creadoEn,
+      if (actualizadoEn != null) 'actualizado_en': actualizadoEn,
+    });
+  }
+
+  PeriodosFiscalesTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? codigo,
+    Value<String>? nombre,
+    Value<DateTime>? fechaInicio,
+    Value<DateTime>? fechaFin,
+    Value<EstadoPeriodo>? estado,
+    Value<String>? paisCodigo,
+    Value<DateTime>? creadoEn,
+    Value<DateTime?>? actualizadoEn,
+  }) {
+    return PeriodosFiscalesTableCompanion(
+      id: id ?? this.id,
+      codigo: codigo ?? this.codigo,
+      nombre: nombre ?? this.nombre,
+      fechaInicio: fechaInicio ?? this.fechaInicio,
+      fechaFin: fechaFin ?? this.fechaFin,
+      estado: estado ?? this.estado,
+      paisCodigo: paisCodigo ?? this.paisCodigo,
+      creadoEn: creadoEn ?? this.creadoEn,
+      actualizadoEn: actualizadoEn ?? this.actualizadoEn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (nombre.present) {
+      map['nombre'] = Variable<String>(nombre.value);
+    }
+    if (fechaInicio.present) {
+      map['fecha_inicio'] = Variable<DateTime>(fechaInicio.value);
+    }
+    if (fechaFin.present) {
+      map['fecha_fin'] = Variable<DateTime>(fechaFin.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<String>(
+        $PeriodosFiscalesTableTable.$converterestado.toSql(estado.value),
+      );
+    }
+    if (paisCodigo.present) {
+      map['pais_codigo'] = Variable<String>(paisCodigo.value);
+    }
+    if (creadoEn.present) {
+      map['creado_en'] = Variable<DateTime>(creadoEn.value);
+    }
+    if (actualizadoEn.present) {
+      map['actualizado_en'] = Variable<DateTime>(actualizadoEn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PeriodosFiscalesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('nombre: $nombre, ')
+          ..write('fechaInicio: $fechaInicio, ')
+          ..write('fechaFin: $fechaFin, ')
+          ..write('estado: $estado, ')
+          ..write('paisCodigo: $paisCodigo, ')
+          ..write('creadoEn: $creadoEn, ')
+          ..write('actualizadoEn: $actualizadoEn')
           ..write(')'))
         .toString();
   }
@@ -44894,6 +45480,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AsientosTableTable asientosTable = $AsientosTableTable(this);
   late final $LineasAsientoTableTable lineasAsientoTable =
       $LineasAsientoTableTable(this);
+  late final $PeriodosFiscalesTableTable periodosFiscalesTable =
+      $PeriodosFiscalesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -44963,6 +45551,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     planCuentasTable,
     asientosTable,
     lineasAsientoTable,
+    periodosFiscalesTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -72382,8 +72971,8 @@ typedef $$LineasAsientoTableTableCreateCompanionBuilder =
       Value<int> id,
       required int asientoId,
       required int cuentaId,
-      Value<double> debe,
-      Value<double> haber,
+      Value<int> debeCents,
+      Value<int> haberCents,
       Value<String?> conceptoLinea,
     });
 typedef $$LineasAsientoTableTableUpdateCompanionBuilder =
@@ -72391,8 +72980,8 @@ typedef $$LineasAsientoTableTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> asientoId,
       Value<int> cuentaId,
-      Value<double> debe,
-      Value<double> haber,
+      Value<int> debeCents,
+      Value<int> haberCents,
       Value<String?> conceptoLinea,
     });
 
@@ -72468,13 +73057,13 @@ class $$LineasAsientoTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get debe => $composableBuilder(
-    column: $table.debe,
+  ColumnFilters<int> get debeCents => $composableBuilder(
+    column: $table.debeCents,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get haber => $composableBuilder(
-    column: $table.haber,
+  ColumnFilters<int> get haberCents => $composableBuilder(
+    column: $table.haberCents,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -72544,13 +73133,13 @@ class $$LineasAsientoTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get debe => $composableBuilder(
-    column: $table.debe,
+  ColumnOrderings<int> get debeCents => $composableBuilder(
+    column: $table.debeCents,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get haber => $composableBuilder(
-    column: $table.haber,
+  ColumnOrderings<int> get haberCents => $composableBuilder(
+    column: $table.haberCents,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -72618,11 +73207,13 @@ class $$LineasAsientoTableTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<double> get debe =>
-      $composableBuilder(column: $table.debe, builder: (column) => column);
+  GeneratedColumn<int> get debeCents =>
+      $composableBuilder(column: $table.debeCents, builder: (column) => column);
 
-  GeneratedColumn<double> get haber =>
-      $composableBuilder(column: $table.haber, builder: (column) => column);
+  GeneratedColumn<int> get haberCents => $composableBuilder(
+    column: $table.haberCents,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get conceptoLinea => $composableBuilder(
     column: $table.conceptoLinea,
@@ -72712,15 +73303,15 @@ class $$LineasAsientoTableTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> asientoId = const Value.absent(),
                 Value<int> cuentaId = const Value.absent(),
-                Value<double> debe = const Value.absent(),
-                Value<double> haber = const Value.absent(),
+                Value<int> debeCents = const Value.absent(),
+                Value<int> haberCents = const Value.absent(),
                 Value<String?> conceptoLinea = const Value.absent(),
               }) => LineasAsientoTableCompanion(
                 id: id,
                 asientoId: asientoId,
                 cuentaId: cuentaId,
-                debe: debe,
-                haber: haber,
+                debeCents: debeCents,
+                haberCents: haberCents,
                 conceptoLinea: conceptoLinea,
               ),
           createCompanionCallback:
@@ -72728,15 +73319,15 @@ class $$LineasAsientoTableTableTableManager
                 Value<int> id = const Value.absent(),
                 required int asientoId,
                 required int cuentaId,
-                Value<double> debe = const Value.absent(),
-                Value<double> haber = const Value.absent(),
+                Value<int> debeCents = const Value.absent(),
+                Value<int> haberCents = const Value.absent(),
                 Value<String?> conceptoLinea = const Value.absent(),
               }) => LineasAsientoTableCompanion.insert(
                 id: id,
                 asientoId: asientoId,
                 cuentaId: cuentaId,
-                debe: debe,
-                haber: haber,
+                debeCents: debeCents,
+                haberCents: haberCents,
                 conceptoLinea: conceptoLinea,
               ),
           withReferenceMapper: (p0) => p0
@@ -72822,6 +73413,302 @@ typedef $$LineasAsientoTableTableProcessedTableManager =
       (LineasAsientoTableData, $$LineasAsientoTableTableReferences),
       LineasAsientoTableData,
       PrefetchHooks Function({bool asientoId, bool cuentaId})
+    >;
+typedef $$PeriodosFiscalesTableTableCreateCompanionBuilder =
+    PeriodosFiscalesTableCompanion Function({
+      Value<int> id,
+      required String codigo,
+      required String nombre,
+      required DateTime fechaInicio,
+      required DateTime fechaFin,
+      Value<EstadoPeriodo> estado,
+      Value<String> paisCodigo,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+typedef $$PeriodosFiscalesTableTableUpdateCompanionBuilder =
+    PeriodosFiscalesTableCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      Value<String> nombre,
+      Value<DateTime> fechaInicio,
+      Value<DateTime> fechaFin,
+      Value<EstadoPeriodo> estado,
+      Value<String> paisCodigo,
+      Value<DateTime> creadoEn,
+      Value<DateTime?> actualizadoEn,
+    });
+
+class $$PeriodosFiscalesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PeriodosFiscalesTableTable> {
+  $$PeriodosFiscalesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaFin => $composableBuilder(
+    column: $table.fechaFin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<EstadoPeriodo, EstadoPeriodo, String>
+  get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get paisCodigo => $composableBuilder(
+    column: $table.paisCodigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PeriodosFiscalesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PeriodosFiscalesTableTable> {
+  $$PeriodosFiscalesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nombre => $composableBuilder(
+    column: $table.nombre,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaFin => $composableBuilder(
+    column: $table.fechaFin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paisCodigo => $composableBuilder(
+    column: $table.paisCodigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get creadoEn => $composableBuilder(
+    column: $table.creadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PeriodosFiscalesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PeriodosFiscalesTableTable> {
+  $$PeriodosFiscalesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get nombre =>
+      $composableBuilder(column: $table.nombre, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaFin =>
+      $composableBuilder(column: $table.fechaFin, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EstadoPeriodo, String> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get paisCodigo => $composableBuilder(
+    column: $table.paisCodigo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get creadoEn =>
+      $composableBuilder(column: $table.creadoEn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get actualizadoEn => $composableBuilder(
+    column: $table.actualizadoEn,
+    builder: (column) => column,
+  );
+}
+
+class $$PeriodosFiscalesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PeriodosFiscalesTableTable,
+          PeriodosFiscalesTableData,
+          $$PeriodosFiscalesTableTableFilterComposer,
+          $$PeriodosFiscalesTableTableOrderingComposer,
+          $$PeriodosFiscalesTableTableAnnotationComposer,
+          $$PeriodosFiscalesTableTableCreateCompanionBuilder,
+          $$PeriodosFiscalesTableTableUpdateCompanionBuilder,
+          (
+            PeriodosFiscalesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $PeriodosFiscalesTableTable,
+              PeriodosFiscalesTableData
+            >,
+          ),
+          PeriodosFiscalesTableData,
+          PrefetchHooks Function()
+        > {
+  $$PeriodosFiscalesTableTableTableManager(
+    _$AppDatabase db,
+    $PeriodosFiscalesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PeriodosFiscalesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PeriodosFiscalesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PeriodosFiscalesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String> nombre = const Value.absent(),
+                Value<DateTime> fechaInicio = const Value.absent(),
+                Value<DateTime> fechaFin = const Value.absent(),
+                Value<EstadoPeriodo> estado = const Value.absent(),
+                Value<String> paisCodigo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => PeriodosFiscalesTableCompanion(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                estado: estado,
+                paisCodigo: paisCodigo,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String codigo,
+                required String nombre,
+                required DateTime fechaInicio,
+                required DateTime fechaFin,
+                Value<EstadoPeriodo> estado = const Value.absent(),
+                Value<String> paisCodigo = const Value.absent(),
+                Value<DateTime> creadoEn = const Value.absent(),
+                Value<DateTime?> actualizadoEn = const Value.absent(),
+              }) => PeriodosFiscalesTableCompanion.insert(
+                id: id,
+                codigo: codigo,
+                nombre: nombre,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                estado: estado,
+                paisCodigo: paisCodigo,
+                creadoEn: creadoEn,
+                actualizadoEn: actualizadoEn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PeriodosFiscalesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PeriodosFiscalesTableTable,
+      PeriodosFiscalesTableData,
+      $$PeriodosFiscalesTableTableFilterComposer,
+      $$PeriodosFiscalesTableTableOrderingComposer,
+      $$PeriodosFiscalesTableTableAnnotationComposer,
+      $$PeriodosFiscalesTableTableCreateCompanionBuilder,
+      $$PeriodosFiscalesTableTableUpdateCompanionBuilder,
+      (
+        PeriodosFiscalesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $PeriodosFiscalesTableTable,
+          PeriodosFiscalesTableData
+        >,
+      ),
+      PeriodosFiscalesTableData,
+      PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {
@@ -72976,4 +73863,6 @@ class $AppDatabaseManager {
       $$AsientosTableTableTableManager(_db, _db.asientosTable);
   $$LineasAsientoTableTableTableManager get lineasAsientoTable =>
       $$LineasAsientoTableTableTableManager(_db, _db.lineasAsientoTable);
+  $$PeriodosFiscalesTableTableTableManager get periodosFiscalesTable =>
+      $$PeriodosFiscalesTableTableTableManager(_db, _db.periodosFiscalesTable);
 }

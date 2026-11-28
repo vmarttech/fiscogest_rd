@@ -3,6 +3,9 @@ import 'package:fiscogest_rd/core/contabilidad/data/repositories/plan_cuentas_re
 import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_asiento_repository.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_plan_cuentas_repository.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/services/motor_partida_doble.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/repositories/periodo_fiscal_repository_impl.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_periodo_fiscal_repository.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/config/contabilidad_pais_config.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/services/contabilidad_eventos_listener.dart';
 import 'package:fiscogest_rd/core/database/app_database.dart';
 import 'package:fiscogest_rd/features/almacenes/data/dao/stock_almacen_dao.dart';
@@ -25,6 +28,7 @@ import 'package:fiscogest_rd/features/inventario/data/repositories/kardex_reposi
 import 'package:fiscogest_rd/features/inventario/data/services/inventario_service_impl.dart';
 import 'package:fiscogest_rd/features/inventario/domain/interfaces/ikardex_repository.dart';
 import 'package:fiscogest_rd/features/inventario/domain/services/i_inventario_service.dart';
+import 'package:fiscogest_rd/core/contabilidad/data/seed/plan_cuentas_rd_seed.dart';
 import 'package:fiscogest_rd/features/comercial/domain/services/compra_eventos_listener.dart';
 
 class RepositoryInjection {
@@ -41,6 +45,7 @@ class RepositoryInjection {
     required this.planCuentasRepository,
     required this.asientoRepository,
     required this.motorPartidaDoble,
+    required this.periodoFiscalRepository,
   });
 
   static RepositoryInjection? _instance;
@@ -66,6 +71,7 @@ class RepositoryInjection {
   final IPlanCuentasRepository planCuentasRepository;
   final IAsientoRepository asientoRepository;
   final MotorPartidaDoble motorPartidaDoble;
+  final IPeriodoFiscalRepository periodoFiscalRepository;
 
   static Future<RepositoryInjection> initialize(AppDatabase db) async {
     if (_instance != null) return _instance!;
@@ -105,10 +111,23 @@ class RepositoryInjection {
     );
     final planCuentasRepository = PlanCuentasRepositoryImpl(db);
     final asientoRepository = AsientoRepositoryImpl(db);
+    final periodoFiscalRepository = PeriodoFiscalRepositoryImpl(db);
+    // Plan + periodo del país activo (DO/MX/PR). Idempotente.
+    await PlanCuentasRdSeed(planCuentasRepository).asegurarPlanMinimo();
+    await periodoFiscalRepository.asegurarPeriodoAnualActual(
+      ContabilidadPaisConfig.paisCodigo,
+    );
     // Seam de licencia: verificarLicencia se inyecta al cablear licencia_service.dart.
-    final motorPartidaDoble = MotorPartidaDoble(asientoRepository);
+    final motorPartidaDoble = MotorPartidaDoble(
+      asientoRepository,
+      planCuentas: planCuentasRepository,
+      periodos: periodoFiscalRepository,
+    );
     _compraEventosListener = CompraEventosListener();
-    _contabilidadEventosListener = ContabilidadEventosListener();
+    _contabilidadEventosListener = ContabilidadEventosListener(
+      motor: motorPartidaDoble,
+      planCuentas: planCuentasRepository,
+    );
 
     // Los listeners se desuscriben en RepositoryInjection.dispose().
 
@@ -125,6 +144,7 @@ class RepositoryInjection {
       planCuentasRepository: planCuentasRepository,
       asientoRepository: asientoRepository,
       motorPartidaDoble: motorPartidaDoble,
+      periodoFiscalRepository: periodoFiscalRepository,
     );
     return _instance!;
   }

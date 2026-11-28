@@ -15,12 +15,14 @@ class CompraService {
     required RegistrarCompraUseCase registrarCompra,
     required ConfirmarCompraUseCase confirmarCompra,
     required ListarComprasUseCase listarCompras,
-  }) : _registrarCompra = registrarCompra,
-       _confirmarCompra = confirmarCompra,
-       _listarCompras = listarCompras;
+  })  : _registrarCompra = registrarCompra,
+        _confirmarCompra = confirmarCompra,
+        _listarCompras = listarCompras;
+
   final RegistrarCompraUseCase _registrarCompra;
   final ConfirmarCompraUseCase _confirmarCompra;
   final ListarComprasUseCase _listarCompras;
+
   Future<Compra> registrarCompra({
     required Compra compra,
     required List<DetalleCompra> detalles,
@@ -34,7 +36,24 @@ class CompraService {
 
   Future<Compra> confirmarCompra(int compraId) async {
     final compraConfirmada = await _confirmarCompra(compraId);
-    EventoBus.emitir(EventosSistema.compraConfirmada, {'compraId': compraId});
+
+    // Centavos enteros para el motor contable (nunca double en el asiento).
+    final netoCents =
+        (compraConfirmada.subtotalSinImpuestos * 100).round();
+    final itbisCents = (compraConfirmada.montoImpuesto * 100).round();
+    final totalCents = (compraConfirmada.totalCompra * 100).round();
+
+    EventoBus.emitir(EventosSistema.compraConfirmada, {
+      'compraId': compraConfirmada.id,
+      'montoNetoCents': netoCents,
+      'itbisCents': itbisCents,
+      'totalCents': totalCents,
+      // Compat: el listener también acepta doubles vía _asCents.
+      'montoNeto': compraConfirmada.subtotalSinImpuestos,
+      'itbis': compraConfirmada.montoImpuesto,
+      'total': compraConfirmada.totalCompra,
+    });
+
     return compraConfirmada;
   }
 

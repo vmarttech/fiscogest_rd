@@ -70,7 +70,6 @@ import 'package:fiscogest_rd/features/clientes/presentation/pages/nuevo_cliente_
 import 'package:fiscogest_rd/features/proveedores/presentation/pages/proveedores_page.dart';
 import 'package:fiscogest_rd/features/reports/presentation/pages/reports_page.dart';
 import 'package:fiscogest_rd/features/gastos/presentation/pages/gastos_page.dart';
-import 'package:fiscogest_rd/features/contabilidad/presentation/pages/contabilidad_page.dart';
 import 'package:fiscogest_rd/features/nomina/presentation/pages/nomina_page.dart';
 import 'package:fiscogest_rd/features/nomina/presentation/pages/planillas_page.dart';
 import 'package:fiscogest_rd/features/nomina/presentation/pages/planilla_detalle_page.dart';
@@ -106,6 +105,7 @@ import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_fact
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/historial_facturas_page.dart';
 import 'package:fiscogest_rd/features/facturacion/presentation/pages/emitir_nc_page.dart';
 import 'package:fiscogest_rd/core/presentation/pages/inicio_page.dart';
+import 'package:fiscogest_rd/core/contabilidad/presentation/pages/contabilidad_home_page.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -514,7 +514,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      GoRoute(
+GoRoute(
         path: '/creditos',
         name: CreditoInicioPage.routeName,
         builder: (_, __) => const AppShell(child: CreditoInicioPage()),
@@ -884,9 +884,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const AppShell(child: GastosPage()),
       ),
       GoRoute(
-        path: '/contabilidad',
-        name: ContabilidadPage.routeName,
-        builder: (_, __) => const AppShell(child: ContabilidadPage()),
+        path: ContabilidadHomePage.routePath,
+        name: ContabilidadHomePage.routeName,
+        builder: (_, __) => const AppShell(child: ContabilidadHomePage()),
       ),
       GoRoute(
         path: '/nomina',

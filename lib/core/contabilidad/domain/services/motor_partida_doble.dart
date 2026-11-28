@@ -1,45 +1,78 @@
+import 'package:fiscogest_rd/core/contabilidad/domain/config/contabilidad_pais_config.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/entities/asiento_contable.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/entities/linea_asiento.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/entities/plan_cuenta.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/enums/estado_asiento.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_asiento_repository.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_periodo_fiscal_repository.dart';
+import 'package:fiscogest_rd/core/contabilidad/domain/repositories/i_plan_cuentas_repository.dart';
 import 'package:fiscogest_rd/core/contabilidad/domain/services/validador_asientos.dart';
 
-/// Motor de registro de asientos en partida doble.
+/// Motor de partida doble. Anulación = asiento de reversa.
+/// Si hay repo de periodos, exige periodo abierto que contenga la fecha.
 class MotorPartidaDoble {
-  MotorPartidaDoble(this._repo, {this.verificarLicencia});
+  MotorPartidaDoble(
+    this._repo, {
+    IPlanCuentasRepository? planCuentas,
+    IPeriodoFiscalRepository? periodos,
+    this.verificarLicencia,
+  })  : _planCuentas = planCuentas,
+        _periodos = periodos;
 
   final IAsientoRepository _repo;
-
-  // Seam de integracion con licencias: si se provee y devuelve false,
-  // el registro de asientos se bloquea mientras la licencia no este vigente.
+  final IPlanCuentasRepository? _planCuentas;
+  final IPeriodoFiscalRepository? _periodos;
   final Future<bool> Function()? verificarLicencia;
+
+  Future<Map<int, PlanCuenta>?> _cargarCuentas(List<LineaAsiento> lineas) async {
+    final plan = _planCuentas;
+    if (plan == null) return null;
+    final mapa = <int, PlanCuenta>{};
+    for (final l in lineas) {
+      if (mapa.containsKey(l.cuentaId)) continue;
+      final c = await plan.obtenerPorId(l.cuentaId);
+      if (c != null) mapa[c.id] = c;
+    }
+    return mapa;
+  }
+
+  Future<void> _assertPeriodoAbierto(DateTime fecha) async {
+    final periodos = _periodos;
+    if (periodos == null) return;
+    final p = await periodos.periodoAbiertoQueContiene(
+      fecha,
+      paisCodigo: ContabilidadPaisConfig.paisCodigo,
+    );
+    if (p == null) {
+      throw StateError(
+        'acct_error_period_closed_or_missing:${ContabilidadPaisConfig.paisCodigo}',
+      );
+    }
+  }
 
   Future<AsientoContable> registrar({
     required AsientoContable asiento,
     required List<LineaAsiento> lineas,
   }) async {
-    // Validar reglas de negocio
-    final errores = ValidadorAsientos().validar(asiento, lineas);
+    final cuentas = await _cargarCuentas(lineas);
+    final errores =
+        ValidadorAsientos().validar(asiento, lineas, cuentasPorId: cuentas);
     if (errores.isNotEmpty) {
-      // Codigo de dominio con detalle: cada item ya es un acct_error_* (sufijo opcional tras ':').
       throw Exception('acct_error_validation_failed:${errores.join('|')}');
     }
 
-    // Integracion con licencias: no registrar si la licencia esta vencida o inactiva.
-    // Falla cerrada: si la verificacion lanza error (red, servicio), se bloquea el registro.
+    await _assertPeriodoAbierto(asiento.fecha);
+
     if (verificarLicencia != null) {
-      bool licenciaVigente;
+      bool ok;
       try {
-        licenciaVigente = await verificarLicencia!();
+        ok = await verificarLicencia!();
       } catch (_) {
-        licenciaVigente = false;
+        ok = false;
       }
-      if (!licenciaVigente) {
-        throw StateError('acct_error_license_inactive');
-      }
+      if (!ok) throw StateError('acct_error_license_inactive');
     }
 
-    // No re-registrar un asiento ya contabilizado ni uno anulado previamente
     if (asiento.estado == EstadoAsiento.contabilizado) {
       throw ArgumentError('acct_error_already_posted');
     }
@@ -47,7 +80,6 @@ class MotorPartidaDoble {
       throw ArgumentError('acct_error_already_voided');
     }
 
-    // Normalizar y generar número secuencial si no tiene
     var numero = asiento.numeroAsiento.trim();
     if (numero.isEmpty) {
       numero = (await _repo.obtenerSiguienteNumero()).trim();
@@ -56,30 +88,24 @@ class MotorPartidaDoble {
       throw StateError('acct_error_sequence_failed');
     }
 
-    // Cambiar estado a contabilizado
     final finalizado = asiento.copyWith(
       numeroAsiento: numero,
       estado: EstadoAsiento.contabilizado,
     );
-
-    // Persistir transaccionalmente
     return _repo.registrar(finalizado, lineas);
   }
 
-  Future<AsientoContable?> consultar(int asientoId) async {
-    return _repo.obtenerPorId(asientoId);
-  }
+  Future<AsientoContable?> consultar(int asientoId) =>
+      _repo.obtenerPorId(asientoId);
 
-  Future<List<LineaAsiento>> obtenerLineas(int asientoId) async {
-    return _repo.obtenerLineas(asientoId);
-  }
+  Future<List<LineaAsiento>> obtenerLineas(int asientoId) =>
+      _repo.obtenerLineas(asientoId);
 
-  Future<bool> anular(int asientoId, String motivo) async {
+  Future<AsientoContable> anular(int asientoId, String motivo) async {
     final motivoLimpio = motivo.trim();
     if (motivoLimpio.isEmpty) {
       throw ArgumentError('acct_error_void_reason_required');
     }
-
     final existente = await _repo.obtenerPorId(asientoId);
     if (existente == null) {
       throw ArgumentError('acct_error_entry_not_found:$asientoId');
@@ -88,9 +114,45 @@ class MotorPartidaDoble {
       throw StateError('acct_error_already_voided:$asientoId');
     }
     if (existente.estado != EstadoAsiento.contabilizado) {
-      throw StateError('acct_error_void_requires_posted:${existente.estado.name}');
+      throw StateError(
+        'acct_error_void_requires_posted:${existente.estado.name}',
+      );
+    }
+    final lineasOrig = await _repo.obtenerLineas(asientoId);
+    if (lineasOrig.length < 2) {
+      throw StateError('acct_error_void_no_lines:$asientoId');
     }
 
-    return _repo.anular(asientoId, motivoLimpio);
+    final lineasReversa = lineasOrig
+        .map(
+          (l) => LineaAsiento(
+            cuentaId: l.cuentaId,
+            debeCents: l.haberCents,
+            haberCents: l.debeCents,
+            concepto: (l.concepto == null || l.concepto!.isEmpty)
+                ? 'Reversa'
+                : 'Reversa: ${l.concepto}',
+          ),
+        )
+        .toList();
+
+    final ahora = DateTime.now();
+    final reversa = await registrar(
+      asiento: AsientoContable(
+        numeroAsiento: '',
+        fecha: ahora,
+        concepto: 'REVERSA AS ${existente.numeroAsiento}: $motivoLimpio',
+        estado: EstadoAsiento.borrador,
+        documentoOrigen: existente.numeroAsiento,
+        tipoOrigen: 'reversa',
+        referenciaId: existente.id,
+        creadoEn: ahora,
+      ),
+      lineas: lineasReversa,
+    );
+
+    final ok = await _repo.anular(asientoId, motivoLimpio);
+    if (!ok) throw StateError('acct_error_void_mark_failed:$asientoId');
+    return reversa;
   }
 }
